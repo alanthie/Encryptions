@@ -86,11 +86,13 @@ public:
     }
 
     bool read_from_file();
-    bool read_from_buffer(std::string& buffer);
+    //bool read_from_buffer(std::string& buffer);
     bool save_to_file();
     void pre_append(std::string& s);
 
-    bool copy_to(data& dst);
+    bool copy_buffer_to(data& dst);
+    //void swap_buffer_with(data& dst);
+    void clear_data();
 
     std::string filename;
     std::string buffer_data;
@@ -100,8 +102,6 @@ public:
 class encryptor
 {
 public:
-
-
     int encrypted_urlkey_size = 256+2+64; // padding
     struct urlkey
     {
@@ -122,8 +122,8 @@ public:
         puz_full(true),
         puz_partial(false),
         encrypted_data(filename_encrypted_data),
-        encrypted_data_temp("temp.dat");
-        encrypted_data_temp("temp_next.dat");
+        data_temp("temp.dat");
+        data_temp_next("temp_next.dat");
     {
     }
 
@@ -170,21 +170,23 @@ public:
                 {
                     return false;
                 }
-                if (msg_data.copy_to(encrypted_data_temp)== false)
+                if (msg_data.copy_buffer_to(data_temp)== false)
                 {
                     return false;
                 }
             }
 
-            if (i>0) encrypted_data_temp.pre_append(vurlkey[i].url_from_size_with_padding);
+            if (i>0) data_temp.pre_append(vurlkey[i].url_from_size_with_padding);
 
-            encode(encrypted_data_temp, vurlkey[i].key, encrypted_data_temp_next);
+            data_temp_next.clear_data();
+            encode(data_temp, vurlkey[i].key, data_temp_next);
 
-            std::swap(encrypted_data_temp, encrypted_data_temp_next);
-            encrypted_data_temp_next.clear();
+            data_temp_next.copy_buffer_to(data_temp);
+            data_temp_next.clear_data();
         }
-        //pwd0...
-        // encrypted_data_temp => encrypted_data
+        // pwd0...
+        encrypted_data_temp.copy_buffer_to(encrypted_data);
+        encrypted_data.save_to_file();
 
         // encode(Data,          key1) => Data1             // urlkey1=>key1
         // encode(Data1+urlkey1, key2) => Data2
@@ -221,8 +223,8 @@ public:
     puzzle          puz_partial;
     data            encrypted_data;
 
-    data            encrypted_data_temp;
-    data            encrypted_data_temp_next;
+    data            data_temp;
+    data            data_temp_next;
 };
 
 class decryptor
