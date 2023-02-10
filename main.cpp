@@ -50,6 +50,219 @@ int main_wget(int args, char *argc[])
 	return 0;
 }
 
+class puzzle
+{
+public:
+    struct QA
+    {
+        std::string Q;
+        std::string A;
+    };
+    //"What is yout name", "AxxxN"
+
+    puzzle(bool isfull) : is_full(isfull) {}
+    std::string filename()
+    {
+        (isfull == true) ? return "puzzle_full.txt" : return "puzzle_partial.txt";
+    }
+
+    bool read_from_file();
+    bool is_all_answered();
+    bool save_to_file();
+
+    std::string make_key(int size_multiple_of_n = 16);
+    bool make_partial(puzzle& p);
+
+    bool is_full = true;
+    std::vector<QA> vQA;
+};
+
+class data
+{
+public:
+    data(std::string file_name) : filename(file_name) {}
+    ~data()
+    {
+    }
+
+    bool read_from_file();
+    bool read_from_buffer(std::string& buffer);
+    bool save_to_file();
+    void pre_append(std::string& s);
+
+    bool copy_to(data& dst);
+
+    std::string filename;
+    std::string buffer_data;
+};
+
+
+class encryptor
+{
+public:
+
+
+    int encrypted_urlkey_size = 256+2+64; // padding
+    struct urlkey
+    {
+        std::string url;        // 256
+        size_t key_from;        // 2
+        size_t key_size = 64;   // 64
+
+        std::string key;
+        std::string url_from_size_with_padding;
+    };
+
+    encryptor(  std::string filename_urlkey,
+                std::string filename_msg_data,
+                std::string filename_encrypted_data,
+        ) :
+        file_urlkey(filename_urlkey),
+        msg_data(filename_msg_data),
+        puz_full(true),
+        puz_partial(false),
+        encrypted_data(filename_encrypted_data),
+        encrypted_data_temp("temp.dat");
+        encrypted_data_temp("temp_next.dat");
+    {
+    }
+
+    ~encryptor()
+    {
+        // remove temp
+    }
+
+    bool read_file_urlkey();
+    bool make_key(size_t i);
+    bool make_url_from_size_with_padding(size_t i, std::string puzzle_key);
+
+    // select algos
+    bool encode(data& data_temp, std::string& key, data& data_temp_next);
+
+    bool encrypt()
+    {
+        if (read_file_urlkey() == false)
+        {
+            return false;
+        }
+        if (puz_full.read_from_file() == false)
+        {
+            return false;
+        }
+        std::string puz_key = puz_full.make_key();
+        for(size_t i=0; i<vurlkey.size(); i++)
+        {
+        i   f (make_key(i) == false)
+            {
+                return false;
+            }
+            if (make_url_from_size_with_padding(i, puz_key) == false)
+            {
+                return false;
+            }
+        }
+
+        for(size_t i=0; i<vurlkey.size(); i++)
+        {
+            if (i==0)
+            {
+                if (msg_data.read() == false)
+                {
+                    return false;
+                }
+                if (msg_data.copy_to(encrypted_data_temp)== false)
+                {
+                    return false;
+                }
+            }
+
+            if (i>0) encrypted_data_temp.pre_append(vurlkey[i].url_from_size_with_padding);
+
+            encode(encrypted_data_temp, vurlkey[i].key, encrypted_data_temp_next);
+
+            std::swap(encrypted_data_temp, encrypted_data_temp_next);
+            encrypted_data_temp_next.clear();
+        }
+        //pwd0...
+        // encrypted_data_temp => encrypted_data
+
+        // encode(Data,          key1) => Data1             // urlkey1=>key1
+        // encode(Data1+urlkey1, key2) => Data2
+        // encode(Data2+urlkey2, key3) => Data3
+        // ...
+        // encode(DataN-1+urlkeyN-1, keyN) => DataN
+        // encode(DataN+urlkeyN,     pwd0) => DataFinal
+        //
+        // decode(DataFinal, pwd0) => DataN+urlkeyN         urlkeyN=>keyN
+        // decode(DataN,     keyN) => DataN-1+urlkeyN-1     urlkeyN-1=>keyN-1
+        // ...
+        // decode(Data2, key2) => Data1+urlkey1             urlkey1=>key1
+        // decode(Data1, key1) => Data
+
+        if (puz_full.save_to_file() == false)
+        {
+            return false;
+        }
+        if (puz_full.make_partial(puz_partial) == false)
+        {
+            return false;
+        }
+        if (puz_partial.save_to_file() == false)
+        {
+            return false;
+        }
+    }
+
+    std::string     file_urlkey;
+    std::vector<urlkey> vurlkey;
+    data            msg_data;
+    puzzle          puz_full;
+
+    puzzle          puz_partial;
+    data            encrypted_data;
+
+    data            encrypted_data_temp;
+    data            encrypted_data_temp_next;
+};
+
+class decryptor
+{
+public:
+    // pack
+    struct encrypted_header
+    {
+    };
+    struct decrypted_header
+    {
+    };
+
+     encrypted_data(puzzle& p) : puz(p) {}
+    ~encrypted_data()
+    {
+        if (encrypted_data != nullptr)
+        {
+            delete []encrypted_data;
+            encrypted_data = null_ptr;
+            encrypted_data_size = 0;
+        }
+    }
+
+    std::string encrypted_filename() {return "msg_encrypted.dat";}
+    std::string decrypted_filename() {return "msg_decrypted.txt";}
+
+    long long encrypted_filesize() {return encrypted_data_size;}
+
+    bool read_encrypted_data();
+    std::string make_key(int size_multiple_of_n = 16);
+
+    bool decrypted_header();
+    bool is_valid_decrypted_header();
+    bool decrypt();
+
+    data        encrypted_data;
+    data        decrypted_data;
+    puzzle&     puz;
+};
 
 //class DES : public SymAlg{
 //    private:
