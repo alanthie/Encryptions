@@ -141,6 +141,7 @@ public:
     }
 
     void append(char* p, uint32_t n) {buffer.write(p, n, -1);}
+    void append(const char* p, uint32_t n) {buffer.write(p, n, -1);}
 
 	uint32_t get_first(size_t n, Buffer& rout)
 	{
@@ -484,21 +485,44 @@ public:
                 }
             }
 
-            if (i>0) data_temp.append(&vurlkey[i-1].urlinfo_with_padding[0], URLINFO_SIZE);
+            char save_key[KEY_SIZE];
+            for(size_t ii=0; ii<KEY_SIZE; ii++)
+                save_key[ii] = vurlkey[i].key[ii];
+
+            if (i>0)
+            {
+                for(size_t ii=0; ii<KEY_SIZE; ii++)
+                    vurlkey[i-1].key[ii] = 0;
+
+                data_temp.append(&vurlkey[i-1].urlinfo_with_padding[0], URLINFO_SIZE);
+            }
 
             data_temp_next.clear_data();
-            encode(i, data_temp, &vurlkey[i].key[0], KEY_SIZE, data_temp_next);
+            encode(i, data_temp, &save_key[0], KEY_SIZE, data_temp_next);
 
             data_temp.buffer.swap_with(data_temp_next.buffer);
             data_temp_next.erase();
         }
 
-        // encode(DataN+urlkeyN, pwd0) => DataFinal
         if (vurlkey.size()>0)
         {
+            for(size_t ii=0; ii<KEY_SIZE; ii++)
+                vurlkey[vurlkey.size()-1].key[ii] = 0;
+
             data_temp.append(&vurlkey[vurlkey.size()-1].urlinfo_with_padding[0], URLINFO_SIZE);
-            encode(vurlkey.size(), data_temp, puz_key.getdata(), puz_key.size(), data_temp_next);
         }
+        else
+        {
+        }
+
+        // Number of iterations in the last 2 byte!
+        Buffer temp(2+1);
+		temp.init(0);
+		temp.writeInt16(vurlkey.size() + 1, -1);
+        data_temp.append(temp.getdata(), 2);
+
+        // encode(DataN+urlkeyN, pwd0) => DataFinal
+        encode(vurlkey.size(), data_temp, puz_key.getdata(), puz_key.size(), data_temp_next);
 
         data_temp_next.copy_buffer_to(encrypted_data);
         encrypted_data.save_to_file(filename_encrypted_data);
@@ -534,16 +558,115 @@ public:
     {
     }
 
+    bool read_urlinfo(Buffer& temp, urlkey& out_uk)
+	{
+		bool r = true;
+        uint32_t pos = 0;
+
+		out_uk.url_size = temp.readInt16(pos); pos+=2;
+
+		out_uk.url.clear();
+		for( size_t j = 0; j< out_uk.url_size; j++)
+            out_uk.url += temp.getdata()[pos+j];
+        pos += out_uk.url_size;
+
+		out_uk.key_from = temp.readInt32(pos); pos+=4;
+		out_uk.key_size = temp.readInt16(pos); pos+=2;
+
+		for( size_t j = 0; j< 64; j++)
+            out_uk.checksum[j] = temp.getdata()[pos+j];
+        pos += 64;
+
+        // zero
+        for( size_t j = 0; j< KEY_SIZE; j++)
+            out_uk.key[j] = 0;
+        pos += KEY_SIZE;
+
+		return r;
+	}
+
+	bool get_key(urlkey& uk)
+	{
+		bool r = true;
+		std::string file = "./Staging/url_file.dat";
+
+		std::remove(file.data());
+
+		// DOWNLOAD URL FILE
+		if (wget(uk.url.data(), file.data()) != 0)
+		{
+            std::cerr << "ERROR " << "Invalid web url" << std::endl;
+            r = false;
+		}
+
+		if (r)
+		{
+			data d;
+			r = d.read_from_file(file);
+			if (r)
+			{
+                uint32_t pos = uk.key_from;
+                size_t   key_size = uk.key_size;
+
+                if (pos >= d.buffer.size() - key_size)
+                {
+                    std::cerr << "ERROR " << "Invalid web file size" << std::endl;
+                    r = false;
+                }
+
+                if (r && (key_size <= KEY_SIZE))
+                {
+                    for( size_t j = 0; j< key_size; j++)
+                        uk.key[j] = d.buffer.getdata()[pos+j];
+                    for( size_t j = key_size; j < KEY_SIZE; j++)
+    					uk.key[j] = j % 7;
+
+                    std::string checksum;
+                    {
+                        SHA256 sha;
+                        sha.update(reinterpret_cast<const uint8_t*> (d.buffer.getdata()), d.buffer.size() );
+                        uint8_t* digest = sha.digest();
+                        checksum = SHA256::toString(digest);
+                        std::cout << checksum << " " << checksum.size() << std::endl;
+                        delete[] digest;
+                    }
+
+                    if (checksum != uk.checksum)
+                    {
+                        std::cerr << "ERROR " << "Invalid web file checksum" << std::endl;
+                        r = false;
+                    }
+                }
+                else
+                {
+                    std::cerr << "ERROR " << "Invalid web key size" << std::endl;
+                    r = false;
+                }
+            }
+		}
+
+		std::remove(file.data());
+		return r;
+	}
+
+	bool decode(size_t iter, data& data_encrypted, const char* key, uint32_t key_size, data& data_decrypted)
+	{
+        bool r = true;
+
+        return r;
+	}
+
 
     bool decrypt()
 	{
 		bool r = true;
-		Buffer puz_key;
+		Buffer puz_key(10000);
 
 		if (r)
 		{
 			if (puz.read_from_file(filename_puzzle) == false)
 			{
+                std::cerr << "ERROR " << "(puz.read_from_file(filename_puzzle) == false)" << std::endl;
 				r = false;
 			}
 		}
@@ -552,6 +675,7 @@ public:
 		{
 			if (puz.is_all_answered() == false)
 			{
+                std::cerr << "ERROR " << "(puz.is_all_answered() == false)" << std::endl;
 				r = false;
 			}
 		}
@@ -561,16 +685,130 @@ public:
 			puz.make_key(puz_key);
 			if (puz_key.size() == 0)
 			{
+                std::cerr << "ERROR " << "(puz_key.size() == 0)" << std::endl;
 				r = false;
 			}
 		}
 
-		// decode(DataFinal, pwd0) => DataN+urlkeyN         urlkeyN=>keyN
-        // decode(DataN,     keyN) => DataN-1+urlkeyN-1     urlkeyN-1=>keyN-1
-        // ...
-        // decode(Data2, key2) => Data1+urlkey1             urlkey1=>key1
-        // decode(Data1, key1) => Data
+		if (r)
+		{
+            if (encrypted_data.read_from_file(filename_encrypted_data) == false)
+			{
+                std::cerr << "ERROR " << "encrypted_data.read_from_file(filename_encrypted_data) == false)" << std::endl;
+				r = false;
+			}
+		}
 
+		// decode(DataFinal, pwd0) => DataN+urlkeyN  urlkeyN=>keyN
+        if (r)
+		{
+            data_temp_next.clear_data();
+            decode(0, encrypted_data, puz_key.getdata(), puz_key.size(), data_temp_next);
+        }
+
+		// N+1 = Number of iterations in the last 2 byte!
+		int16_t NITER = 0;
+        if (r)
+		{
+            size_t file_size = data_temp_next.buffer.size();
+            if (file_size >= 2)
+            {
+                NITER = data_temp_next.buffer.readInt16(file_size-2);
+                NITER = NITER - 1;
+                if (NITER < 0) r = false;
+                else if (NITER > 100) r = false;
+
+                if (r==false)
+                {
+                    std::cerr << "ERROR " << "encrypted_data can not be decoded - invalid iteration value" << std::endl;
+                }
+            }
+            else
+            {
+                std::cerr << "ERROR " << "encrypted_data can not be decoded  - invalid file size" << std::endl;
+                r = false;
+            }
+		}
+
+		urlkey uk;
+		if (r)
+        {
+            size_t buffer_size = data_temp_next.buffer.size();
+
+            // Get urlkeyN
+            if (buffer_size >= URLINFO_SIZE + 2) // last 2 is NITER+1
+            {
+                // Inverse of data_temp.append(&vurlkey[vurlkey.size()-1].urlinfo_with_padding[0], URLINFO_SIZE);
+                Buffer temp(URLINFO_SIZE + 2);
+                data_temp_next.get_last(URLINFO_SIZE + 2, temp);
+
+                if (read_urlinfo(temp, uk) == false)
+                {
+                    std::cerr << "ERROR " << "encrypted_data can not be decoded  - invalid urlinfo" << std::endl;
+                    r = false;
+                }
+            }
+            else
+            {
+                std::cerr << "ERROR " << "encrypted_data can not be decoded  - invalid urlinfo size" << std::endl;
+                r = false;
+            }
+        }
+
+        if (r)
+        {
+            data_temp.buffer.swap_with(data_temp_next.buffer);
+            data_temp_next.erase();
+
+            // decode(DataFinal, pwd0) => DataN+urlkeyN         urlkeyN=>keyN
+            // decode(DataN,     keyN) => DataN-1+urlkeyN-1     urlkeyN-1=>keyN-1
+            // ...
+            // decode(Data2, key2) => Data1+urlkey1             urlkey1=>key1
+            // decode(Data1, key1) => Data
+            for(int16_t iter=0; iter<NITER; iter++)
+            {
+                // Get KeyN from uk info in the web
+                r = get_key(uk);
+                if (r==false)
+                {
+                    break;
+                }
+
+                // decode(DataN, keyN) => DataN-1+urlkeyN-1     urlkeyN-1=>keyN-1
+                if (decode(iter, encrypted_data, &uk.key[0], KEY_SIZE, data_temp_next) == false)
+                {
+                    r = false;
+                    std::cerr << "ERROR " << "encrypted_data can not be decoded" << std::endl;
+                    break;
+                }
+
+                size_t buffer_size = data_temp_next.buffer.size();
+
+                // Get urlkeyN
+                if (buffer_size >= URLINFO_SIZE)
+                {
+                    // Inverse of data_temp.append(&vurlkey[vurlkey.size()-1].urlinfo_with_padding[0], URLINFO_SIZE);
+                    Buffer temp(URLINFO_SIZE);
+                    data_temp_next.get_last(URLINFO_SIZE, temp);
+
+                    if (read_urlinfo(temp, uk) == false)
+                    {
+                        r = false;
+                        std::cerr << "ERROR " << "encrypted_data can not be decoded - can not read urlinfo" << std::endl;
+                        break;
+                    }
+                }
+                else
+                {
+                    r = false;
+                    std::cerr << "ERROR " << "encrypted_data can not be decoded - invalid urlinfo size" << std::endl;
+                    break;
+                }
+
+                data_temp.buffer.swap_with(data_temp_next.buffer);
+                data_temp_next.erase();
+            }
+		}
 		return r;
 	}
 
