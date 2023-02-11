@@ -80,6 +80,25 @@ DES::DES(const std::string & KEY)
     setkey(KEY);
 }
 
+DES::DES(const char key[4])
+{
+    std::string KEY;
+    for(size_t i=0;i<4;i++)
+        KEY += makehex(key[i], 2);
+    setkey(KEY);
+}
+
+std::string DES::encrypt_bin(const char* data, int data_size)
+{
+    std::string DATA;
+    if (data_size!=4)
+        throw std::runtime_error("Error: binary data size must be 4.");
+
+    for(size_t i=0;i<4;i++)
+        DATA += makehex(data[i], 2);
+    return run(DATA);
+}
+
 void DES::setkey(const std::string & KEY){
     if (keyset){
         throw std::runtime_error("Error: Key has already been set.");
@@ -120,6 +139,26 @@ std::string DES::decrypt(const std::string & DATA){
     std::string out = run(DATA);
     std::reverse(keys, keys + 16);
     return out;
+}
+
+void DES::decrypt_bin(const std::string& DATA, char* out, int out_size)
+{
+    if (out_size!=4)
+        throw std::runtime_error("Error: binary data size must be 4.");
+
+    std::string s = decrypt(DATA);
+
+    uint8_t b;
+    std::string s2;
+    for(size_t i=0;i<4;i++)
+    {
+        s2.clear();
+        s2 += s[2*i+0];
+        s2 += s[2*i+1];
+        b = 0;
+        b = hextobin(s2, b);
+        out[i]=b;
+    }
 }
 
 unsigned int DES::blocksize() const {

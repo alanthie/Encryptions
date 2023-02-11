@@ -346,7 +346,6 @@ public:
 
 		Buffer temp(URLINFO_SIZE+1);
 		temp.init(0);
-		//vurlkey[i].url_size = vurlkey[i].url.size();
 		temp.writeInt16(vurlkey[i].url_size, -1);
 		temp.write(vurlkey[i].url.data(), vurlkey[i].url.size(), -1);
 		temp.writeInt32(vurlkey[i].key_from, -1);
@@ -367,37 +366,34 @@ public:
 		bool r = true;
 		char c;
 
-		uint32_t nblock = data_temp.buffer.size() / 8;
-		uint32_t nkeys  = key_size / 8;
+        // BINARY DES is multiple of 4
+		uint32_t nblock = data_temp.buffer.size() / 4;
+		uint32_t nkeys  = key_size / 4;
 
-		std::string KEY;
-		std::string DATA;
+		char KEY[4];
+		char DATA[4];
+		std::string data_encr;
 
 		uint32_t key_idx = 0;
 		for(size_t blocki = 0; blocki < nblock; blocki++)
 		{
-            DATA.clear();
-            for(size_t j = 0; j < 8; j++)
+            for(size_t j = 0; j < 4; j++)
             {
-                c = data_temp.buffer.getdata()[8*blocki + j];
-                if (c==0) c=1; // ???????
-                DATA += c;
+                c = data_temp.buffer.getdata()[4*blocki + j];
+                DATA[j] = c;
             }
 
-            KEY.clear();
-            for(size_t j = 0; j < 8; j++)
+            for(size_t j = 0; j < 4; j++)
             {
-                c = key[8*key_idx + j];
-                if (c==0) c=1;
-                KEY += c;
+                c = key[4*key_idx + j];
+                KEY[j] = c;
             }
             key_idx++;
             if (key_idx >= nkeys) key_idx=0;
 
             DES des(KEY);
-            std::string data_encr = des.encrypt(DATA);
-            data_temp_next.buffer.write(data_encr.data(), data_encr.size(), -1);
-            //std::string data_back = des.decrypt(data_encr);
+            data_encr = des.encrypt_bin(DATA, 4);
+            data_temp_next.buffer.write(data_encr.data(), data_encr.size(), -1); // 8 bytes!
         }
 
 		return r;
@@ -489,17 +485,20 @@ public:
             }
 
             if (i>0) data_temp.append(&vurlkey[i-1].urlinfo_with_padding[0], URLINFO_SIZE);
+
             data_temp_next.clear_data();
             encode(i, data_temp, &vurlkey[i].key[0], KEY_SIZE, data_temp_next);
 
             data_temp.buffer.swap_with(data_temp_next.buffer);
-            //data_temp_next.copy_buffer_to(data_temp);
             data_temp_next.erase();
         }
-        // encode(DataN+urlkeyN,     pwd0) => DataFinal
-        if (vurlkey.size()>0) data_temp.append(&vurlkey[vurlkey.size()-1].urlinfo_with_padding[0], URLINFO_SIZE);
+
+        // encode(DataN+urlkeyN, pwd0) => DataFinal
         if (vurlkey.size()>0)
+        {
+            data_temp.append(&vurlkey[vurlkey.size()-1].urlinfo_with_padding[0], URLINFO_SIZE);
             encode(vurlkey.size(), data_temp, puz_key.getdata(), puz_key.size(), data_temp_next);
+        }
 
         data_temp_next.copy_buffer_to(encrypted_data);
         encrypted_data.save_to_file(filename_encrypted_data);
@@ -513,7 +512,6 @@ public:
     puzzle              puz;
     data                encrypted_data;
 
-    // Temp
     data                data_temp;
     data                data_temp_next;
 
@@ -589,47 +587,92 @@ public:
     data                data_temp_next;
 };
 
-//class DES : public SymAlg{
-//    private:
-//        uint64_t keys[16];
-//        std::string run(const std::string & data);
-//
-//    public:
-//        DES();
-//        DES(const std::string & KEY);
-//        void setkey(const std::string & KEY);
-//        std::string encrypt(const std::string & DATA);
-//        std::string decrypt(const std::string & DATA);
-//        unsigned int blocksize() const;
-//};
 
 int main()
 {
+    std::cout << "bin 255 to hex2 " << makehex((char)255, 2) << std::endl;
+    std::cout << "bin 128 to hex2 " << makehex((char)128, 2) << std::endl;
+    std::cout << "bin 0 to hex2 "   << makehex((char)0  , 2) << std::endl;
+    std::cout << "bin 256*10+5 to hex4 "   << makehex((uint32_t)2565  , 4) << std::endl;
+
+    std::cout << "hex2 " << makehex((char)255, 2) << " to uint8_t " << (int)hextobin(makehex((char)255, 2), uint8_t(0)) << std::endl;
+    std::cout << "hex4 " << makehex((uint32_t)2565  , 4) << " to uint32_t " << (int)hextobin(makehex((uint32_t)2565  , 4), uint32_t(0)) << std::endl;
+
+
     std::string KEY  = "EWTW;RLd"; // 8 bytes l peut exister 2e56 (soit 7.2*10e16) clés différentes !
     std::string data = "65431234"; // 8 bytes
 
-    DES des(KEY);
-    std::string data_encr = des.encrypt(data);
-    std::string data_back = des.decrypt(data_encr);
-    if (data != data_back)
     {
-        std::cout << "Error with DES algo"
-        << "\nkey " << KEY
-        << "\ndata " << data
-        << "\ndata_encr " << data_encr
-        << "\ndata_back " << data_back
-        << std::endl;
-    }
-    else
-    {
-        std::cout << "OK with DES algo "
-        << "\nkey " << KEY
-        << "\ndata " << data
-        << "\ndata_encr " << data_encr
-        << "\ndata_back " << data_back
-        << std::endl;
+        DES des(KEY);
+        std::string data_encr = des.encrypt(data);
+        std::string data_back = des.decrypt(data_encr);
+        if (data != data_back)
+        {
+            std::cout << "Error with DES algo"
+            << "\nkey " << KEY
+            << "\ndata " << data
+            //<< "\ndata_encr " << data_encr
+            << "\ndata_back " << data_back
+            << std::endl;
+        }
+        else
+        {
+            std::cout << "OK with DES algo "
+            << "\nkey " << KEY
+            << "\ndata " << data
+            //<< "\ndata_encr " << data_encr
+            << "\ndata_back " << data_back
+            << std::endl;
+        }
     }
 
+
+    // BINARYE DES
+    {
+        char bin[4] = {12, 0, 34, 0}; // bin 4 => string 8
+        char dat[4] = {33, 5, 12, 0}; // bin 4 => string 8
+        char out_dat[4];
+//        KEY.clear();  for(size_t i=0;i<4;i++) KEY +=makehex(bin[i], 2);
+//        data.clear(); for(size_t i=0;i<4;i++) data+=makehex(dat[i], 2);
+
+        DES des(bin);
+        std::string data_encr = des.encrypt_bin(dat, 4);
+        des.decrypt_bin(data_encr, out_dat, 4);
+
+        std::string data_back  = "{";
+        for(size_t i=0;i<4;i++)
+        {
+            data_back+=std::to_string((int)out_dat[i]);
+            data_back+=",";
+        }
+        data_back += "}";
+
+        bool ok = true;
+        for(size_t i=0;i<4;i++)
+        {
+            if (dat[i] != out_dat[i])
+            {
+                std::cout << "Error with DES binary algo"
+                << "\nkey " << KEY
+                << "\ndata {33, 5, 12, 0}"
+                //<< "\ndata_encr " << data_encr
+                << "\ndata_back " << data_back
+                << std::endl;
+                ok = false;
+                break;
+            }
+        }
+        if (ok)
+        {
+            std::cout << "OK with DES binary algo "
+            << "\nkey " << KEY
+            << "\ndata {33, 5, 12, 0}"
+            //<< "\ndata_encr " << data_encr
+            << "\ndata_back " << data_back
+            << std::endl;
+        }
+    }
+    //return 0;
 
     std::string url = "https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz";
     std::string filename  = "./Staging/Python-3.8.1.tgz";

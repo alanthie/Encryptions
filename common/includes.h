@@ -69,6 +69,27 @@ template <typename T> std::string makehex(T value, unsigned int size = 2 * sizeo
     return out;
 }
 
+template <typename T> T hextobin(std::string svalue, T val_start, bool caps = false)
+{
+    T val = val_start;
+    char hex;
+    for(size_t i=0;i<svalue.size();i++)
+    {
+        hex = svalue[i];
+        if (caps)
+        {
+            if ((hex>='0') && (hex<='9')) val = 16*val+ (hex -'0');
+            else if ((hex>='A') && (hex<='F')) val = 16*val+ (10 + hex -'A');
+        }
+        else
+        {
+            if ((hex>='0') && (hex<='9')) val = 16*val+ (hex -'0');
+            else if ((hex>='a') && (hex<='f')) val = 16*val+ (10 + hex -'a');
+        }
+    }
+    return val;
+}
+
 // extract 8 bits from a numeric value
 template <typename T> uint8_t byte(const T & value, const uint16_t & n){
     return (value >> (n << 3)) & 0xff;

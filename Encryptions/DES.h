@@ -44,6 +44,11 @@ class DES : public SymAlg{
         std::string encrypt(const std::string & DATA);
         std::string decrypt(const std::string & DATA);
         unsigned int blocksize() const;
+
+        // BINARY DES
+        DES(const char KEY[4]);
+        std::string encrypt_bin(const char* data, int data_size=4);
+        void decrypt_bin(const std::string& DATA, char* out, int out_size=4);
 };
 
 #endif
