@@ -85,6 +85,7 @@ constexpr static int KEY_SIZE       = 64;
 constexpr static int CHKSUM_SIZE    = 64;
 constexpr static int URLINFO_SIZE   = 256+CHKSUM_SIZE+KEY_SIZE+4+2+2+8; // padding 16x
 constexpr static size_t PADDING_MULTIPLE = 16;
+constexpr static int16_t NITER_LIM = 100;
 
 class data
 {
@@ -168,8 +169,8 @@ public:
     void clear_data() {buffer.clear();}
     void erase() {buffer.erase();}
     void realloc(uint32_t sz){buffer.realloc(sz);}
-
     uint32_t allocsize() {return buffer.allocsize();}
+
     Buffer buffer;
 };
 
@@ -573,9 +574,9 @@ public:
 		out_uk.key_from = temp.readInt32(pos); pos+=4;
 		out_uk.key_size = temp.readInt16(pos); pos+=2;
 
-		for( size_t j = 0; j< 64; j++)
+		for( size_t j = 0; j< CHKSUM_SIZE; j++)
             out_uk.checksum[j] = temp.getdata()[pos+j];
-        pos += 64;
+        pos += CHKSUM_SIZE;
 
         // zero
         for( size_t j = 0; j< KEY_SIZE; j++)
@@ -716,7 +717,7 @@ public:
                 NITER = data_temp_next.buffer.readInt16(file_size-2);
                 NITER = NITER - 1;
                 if (NITER < 0) r = false;
-                else if (NITER > 100) r = false;
+                else if (NITER > NITER_LIM) r = false;
 
                 if (r==false)
                 {
@@ -820,9 +821,8 @@ public:
     std::string filename_encrypted_data;
 	std::string filename_decrypted_data;
 
-	// Temp
-    data                data_temp;
-    data                data_temp_next;
+    data        data_temp;
+    data        data_temp_next;
 };
 
 
