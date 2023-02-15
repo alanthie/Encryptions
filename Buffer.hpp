@@ -146,6 +146,11 @@ public:
         if (offset+2-1 >= alloc_size) throw bad_buffer_operation(alloc_size);
         return (int16_t)data[offset];
     }
+    uint16_t readUInt16(uint32_t offset)
+    {
+        if (offset+2-1 >= alloc_size) throw bad_buffer_operation(alloc_size);
+        return (uint16_t)data[offset];
+    }
     int8_t readInt8(uint32_t offset)
     {
         if (offset+1-1 >= alloc_size) throw bad_buffer_operation(alloc_size);
@@ -164,6 +169,8 @@ public:
         if (appendOffset + sizeof(int32_t) > length)
             length = appendOffset + sizeof(int32_t);
     }
+
+
     void writeInt16(int16_t number, int32_t offset = -1)
     {
         uint32_t of = (uint32_t)(offset == -1 ? length : offset)+2-1;
@@ -176,6 +183,20 @@ public:
         if (appendOffset + sizeof(int16_t) > length)
             length = appendOffset + sizeof(int16_t);
     }
+
+    void writeUInt16(uint16_t number, int32_t offset = -1)
+    {
+        uint32_t of = (uint32_t)(offset == -1 ? length : offset)+2-1;
+        if (of >= alloc_size) increase_size(of);
+
+        int appendOffset = offset == -1 ? length : offset;
+
+        memcpy(this->data + appendOffset, &number, sizeof(uint16_t));
+
+        if (appendOffset + sizeof(uint16_t) > length)
+            length = appendOffset + sizeof(uint16_t);
+    }
+
     void writeInt8(int8_t number, int32_t offset = -1)
     {
         uint32_t of = (uint32_t)(offset == -1 ? length : offset)+1-1;
