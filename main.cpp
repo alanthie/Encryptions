@@ -79,7 +79,7 @@ int main_wget(int args, char *argc[])
 	return 0;
 }
 
-constexpr static uint32_t BASE  = 10000;
+constexpr static uint32_t BASE  = 25000; // BASE*BASE >= FILE_SIZE_LIM
 constexpr static int16_t URL_MIN_SIZE   = 10;
 constexpr static int16_t URL_MAX_SIZE   = 256;
 constexpr static int16_t KEY_SIZE       = 64;
@@ -130,7 +130,6 @@ public:
                     else
                     {
                         std::cerr << "ERROR read_from_file FILE_SIZE_LIM " << filename << " " << usz << std::endl;
-
                         ifd.close();
                         return false;
                     }
@@ -138,7 +137,6 @@ public:
                 else
                 {
                     std::cerr << "ERROR read_from_file allow_realloc = false " << filename << " " << usz << std::endl;
-
                     ifd.close();
                     return false;
                 }
@@ -412,12 +410,12 @@ public:
 				if (d.buffer.size() > KEY_SIZE)
 				{
 					random_engine rd;
-//					uint32_t t = rd.get_rand() * (d.buffer.size() - KEY_SIZE);
-//					vurlkey[i].key_fromH = (t / BASE);
-//					vurlkey[i].key_fromL = t - (vurlkey[i].key_fromH  * BASE);
-					vurlkey[i].key_fromH = 2;
-					vurlkey[i].key_fromL = 3;
-					int32_t t = BASE*vurlkey[i].key_fromH  + vurlkey[i].key_fromL;
+					uint32_t t = rd.get_rand() * (d.buffer.size() - KEY_SIZE);
+					vurlkey[i].key_fromH = (t / BASE);
+					vurlkey[i].key_fromL = t - (vurlkey[i].key_fromH  * BASE);
+//					vurlkey[i].key_fromH = 2;
+//					vurlkey[i].key_fromL = 3;
+//					int32_t t = BASE*vurlkey[i].key_fromH  + vurlkey[i].key_fromL;
 					std::cout << "vurlkey[i].key_fromH=" << vurlkey[i].key_fromH << " ";
 					std::cout << "vurlkey[i].key_fromL=" << vurlkey[i].key_fromL << " ";
 					std::cout << "key_pos=" << t << " ";
@@ -726,10 +724,8 @@ public:
 		out_uk.url_size = temp.readUInt16(pos); pos+=2;
 		std::cout << "read_urlinfo out_uk.url_size " << out_uk.url_size << " "<< std::endl;
 
-		for( int16_t j = 0; j< out_uk.url_size; j++)
-            out_uk.url[j] = temp.getdata()[pos+j];
-        for( int16_t j = out_uk.url_size; j< URL_MAX_SIZE; j++)
-            out_uk.url[j] = 0;
+		for( int16_t j = 0; j< out_uk.url_size; j++) out_uk.url[j] = temp.getdata()[pos+j];
+        for( int16_t j = out_uk.url_size; j< URL_MAX_SIZE; j++) out_uk.url[j] = 0;
         pos += URL_MAX_SIZE;
 
         for( int16_t j = 0; j< 4; j++)
@@ -746,12 +742,12 @@ public:
 		std::cout << "out_uk.key_fromH " << out_uk.key_fromH << " ";
 		std::cout << "out_uk.key_fromL " << out_uk.key_fromL << " ";
 		int32_t v = out_uk.key_fromH * BASE + out_uk.key_fromL;
+
 		std::cout << "out_uk.key_from " << v << " ";
 		std::cout << "out_uk.key_size " << out_uk.key_size << std::endl;
 
 		 // zero
-        for( int16_t j = 0; j< KEY_SIZE; j++)
-            out_uk.key[j] = 0;
+        for( int16_t j = 0; j< KEY_SIZE; j++) out_uk.key[j] = 0;
         pos += KEY_SIZE;
 
 		for( int16_t j = 0; j< CHKSUM_SIZE; j++)
@@ -1136,6 +1132,61 @@ public:
     data        data_temp_next;
 };
 
+void DOTESTCASE(std::string TEST, bool disable_netw = false)
+{
+    std::string TESTCASE = "testcase";
+    std::string file_url            = "/urls.txt";
+    std::string file_partial_puzzle = "/partial_puzzle.txt";
+    std::string file_msg_encrypted  = "/msg_encrypted.dat";
+    std::string file_msg            = "/msg.txt";
+    std::string file_puzzle         = "/puzzle.txt";
+    std::string file_msg_decrypted  = "/msg_decrypted.dat";
+
+    {
+        //std::string TEST = "onewebkey";
+
+        std::string file = "./"+TESTCASE+"/"+TEST+file_partial_puzzle;
+		std::remove(file.data());
+
+		file = "./"+TESTCASE+"/"+TEST+file_msg_encrypted;
+		std::remove(file.data());
+
+        encryptor encr("./"+TESTCASE+"/"+TEST+file_url,
+                       "./"+TESTCASE+"/"+TEST+file_msg,
+                       "./"+TESTCASE+"/"+TEST+file_puzzle,
+                       "./"+TESTCASE+"/"+TEST+file_partial_puzzle,
+                       "./"+TESTCASE+"/"+TEST+file_msg_encrypted);
+
+        if (encr.encrypt(disable_netw) == true)
+        {
+            decryptor decr( encr.filename_partial_puzzle,
+                            encr.filename_puzzle,
+                            encr.filename_encrypted_data,
+                            "./"+TESTCASE+"/"+TEST+file_msg_decrypted
+                          );
+
+            if (decr.decrypt() == true)
+            {
+                if( is_file_same(encr.filename_msg_data, decr.filename_decrypted_data) == false)
+                {
+                    std::cout << ""+TESTCASE+" "+TEST+" - ERROR encrypt/decrypt failed " << std::endl;
+                }
+                else
+                {
+                    std::cout << "SUCCESS "+TESTCASE+" "+TEST+"" << std::endl;
+                }
+            }
+            else
+            {
+                std::cout << ""+TESTCASE+" "+TEST+" - ERROR decrypt() " << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << ""+TESTCASE+" "+TEST+" - ERROR encrypt() " << std::endl;
+        }
+    }
+}
 
 int main()
 {
@@ -1233,7 +1284,29 @@ int main()
 
         if ( wget(url.data(), filename.data()) != 0)
         {
-            printf("An error occured wget !\n");
+            std::cout << "An error occured wget " << std::endl;
+        }
+        else
+        {
+            std::cout << "OK with wget " << std::endl;
+        }
+    }
+    //https://ln5.sync.com/dl/7259131b0/twwrxp25-j6j6viw3-5a99vmwn-rv43m9e6
+    if (true)
+    {
+        //Sync public TerrePlane (Flat earth) img.pgn
+        //std::string url = "https://ln5.sync.com/dl/7259131b0/twwrxp25-j6j6viw3-5a99vmwn-rv43m9e6";
+        //std::string url = "https://cp.sync.com/9a4886a8-b1b3-4a2c-a3c7-4b0c01d76486";
+        //std::string url = "https://cp.sync.com/file/1342219113/view/image";
+        //std::string url = "https://u.pcloud.link/publink/show?code=XZH2QgVZC4KuzbwhtBmqrvCrpMQhTzAkOd2V";
+        //"downloadlink": "
+        std::string url = "https://c326.pcloud.com/dHZTgqwh1ZJ8HkagZZZQaV0o7Z2ZZLH4ZkZH2QgVZ91trCtkdpvFP5vxOxY8VcyStULb7/Screenshot%20from%202021-06-16%2014-28-40.png";
+        //"https:\/\/c326.pcloud.com\/dHZTgqwh1ZJ8HkagZZZQaV0o7Z2ZZLH4ZkZH2QgVZ91trCtkdpvFP5vxOxY8VcyStULb7\/Screenshot%20from%202021-06-16%2014-28-40.png"
+        std::string filename  = "./Staging/img.png";
+
+        if ( wget(url.data(), filename.data()) != 0)
+        {
+            std::cout << "An error occured wget " << std::endl;
         }
         else
         {
@@ -1242,99 +1315,22 @@ int main()
     }
 
     // TESTCASE nowebkey
-    std::string TESTCASE = "testcase";
     if (true)
     {
-        std::string TEST = "nowebkey";
-
-        std::string file = "./"+TESTCASE+"/"+TEST+"/partial_puzzle.txt";
-		std::remove(file.data());
-
-		file = "./"+TESTCASE+"/"+TEST+"/msg_encrypted.dat";
-		std::remove(file.data());
-
-        encryptor encr("./"+TESTCASE+"/"+TEST+"/urls.txt",
-                       "./"+TESTCASE+"/"+TEST+"/msg.txt",
-                       "./"+TESTCASE+"/"+TEST+"/puzzle.txt",
-                       "./"+TESTCASE+"/"+TEST+"/partial_puzzle.txt",
-                       "./"+TESTCASE+"/"+TEST+"/msg_encrypted.dat");
-
-        if (encr.encrypt(true) == true)
-        {
-            decryptor decr( encr.filename_partial_puzzle,
-                            encr.filename_puzzle,
-                            encr.filename_encrypted_data,
-                            "./"+TESTCASE+"/"+TEST+"/msg_decrypted.dat"
-                          );
-            if (decr.decrypt() == true)
-            {
-                if( is_file_same(encr.filename_msg_data, decr.filename_decrypted_data) == false)
-                {
-                    std::cout << ""+TESTCASE+" "+TEST+" - ERROR encrypt/decrypt failed " << std::endl;
-                }
-                else
-                {
-                    std::cout << "SUCCESS "+TESTCASE+" "+TEST+"" << std::endl;
-                }
-            }
-            else
-            {
-                std::cout << ""+TESTCASE+" "+TEST+" - ERROR decrypt() " << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << ""+TESTCASE+" "+TEST+" - ERROR encrypt() " << std::endl;
-        }
+        DOTESTCASE("nowebkey", true);
     }
 
     // TESTCASE onewebkey
     if (true)
     {
-        std::string TEST = "onewebkey";
-
-        std::string file = "./"+TESTCASE+"/"+TEST+"/partial_puzzle.txt";
-		std::remove(file.data());
-
-		file = "./"+TESTCASE+"/"+TEST+"/onewebkey.dat";
-		std::remove(file.data());
-
-        encryptor encr("./"+TESTCASE+"/"+TEST+"/urls.txt",
-                       "./"+TESTCASE+"/"+TEST+"/msg.txt",
-                       "./"+TESTCASE+"/"+TEST+"/puzzle.txt",
-                       "./"+TESTCASE+"/"+TEST+"/partial_puzzle.txt",
-                       "./"+TESTCASE+"/"+TEST+"/msg_encrypted.dat");
-
-        if (encr.encrypt(false) == true)
-        {
-            decryptor decr( encr.filename_partial_puzzle,
-                            encr.filename_puzzle,
-                            encr.filename_encrypted_data,
-                            "./"+TESTCASE+"/"+TEST+"/msg_decrypted.dat"
-                          );
-
-            if (decr.decrypt() == true)
-            {
-                if( is_file_same(encr.filename_msg_data, decr.filename_decrypted_data) == false)
-                {
-                    std::cout << ""+TESTCASE+" "+TEST+" - ERROR encrypt/decrypt failed " << std::endl;
-                }
-                else
-                {
-                    std::cout << "SUCCESS "+TESTCASE+" "+TEST+"" << std::endl;
-                }
-            }
-            else
-            {
-                std::cout << ""+TESTCASE+" "+TEST+" - ERROR decrypt() " << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << ""+TESTCASE+" "+TEST+" - ERROR encrypt() " << std::endl;
-        }
+        DOTESTCASE("onewebkey", false);
     }
 
+    // TESTCASE manywebkey
+    if (true)
+    {
+        DOTESTCASE("manywebkey", false);
+    }
 
     std::cout << "done enter a number to exit " << std::endl;
     int a; std::cin >> a;
