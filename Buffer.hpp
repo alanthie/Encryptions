@@ -10,12 +10,15 @@
 
 class data;
 
+constexpr static uint32_t BUFFER_SIZE_INIT  = 10*1000;
+constexpr static uint32_t BUFFER_SIZE_LIM   = 10*1000*1000;
+
 class bad_buffer_operation
 {
 public:
-    bad_buffer_operation(uint32_t sz) : bsize(sz)
+    bad_buffer_operation(uint32_t sz) :
+        bsize(sz)
     {
-        int a=1;
     }
     uint32_t bsize;
 };
@@ -25,7 +28,7 @@ class Buffer
 //friend class data;
 
 public:
-    explicit Buffer(uint32_t sz = 1*1000*1000)
+    explicit Buffer(uint32_t sz = BUFFER_SIZE_INIT)
     {
         data = new char[sz]{0};
         length = 0;
@@ -52,6 +55,13 @@ public:
         length = 0;
     }
 
+    void remove_last_n_char(uint32_t n)
+    {
+        if (length >= n)
+            length = length - n;
+        else length = 0;
+    }
+
     void init(char c)
     {
         for( size_t i = 0; i< alloc_size; i++)
@@ -72,7 +82,12 @@ public:
 
     void increase_size(uint32_t n)
     {
-        if (n > 100*1000*1000) // 100MB
+        if(n==0)
+        {
+            return;
+        }
+
+        if (n > BUFFER_SIZE_LIM)
         {
             throw bad_buffer_operation(alloc_size);
         }
