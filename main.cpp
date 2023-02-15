@@ -65,8 +65,6 @@ int wget(char *in, const char *out)
 	return res;
 }
 
-
-
 int main_wget(int args, char *argc[])
 {
 	if(args != 3)
@@ -87,15 +85,6 @@ constexpr static int16_t URL_MAX_SIZE   = 256;
 constexpr static int16_t KEY_SIZE       = 64;
 constexpr static int16_t CHKSUM_SIZE    = 64;
 constexpr static int16_t URLINFO_SIZE   = 2+URL_MAX_SIZE+4+6+CHKSUM_SIZE+KEY_SIZE+4; // padding 16x
-//    uint16_t url_size = 0;           // 2
-//    char url[URL_MAX_SIZE]= {0};    // 256
-//    char magic[4]= {'a','b','c','d'};  //4
-//    uint16_t key_fromH = 0;          // 2 random offset
-//    uint16_t key_fromL = 0;          // 2
-//    uint16_t key_size = KEY_SIZE;    // 2
-//    char key[KEY_SIZE] = {0};       // 64
-//    char checksum[CHKSUM_SIZE] = {0};     // 64
-
 constexpr static int16_t PADDING_MULTIPLE = 8;
 constexpr static int16_t NITER_LIM      = 100;
 constexpr static int16_t PUZZLE_SIZE_LIM = 10000;
@@ -189,16 +178,22 @@ public:
             int32_t r = buffer.write(ofd, buffer.size());
             if (r==-1)
             {
+                std::cerr << "ERROR save_to_file" << "Failed for buffer.write(ofd, buffer.size()" << buffer.size() <<  std::endl;
                 ofd.close();
                 return false;
             }
             if (r!=(int32_t)buffer.size())
             {
+                std::cerr << "ERROR save_to_file" << "Failed for buffer.write(ofd, buffer.size() " << r << std::endl;
                 ofd.close();
                 return false;
             }
             ofd.close();
             return true;
+        }
+        else
+        {
+            std::cerr << "ERROR save_to_file" << "Failed  to open file " << filename << std::endl;
         }
         return false;
     }
@@ -208,7 +203,11 @@ public:
 
 	int32_t get_first(size_t n, Buffer& rout)
 	{
-        if (buffer.size() < n) return -1;
+        if (buffer.size() < n)
+        {
+            std::cerr << "WARNING get_first" << "Failed for (buffer.size() < n) " << n << std::endl;
+            return -1;
+        }
         rout.erase();
         rout.write(buffer.getdata(), n, 0);
         return n;
@@ -216,7 +215,11 @@ public:
 
 	int32_t get_last(size_t n, Buffer& rout)
 	{
-        if (buffer.size() < n) return -1;
+        if (buffer.size() < n)
+        {
+            std::cerr << "WARNING get_last" << "Failed for (buffer.size() < n) " << n << std::endl;
+            return -1;
+        }
         rout.erase();
         rout.write(buffer.getdata() + buffer.size() - n, n, 0);
         return n;
@@ -306,14 +309,14 @@ class urlkey
 public:
     urlkey() {}
 
-    uint16_t url_size = 0;           // 2
-    char url[URL_MAX_SIZE]= {0};    // 256
-    char magic[4]= {'a','b','c','d'};  //4
-    uint16_t key_fromH = 0;          // 2 random offset
-    uint16_t key_fromL = 0;          // 2
-    uint16_t key_size = KEY_SIZE;    // 2
-    char key[KEY_SIZE] = {0};       // 64
-    char checksum[CHKSUM_SIZE] = {0};     // 64
+    uint16_t url_size = 0;              // 2
+    char url[URL_MAX_SIZE]= {0};        // 256
+    char magic[4]= {'a','b','c','d'};   // 4
+    uint16_t key_fromH = 0;             // 2 random offset
+    uint16_t key_fromL = 0;             // 2
+    uint16_t key_size = KEY_SIZE;       // 2
+    char key[KEY_SIZE] = {0};           // 64
+    char checksum[CHKSUM_SIZE] = {0};   // 64
 
     char urlinfo_with_padding[URLINFO_SIZE] = {0};
 };
@@ -413,7 +416,7 @@ public:
 //					vurlkey[i].key_fromH = (t / BASE);
 //					vurlkey[i].key_fromL = t - (vurlkey[i].key_fromH  * BASE);
 					vurlkey[i].key_fromH = 2;
-					vurlkey[i].key_fromL = 30;
+					vurlkey[i].key_fromL = 3;
 					int32_t t = BASE*vurlkey[i].key_fromH  + vurlkey[i].key_fromL;
 					std::cout << "vurlkey[i].key_fromH=" << vurlkey[i].key_fromH << " ";
 					std::cout << "vurlkey[i].key_fromL=" << vurlkey[i].key_fromL << " ";
@@ -451,7 +454,6 @@ public:
                     auto s = SHA256::toString(digest);
                     for( size_t j = 0; j< CHKSUM_SIZE; j++)
                         vurlkey[i].checksum[j] = s[j];
-                    //auto s = SHA256::toString(digest);
                     std::cout << "Encr " << SHA256::toString(digest) << std::endl;
                     delete[] digest;
                 }
@@ -670,7 +672,7 @@ public:
         // Save number of iterations (N web keys + 1 puzzle key) in the last 2 byte! + PADDING_MULTIPLE-2
         Buffer temp(PADDING_MULTIPLE);
 		temp.init(0);
-		temp.writeInt16(vurlkey.size() + 1, PADDING_MULTIPLE-2);
+		temp.writeUInt16(vurlkey.size() + 1, PADDING_MULTIPLE-2);
         data_temp.append(temp.getdata(), PADDING_MULTIPLE);
 
         //encode(DataN+urlkeyN+Niter,     pwd0) => DataFinal
@@ -974,7 +976,7 @@ public:
             size_t file_size = data_temp_next.buffer.size();
             if (file_size >= PADDING_MULTIPLE)
             {
-                NITER = data_temp_next.buffer.readInt16(file_size-2);
+                NITER = data_temp_next.buffer.readUInt16(file_size-2);
                 NITER = NITER - 1;
                 if (NITER < 0)
                     r = false;
@@ -997,6 +999,9 @@ public:
         {
             // remove last PADDING_MULTIPLE char
             data_temp_next.buffer.remove_last_n_char(PADDING_MULTIPLE);
+
+            data_temp.buffer.swap_with(data_temp_next.buffer);
+            data_temp_next.erase();
         }
         else
         {

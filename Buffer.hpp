@@ -136,6 +136,32 @@ public:
         return -1;
     }
 
+    unsigned long byteToInt4(char buff[])
+    {
+        return   ((unsigned long)(unsigned char)buff[3] << 24)
+               | ((unsigned long)(unsigned char)buff[2] << 16)
+               | ((unsigned long)(unsigned char)buff[1] << 8)
+               |  (unsigned long)(unsigned char)buff[0];
+    }
+    unsigned long byteToInt2(char buff[])
+    {
+        return   ((unsigned long)(unsigned char)buff[1] << 8)
+               | (unsigned long)(unsigned char)buff[0];
+    }
+
+    void int4ToByte(unsigned long k,  char buff[])
+    {
+        buff[0] = (k & 0x000000ff);
+        buff[1] = (k & 0x0000ff00) >> 8;
+        buff[2] = (k & 0x00ff0000) >> 16;
+        buff[3] = (k & 0xff000000) >> 24;
+    }
+    void int2ToByte(unsigned long k,  char buff[])
+    {
+        buff[0] = (k & 0x000000ff);
+        buff[1] = (k & 0x0000ff00) >> 8;
+    }
+
     int32_t readInt32(uint32_t offset)
     {
         if (offset+4-1 >= alloc_size) throw bad_buffer_operation(alloc_size);
@@ -149,7 +175,8 @@ public:
     uint16_t readUInt16(uint32_t offset)
     {
         if (offset+2-1 >= alloc_size) throw bad_buffer_operation(alloc_size);
-        return (uint16_t)data[offset];
+        //return (uint16_t)data[offset];
+        return (int16_t) byteToInt2(&data[offset]);
     }
     int8_t readInt8(uint32_t offset)
     {
@@ -189,12 +216,15 @@ public:
         uint32_t of = (uint32_t)(offset == -1 ? length : offset)+2-1;
         if (of >= alloc_size) increase_size(of);
 
-        int appendOffset = offset == -1 ? length : offset;
+        uint32_t appendOffset = (offset == -1) ? length : (uint32_t)offset;
 
-        memcpy(this->data + appendOffset, &number, sizeof(uint16_t));
+        //memcpy(this->data + appendOffset, &number, sizeof(uint16_t));
+        char buff[2];
+        int2ToByte(number, buff);
+        memcpy(this->data + appendOffset, &number, 2);
 
-        if (appendOffset + sizeof(uint16_t) > length)
-            length = appendOffset + sizeof(uint16_t);
+        //if (appendOffset + sizeof(uint16_t) > length) length = appendOffset + sizeof(uint16_t);
+        if (appendOffset + 2 > length) length = appendOffset + 2;
     }
 
     void writeInt8(int8_t number, int32_t offset = -1)
