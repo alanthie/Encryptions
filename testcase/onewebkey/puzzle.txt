@@ -1,6 +1,4 @@
-"Your first name" : "Alain"
-"Your car type" : "Jeep"
-"Prime(1)" : "2"
-"Prime(5)" : "11"
-"Last password" : "1234"
-
+"Votre prenom" : "Alain"
+"Le model de votre auto" : "Ford"
+“How long is an Olympic swimming pool (in meters)?“ :  “50“
+“Which country do cities of Perth, Adelade & Brisbane belong to?“ : “Australia“

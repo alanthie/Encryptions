@@ -82,7 +82,7 @@ int main_wget(int args, char *argc[])
 constexpr static uint32_t BASE  = 25000; // BASE*BASE >= FILE_SIZE_LIM
 constexpr static int16_t URL_MIN_SIZE   = 10;
 constexpr static int16_t URL_MAX_SIZE   = 256;
-constexpr static int16_t KEY_SIZE       = 64;
+constexpr static int16_t KEY_SIZE       = 256;
 constexpr static int16_t CHKSUM_SIZE    = 64;
 constexpr static int16_t URLINFO_SIZE   = 2+URL_MAX_SIZE+4+6+CHKSUM_SIZE+KEY_SIZE+4; // padding 16x
 constexpr static int16_t PADDING_MULTIPLE = 8;
@@ -260,7 +260,7 @@ bool is_file_same(std::string filename1, std::string filename2)
     return true;
 }
 
-class puzzle : public data
+class puzzle
 {
 public:
     struct QA
@@ -271,25 +271,54 @@ public:
 
     puzzle() {}
 
-    bool make_partial() {return true;}
+    void remove_partial(std::string& a)
+    {
+        std::string  s;
+        for(size_t i = 0; i < a.size(); i++)
+        {
+            if (i==0) continue;
+            if (i==a.size()-1) continue;
+            a[i] = 'x'; //"What is yout name?": "AxxxN"
+        }
+    }
+
+    bool make_partial()
+    {
+        for(size_t i = 0; i < vQA.size(); i++)
+        {
+            remove_partial(vQA[i].A);
+        }
+        return true;
+    }
+
     bool is_all_answered() {return true;}
 
-    bool read_from_file(std::string filename, bool b) override
+    bool read_from_file(std::string filename, bool b)
     {
-        return data::read_from_file(filename, b);
+        if (puz_data.read_from_file(filename, b) == true)
+        {
+            return parse_puzzle();
+        }
+        return false;
     }
-    bool save_to_file(std::string filename) override
+
+    bool save_to_file(std::string filename)
     {
-        return data::save_to_file(filename);
+        data temp;
+
+        std::string s;
+        for(size_t i = 0; i < vQA.size(); i++)
+        {
+            s = "\"" + vQA[i].Q +"\"" +" : " +  "\"" + vQA[i].A + "\"" + "\n";
+            temp.buffer.write(s.data(), s.size(), -1);
+        }
+        return temp.save_to_file(filename);
     }
-    //"What is yout name?": "AxxxN"
-    //"What is Q(23)?": "3xxxxxxx8"
 
     void make_key(Buffer& rout)
     {
-        size_t r = buffer.size() % PADDING_MULTIPLE;
-        //rout.realloc(buffer.size() + r);
-        rout.write(buffer.getdata(), buffer.size(), 0);
+        size_t r = puz_data.buffer.size() % PADDING_MULTIPLE;
+        rout.write(puz_data.buffer.getdata(), puz_data.buffer.size(), 0);
 
         char c[1] = {'0'};
         for(size_t i = 0; i < PADDING_MULTIPLE - r; i++)
@@ -299,6 +328,122 @@ public:
         }
     }
 
+    bool parse_puzzle()
+    {
+        size_t pos = 0;
+        char c;
+        std::string sqa;
+
+        vQA.clear();
+        size_t sz = puz_data.buffer.size();
+
+        while (pos < sz)
+        {
+            c = puz_data.buffer.getdata()[pos];
+            if (c!=0)
+            {
+                if ((c!= '\n') && (c!= '\r'))
+                {
+                    sqa+=c;
+                }
+                else
+                {
+                    if (sqa.size() > 7)
+                    {
+                        if (parse_qa(sqa) == false)
+                        {
+                            //return false;
+                        }
+                    }
+                    sqa.clear();
+                }
+            }
+            pos++;
+        }
+
+        if (sqa.size() > 7)
+        {
+            if (parse_qa(sqa) == false)
+            {
+                //return false;
+            }
+        }
+        return true;
+    }
+
+    bool parse_qa(std::string qa)
+    {
+        size_t pos = 0;
+        char c;
+        std::string q;
+        std::string a;
+        bool do_q = true;
+        bool do_a = false;
+        bool do_sep = false;
+        bool start_found = false;
+        bool end_found = false;
+
+        size_t sz = qa.size();
+        while (pos < sz)
+        {
+            c = qa[pos];
+            if (do_sep==false)
+            {
+                if (start_found==false)
+                {
+                    if (c!= '"')
+                    {
+                        //skip
+                    }
+                    else
+                    {
+                        start_found = true;
+                    }
+                }
+                else if (end_found==false)
+                {
+                    if (c!= '"')
+                    {
+                        if (do_q) q+= c;
+                        if (do_a) a+= c;
+                    }
+                    else
+                    {
+                        end_found = true;
+                        if (do_q) {do_q=false;do_sep=true;}
+                        if (do_a) {do_a=false;}
+                    }
+                }
+            }
+            else
+            {
+                if (c!= ':')
+                {
+                    //skip
+                }
+                else
+                {
+                    //separator_found = true;
+                    do_sep = false;
+                    start_found = false;
+                    end_found = false;
+                    do_a = true;
+                }
+            }
+            pos++;
+        }
+        if ((do_q==true) || (do_a==true) || (do_sep==true))
+        {
+            return false;
+        }
+        if (q.size()<=0) return false;
+        QA q_a; q_a.Q = q; q_a.A = a;
+        vQA.push_back( q_a );
+
+        return true;
+    }
+
+    data puz_data;
     std::vector<QA> vQA;
 };
 
@@ -313,7 +458,7 @@ public:
     uint16_t key_fromH = 0;             // 2 random offset
     uint16_t key_fromL = 0;             // 2
     uint16_t key_size = KEY_SIZE;       // 2
-    char key[KEY_SIZE] = {0};           // 64
+    char key[KEY_SIZE] = {0};           // 256
     char checksum[CHKSUM_SIZE] = {0};   // 64
 
     char urlinfo_with_padding[URLINFO_SIZE] = {0};
@@ -339,7 +484,6 @@ public:
 
     ~encryptor()
     {
-        // remove temp
     }
 
     bool read_file_urls(std::string filename)
@@ -395,6 +539,7 @@ public:
 		std::remove(file.data());
 
 		// DOWNLOAD URL FILE
+		std::cout << "URL " << vurlkey[i].url << std::endl;
 		if (wget(&vurlkey[i].url[0], file.data()) != 0)
 		{
             std::cerr << "ERROR wget vurlkey[i].url " << vurlkey[i].url << std::endl;
@@ -420,10 +565,12 @@ public:
 					std::cout << "vurlkey[i].key_fromL=" << vurlkey[i].key_fromL << " ";
 					std::cout << "key_pos=" << t << " ";
 					std::cout << "key_pos=" << BASE*vurlkey[i].key_fromH + vurlkey[i].key_fromL  << " ";
+					std::cout <<  std::endl;
+
 					for( size_t j = 0; j< KEY_SIZE; j++)
 					{
 						vurlkey[i].key[j] = d.buffer.getdata()[t+j];
-						std::cout << (int)vurlkey[i].key[j] << " ";
+						std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
                     }
                     std::cout <<  std::endl;
 				}
@@ -433,12 +580,12 @@ public:
 					for( size_t j = 0; j< d.buffer.size(); j++)
 					{
 						vurlkey[i].key[j] = d.buffer.getdata()[j];
-						std::cout << (int)vurlkey[i].key[j] << " ";
+						std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
                     }
 					for( size_t j = d.buffer.size(); j< KEY_SIZE; j++)
 					{
 						vurlkey[i].key[j] = j % 7;
-						std::cout << (int)vurlkey[i].key[j] << " ";
+						std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
                     }
                     std::cout <<  std::endl;
 				}
@@ -452,7 +599,7 @@ public:
                     auto s = SHA256::toString(digest);
                     for( size_t j = 0; j< CHKSUM_SIZE; j++)
                         vurlkey[i].checksum[j] = s[j];
-                    std::cout << "Encr " << SHA256::toString(digest) << std::endl;
+                    std::cout << "Encryption checksum " << SHA256::toString(digest) << std::endl;
                     delete[] digest;
                 }
             }
@@ -556,7 +703,7 @@ public:
             std::cerr << "ERROR " << "puz.read_from_file" << std::endl;
             return false;
         }
-        if (puz.buffer.size() == 0)
+        if (puz.puz_data.buffer.size() == 0)
         {
             std::cerr << "ERROR " << "(puz.buffer.size() == 0)" << std::endl;
             return false;
@@ -740,7 +887,7 @@ public:
 		out_uk.key_size = temp.readUInt16(pos);  pos+=2;
 
 		std::cout << "out_uk.key_fromH " << out_uk.key_fromH << " ";
-		std::cout << "out_uk.key_fromL " << out_uk.key_fromL << " ";
+		std::cout << "out_uk.key_fromL " << out_uk.key_fromL << std::endl;
 		int32_t v = out_uk.key_fromH * BASE + out_uk.key_fromL;
 
 		std::cout << "out_uk.key_from " << v << " ";
@@ -753,9 +900,9 @@ public:
 		for( int16_t j = 0; j< CHKSUM_SIZE; j++)
 		{
             out_uk.checksum[j] = temp.getdata()[pos+j];
-            std::cout << out_uk.checksum[j];
+            //std::cout << out_uk.checksum[j];
         }
-        std::cout << std::endl;
+        //std::cout << std::endl;
         pos += CHKSUM_SIZE;
 
 		return r;
@@ -780,6 +927,7 @@ public:
             for( int16_t j = 0; j< URL_MAX_SIZE; j++)
                 u[j] = uk.url[j];
 
+            std::cout << "URL " << u << std::endl;
             if (wget(u, file.data()) != 0)
             {
                 std::cerr << "ERROR " << "Unable to read web url contents" << std::endl;
@@ -811,12 +959,12 @@ public:
                     for( size_t j = 0; j< key_size; j++)
                     {
                         uk.key[j] = d.buffer.getdata()[pos+j];
-                        std::cout << (int)uk.key[j]<< "  ";
+                        std::cout << (int)(unsigned char)uk.key[j]<< "  ";
                     }
                     for( size_t j = key_size; j < KEY_SIZE; j++)
                     {
     					uk.key[j] = j % 7;
-    					std::cout << (int)uk.key[j]<< "  ";
+    					std::cout << (int)(unsigned char)uk.key[j]<< "  ";
                     }
                     std::cout << std::endl;
 
@@ -826,17 +974,17 @@ public:
                         sha.update(reinterpret_cast<const uint8_t*> (d.buffer.getdata()), d.buffer.size() );
                         uint8_t* digest = sha.digest();
                         checksum = SHA256::toString(digest);
-                        std::cout << "Decr " << checksum << std::endl;
+                        std::cout << "Decryption checksum " << checksum << std::endl;
                         delete[] digest;
                     }
 
                     char c;
-                    for( size_t j = 0; j< CHKSUM_SIZE; j++)
-                    {
-                        c = uk.checksum[j];
-                        std::cout << c;
-                    }
-                    std::cout << std::endl;
+//                    for( size_t j = 0; j< CHKSUM_SIZE; j++)
+//                    {
+//                        c = uk.checksum[j];
+//                        //std::cout << c;
+//                    }
+//                    std::cout << std::endl;
 
                     for( size_t j = 0; j< CHKSUM_SIZE; j++)
                     {
@@ -1132,19 +1280,16 @@ public:
     data        data_temp_next;
 };
 
-void DOTESTCASE(std::string TEST, bool disable_netw = false)
+void DOTESTCASE(std::string TEST, bool disable_netw = false, std::string file_msg = "/msg.txt")
 {
     std::string TESTCASE = "testcase";
     std::string file_url            = "/urls.txt";
     std::string file_partial_puzzle = "/partial_puzzle.txt";
     std::string file_msg_encrypted  = "/msg_encrypted.dat";
-    std::string file_msg            = "/msg.txt";
     std::string file_puzzle         = "/puzzle.txt";
     std::string file_msg_decrypted  = "/msg_decrypted.dat";
 
     {
-        //std::string TEST = "onewebkey";
-
         std::string file = "./"+TESTCASE+"/"+TEST+file_partial_puzzle;
 		std::remove(file.data());
 
@@ -1186,6 +1331,7 @@ void DOTESTCASE(std::string TEST, bool disable_netw = false)
             std::cout << ""+TESTCASE+" "+TEST+" - ERROR encrypt() " << std::endl;
         }
     }
+    std::cout << std::endl;
 }
 
 int main()
@@ -1292,7 +1438,7 @@ int main()
         }
     }
     //https://ln5.sync.com/dl/7259131b0/twwrxp25-j6j6viw3-5a99vmwn-rv43m9e6
-    if (true)
+    if (false)
     {
         //Sync public TerrePlane (Flat earth) img.pgn
         //std::string url = "https://ln5.sync.com/dl/7259131b0/twwrxp25-j6j6viw3-5a99vmwn-rv43m9e6";
@@ -1315,24 +1461,30 @@ int main()
     }
 
     // TESTCASE nowebkey
-    if (true)
+    if (false)
     {
         DOTESTCASE("nowebkey", true);
     }
 
     // TESTCASE onewebkey
-    if (true)
+    if (false)
     {
         DOTESTCASE("onewebkey", false);
     }
 
     // TESTCASE manywebkey
-    if (true)
+    if (false)
     {
         DOTESTCASE("manywebkey", false);
     }
 
-    std::cout << "done enter a number to exit " << std::endl;
-    int a; std::cin >> a;
+    // TESTCASE
+    if (true)
+    {
+        DOTESTCASE("zipcontent", false, "/test.zip");
+    }
+
+//    std::cout << "done enter a number to exit " << std::endl;
+//    int a; std::cin >> a;
     return 0;
 }

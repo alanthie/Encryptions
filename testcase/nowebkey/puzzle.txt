@@ -3,4 +3,5 @@
 "Prime(1)" : "2"
 "Prime(5)" : "11"
 "Last password" : "1234"
+"Factorial(15)" : "1307674368000"
 

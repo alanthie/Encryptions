@@ -72,12 +72,14 @@ public:
     {
         std::swap( data, bfr.data );
         std::swap( length, bfr.length);
+        std::swap( alloc_size, bfr.alloc_size);
     }
 
     void swap_with(Buffer& r)
     {
         std::swap( data, r.data );
         std::swap( length, r.length);
+        std::swap( alloc_size, r.alloc_size);
     }
 
     void increase_size(uint32_t n)

@@ -1,6 +1,18 @@
-"Your first name" : "Alain"
-"Your car type" : "Jeep"
+======================================
+"Votre prenom" : "Samuel"
+"Le model de votre auto" : "Jeep"
+"Le nom de votre dernier chien : "Toutoune"
+"Annee de naissance : "1999"
 "Prime(1)" : "2"
 "Prime(5)" : "11"
-"Last password" : "1234"
-
+"Dernier mot de passe" : "1234"
+"Factorial(15)" : "1307674368000"
+"Euler 827" : "397289979"
+"Euler 828" : "148693670"
+"Euler 829" : "41768797657018024"
+"La terre est plate" : "Vrai"
+"Y a pas de virus" : "Vrai"
+"Animal vu dans la rue" : "Renard"
+"Animal pour collet" : "Lapin"
+"TV" : "Teamviewer"
+======================================
