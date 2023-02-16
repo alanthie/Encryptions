@@ -265,9 +265,13 @@ class puzzle
 public:
     struct QA
     {
+        int type = 0; // 0==QA, 1==REM, 2==CHK
         std::string Q;
         std::string A;
     };
+
+    const std::string REM_TOKEN = "REM";
+    const std::string CHKSUM_TOKEN = "CHKSUM";
 
     puzzle() {}
 
@@ -286,18 +290,54 @@ public:
     {
         for(size_t i = 0; i < vQA.size(); i++)
         {
-            remove_partial(vQA[i].A);
+            if (vQA[i].type == 0)
+            {
+                remove_partial(vQA[i].A);
+            }
         }
         return true;
     }
 
     bool is_all_answered() {return true;}
 
+    std::string checksum()
+    {
+        data temp;
+        std::string s;
+        for(size_t i = 0; i < vQA.size(); i++)
+        {
+            if (vQA[i].type == 0)
+            {
+                s = "\"" + vQA[i].Q +"\"" +" : " +  "\"" + vQA[i].A + "\"" + "\n";
+                temp.buffer.write(s.data(), s.size(), -1);
+            }
+            else if (vQA[i].type == 1)
+            {
+                s = vQA[i].Q + vQA[i].A + "\n";
+                temp.buffer.write(s.data(), s.size(), -1);
+            }
+        }
+
+        SHA256 sha;
+        sha.update(reinterpret_cast<const uint8_t*> (temp.buffer.getdata()), temp.buffer.size() );
+        uint8_t* digest = sha.digest();
+        s = SHA256::toString(digest);
+        std::cout << "chksum puzzle " << s << std::endl;
+        delete[] digest;
+
+        return s;
+    }
+
     bool read_from_file(std::string filename, bool b)
     {
         if (puz_data.read_from_file(filename, b) == true)
         {
-            return parse_puzzle();
+            bool r = parse_puzzle();
+            if (r)
+            {
+                chksum_puzzle = checksum();
+            }
+            return r;
         }
         return false;
     }
@@ -309,9 +349,19 @@ public:
         std::string s;
         for(size_t i = 0; i < vQA.size(); i++)
         {
-            s = "\"" + vQA[i].Q +"\"" +" : " +  "\"" + vQA[i].A + "\"" + "\n";
+            if (vQA[i].type == 0)
+            {
+                s = "\"" + vQA[i].Q +"\"" +" : " +  "\"" + vQA[i].A + "\"" + "\n";
+            }
+            else
+            {
+                s =vQA[i].Q + vQA[i].A + "\n";
+            }
             temp.buffer.write(s.data(), s.size(), -1);
         }
+        s = CHKSUM_TOKEN + " puzzle : " + chksum_puzzle + "\n";
+        temp.buffer.write(s.data(), s.size(), -1);
+
         return temp.save_to_file(filename);
     }
 
@@ -348,12 +398,24 @@ public:
                 }
                 else
                 {
-                    if (sqa.size() > 7)
+                    if ((sqa.size() >= REM_TOKEN.size()) && (sqa.substr(0,REM_TOKEN.size()) == REM_TOKEN))
+                    {
+                        parse_rem(sqa);
+                    }
+                    else if ((sqa.size() >= CHKSUM_TOKEN.size()) && (sqa.substr(0,CHKSUM_TOKEN.size()) == CHKSUM_TOKEN))
+                    {
+                        parse_chksum(sqa);
+                    }
+                    else if (sqa.size() > 7) // "" : ""
                     {
                         if (parse_qa(sqa) == false)
                         {
                             //return false;
                         }
+                    }
+                    else
+                    {
+                        // skip (remove)
                     }
                     sqa.clear();
                 }
@@ -368,6 +430,32 @@ public:
                 //return false;
             }
         }
+        return true;
+    }
+
+    bool parse_rem(std::string qa)
+    {
+        if (qa.size() < REM_TOKEN.size())
+            return false;
+
+        QA q_a;
+        q_a.type = 1;
+        q_a.Q = qa;
+        q_a.A = "";
+        vQA.push_back( q_a );
+        return true;
+    }
+
+    bool parse_chksum(std::string qa)
+    {
+        if (qa.size() < CHKSUM_TOKEN.size())
+            return false;
+
+        QA q_a;
+        q_a.type = 2;
+        q_a.Q = qa;
+        q_a.A = "";
+        vQA.push_back( q_a );
         return true;
     }
 
@@ -436,8 +524,14 @@ public:
         {
             return false;
         }
-        if (q.size()<=0) return false;
-        QA q_a; q_a.Q = q; q_a.A = a;
+
+        if (q.size()<=0)
+            return false;
+
+        QA q_a;
+        q_a.type = 0;
+        q_a.Q = q;
+        q_a.A = a;
         vQA.push_back( q_a );
 
         return true;
@@ -445,6 +539,7 @@ public:
 
     data puz_data;
     std::vector<QA> vQA;
+    std::string chksum_puzzle;
 };
 
 class urlkey
@@ -1445,7 +1540,7 @@ int main()
         //std::string url = "https://cp.sync.com/9a4886a8-b1b3-4a2c-a3c7-4b0c01d76486";
         //std::string url = "https://cp.sync.com/file/1342219113/view/image";
         //std::string url = "https://u.pcloud.link/publink/show?code=XZH2QgVZC4KuzbwhtBmqrvCrpMQhTzAkOd2V";
-        //"downloadlink": "
+        //"downloadlink": " // EXPIRED
         std::string url = "https://c326.pcloud.com/dHZTgqwh1ZJ8HkagZZZQaV0o7Z2ZZLH4ZkZH2QgVZ91trCtkdpvFP5vxOxY8VcyStULb7/Screenshot%20from%202021-06-16%2014-28-40.png";
         //"https:\/\/c326.pcloud.com\/dHZTgqwh1ZJ8HkagZZZQaV0o7Z2ZZLH4ZkZH2QgVZ91trCtkdpvFP5vxOxY8VcyStULb7\/Screenshot%20from%202021-06-16%2014-28-40.png"
         std::string filename  = "./Staging/img.png";
@@ -1477,6 +1572,8 @@ int main()
     {
         DOTESTCASE("manywebkey", false);
     }
+
+    //int a; std::cin >> a;
 
     // TESTCASE
     if (true)
