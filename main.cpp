@@ -2,6 +2,7 @@
 #include "Encryptions/DES.h"
 #include "Buffer.hpp"
 #include "SHA256.h"
+#include "argparse.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -630,7 +631,7 @@ public:
     bool make_urlkey_from_url(size_t i)
 	{
 		bool r = true;
-		std::string file = "./Staging/url_file.dat";
+		std::string file = "./staging_url_file.dat";
 		std::remove(file.data());
 
 		// DOWNLOAD URL FILE
@@ -943,12 +944,12 @@ public:
 class decryptor
 {
 public:
-	decryptor(	std::string ifilename_partial_puzzle,
+	decryptor(	//std::string ifilename_partial_puzzle,
                 std::string ifilename_puzzle,
                 std::string ifilename_encrypted_data,
 			 	std::string ifilename_decrypted_data)
 	{
-        filename_partial_puzzle = ifilename_partial_puzzle;
+        //filename_partial_puzzle = ifilename_partial_puzzle;
         filename_puzzle = ifilename_puzzle;
         filename_encrypted_data = ifilename_encrypted_data;
         filename_decrypted_data = ifilename_decrypted_data;
@@ -1006,7 +1007,7 @@ public:
 	bool get_key(urlkey& uk)
 	{
 		bool r = true;
-		std::string file = "./Staging/url_file.dat";
+		std::string file = "./staging_url_file.dat";
 		std::remove(file.data());
 
         if ( (uk.url_size < URL_MIN_SIZE) || (uk.url_size > URL_MAX_SIZE))
@@ -1366,7 +1367,7 @@ public:
     data        encrypted_data;
     data        decrypted_data;
 
-	std::string filename_partial_puzzle;
+	//std::string filename_partial_puzzle;
 	std::string filename_puzzle;
     std::string filename_encrypted_data;
 	std::string filename_decrypted_data;
@@ -1399,7 +1400,7 @@ void DOTESTCASE(std::string TEST, bool disable_netw = false, std::string file_ms
 
         if (encr.encrypt(disable_netw) == true)
         {
-            decryptor decr( encr.filename_partial_puzzle,
+            decryptor decr( //encr.filename_partial_puzzle,
                             encr.filename_puzzle,
                             encr.filename_encrypted_data,
                             "./"+TESTCASE+"/"+TEST+file_msg_decrypted
@@ -1429,7 +1430,124 @@ void DOTESTCASE(std::string TEST, bool disable_netw = false, std::string file_ms
     std::cout << std::endl;
 }
 
-int main()
+int main_crypto(int argc, char **argv)
+{
+    // Main parser
+    argparse::ArgumentParser program("crypto");
+
+    // Encode subcommand
+    argparse::ArgumentParser encode_command("encode");
+    encode_command.add_description("Encodes a file into an encrypted file");
+
+    encode_command.add_argument("-i", "--input")
+        .required()
+        .help("specify the input file.");
+
+    encode_command.add_argument("-o", "--output")
+        .required()
+        .help("specify the output encrypted file.");
+
+    encode_command.add_argument("-p", "--puzzle")
+        .required()
+        .help("specify the input puzzle file.");
+
+    encode_command.add_argument("-q", "--qapuzzle")
+        .required()
+        .help("specify the output qa puzzle file.");
+
+    encode_command.add_argument("-u", "--url")
+        .help("specify the (optional input) url list file.");
+
+    // Decode subcommand
+    argparse::ArgumentParser decode_command("decode");
+    decode_command.add_description("Decodes and extracts a file from an encrypted file");
+
+    decode_command.add_argument("-i", "--input")
+        .required()
+        .help("specify the input encrypted file.");
+
+    decode_command.add_argument("-o", "--output")
+        .required()
+        //.default_value(std::string(""))
+        .help("specify the output decrypted file.");
+
+    decode_command.add_argument("-p", "--puzzle")
+        .required()
+        .help("specify the input puzzle file.");
+
+    // Add the subcommands to the main parser
+    program.add_subparser(encode_command);
+    program.add_subparser(decode_command);
+
+    // Parse the arguments
+    try {
+        program.parse_args(argc, argv);
+    }
+    catch (const std::runtime_error &err)
+    {
+        std::cerr << err.what() << std::endl;
+        std::cerr << program;
+        return -1;
+    }
+
+    // Encode command
+    if (program.is_subcommand_used("encode"))
+    {
+        auto input_path  = encode_command.get<std::string>("--input");
+        auto output_path = encode_command.get<std::string>("--output");
+        auto puzzle_path  = encode_command.get<std::string>("--puzzle");
+        auto qa_puzzle_path  = encode_command.get<std::string>("--qapuzzle");
+        auto url_path  = encode_command.get<std::string>("--url");
+
+        // ./crypto encode  -i ./test.zip -o ./test.zip.encrypted -p ./puzzle.txt -q ./partial_puzzle.txt -u ./urls.txt
+        encryptor encr(url_path,
+                       input_path,
+                       puzzle_path,
+                       qa_puzzle_path,
+                       output_path);
+
+        if (encr.encrypt(false) == true)
+        {
+            return 0;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    // Decode command
+    else if (program.is_subcommand_used("decode"))
+    {
+        auto input_path  = decode_command.get<std::string>("--input");
+        auto output_path = decode_command.get<std::string>("--output");
+        auto puzzle_path  = decode_command.get<std::string>("--puzzle");
+
+        // ./crypto decode  -i ./test.zip.encrypted -o ./test.zip.unencrypted -p ./puzzle.txt
+        decryptor decr(puzzle_path,
+                       input_path,
+                       output_path);
+
+        if (decr.decrypt() == true)
+        {
+            return 0;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    // No subcommands were given
+    else
+    {
+        std::cerr << program << std::endl;
+    }
+
+    return 0;
+}
+
+int main(int argc, char **argv)
 {
     // TEST makehex() <=> hextobin()
     if (false)
@@ -1521,7 +1639,7 @@ int main()
     if (false)
     {
         std::string url = "https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz";
-        std::string filename  = "./Staging/Python-3.8.1.tgz";
+        std::string filename  = "./staging_Python-3.8.1.tgz";
 
         if ( wget(url.data(), filename.data()) != 0)
         {
@@ -1543,7 +1661,7 @@ int main()
         //"downloadlink": " // EXPIRED
         std::string url = "https://c326.pcloud.com/dHZTgqwh1ZJ8HkagZZZQaV0o7Z2ZZLH4ZkZH2QgVZ91trCtkdpvFP5vxOxY8VcyStULb7/Screenshot%20from%202021-06-16%2014-28-40.png";
         //"https:\/\/c326.pcloud.com\/dHZTgqwh1ZJ8HkagZZZQaV0o7Z2ZZLH4ZkZH2QgVZ91trCtkdpvFP5vxOxY8VcyStULb7\/Screenshot%20from%202021-06-16%2014-28-40.png"
-        std::string filename  = "./Staging/img.png";
+        std::string filename  = "./staging_img.png";
 
         if ( wget(url.data(), filename.data()) != 0)
         {
@@ -1576,12 +1694,14 @@ int main()
     //int a; std::cin >> a;
 
     // TESTCASE
-    if (true)
+    if (false)
     {
         DOTESTCASE("zipcontent", false, "/test.zip");
     }
 
 //    std::cout << "done enter a number to exit " << std::endl;
 //    int a; std::cin >> a;
-    return 0;
+
+    int r = main_crypto(argc, argv);
+    return r;
 }
