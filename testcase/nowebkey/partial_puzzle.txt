@@ -1,7 +1,0 @@
-"Your first name" : "Axxxn"
-"Your car type" : "Jxxp"
-"Prime(1)" : "2"
-"Prime(5)" : "11"
-"Last password" : "1xx4"
-"Factorial(15)" : "1xxxxxxxxxxx0"
-CHKSUM puzzle : 80fe414aa666393c4a3fc526006d8f433d23e214336a3aa8c4010edccab6ba4e
