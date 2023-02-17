@@ -91,7 +91,7 @@ template <typename T> T hextobin(std::string svalue, T val_start, bool caps = fa
 }
 
 // extract 8 bits from a numeric value
-template <typename T> uint8_t byte(const T & value, const uint16_t & n){
+template <typename T> uint8_t getbyte(const T & value, const uint16_t & n){
     return (value >> (n << 3)) & 0xff;
 }
 

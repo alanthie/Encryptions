@@ -43,17 +43,26 @@ size_t write(void *ptr, size_t size, size_t nmemb, FILE *stream) {
 	return fwrite(ptr, size, nmemb, stream);
 }
 
-int wget(char *in, const char *out)
+int wget(const char *in, const char *out)
 {
+    std::cout << "wget in:  " << in << std::endl;
+    std::cout << "wget out: " << out << std::endl;
+
 	CURL* curl;
 	CURLcode res;
 	FILE* fp;
 
-	if(!(curl = curl_easy_init()))
-		return -1;
+    if (!(curl = curl_easy_init()))
+    {
+        std::cerr << "ERROR  curl_easy_init()" << std::endl;
+        return -1;
+    }
 
 	if(!(fp = fopen(out, "wb")))	// Open in binary
+    {
+        std::cerr << "ERROR  fopen in wb " << out << std::endl;
 		return -1;
+    }
 
 	// Set the curl easy options
 	curl_easy_setopt(curl, CURLOPT_URL, in);
@@ -61,6 +70,20 @@ int wget(char *in, const char *out)
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 
 	res = curl_easy_perform(curl);	// Perform the download and write
+    std::cerr << "CURL return " << res << std::endl;
+    if (res != 0)
+    {
+        std::cerr << " CURLE_OK = 0,"
+            "CURLE_UNSUPPORTED_PROTOCOL,     1 "
+            "CURLE_FAILED_INIT,              2 "
+            "CURLE_URL_MALFORMAT,            3 "
+            "CURLE_NOT_BUILT_IN,             4"
+            "CURLE_COULDNT_RESOLVE_PROXY,    5 "
+            "CURLE_COULDNT_RESOLVE_HOST,     6 "
+            "CURLE_COULDNT_CONNECT,          7 "
+            "CURLE_WEIRD_SERVER_REPLY,       8 "
+            "CURLE_REMOTE_ACCESS_DENIED,     9 "  << std::endl;
+    }
 
 	curl_easy_cleanup(curl);
 	fclose(fp);
@@ -625,25 +648,53 @@ public:
 
     bool read_file_urls(std::string filename)
     {
+        char c;
         bool r = true;
         r = urls_data.read_from_file(filename);
 
         std::string s;
-        std::string url;
+        char url[URL_MAX_SIZE+1] = { 0 };
+        int pos = -1;
+
+#ifdef _WIN32
+
+#else
+
+#endif
+
         if (r)
         {
             for(size_t i=0;i<urls_data.buffer.size();i++)
             {
                 // parse url
-                if (urls_data.buffer.getdata()[i] == '\n')
+                c = urls_data.buffer.getdata()[i];
+                std::cout << (int)(unsigned char)c << " ";
+                pos++;
+                //if (c == '\\') c = '/';
+
+                if (c == '\n')
                 {
-                    url = s;
-                    if ((url.size() >= URL_MIN_SIZE) && (url.size() <= URL_MAX_SIZE))
+                    std::cout << std::endl;
+#ifdef _WIN32
+                    int len = pos - 1; // rn
+#else
+                    int len = pos; // n
+#endif
+                    if ((len >= URL_MIN_SIZE) && (len <= URL_MAX_SIZE))
                     {
                         urlkey uk;
                         for(size_t ii=0;ii<URL_MAX_SIZE;ii++) uk.url[ii] = 0;
-                        for(size_t ii=0;ii<url.size();ii++) uk.url[ii] = url[ii];
-                        uk.url_size = url.size();
+                        for (size_t ii = 0; ii < len; ii++)
+                        {
+                            uk.url[ii] = url[ii];
+                        }
+                        //std::cout << "Reading URL " << std::endl;
+                        //std::cout << "url: " << std::endl;
+                        //for (size_t ii = 0; ii < len; ii++)  std::cout << (int)(unsigned char)uk.url[ii] << " ";
+                        //std::cout << std::endl;
+                        //std::cout << "size " << len <<  std::endl;
+
+                        uk.url_size = len;
                         vurlkey.push_back(uk);
                     }
                     else
@@ -652,16 +703,14 @@ public:
                         std::cerr << "WARNING read_file_urls " << "Failed for ((url.size() >= URL_MIN_SIZE) && (url.size() <= URL_MAX_SIZE))" << std::endl;
                     }
                     s.clear();
+                    pos = -1;
+                    std::cout << std::endl;
                 }
                 else
                 {
-                    if (urls_data.buffer.getdata()[i]!=0)
+                    if ((c!=0) && (c!='\r') && (c!='\n'))
                     {
-                        s+=urls_data.buffer.getdata()[i];
-                    }
-                    else
-                    {
-                        std::cerr << "WARNING read_file_urls " << "Failed for (urls_data.buffer.getdata()[i]!=0) " << std::endl;
+                        url[pos] = c;
                     }
                 }
             }
@@ -672,16 +721,19 @@ public:
     bool make_urlkey_from_url(size_t i)
 	{
 		bool r = true;
-		std::string file = "./staging_url_file.dat";
-		std::remove(file.data());
+
+        std::string file = "./staging_url_file.dat";
+        if (fileexists(file))
+		    std::remove(file.data());
 
 		// DOWNLOAD URL FILE
-		std::cout << "URL " << vurlkey[i].url << std::endl;
-		if (wget(&vurlkey[i].url[0], file.data()) != 0)
-		{
-            std::cerr << "ERROR wget vurlkey[i].url " << vurlkey[i].url << std::endl;
+        std::string s(vurlkey[i].url);
+
+        if (wget(s.data(), file.data()) != 0)
+        {
+            std::cerr << "ERROR with wget " << s << std::endl;
             r = false;
-		}
+        }
 
 		if (r)
 		{
@@ -747,7 +799,8 @@ public:
 
 		}
 
-		std::remove(file.data());
+        if (fileexists(file))
+		    std::remove(file.data());
 		return r;
 	}
 
@@ -920,7 +973,7 @@ public:
         {
             if (make_urlkey_from_url(i) == false)
             {
-                std::cerr << "ERROR " << "(make_key_from_url(i) == false) == false)" << std::endl;
+                std::cerr << "ERROR " << "(make_key_from_url(i) == false)" << std::endl;
                 return false;
             }
             if (make_urlinfo_with_padding(i) == false)
@@ -941,16 +994,18 @@ public:
             return false;
         }
 
+        int16_t PADDING = 0;
         auto sz_msg = data_temp.buffer.size();
         if (sz_msg % PADDING_MULTIPLE != 0)
         {
-            std::cerr << "ERROR " << "Msg must be multiple of PADDING_MULTIPLE, sz_msg: " << PADDING_MULTIPLE << " " << sz_msg << std::endl;
-            return false;
+            std::cout << "WARNING " << "Padding msg to multiple of " << PADDING_MULTIPLE << " " << sz_msg << std::endl;
+            //return false;
 
-//            int16_t n = PADDING_MULTIPLE - (sz_msg % PADDING_MULTIPLE);
-//            char c[1] = {' '};
-//            for(int16_t i= 0; i< n; i++)
-//                data_temp.buffer.write(&c[0], 1, -1);
+            int16_t n = PADDING_MULTIPLE - (sz_msg % PADDING_MULTIPLE);
+            PADDING = n;
+            char c[1] = {' '};
+            for(int16_t i= 0; i< n; i++)
+                data_temp.buffer.write(&c[0], 1, -1);
         }
 
 		// encode(Data,          key1) => Data1 // urlkey1=>key1
@@ -1000,6 +1055,7 @@ public:
         // Save number of iterations (N web keys + 1 puzzle key) in the last 2 byte! + PADDING_MULTIPLE-2
         Buffer temp(PADDING_MULTIPLE);
 		temp.init(0);
+        temp.writeUInt16(PADDING, PADDING_MULTIPLE - 4);
 		temp.writeUInt16(vurlkey.size() + 1, PADDING_MULTIPLE-2);
         data_temp.append(temp.getdata(), PADDING_MULTIPLE);
 
@@ -1094,7 +1150,8 @@ public:
 	{
 		bool r = true;
 		std::string file = "./staging_url_file.dat";
-		std::remove(file.data());
+        if (fileexists(file))
+		    std::remove(file.data());
 
         if ( (uk.url_size < URL_MIN_SIZE) || (uk.url_size > URL_MAX_SIZE))
         {
@@ -1319,15 +1376,18 @@ public:
             }
         }
 
-		// N+1 = Number of iterations in the last 2 byte! +PADDING_MULTIPLE-2
+		// N+1 = Number of iterations in the last 2 byte! + PADDING + PADDING_MULTIPLE-2
 		int16_t NITER = 0;
+        int16_t PADDING = 0;
         if (r)
 		{
             size_t file_size = data_temp_next.buffer.size();
             if (file_size >= PADDING_MULTIPLE)
             {
-                NITER = data_temp_next.buffer.readUInt16(file_size-2);
+                PADDING = data_temp_next.buffer.readUInt16(file_size - 4);
+                NITER   = data_temp_next.buffer.readUInt16(file_size-2);
                 NITER = NITER - 1;
+
                 if (NITER < 0)
                     r = false;
                 else if (NITER > NITER_LIM)
@@ -1452,6 +1512,13 @@ public:
             }
 		}
 
+        // Unpadding
+        if (r)
+        {
+            std::cerr << "WARNING Upadding of " << PADDING << " " << data_temp.buffer.size() << std::endl;
+            data_temp.buffer.remove_last_n_char(PADDING);
+        }
+
 		if (r)
 		{
             // data_temp_next => decrypted_data
@@ -1489,6 +1556,8 @@ public:
 void DOTESTCASE(std::string TEST, bool disable_netw = false, std::string file_msg = "/msg.txt")
 {
     std::string TESTCASE = "testcase";
+    //std::string FOLDER = "./../../";
+    std::string FOLDER = "../../../../"; // win
 
     std::string file_url            = "/urls.txt";
     std::string file_puzzle         = "/puzzle.txt";
@@ -1499,39 +1568,39 @@ void DOTESTCASE(std::string TEST, bool disable_netw = false, std::string file_ms
     std::cout << "TESTCASE " + TEST << std::endl;
 
     {
-        std::string file = "./../../"+TESTCASE+"/"+TEST+file_partial_puzzle;
+        std::string file = FOLDER + TESTCASE+ "/" + TEST+file_partial_puzzle;
         if (fileexists(file))
             std::remove(file.data());
 
-		file = "./../../"+TESTCASE+"/"+TEST+file_msg_encrypted;
+		file = FOLDER + TESTCASE+"/"+TEST+file_msg_encrypted;
 		if (fileexists(file))
             std::remove(file.data());
 
-        file = "./../../"+TESTCASE+"/"+TEST+file_puzzle;
+        file = FOLDER + TESTCASE + "/" +TEST+file_puzzle;
         if (fileexists(file) == false)
         {
             std::cout << "ERROR missing puzzle file " << file <<  std::endl;
             return;
         }
 
-        file = "./../../"+TESTCASE+"/"+TEST+file_msg;
+        file = FOLDER +TESTCASE+"/"+TEST+file_msg;
         if (fileexists(file) == false)
         {
             std::cout << "ERROR missing msg file " << file <<  std::endl;
             return;
         }
 
-        encryptor encr("./../../"+TESTCASE+"/"+TEST+file_url,
-                       "./../../"+TESTCASE+"/"+TEST+file_msg,
-                       "./../../"+TESTCASE+"/"+TEST+file_puzzle,
-                       "./../../"+TESTCASE+"/"+TEST+file_partial_puzzle,
-                       "./../../"+TESTCASE+"/"+TEST+file_msg_encrypted);
+        encryptor encr( FOLDER +TESTCASE+"/"+TEST+file_url,
+                        FOLDER+TESTCASE+"/"+TEST+file_msg,
+                          FOLDER+TESTCASE+"/"+TEST+file_puzzle,
+                        FOLDER +TESTCASE+"/"+TEST+file_partial_puzzle,
+                        FOLDER +TESTCASE+"/"+TEST+file_msg_encrypted);
 
         if (encr.encrypt(disable_netw) == true)
         {
             decryptor decr( encr.filename_full_puzzle,
                             encr.filename_encrypted_data,
-                            "./../../"+TESTCASE+"/"+TEST+file_msg_decrypted
+                            FOLDER +TESTCASE+"/"+TEST+file_msg_decrypted
                           );
 
             if (decr.decrypt() == true)
@@ -1660,7 +1729,7 @@ void test_core()
         }
         else
         {
-            std::cout << "OK with wget " << std::endl;
+            std::cout << "OK with wget " << url << std::endl;
         }
         std::remove(filename.data());
     }

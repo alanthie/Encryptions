@@ -4,27 +4,27 @@
 
 uint32_t Twofish::h_fun(uint32_t x, const std::vector<uint32_t> & key){
     uint32_t b0, b1, b2, b3;
-    b0 = byte(x, 0);
-    b1 = byte(x, 1);
-    b2 = byte(x, 2);
-    b3 = byte(x, 3);
+    b0 = getbyte(x, 0);
+    b1 = getbyte(x, 1);
+    b2 = getbyte(x, 2);
+    b3 = getbyte(x, 3);
 
     if (key.size() >= 4){
-        b0 = q_tab[1][b0] ^ byte(key[3], 0);
-        b1 = q_tab[0][b1] ^ byte(key[3], 1);
-        b2 = q_tab[0][b2] ^ byte(key[3], 2);
-        b3 = q_tab[1][b3] ^ byte(key[3], 3);
+        b0 = q_tab[1][b0] ^ getbyte(key[3], 0);
+        b1 = q_tab[0][b1] ^ getbyte(key[3], 1);
+        b2 = q_tab[0][b2] ^ getbyte(key[3], 2);
+        b3 = q_tab[1][b3] ^ getbyte(key[3], 3);
     }
     if (key.size() >= 3){
-        b0 = q_tab[1][b0] ^ byte(key[2], 0);
-        b1 = q_tab[1][b1] ^ byte(key[2], 1);
-        b2 = q_tab[0][b2] ^ byte(key[2], 2);
-        b3 = q_tab[0][b3] ^ byte(key[2], 3);
+        b0 = q_tab[1][b0] ^ getbyte(key[2], 0);
+        b1 = q_tab[1][b1] ^ getbyte(key[2], 1);
+        b2 = q_tab[0][b2] ^ getbyte(key[2], 2);
+        b3 = q_tab[0][b3] ^ getbyte(key[2], 3);
     }
-    b0 = q_tab[0][q_tab[0][b0] ^ byte(key[1], 0)] ^ byte(key[0], 0);
-    b1 = q_tab[0][q_tab[1][b1] ^ byte(key[1], 1)] ^ byte(key[0], 1);
-    b2 = q_tab[1][q_tab[0][b2] ^ byte(key[1], 2)] ^ byte(key[0], 2);
-    b3 = q_tab[1][q_tab[1][b3] ^ byte(key[1], 3)] ^ byte(key[0], 3);
+    b0 = q_tab[0][q_tab[0][b0] ^ getbyte(key[1], 0)] ^ getbyte(key[0], 0);
+    b1 = q_tab[0][q_tab[1][b1] ^ getbyte(key[1], 1)] ^ getbyte(key[0], 1);
+    b2 = q_tab[1][q_tab[0][b2] ^ getbyte(key[1], 2)] ^ getbyte(key[0], 2);
+    b3 = q_tab[1][q_tab[1][b3] ^ getbyte(key[1], 3)] ^ getbyte(key[0], 3);
 
     return m_tab[0][b0] ^ m_tab[1][b1] ^ m_tab[2][b2] ^ m_tab[3][b3];
 }
@@ -51,23 +51,23 @@ std::string Twofish::run(const std::string & data, bool enc){
 
     if (enc){
         for(uint8_t i = 0; i < 8; i++){
-            t1 = mk_tab[0][byte(blk[1],3)] ^ mk_tab[1][byte(blk[1],0)] ^ mk_tab[2][byte(blk[1],1)] ^ mk_tab[3][byte(blk[1],2)];
-            t0 = mk_tab[0][byte(blk[0],0)] ^ mk_tab[1][byte(blk[0],1)] ^ mk_tab[2][byte(blk[0],2)] ^ mk_tab[3][byte(blk[0],3)];
+            t1 = mk_tab[0][getbyte(blk[1],3)] ^ mk_tab[1][getbyte(blk[1],0)] ^ mk_tab[2][getbyte(blk[1],1)] ^ mk_tab[3][getbyte(blk[1],2)];
+            t0 = mk_tab[0][getbyte(blk[0],0)] ^ mk_tab[1][getbyte(blk[0],1)] ^ mk_tab[2][getbyte(blk[0],2)] ^ mk_tab[3][getbyte(blk[0],3)];
             blk[2] = ROR(blk[2] ^ (t0 + t1 + l_key[4 * i + 8]), 1, 32);
             blk[3] = ROL(blk[3], 1, 32) ^ (t0 + 2 * t1 + l_key[4 * i + 9]);
-            t1 = mk_tab[0][byte(blk[3],3)] ^ mk_tab[1][byte(blk[3],0)] ^ mk_tab[2][byte(blk[3],1)] ^ mk_tab[3][byte(blk[3],2)];
-            t0 = mk_tab[0][byte(blk[2],0)] ^ mk_tab[1][byte(blk[2],1)] ^ mk_tab[2][byte(blk[2],2)] ^ mk_tab[3][byte(blk[2],3)];
+            t1 = mk_tab[0][getbyte(blk[3],3)] ^ mk_tab[1][getbyte(blk[3],0)] ^ mk_tab[2][getbyte(blk[3],1)] ^ mk_tab[3][getbyte(blk[3],2)];
+            t0 = mk_tab[0][getbyte(blk[2],0)] ^ mk_tab[1][getbyte(blk[2],1)] ^ mk_tab[2][getbyte(blk[2],2)] ^ mk_tab[3][getbyte(blk[2],3)];
             blk[0] = ROR(blk[0] ^ (t0 + t1 + l_key[4 * i + 10]), 1, 32);
             blk[1] = ROL(blk[1], 1, 32) ^ (t0 + 2 * t1 + l_key[4 * i + 11]);
         }
     } else {
         for(int i = 7; i >= 0; i--){
-            t1 = mk_tab[0][byte(blk[1],3)] ^ mk_tab[1][byte(blk[1],0)] ^ mk_tab[2][byte(blk[1],1)] ^ mk_tab[3][byte(blk[1],2)];
-            t0 = mk_tab[0][byte(blk[0],0)] ^ mk_tab[1][byte(blk[0],1)] ^ mk_tab[2][byte(blk[0],2)] ^ mk_tab[3][byte(blk[0],3)];
+            t1 = mk_tab[0][getbyte(blk[1],3)] ^ mk_tab[1][getbyte(blk[1],0)] ^ mk_tab[2][getbyte(blk[1],1)] ^ mk_tab[3][getbyte(blk[1],2)];
+            t0 = mk_tab[0][getbyte(blk[0],0)] ^ mk_tab[1][getbyte(blk[0],1)] ^ mk_tab[2][getbyte(blk[0],2)] ^ mk_tab[3][getbyte(blk[0],3)];
             blk[2] = ROL(blk[2], 1, 32) ^ (t0 + t1 + l_key[4 * i + 10]);
             blk[3] = ROR(blk[3] ^ (t0 + 2 * t1 + l_key[4 * i + 11]), 1, 32);
-            t1 = mk_tab[0][byte(blk[3],3)] ^ mk_tab[1][byte(blk[3],0)] ^ mk_tab[2][byte(blk[3],1)] ^ mk_tab[3][byte(blk[3],2)];
-            t0 = mk_tab[0][byte(blk[2],0)] ^ mk_tab[1][byte(blk[2],1)] ^ mk_tab[2][byte(blk[2],2)] ^ mk_tab[3][byte(blk[2],3)];
+            t1 = mk_tab[0][getbyte(blk[3],3)] ^ mk_tab[1][getbyte(blk[3],0)] ^ mk_tab[2][getbyte(blk[3],1)] ^ mk_tab[3][getbyte(blk[3],2)];
+            t0 = mk_tab[0][getbyte(blk[2],0)] ^ mk_tab[1][getbyte(blk[2],1)] ^ mk_tab[2][getbyte(blk[2],2)] ^ mk_tab[3][getbyte(blk[2],3)];
             blk[0] = ROL(blk[0], 1, 32) ^ (t0 + t1 + l_key[4 * i + 8]);
             blk[1] = ROR(blk[1] ^ (t0 + 2 * t1 + l_key[4 * i + 9]), 1, 32);
         }
@@ -170,24 +170,24 @@ void Twofish::setkey(const std::string & KEY){
     mk_tab.resize(4, std::vector<uint32_t>(256, 0));
     if (k_len == 2){
         for (uint16_t i = 0; i < 256; i++){
-            mk_tab[0][i] = m_tab[0][q_tab[0][q_tab[0][i] ^ byte(s_key[1],0)] ^ byte(s_key[0],0)];
-            mk_tab[1][i] = m_tab[1][q_tab[0][q_tab[1][i] ^ byte(s_key[1],1)] ^ byte(s_key[0],1)];
-            mk_tab[2][i] = m_tab[2][q_tab[1][q_tab[0][i] ^ byte(s_key[1],2)] ^ byte(s_key[0],2)];
-            mk_tab[3][i] = m_tab[3][q_tab[1][q_tab[1][i] ^ byte(s_key[1],3)] ^ byte(s_key[0],3)];
+            mk_tab[0][i] = m_tab[0][q_tab[0][q_tab[0][i] ^ getbyte(s_key[1],0)] ^ getbyte(s_key[0],0)];
+            mk_tab[1][i] = m_tab[1][q_tab[0][q_tab[1][i] ^ getbyte(s_key[1],1)] ^ getbyte(s_key[0],1)];
+            mk_tab[2][i] = m_tab[2][q_tab[1][q_tab[0][i] ^ getbyte(s_key[1],2)] ^ getbyte(s_key[0],2)];
+            mk_tab[3][i] = m_tab[3][q_tab[1][q_tab[1][i] ^ getbyte(s_key[1],3)] ^ getbyte(s_key[0],3)];
         }
     } else if (k_len == 3){
         for (uint16_t i = 0; i < 256; i++){
-            mk_tab[0][i] = m_tab[0][q_tab[0][q_tab[0][q_tab[1][i] ^ byte(s_key[2], 0)] ^ byte(s_key[1], 0)] ^ byte(s_key[0], 0)];
-            mk_tab[1][i] = m_tab[1][q_tab[0][q_tab[1][q_tab[1][i] ^ byte(s_key[2], 1)] ^ byte(s_key[1], 1)] ^ byte(s_key[0], 1)];
-            mk_tab[2][i] = m_tab[2][q_tab[1][q_tab[0][q_tab[0][i] ^ byte(s_key[2], 2)] ^ byte(s_key[1], 2)] ^ byte(s_key[0], 2)];
-            mk_tab[3][i] = m_tab[3][q_tab[1][q_tab[1][q_tab[0][i] ^ byte(s_key[2], 3)] ^ byte(s_key[1], 3)] ^ byte(s_key[0], 3)];
+            mk_tab[0][i] = m_tab[0][q_tab[0][q_tab[0][q_tab[1][i] ^ getbyte(s_key[2], 0)] ^ getbyte(s_key[1], 0)] ^ getbyte(s_key[0], 0)];
+            mk_tab[1][i] = m_tab[1][q_tab[0][q_tab[1][q_tab[1][i] ^ getbyte(s_key[2], 1)] ^ getbyte(s_key[1], 1)] ^ getbyte(s_key[0], 1)];
+            mk_tab[2][i] = m_tab[2][q_tab[1][q_tab[0][q_tab[0][i] ^ getbyte(s_key[2], 2)] ^ getbyte(s_key[1], 2)] ^ getbyte(s_key[0], 2)];
+            mk_tab[3][i] = m_tab[3][q_tab[1][q_tab[1][q_tab[0][i] ^ getbyte(s_key[2], 3)] ^ getbyte(s_key[1], 3)] ^ getbyte(s_key[0], 3)];
         }
     } else if (k_len == 4){
         for (uint16_t i = 0; i < 256; i++){
-            mk_tab[0][i] = m_tab[0][q_tab[0][q_tab[0][q_tab[1][q_tab[1][i] ^ byte(s_key[3], 0)] ^ byte(s_key[2], 0)] ^ byte(s_key[1], 0)] ^ byte(s_key[0], 0)];
-            mk_tab[1][i] = m_tab[1][q_tab[0][q_tab[1][q_tab[1][q_tab[0][i] ^ byte(s_key[3], 1)] ^ byte(s_key[2], 1)] ^ byte(s_key[1], 1)] ^ byte(s_key[0], 1)];
-            mk_tab[2][i] = m_tab[2][q_tab[1][q_tab[0][q_tab[0][q_tab[0][i] ^ byte(s_key[3], 2)] ^ byte(s_key[2], 2)] ^ byte(s_key[1], 2)] ^ byte(s_key[0], 2)];
-            mk_tab[3][i] = m_tab[3][q_tab[1][q_tab[1][q_tab[0][q_tab[1][i] ^ byte(s_key[3], 3)] ^ byte(s_key[2], 3)] ^ byte(s_key[1], 3)] ^ byte(s_key[0], 3)];
+            mk_tab[0][i] = m_tab[0][q_tab[0][q_tab[0][q_tab[1][q_tab[1][i] ^ getbyte(s_key[3], 0)] ^ getbyte(s_key[2], 0)] ^ getbyte(s_key[1], 0)] ^ getbyte(s_key[0], 0)];
+            mk_tab[1][i] = m_tab[1][q_tab[0][q_tab[1][q_tab[1][q_tab[0][i] ^ getbyte(s_key[3], 1)] ^ getbyte(s_key[2], 1)] ^ getbyte(s_key[1], 1)] ^ getbyte(s_key[0], 1)];
+            mk_tab[2][i] = m_tab[2][q_tab[1][q_tab[0][q_tab[0][q_tab[0][i] ^ getbyte(s_key[3], 2)] ^ getbyte(s_key[2], 2)] ^ getbyte(s_key[1], 2)] ^ getbyte(s_key[0], 2)];
+            mk_tab[3][i] = m_tab[3][q_tab[1][q_tab[1][q_tab[0][q_tab[1][i] ^ getbyte(s_key[3], 3)] ^ getbyte(s_key[2], 3)] ^ getbyte(s_key[1], 3)] ^ getbyte(s_key[0], 3)];
         }
     }
 
