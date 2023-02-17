@@ -76,20 +76,6 @@ bool fileexists(const fs::path& p, fs::file_status s = fs::file_status{})
         return false;
 }
 
-int main_wget(int args, char *argc[])
-{
-	if(args != 3)
-	{
-		printf("%s url file\n", argc[0]);
-		return -1;
-	}
-
-	if(wget(argc[1], argc[2]) != 0)
-		printf("An error occured!\n");
-
-	return 0;
-}
-
 constexpr static uint32_t BASE  = 25000; // BASE*BASE >= FILE_SIZE_LIM
 constexpr static int16_t URL_MIN_SIZE   = 10;
 constexpr static int16_t URL_MAX_SIZE   = 256;

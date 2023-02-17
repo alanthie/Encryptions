@@ -1,0 +1,10 @@
+Example
+
+Linux:
+./crypto encode  -i ./test.zip -o ./test.zip.encrypted -p ./puzzle.txt -q ./partial_puzzle.txt -u ./urls.txt
+./crypto decode  -i ./test.zip.encrypted -p ./puzzle.txt.full -o ./test.zip.unencrypted
+
+Windows
+./crypto encode  -i ./test.zip -o ./test.zip.encrypted -p ./puzzle.txt -q ./partial_puzzle.txt -u ./urls.txt
+./crypto decode  -i ./test.zip.encrypted -p ./puzzle.txt.full -o ./test.zip.unencrypted
+
