@@ -1,4 +1,4 @@
 "Votre prenom" : "Alain"
 "Le model de votre auto" : "Ford"
-“How long is an Olympic swimming pool (in meters)?“ :  “50“
-“Which country do cities of Perth, Adelade & Brisbane belong to?“ : “Australia“
+"How long is an Olympic swimming pool (in meters)?" :  "50"
+"Which country do cities of Perth, Adelade & Brisbane belong to?“ : "Australia"

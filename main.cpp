@@ -10,6 +10,7 @@
 #include <string.h>
 #include <curl/curl.h>
 #include <random>
+#include <filesystem>
 
 class random_engine
 {
@@ -66,6 +67,15 @@ int wget(char *in, const char *out)
 	return res;
 }
 
+namespace fs = std::filesystem;
+bool fileexists(const fs::path& p, fs::file_status s = fs::file_status{})
+{
+    if(fs::status_known(s) ? fs::exists(s) : fs::exists(p))
+        return true;
+    else
+        return false;
+}
+
 int main_wget(int args, char *argc[])
 {
 	if(args != 3)
@@ -90,6 +100,8 @@ constexpr static int16_t PADDING_MULTIPLE = 8;
 constexpr static int16_t NITER_LIM      = 100;
 constexpr static int16_t PUZZLE_SIZE_LIM = 10000;
 constexpr static uint32_t FILE_SIZE_LIM = 100*1000*1000;
+const std::string REM_TOKEN = "REM";
+const std::string CHKSUM_TOKEN = "CHKSUM";
 
 class data
 {
@@ -271,8 +283,6 @@ public:
         std::string A;
     };
 
-    const std::string REM_TOKEN = "REM";
-    const std::string CHKSUM_TOKEN = "CHKSUM";
 
     puzzle() {}
 
@@ -289,6 +299,7 @@ public:
 
     bool make_partial()
     {
+        replace_checksum();
         for(size_t i = 0; i < vQA.size(); i++)
         {
             if (vQA[i].type == 0)
@@ -301,9 +312,56 @@ public:
 
     bool is_all_answered() {return true;}
 
-    std::string checksum()
+    std::string parse_checksum(std::string s)
     {
-        data temp;
+        //CHKSUM puzzle : a1531f26f3744f83ee3bf97dba969a1cd7a4b9ed18a6b8f13da16a6f45c726ff
+        for(size_t i = 0; i < s.size(); i++)
+        {
+            if (s[i] == ':')
+            {
+                for(size_t j = i+1; j < s.size(); j++)
+                {
+                    if (s[j] != ' ')
+                        return s.substr(j);
+                }
+            }
+        }
+        return "";
+    }
+
+    std::string read_checksum()
+    {
+        for(size_t i = 0; i < vQA.size(); i++)
+        {
+            if (vQA[i].type == 2)
+            {
+                return parse_checksum(vQA[i].Q);
+            }
+        }
+        return "";
+    }
+
+    bool is_valid_checksum()
+    {
+        std::string s1 = checksum();
+        std::string s2 = read_checksum();
+        if (s1!=s2)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    void replace_checksum()
+    {
+        if (chksum_puzzle.size()==0)
+        {
+            chksum_puzzle = checksum();
+        }
+    }
+
+    void make_puzzle_before_checksum(data& temp)
+    {
         std::string s;
         for(size_t i = 0; i < vQA.size(); i++)
         {
@@ -318,6 +376,13 @@ public:
                 temp.buffer.write(s.data(), s.size(), -1);
             }
         }
+    }
+
+    std::string checksum()
+    {
+        data temp;
+        std::string s;
+        make_puzzle_before_checksum(temp);
 
         SHA256 sha;
         sha.update(reinterpret_cast<const uint8_t*> (temp.buffer.getdata()), temp.buffer.size() );
@@ -346,30 +411,20 @@ public:
     bool save_to_file(std::string filename)
     {
         data temp;
+        make_puzzle_before_checksum(temp);
 
-        std::string s;
-        for(size_t i = 0; i < vQA.size(); i++)
-        {
-            if (vQA[i].type == 0)
-            {
-                s = "\"" + vQA[i].Q +"\"" +" : " +  "\"" + vQA[i].A + "\"" + "\n";
-            }
-            else
-            {
-                s =vQA[i].Q + vQA[i].A + "\n";
-            }
-            temp.buffer.write(s.data(), s.size(), -1);
-        }
-        s = CHKSUM_TOKEN + " puzzle : " + chksum_puzzle + "\n";
+        std::string s = CHKSUM_TOKEN + " puzzle : " + chksum_puzzle + "\n";
         temp.buffer.write(s.data(), s.size(), -1);
-
         return temp.save_to_file(filename);
     }
 
     void make_key(Buffer& rout)
     {
-        size_t r = puz_data.buffer.size() % PADDING_MULTIPLE;
-        rout.write(puz_data.buffer.getdata(), puz_data.buffer.size(), 0);
+        data temp;
+        make_puzzle_before_checksum(temp);
+
+        size_t r = temp.buffer.size() % PADDING_MULTIPLE;
+        rout.write(temp.buffer.getdata(), temp.buffer.size(), 0);
 
         char c[1] = {'0'};
         for(size_t i = 0; i < PADDING_MULTIPLE - r; i++)
@@ -780,17 +835,51 @@ public:
 
     bool encrypt(bool allow_empty_url = false)
     {
-        if (read_file_urls(filename_urls) == false)
+        if (filename_puzzle.size() ==  0)
         {
-            std::cerr << "ERROR " << "read_file_urls" << std::endl;
+            std::cout << "ERROR empty puzzle filename " <<  std::endl;
             return false;
         }
-        if (allow_empty_url == false)
+        filename_full_puzzle = filename_puzzle + ".full";
+
+        if (filename_msg_data.size() ==  0)
         {
-            if (vurlkey.size() == 0)
+            std::cout << "ERROR empty msg_data filename " <<  std::endl;
+            return false;
+        }
+
+        if (fileexists(filename_puzzle) == false)
+        {
+            std::cout << "ERROR missing puzzle file " << filename_puzzle <<  std::endl;
+            return false;
+        }
+        if (fileexists(filename_msg_data) == false)
+        {
+            std::cout << "ERROR missing msg file " << filename_msg_data <<  std::endl;
+            return false;
+        }
+
+        if (filename_urls.size() > 0)
+        {
+            if (fileexists(filename_urls))
             {
-                std::cerr << "ERROR " << "(vurlkey.size() == 0)" << std::endl;
-                return false;
+                if (read_file_urls(filename_urls) == false)
+                {
+                    std::cerr << "ERROR " << "read_file_urls" << std::endl;
+                    return false;
+                }
+
+                if (allow_empty_url == false)
+                {
+                    if (vurlkey.size() == 0)
+                    {
+                        std::cerr << "ERROR " << "(vurlkey.size() == 0)" << std::endl;
+                        return false;
+                    }
+                }
+            }
+            else
+            {
             }
         }
 
@@ -805,6 +894,20 @@ public:
             return false;
         }
 
+		if (puz.is_all_answered() == false)
+        {
+            std::cerr << "ERROR " << "(puz.is_all_answered() == false)" << std::endl;
+            return false;
+        }
+
+        // before removal of answer
+        if (puz.save_to_file(filename_full_puzzle) == false)
+        {
+            std::cerr << "ERROR " << "puz.save_to_file(filename_full_puzzle) == false)" << std::endl;
+            return false;
+        }
+
+        // before removal of answer
         Buffer puz_key(PUZZLE_SIZE_LIM);
         puz.make_key(puz_key);
         if (puz_key.size()== 0)
@@ -813,16 +916,14 @@ public:
             return false;
         }
 
-		if (puz.is_all_answered() == false)
-        {
-            std::cerr << "ERROR " << "(puz.is_all_answered() == false)" << std::endl;
-            return false;
-        }
+        // removal of answer
         if (puz.make_partial() == false)
         {
             std::cerr << "ERROR " << "(puz.make_partial() == false)" << std::endl;
             return false;
         }
+
+        // after removal of answer
         if (puz.save_to_file(filename_partial_puzzle) == false)
         {
             std::cerr << "ERROR " << "puz.save_to_file(filename_partial_puzzle) == false)" << std::endl;
@@ -939,17 +1040,16 @@ public:
     std::string filename_puzzle;
     std::string filename_partial_puzzle;
     std::string filename_encrypted_data;
+    std::string filename_full_puzzle;
 };
 
 class decryptor
 {
 public:
-	decryptor(	//std::string ifilename_partial_puzzle,
-                std::string ifilename_puzzle,
+	decryptor(  std::string ifilename_puzzle,
                 std::string ifilename_encrypted_data,
 			 	std::string ifilename_decrypted_data)
 	{
-        //filename_partial_puzzle = ifilename_partial_puzzle;
         filename_puzzle = ifilename_puzzle;
         filename_encrypted_data = ifilename_encrypted_data;
         filename_decrypted_data = ifilename_decrypted_data;
@@ -1075,13 +1175,6 @@ public:
                     }
 
                     char c;
-//                    for( size_t j = 0; j< CHKSUM_SIZE; j++)
-//                    {
-//                        c = uk.checksum[j];
-//                        //std::cout << c;
-//                    }
-//                    std::cout << std::endl;
-
                     for( size_t j = 0; j< CHKSUM_SIZE; j++)
                     {
                         c = checksum.at(j);
@@ -1158,6 +1251,28 @@ public:
 
     bool decrypt()
 	{
+        if (filename_puzzle.size() ==  0)
+        {
+            std::cout << "ERROR empty puzzle filename " <<  std::endl;
+            return false;
+        }
+        if (filename_encrypted_data.size() ==  0)
+        {
+            std::cout << "ERROR empty encrypted_data filename " <<  std::endl;
+            return false;
+        }
+
+        if (fileexists(filename_puzzle) == false)
+        {
+            std::cout << "ERROR missing puzzle file " << filename_puzzle <<  std::endl;
+            return false;
+        }
+        if (fileexists(filename_encrypted_data) == false)
+        {
+            std::cout << "ERROR missing encrypted_data file " << filename_encrypted_data <<  std::endl;
+            return false;
+        }
+
 		bool r = true;
 		Buffer puz_key(PUZZLE_SIZE_LIM);
 
@@ -1175,6 +1290,15 @@ public:
 			if (puz.is_all_answered() == false)
 			{
                 std::cerr << "ERROR " << "(puz.is_all_answered() == false)" << std::endl;
+				r = false;
+			}
+		}
+
+		if (r)
+		{
+			if (puz.is_valid_checksum() == false)
+			{
+                std::cerr << "ERROR " << "invalid puzzle answers or checksum" << std::endl;
 				r = false;
 			}
 		}
@@ -1367,7 +1491,6 @@ public:
     data        encrypted_data;
     data        decrypted_data;
 
-	//std::string filename_partial_puzzle;
 	std::string filename_puzzle;
     std::string filename_encrypted_data;
 	std::string filename_decrypted_data;
@@ -1376,34 +1499,53 @@ public:
     data        data_temp_next;
 };
 
+// ./crypto test -i manywebkey
 void DOTESTCASE(std::string TEST, bool disable_netw = false, std::string file_msg = "/msg.txt")
 {
     std::string TESTCASE = "testcase";
+
     std::string file_url            = "/urls.txt";
-    std::string file_partial_puzzle = "/partial_puzzle.txt";
-    std::string file_msg_encrypted  = "/msg_encrypted.dat";
     std::string file_puzzle         = "/puzzle.txt";
     std::string file_msg_decrypted  = "/msg_decrypted.dat";
+    std::string file_partial_puzzle = "/partial_puzzle.txt";
+    std::string file_msg_encrypted  = "/msg_encrypted.dat";
+
+    std::cout << "TESTCASE " + TEST << std::endl;
 
     {
-        std::string file = "./"+TESTCASE+"/"+TEST+file_partial_puzzle;
-		std::remove(file.data());
+        std::string file = "./../../"+TESTCASE+"/"+TEST+file_partial_puzzle;
+        if (fileexists(file))
+            std::remove(file.data());
 
-		file = "./"+TESTCASE+"/"+TEST+file_msg_encrypted;
-		std::remove(file.data());
+		file = "./../../"+TESTCASE+"/"+TEST+file_msg_encrypted;
+		if (fileexists(file))
+            std::remove(file.data());
 
-        encryptor encr("./"+TESTCASE+"/"+TEST+file_url,
-                       "./"+TESTCASE+"/"+TEST+file_msg,
-                       "./"+TESTCASE+"/"+TEST+file_puzzle,
-                       "./"+TESTCASE+"/"+TEST+file_partial_puzzle,
-                       "./"+TESTCASE+"/"+TEST+file_msg_encrypted);
+        file = "./../../"+TESTCASE+"/"+TEST+file_puzzle;
+        if (fileexists(file) == false)
+        {
+            std::cout << "ERROR missing puzzle file " << file <<  std::endl;
+            return;
+        }
+
+        file = "./../../"+TESTCASE+"/"+TEST+file_msg;
+        if (fileexists(file) == false)
+        {
+            std::cout << "ERROR missing msg file " << file <<  std::endl;
+            return;
+        }
+
+        encryptor encr("./../../"+TESTCASE+"/"+TEST+file_url,
+                       "./../../"+TESTCASE+"/"+TEST+file_msg,
+                       "./../../"+TESTCASE+"/"+TEST+file_puzzle,
+                       "./../../"+TESTCASE+"/"+TEST+file_partial_puzzle,
+                       "./../../"+TESTCASE+"/"+TEST+file_msg_encrypted);
 
         if (encr.encrypt(disable_netw) == true)
         {
-            decryptor decr( //encr.filename_partial_puzzle,
-                            encr.filename_puzzle,
+            decryptor decr( encr.filename_full_puzzle,
                             encr.filename_encrypted_data,
-                            "./"+TESTCASE+"/"+TEST+file_msg_decrypted
+                            "./../../"+TESTCASE+"/"+TEST+file_msg_decrypted
                           );
 
             if (decr.decrypt() == true)
@@ -1427,13 +1569,153 @@ void DOTESTCASE(std::string TEST, bool disable_netw = false, std::string file_ms
             std::cout << ""+TESTCASE+" "+TEST+" - ERROR encrypt() " << std::endl;
         }
     }
+
     std::cout << std::endl;
+}
+
+void test_core()
+{
+   // TEST makehex() <=> hextobin()
+    if (true)
+    {
+        std::cout << "bin 255 to hex2 " << makehex((char)255, 2) << std::endl;
+        std::cout << "bin 128 to hex2 " << makehex((char)128, 2) << std::endl;
+        std::cout << "bin 0 to hex2 "   << makehex((char)0  , 2) << std::endl;
+        std::cout << "bin 256*10+5 to hex4 "   << makehex((uint32_t)2565  , 4) << std::endl;
+
+        std::cout << "hex2 " << makehex((char)255, 2) << " to uint8_t " << (int)hextobin(makehex((char)255, 2), uint8_t(0)) << std::endl;
+        std::cout << "hex4 " << makehex((uint32_t)2565  , 4) << " to uint32_t " << (int)hextobin(makehex((uint32_t)2565  , 4), uint32_t(0)) << std::endl;
+    }
+
+    // TEST CLASSIC STRING DES
+    if (true)
+    {
+        std::string KEY  = "EWTW;RLd"; // 8 bytes l peut exister 2e56 (soit 7.2*10e16) clés différentes !
+        std::string data = "65431234"; // 8 bytes
+
+        DES des(KEY);
+        std::string data_encr = des.encrypt(data);
+        std::string data_back = des.decrypt(data_encr);
+        if (data != data_back)
+        {
+            std::cout << "Error with DES algo"
+            << "\nkey " << KEY
+            << "\ndata " << data
+            //<< "\ndata_encr " << data_encr
+            << "\ndata_back " << data_back
+            << std::endl;
+        }
+        else
+        {
+            std::cout << "OK with DES algo "
+            << "\nkey " << KEY
+            << "\ndata " << data
+            //<< "\ndata_encr " << data_encr
+            << "\ndata_back " << data_back
+            << std::endl;
+        }
+    }
+
+    // TEST BINARYE DES
+    if (true)
+    {
+        char bin[4] = {12, 0, 34, 0}; // bin 4 => string 8
+        char dat[4] = {33, 5, 12, 0}; // bin 4 => string 8
+        char out_dat[4];
+
+        DES des(bin);
+        std::string data_encr = des.encrypt_bin(dat, 4);
+        des.decrypt_bin(data_encr, out_dat, 4);
+
+        std::string data_back  = "{";
+        for(size_t i=0;i<4;i++)
+        {
+            data_back+=std::to_string((int)out_dat[i]);
+            data_back+=",";
+        }
+        data_back += "}";
+
+        bool ok = true;
+        for(size_t i=0;i<4;i++)
+        {
+            if (dat[i] != out_dat[i])
+            {
+                std::cout << "Error with DES binary algo"
+                //<< "\nkey " << KEY
+                << "\ndata {33, 5, 12, 0}"
+                //<< "\ndata_encr " << data_encr
+                << "\ndata_back " << data_back
+                << std::endl;
+                ok = false;
+                break;
+            }
+        }
+        if (ok)
+        {
+            std::cout << "OK with DES binary algo "
+            //<< "\nkey " << KEY
+            << "\ndata {33, 5, 12, 0}"
+            //<< "\ndata_encr " << data_encr
+            << "\ndata_back " << data_back
+            << std::endl;
+        }
+    }
+
+    // TEST wget
+    if (true)
+    {
+        std::string url = "https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz";
+        std::string filename  = "./staging_Python-3.8.1.tgz";
+        std::remove(filename.data());
+
+        if ( wget(url.data(), filename.data()) != 0)
+        {
+            std::cout << "An error occured wget " << std::endl;
+        }
+        else
+        {
+            std::cout << "OK with wget " << std::endl;
+        }
+        std::remove(filename.data());
+    }
+
+    //https://ln5.sync.com/dl/7259131b0/twwrxp25-j6j6viw3-5a99vmwn-rv43m9e6
+    if (false)
+    {
+        //Sync public TerrePlane (Flat earth) img.pgn
+        //std::string url = "https://ln5.sync.com/dl/7259131b0/twwrxp25-j6j6viw3-5a99vmwn-rv43m9e6";
+        //std::string url = "https://cp.sync.com/9a4886a8-b1b3-4a2c-a3c7-4b0c01d76486";
+        //std::string url = "https://cp.sync.com/file/1342219113/view/image";
+        //std::string url = "https://u.pcloud.link/publink/show?code=XZH2QgVZC4KuzbwhtBmqrvCrpMQhTzAkOd2V";
+        //"downloadlink": " // EXPIRED
+        std::string url = "https://c326.pcloud.com/dHZTgqwh1ZJ8HkagZZZQaV0o7Z2ZZLH4ZkZH2QgVZ91trCtkdpvFP5vxOxY8VcyStULb7/Screenshot%20from%202021-06-16%2014-28-40.png";
+        //"https:\/\/c326.pcloud.com\/dHZTgqwh1ZJ8HkagZZZQaV0o7Z2ZZLH4ZkZH2QgVZ91trCtkdpvFP5vxOxY8VcyStULb7\/Screenshot%20from%202021-06-16%2014-28-40.png"
+        std::string filename  = "./staging_img.png";
+        std::remove(filename.data());
+
+        if ( wget(url.data(), filename.data()) != 0)
+        {
+            std::cout << "An error occured wget " << std::endl;
+        }
+        else
+        {
+            std::cout << "OK with wget " << std::endl;
+        }
+        std::remove(filename.data());
+    }
 }
 
 int main_crypto(int argc, char **argv)
 {
     // Main parser
     argparse::ArgumentParser program("crypto");
+
+    // Test subcommand
+    argparse::ArgumentParser test_command("test");
+    test_command.add_description("Test a case");
+    test_command.add_argument("-i", "--input")
+        .required()
+        .help("specify the testcase name.");
 
     // Encode subcommand
     argparse::ArgumentParser encode_command("encode");
@@ -1468,7 +1750,7 @@ int main_crypto(int argc, char **argv)
 
     decode_command.add_argument("-o", "--output")
         .required()
-        //.default_value(std::string(""))
+        .default_value(std::string(""))
         .help("specify the output decrypted file.");
 
     decode_command.add_argument("-p", "--puzzle")
@@ -1478,6 +1760,7 @@ int main_crypto(int argc, char **argv)
     // Add the subcommands to the main parser
     program.add_subparser(encode_command);
     program.add_subparser(decode_command);
+    program.add_subparser(test_command);
 
     // Parse the arguments
     try {
@@ -1488,6 +1771,22 @@ int main_crypto(int argc, char **argv)
         std::cerr << err.what() << std::endl;
         std::cerr << program;
         return -1;
+    }
+
+    if (program.is_subcommand_used("test"))
+    {
+        auto testname = test_command.get<std::string>("--input");
+        if (testname == "core")
+        {
+            test_core();
+        }
+        else
+        {
+            if (testname == "nowebkey") DOTESTCASE(testname, true);
+            else if (testname == "zipcontent") DOTESTCASE(testname, false, "/test.zip");
+            else DOTESTCASE(testname, false);
+        }
+        return 0;
     }
 
     // Encode command
@@ -1549,159 +1848,6 @@ int main_crypto(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    // TEST makehex() <=> hextobin()
-    if (false)
-    {
-        std::cout << "bin 255 to hex2 " << makehex((char)255, 2) << std::endl;
-        std::cout << "bin 128 to hex2 " << makehex((char)128, 2) << std::endl;
-        std::cout << "bin 0 to hex2 "   << makehex((char)0  , 2) << std::endl;
-        std::cout << "bin 256*10+5 to hex4 "   << makehex((uint32_t)2565  , 4) << std::endl;
-
-        std::cout << "hex2 " << makehex((char)255, 2) << " to uint8_t " << (int)hextobin(makehex((char)255, 2), uint8_t(0)) << std::endl;
-        std::cout << "hex4 " << makehex((uint32_t)2565  , 4) << " to uint32_t " << (int)hextobin(makehex((uint32_t)2565  , 4), uint32_t(0)) << std::endl;
-    }
-
-    // TEST CLASSIC STRING DES
-    if (false)
-    {
-        std::string KEY  = "EWTW;RLd"; // 8 bytes l peut exister 2e56 (soit 7.2*10e16) clés différentes !
-        std::string data = "65431234"; // 8 bytes
-
-        DES des(KEY);
-        std::string data_encr = des.encrypt(data);
-        std::string data_back = des.decrypt(data_encr);
-        if (data != data_back)
-        {
-            std::cout << "Error with DES algo"
-            << "\nkey " << KEY
-            << "\ndata " << data
-            //<< "\ndata_encr " << data_encr
-            << "\ndata_back " << data_back
-            << std::endl;
-        }
-        else
-        {
-            std::cout << "OK with DES algo "
-            << "\nkey " << KEY
-            << "\ndata " << data
-            //<< "\ndata_encr " << data_encr
-            << "\ndata_back " << data_back
-            << std::endl;
-        }
-    }
-
-    // TEST BINARYE DES
-    if (false)
-    {
-        char bin[4] = {12, 0, 34, 0}; // bin 4 => string 8
-        char dat[4] = {33, 5, 12, 0}; // bin 4 => string 8
-        char out_dat[4];
-
-        DES des(bin);
-        std::string data_encr = des.encrypt_bin(dat, 4);
-        des.decrypt_bin(data_encr, out_dat, 4);
-
-        std::string data_back  = "{";
-        for(size_t i=0;i<4;i++)
-        {
-            data_back+=std::to_string((int)out_dat[i]);
-            data_back+=",";
-        }
-        data_back += "}";
-
-        bool ok = true;
-        for(size_t i=0;i<4;i++)
-        {
-            if (dat[i] != out_dat[i])
-            {
-                std::cout << "Error with DES binary algo"
-                //<< "\nkey " << KEY
-                << "\ndata {33, 5, 12, 0}"
-                //<< "\ndata_encr " << data_encr
-                << "\ndata_back " << data_back
-                << std::endl;
-                ok = false;
-                break;
-            }
-        }
-        if (ok)
-        {
-            std::cout << "OK with DES binary algo "
-            //<< "\nkey " << KEY
-            << "\ndata {33, 5, 12, 0}"
-            //<< "\ndata_encr " << data_encr
-            << "\ndata_back " << data_back
-            << std::endl;
-        }
-    }
-
-    // TEST wget
-    if (false)
-    {
-        std::string url = "https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz";
-        std::string filename  = "./staging_Python-3.8.1.tgz";
-
-        if ( wget(url.data(), filename.data()) != 0)
-        {
-            std::cout << "An error occured wget " << std::endl;
-        }
-        else
-        {
-            std::cout << "OK with wget " << std::endl;
-        }
-    }
-    //https://ln5.sync.com/dl/7259131b0/twwrxp25-j6j6viw3-5a99vmwn-rv43m9e6
-    if (false)
-    {
-        //Sync public TerrePlane (Flat earth) img.pgn
-        //std::string url = "https://ln5.sync.com/dl/7259131b0/twwrxp25-j6j6viw3-5a99vmwn-rv43m9e6";
-        //std::string url = "https://cp.sync.com/9a4886a8-b1b3-4a2c-a3c7-4b0c01d76486";
-        //std::string url = "https://cp.sync.com/file/1342219113/view/image";
-        //std::string url = "https://u.pcloud.link/publink/show?code=XZH2QgVZC4KuzbwhtBmqrvCrpMQhTzAkOd2V";
-        //"downloadlink": " // EXPIRED
-        std::string url = "https://c326.pcloud.com/dHZTgqwh1ZJ8HkagZZZQaV0o7Z2ZZLH4ZkZH2QgVZ91trCtkdpvFP5vxOxY8VcyStULb7/Screenshot%20from%202021-06-16%2014-28-40.png";
-        //"https:\/\/c326.pcloud.com\/dHZTgqwh1ZJ8HkagZZZQaV0o7Z2ZZLH4ZkZH2QgVZ91trCtkdpvFP5vxOxY8VcyStULb7\/Screenshot%20from%202021-06-16%2014-28-40.png"
-        std::string filename  = "./staging_img.png";
-
-        if ( wget(url.data(), filename.data()) != 0)
-        {
-            std::cout << "An error occured wget " << std::endl;
-        }
-        else
-        {
-            std::cout << "OK with wget " << std::endl;
-        }
-    }
-
-    // TESTCASE nowebkey
-    if (false)
-    {
-        DOTESTCASE("nowebkey", true);
-    }
-
-    // TESTCASE onewebkey
-    if (false)
-    {
-        DOTESTCASE("onewebkey", false);
-    }
-
-    // TESTCASE manywebkey
-    if (false)
-    {
-        DOTESTCASE("manywebkey", false);
-    }
-
-    //int a; std::cin >> a;
-
-    // TESTCASE
-    if (false)
-    {
-        DOTESTCASE("zipcontent", false, "/test.zip");
-    }
-
-//    std::cout << "done enter a number to exit " << std::endl;
-//    int a; std::cin >> a;
-
     int r = main_crypto(argc, argv);
     return r;
 }

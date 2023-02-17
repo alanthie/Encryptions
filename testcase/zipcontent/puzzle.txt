@@ -7,13 +7,14 @@ REM Save this file when done
 REM 
 REM If your answered puzzle file is named: puzzle.txt
 REM If your secret encrypted message file is named: msg.zip.encrypted
+REM If your secret message file will be named: msg.zip
 REM Then to decrypt launch the following command on windows: 
-REM crypto.exe -d -p puzzle.txt -f msg.zip.encrypted
+REM crypto.exe decode -p ./puzzle.txt -i ./msg.zip.encrypted -o ./msg.zip
 REM
 REM To decrypt launch the following command on Linux: 
-REM ./crypto -d -p puzzle.txt -f msg.zip.encrypted
+REM ./crypto decode -p ./puzzle.txt -i ./msg.zip.encrypted -o ./msg.zip
 REM
-REM The secret unencrypted message file will be created in your current folder
+REM The secret unencrypted message file will be created in your specified folder
 REM 
 REM The crypto tool (source and executable) is available on github:
 REM https://github.com/alanthie/Encryptions
