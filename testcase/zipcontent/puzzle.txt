@@ -25,15 +25,9 @@ REM ===========================================================================
 "Le model de votre auto" : "Ford"
 "How long is an Olympic swimming pool (in meters)?" :  "50"
 "Which country do cities of Perth, Adelade & Brisbane belong to?" : "Australia"
-"Sudoku book10, no23 line1" : "123456782"
-"Sudoku book10, no23 line2" : "223456783"
-"Sudoku book10, no23 line3" : "323456784"
-"Sudoku book10, no23 line4" : "423456785"
-"Sudoku book10, no23 line5" : "523456786"
-"Sudoku book10, no23 line6" : "623456787"
-"Sudoku book10, no23 line7" : "723456788"
-"Sudoku book10, no23 line8" : "823456789"
-"Sudoku book10, no23 line9" : "923456781"
+"Sudoku book10, no23 line1" : "123456789"
+"Sudoku book10, no23 line2" : "789123456"
+"Sudoku book10, no23 line3" : "456789123"
 "TV" : "Teamviewer"
 REM ===========================================================================
 REM Your puzzle questions end here
