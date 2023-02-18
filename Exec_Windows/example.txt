@@ -1,10 +1,41 @@
 Example
 
 Linux:
-./crypto encode  -i ./test.zip -o ./test.zip.encrypted -p ./puzzle.txt -q ./partial_puzzle.txt -u ./urls.txt
-./crypto decode  -i ./test.zip.encrypted -p ./puzzle.txt.full -o ./test.zip.unencrypted
+./crypto encode  -i ./test.zip -o ./test.zip.encrypted -p ./puzzle.txt -q ./partial_puzzle.txt -u ./urls.txt -v 1
+./crypto decode  -i ./test.zip.encrypted -p ./puzzle.txt.full -o ./test.zip.unencrypted -v 1
+
+./crypto batch_encode -i ./../../crypto_batch.ini -v 1
+./crypto batch_decode -i ./../../crypto_batch.ini -v 1
+
 
 Windows
-./crypto encode  -i ./test.zip -o ./test.zip.encrypted -p ./puzzle.txt -q ./partial_puzzle.txt -u ./urls.txt
-./crypto decode  -i ./test.zip.encrypted -p ./puzzle.txt.full -o ./test.zip.unencrypted
+./crypto.exe encode  -i ./test.zip -o ./test.zip.encrypted -p ./puzzle.txt -q ./partial_puzzle.txt -u ./urls.txt
+./crypto.exe decode  -i ./test.zip.encrypted -p ./puzzle.txt.full -o ./test.zip.unencrypted
+
+./crypto batch_encode -i ./../../crypto_batch.ini -v 1
+./crypto batch_decode -i ./../../crypto_batch.ini -v 1
+
+
+In BATCH mode
+Example of crypto_batch.ini:
+
+[Config]
+folder_encoder_input    = /home/server/dev/Encryptions/bin/Release/
+folder_encoder_output   = /home/server/dev/Encryptions/bin/Release/
+folder_decoder_input    = /home/server/dev/Encryptions/bin/Release/
+folder_decoder_output   = /home/server/dev/Encryptions/bin/Release/
+folder_staging          = /home/server/dev/Encryptions/bin/Release/
+
+[Encoding]
+encoding_input_puzzle            = puzzle.txt
+encoding_input_msg               = test.zip
+encoding_input_urls              = urls.txt
+encoding_output_qa_puzzle        = puzzle_qa.txt
+encoding_output_file_encrypted   = test.zip.encrypted
+
+[Decoding]
+decoding_input_qa_puzzle         = puzzle.txt.full
+decoding_input_msg_encrypted     = test.zip.encrypted
+decoding_output_msg_unencrypted  = test.zip.unencrypted
+
 
