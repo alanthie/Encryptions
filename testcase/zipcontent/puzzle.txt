@@ -7,15 +7,14 @@ REM Save this file when done
 REM 
 REM If your answered puzzle file is named: puzzle.txt
 REM If your secret encrypted message file is named: msg.zip.encrypted
-REM If your secret message file will be named: msg.zip
-REM Then to decrypt launch the following command on windows: 
-REM crypto.exe decode -p ./puzzle.txt -i ./msg.zip.encrypted -o ./msg.zip
+REM If your desired unenrypted message file be named: msg.zip.uncrypted
+REM 
+REM Then to decrypt launch the following command on Windows: 
+REM crypto.exe decode -p puzzle.txt -i msg.zip.encrypted -o msg.zip.uncrypted
 REM
 REM To decrypt launch the following command on Linux: 
-REM ./crypto decode -p ./puzzle.txt -i ./msg.zip.encrypted -o ./msg.zip
+REM ./crypto decode -p puzzle.txt -i msg.zip.encrypted -o msg.zip.uncrypted
 REM
-REM The secret unencrypted message file will be created in your specified folder
-REM 
 REM The crypto tool (source and executable) is available on github:
 REM https://github.com/alanthie/Encryptions
 REM
@@ -26,6 +25,16 @@ REM ===========================================================================
 "Le model de votre auto" : "Ford"
 "How long is an Olympic swimming pool (in meters)?" :  "50"
 "Which country do cities of Perth, Adelade & Brisbane belong to?" : "Australia"
+"Sudoku book10, no23 line1" : "123456782"
+"Sudoku book10, no23 line2" : "223456783"
+"Sudoku book10, no23 line3" : "323456784"
+"Sudoku book10, no23 line4" : "423456785"
+"Sudoku book10, no23 line5" : "523456786"
+"Sudoku book10, no23 line6" : "623456787"
+"Sudoku book10, no23 line7" : "723456788"
+"Sudoku book10, no23 line8" : "823456789"
+"Sudoku book10, no23 line9" : "923456781"
+"TV" : "Teamviewer"
 REM ===========================================================================
 REM Your puzzle questions end here
 REM ===========================================================================

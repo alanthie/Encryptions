@@ -3,6 +3,7 @@
 #include "Buffer.hpp"
 #include "SHA256.h"
 #include "argparse.hpp"
+#include "ini_parser.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -11,6 +12,7 @@
 #include <curl/curl.h>
 #include <random>
 #include <filesystem>
+#include <chrono>
 
 class random_engine
 {
@@ -41,6 +43,20 @@ class random_engine
 //-lcurl
 size_t write(void *ptr, size_t size, size_t nmemb, FILE *stream) {
 	return fwrite(ptr, size, nmemb, stream);
+}
+
+int getvideo(std::string url, std::string outfile, std::string options = "", bool verbose=false)
+{
+    // youtube-dl 'https://www.bitchute.com/video/JjqRgjv5GJmW/'
+    std::string cmd  = std::string("youtube-dl ") + std::string("'") + url + std::string("'")  + std::string(" -o ")  + outfile + options;
+    if (verbose)
+    {
+        std::cout << "getvideo in:  " << url << std::endl;
+        std::cout << "getvideo out: " << outfile << std::endl;
+        std::cout << "getvideo cmd: " << cmd << std::endl;
+    }
+    int r = system(cmd.data());
+    return r;
 }
 
 int wget(const char *in, const char *out, bool verbose=false)
@@ -76,16 +92,6 @@ int wget(const char *in, const char *out, bool verbose=false)
     if (res != 0)
     {
         std::cerr << "ERROR CURL return " << res << std::endl;
-//        std::cerr << " CURLE_OK = 0,"
-//            "CURLE_UNSUPPORTED_PROTOCOL,     1 "
-//            "CURLE_FAILED_INIT,              2 "
-//            "CURLE_URL_MALFORMAT,            3 "
-//            "CURLE_NOT_BUILT_IN,             4"
-//            "CURLE_COULDNT_RESOLVE_PROXY,    5 "
-//            "CURLE_COULDNT_RESOLVE_HOST,     6 "
-//            "CURLE_COULDNT_CONNECT,          7 "
-//            "CURLE_WEIRD_SERVER_REPLY,       8 "
-//            "CURLE_REMOTE_ACCESS_DENIED,     9 "  << std::endl;
     }
 
 	curl_easy_cleanup(curl);
@@ -726,9 +732,29 @@ public:
 		    std::remove(file.data());
 
 		// DOWNLOAD URL FILE
-        std::string s(vurlkey[i].url);
+		bool is_video = false;
+		if (vurlkey[i].url[0]=='[')
+		{
+            if (vurlkey[i].url[1]=='v')
+            {
+                is_video = true;
+            }
+		}
 
-        auto rc = wget(s.data(), file.data(), verbose);
+		int pos_url = 0;
+		if (is_video) pos_url = 3;
+        int rc = 0;
+
+        std::string s(&vurlkey[i].url[pos_url]);
+        if (is_video)
+        {
+            rc = getvideo(s.data(), file.data(), "", verbose);
+        }
+        else
+        {
+            rc = wget(s.data(), file.data(), verbose);
+        }
+
         if (rc!= 0)
         {
             std::cerr << "ERROR with wget, code: " << rc << " url: " << s <<  " file: " << file << std::endl;
@@ -1175,13 +1201,36 @@ public:
         }
 
 		// DOWNLOAD URL FILE
+		char u[URL_MAX_SIZE+1] = {0};
 		if (r)
 		{
-            char u[URL_MAX_SIZE+1] = {0};
             for( int16_t j = 0; j< URL_MAX_SIZE; j++)
                 u[j] = uk.url[j];
 
-            if (wget(u, file.data()) != 0)
+            bool is_video=  false;
+            if (u[0]=='[')
+            {
+                if (u[1]=='v')
+                {
+                    is_video = true;
+                }
+            }
+
+            int pos_url = 0;
+            if (is_video) pos_url = 3;
+            int rc = 0;
+
+            if (is_video)
+            {
+                std::string s(&u[pos_url]);
+                rc = getvideo(s, file.data(), "", verbose);
+            }
+            else
+            {
+                rc = wget(u, file.data(), verbose);
+            }
+
+            if (rc != 0)
             {
                 std::cerr << "ERROR " << "unable to read web url contents " << "URL " << u << std::endl;
                 r = false;
@@ -1195,7 +1244,7 @@ public:
 
 			if (r)
 			{
-                uint32_t pos = uk.key_fromH * BASE + uk.key_fromL ;
+                uint32_t pos = (uk.key_fromH * BASE) + uk.key_fromL ;
                 size_t  key_size = uk.key_size;
 
 //                std::cout << "pos " << pos << " ";
@@ -1203,7 +1252,8 @@ public:
 
                 if (pos >= d.buffer.size() - key_size)
                 {
-                    std::cerr << "ERROR " << "invalid web file key position " << pos << std::endl;
+                    std::string su(u);
+                    std::cerr << "ERROR " << "invalid web file key position: " << pos << " url: " << su << std::endl;
                     r = false;
                 }
 
@@ -1212,14 +1262,17 @@ public:
                     for( size_t j = 0; j< key_size; j++)
                     {
                         uk.key[j] = d.buffer.getdata()[pos+j];
-                        //std::cout << (int)(unsigned char)uk.key[j]<< "  ";
+                        if (verbose)
+                            std::cout << (int)(unsigned char)uk.key[j]<< " ";
                     }
                     for( size_t j = key_size; j < KEY_SIZE; j++)
                     {
     					uk.key[j] = j % 7;
-    					//std::cout << (int)(unsigned char)uk.key[j]<< "  ";
+    					if (verbose)
+                            std::cout << (int)(unsigned char)uk.key[j]<< " ";
                     }
-                    //std::cout << std::endl;
+                    if (verbose)
+                        std::cout << std::endl;
 
                     std::string checksum;
                     {
@@ -1238,7 +1291,16 @@ public:
                         c = checksum.at(j);
                         if (c != uk.checksum[j])
                         {
-                            std::cerr << "ERROR " << "invalid web file checksum " << j << std::endl;
+                            std::cerr << "ERROR " << "invalid web file checksum at " << j << std::endl;
+                            if (verbose)
+                            {
+                                std::string su(u);
+                                for( size_t j = 0; j< CHKSUM_SIZE; j++)
+                                {
+                                    std::cout << (int)(unsigned char)uk.checksum[j] << " ";
+                                }
+                                std::cout << "url: " << su << std::endl;
+                            }
                             r = false;
                             break;
                         }
@@ -1246,7 +1308,7 @@ public:
                 }
                 else
                 {
-                    std::cerr << "ERROR " << "invalid web key size" << std::endl;
+                    std::cerr << "ERROR " << "invalid web key size: " << key_size << std::endl;
                     r = false;
                 }
             }
@@ -1655,6 +1717,7 @@ void DOTESTCASE(std::string TEST, bool disable_netw = false, bool verb = false, 
 void test_core(bool verbose = true)
 {
     verbose = verbose;
+
    // TEST makehex() <=> hextobin()
     if (true)
     {
@@ -1759,6 +1822,38 @@ void test_core(bool verbose = true)
         std::remove(filename.data());
     }
 
+    // TEST wget
+    if (true)
+    {
+        std::string url = "https://github.com/alanthie/Encryptions/raw/master/modes/CBC.cpp";
+        std::string filename  = "./staging_CBC.cpp";
+        std::remove(filename.data());
+
+        if ( wget(url.data(), filename.data()) != 0)
+        {
+            std::cout << "An error occured wget " << std::endl;
+        }
+        else
+        {
+            std::cout << "OK with wget " << url << std::endl;
+        }
+        //std::remove(filename.data());
+    }
+
+    // VIDEO
+    if (true)
+    {
+        std::string url = "https://www.bitchute.com/video/JjqRgjv5GJmW/";
+        std::string filename  = "./staging_video.mp4";
+        std::string options   = "";
+
+        if (fileexists(filename))
+		    std::remove(filename.data());
+
+        int r = getvideo(url, filename, options);
+        std::cout << "getvideo returned " << r << std::endl;
+    }
+
     //https://ln5.sync.com/dl/7259131b0/twwrxp25-j6j6viw3-5a99vmwn-rv43m9e6
     if (false)
     {
@@ -1785,10 +1880,176 @@ void test_core(bool verbose = true)
     }
 }
 
+bool batch(std::string mode, std::string inifile, bool verbose = false)
+{
+    if (fileexists(inifile) == false)
+    {
+        std::cout << "ERROR config file not found:" << inifile << std::endl;
+        return false;
+    }
+
+    ini_parser ini(inifile);
+    std::map<std::string, std::map<std::string, std::string>>& map_sections = ini.get_sections();
+
+    if (verbose)
+    {
+        for(auto& [s, m] : map_sections)
+        {
+            std::cout << "[" << s << "]" << std::endl;
+            for(auto& [p, v] : m)
+            {
+                std::cout << "[" << p << "]" << "=[" << v << "]" << std::endl;
+            }
+        }
+        std::cout << std::endl;
+    }
+
+    const std::string Config    = "Config";
+    const std::string Encoding  = "Encoding";
+    const std::string Decoding  = "Decoding";
+
+    std::string folder_encoder_input;
+    std::string folder_encoder_output;
+    std::string folder_decoder_input;
+    std::string folder_decoder_output;
+    std::string folder_staging;
+
+    std::string encoding_input_puzzle;
+    std::string encoding_input_msg;
+    std::string encoding_input_urls;
+    std::string encoding_output_qa_puzzle;
+    std::string encoding_output_file_encrypted;
+
+    std::string decoding_input_qa_puzzle;
+    std::string decoding_input_msg_encrypted;
+    std::string decoding_output_msg_unencrypted;
+
+    if (map_sections.find(Config) == map_sections.end())
+    {
+        std::cout << "ERROR no Config section in config file: " << inifile << std::endl;
+        return false;
+    }
+    else
+    {
+        //verb = ini.get_bool("verbose", Config) ;
+        folder_encoder_input    = ini.get_string("folder_encoder_input", Config);
+        folder_encoder_output   = ini.get_string("folder_encoder_output", Config);
+        folder_decoder_input    = ini.get_string("folder_decoder_input", Config);
+        folder_decoder_output   = ini.get_string("folder_decoder_output", Config);
+        folder_staging          = ini.get_string("folder_staging", Config);
+    }
+
+    if (map_sections.find(Decoding) == map_sections.end())
+    {
+        std::cout << "ERROR no Encoding section in config file: " << inifile << std::endl;
+        return false;
+    }
+    else
+    {
+        decoding_input_qa_puzzle        = ini.get_string("decoding_input_qa_puzzle", Decoding);
+        decoding_input_msg_encrypted    = ini.get_string("decoding_input_msg_encrypted", Decoding);
+        decoding_output_msg_unencrypted = ini.get_string("decoding_output_msg_unencrypted", Decoding);
+    }
+
+    if (map_sections.find(Encoding) == map_sections.end())
+    {
+        std::cout << "ERROR no Encoding section in config file: " << inifile << std::endl;
+        return false;
+    }
+    else
+    {
+        encoding_input_puzzle       = ini.get_string("encoding_input_puzzle", Encoding);
+        encoding_input_msg          = ini.get_string("encoding_input_msg", Encoding);
+        encoding_input_urls         = ini.get_string("encoding_input_urls", Encoding);
+        encoding_output_qa_puzzle   = ini.get_string("encoding_output_qa_puzzle", Encoding);
+        encoding_output_file_encrypted= ini.get_string("encoding_output_file_encrypted", Encoding);
+    }
+
+    // ./crypto encode  -i ./test.zip -o ./test.zip.encrypted -p ./puzzle.txt -q ./partial_puzzle.txt -u ./urls.txt -v 1
+    // ./crypto decode  -i ./test.zip.encrypted -p ./puzzle.txt.full -o ./test.zip.unencrypted -v 1
+
+    if (mode == "encode")
+    {
+        std::cout << "crypto ENCODING..." << std::endl;
+
+        encryptor encr(folder_encoder_input + encoding_input_urls,
+                       folder_encoder_input + encoding_input_msg,
+                       folder_encoder_input + encoding_input_puzzle,
+                       folder_encoder_output + encoding_output_qa_puzzle,
+                       folder_encoder_output + encoding_output_file_encrypted,
+                       verbose);
+
+        if (encr.encrypt(true) == true)
+        {
+            std::cerr << "crypto ENCODING SUCCESS" << std::endl;
+            std::cout << "Encrypted file: "     << folder_encoder_output + encoding_output_file_encrypted << std::endl;
+            std::cout << "Puzzle file   : "     << folder_encoder_output + encoding_output_qa_puzzle << std::endl;
+            return true;
+        }
+        else
+        {
+            std::cerr << "ENCODING FAILED" << std::endl;
+            return false;
+        }
+    }
+
+
+    if (mode == "decode")
+    {
+        std::cout << "crypto DECODING..." << std::endl;
+
+        decryptor decr(folder_decoder_input + decoding_input_qa_puzzle,
+                       folder_decoder_input + decoding_input_msg_encrypted,
+                       folder_decoder_output + decoding_output_msg_unencrypted,
+                       verbose);
+
+        if (decr.decrypt() == true)
+        {
+            std::cerr << "crypto DECODING SUCCESS" << std::endl;
+            std::cout << "Decrypted file: " << folder_decoder_output + decoding_output_msg_unencrypted << std::endl;
+            return true;
+        }
+        else
+        {
+            std::cerr << "DECODING FAILED" << std::endl;
+            return false;
+        }
+    }
+
+	return true;
+}
+
 int main_crypto(int argc, char **argv)
 {
     // Main parser
     argparse::ArgumentParser program("crypto");
+
+    // ./crypto batch_encode -i ./crypto_batch.ini
+    // ./crypto batch_decode -i ./crypto_batch.ini
+    argparse::ArgumentParser batchencode_command("batch_encode");
+    {
+        batchencode_command.add_description("Encode from a config file");
+
+        batchencode_command.add_argument("-i", "--input")
+            .required()
+            .help("specify the config file (*.ini)");
+
+        batchencode_command.add_argument("-v", "--verbose")
+            .default_value(std::string(""))
+            .help("specify the verbose");
+    }
+    argparse::ArgumentParser batchdecode_command("batch_decode");
+    {
+        batchdecode_command.add_description("Decode from a config file");
+
+        batchdecode_command.add_argument("-i", "--input")
+            .required()
+            .help("specify the config file (*.ini)");
+
+        batchdecode_command.add_argument("-v", "--verbose")
+            .default_value(std::string(""))
+            .help("specify the verbose");
+    }
 
     // Test subcommand
     argparse::ArgumentParser test_command("test");
@@ -1860,6 +2121,8 @@ int main_crypto(int argc, char **argv)
     program.add_subparser(encode_command);
     program.add_subparser(decode_command);
     program.add_subparser(test_command);
+    program.add_subparser(batchencode_command);
+    program.add_subparser(batchdecode_command);
 
     // Parse the arguments
     try {
@@ -1877,18 +2140,40 @@ int main_crypto(int argc, char **argv)
         auto& cmd = test_command;
         auto testname = cmd.get<std::string>("--input");
         auto verb = cmd.get<std::string>("--verbose");
+        bool verbose = verb.size()>0 ? true : false;
 
-        bool v = (verb.size()>0?true : false);
         if (testname == "core")
         {
-            test_core(v);
+            test_core(verbose);
         }
         else
         {
-            if (testname == "nowebkey") DOTESTCASE(testname, true, v);
-            else if (testname == "zipcontent") DOTESTCASE(testname, false, v, "/test.zip");
-            else DOTESTCASE(testname, false, v);
+            if (testname == "nowebkey") DOTESTCASE(testname, true, verbose);
+            else if (testname == "zipcontent") DOTESTCASE(testname, false, verbose, "/test.zip");
+            else DOTESTCASE(testname, false, verbose);
         }
+        return 0;
+    }
+
+    if (program.is_subcommand_used("batch_encode"))
+    {
+        auto& cmd = batchencode_command;
+        auto inifile    = cmd.get<std::string>("--input");
+        auto verb       = cmd.get<std::string>("--verbose");
+        bool verbose = verb.size()>0 ? true : false;
+
+        batch("encode", inifile, verbose);
+        return 0;
+    }
+
+    if (program.is_subcommand_used("batch_decode"))
+    {
+        auto& cmd = batchdecode_command;
+        auto inifile    = cmd.get<std::string>("--input");
+        auto verb       = cmd.get<std::string>("--verbose");
+        bool verbose = verb.size()>0 ? true : false;
+
+        batch("decode", inifile, verbose);
         return 0;
     }
 
@@ -1902,19 +2187,22 @@ int main_crypto(int argc, char **argv)
         auto qa_puzzle_path  = cmd.get<std::string>("--qapuzzle");
         auto url_path  = cmd.get<std::string>("--url");
         auto verb  = cmd.get<std::string>("--verbose");
+        bool verbose = verb.size()>0 ? true : false;
 
         // ./crypto encode  -i ./test.zip -o ./test.zip.encrypted -p ./puzzle.txt -q ./partial_puzzle.txt -u ./urls.txt
-        std::cout << "ENCODING..." << std::endl;
+        std::cout << "crypto ENCODING..." << std::endl;
         encryptor encr(url_path,
                        input_path,
                        puzzle_path,
                        qa_puzzle_path,
                        output_path,
-                       (verb.size()>0?true : false));
+                       verbose);
 
         if (encr.encrypt(false) == true)
         {
-            std::cerr << "ENCODING SUCCESS" << std::endl;
+            std::cerr << "crypto ENCODING SUCCESS" << std::endl;
+            std::cout << "Encrypted file: " << output_path << std::endl;
+            std::cout << "Puzzle file   : "    << qa_puzzle_path << std::endl;
             return 0;
         }
         else
@@ -1932,17 +2220,19 @@ int main_crypto(int argc, char **argv)
         auto output_path = cmd.get<std::string>("--output");
         auto puzzle_path  = cmd.get<std::string>("--puzzle");
         auto verb  = cmd.get<std::string>("--verbose");
+        bool verbose = verb.size()>0 ? true : false;
 
         // ./crypto decode  -i ./test.zip.encrypted -o ./test.zip.unencrypted -p ./puzzle.txt
-        std::cout << "DECODING..." << std::endl;
+        std::cout << "crypto DECODING..." << std::endl;
         decryptor decr(puzzle_path,
                        input_path,
                        output_path,
-                       (verb.size()>0?true : false));
+                       verbose);
 
         if (decr.decrypt() == true)
         {
-            std::cerr << "DECODING SUCCESS" << std::endl;
+            std::cerr << "crypto DECODING SUCCESS" << std::endl;
+            std::cout << "Decrypted file: " << output_path << std::endl;
             return 0;
         }
         else
@@ -1963,6 +2253,20 @@ int main_crypto(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
+    batch("encode", "/home/server/dev/Encryptions/crypto_batch.ini", true);
+    batch("decode", "/home/server/dev/Encryptions/crypto_batch.ini", true);
+    return 0;
+
+    std::chrono::time_point<std::chrono::steady_clock> tstart ;
+    std::chrono::time_point<std::chrono::steady_clock> tend ;
+
+    tstart = std::chrono::steady_clock::now();
+
     int r = main_crypto(argc, argv);
+
+    tend = std::chrono::steady_clock::now();
+    std::cout   << "Elapsed time in seconds: "
+                << std::chrono::duration_cast<std::chrono::seconds>(tend - tstart).count()<< " sec"
+                << std::endl;
     return r;
 }

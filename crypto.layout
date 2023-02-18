@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
-	<ActiveTarget name="Debug" />
-	<File name="Encryptions/AES.h" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<ActiveTarget name="Release" />
+	<File name="Buffer.hpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1773" topLine="30" />
-		</Cursor>
-	</File>
-	<File name="main.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="3" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="12982" topLine="490" />
-		</Cursor>
-	</File>
-	<File name="Encryptions/DES.h" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1693" topLine="26" />
-		</Cursor>
-	</File>
-	<File name="Encryptions/AES.cpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="3864" topLine="96" />
+			<Cursor1 position="5300" topLine="207" />
 		</Cursor>
 	</File>
 	<File name="Encryptions/DES.cpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3691" topLine="138" />
+			<Cursor1 position="3691" topLine="134" />
 		</Cursor>
 	</File>
-	<File name="Buffer.hpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="ini_parser.hpp" open="0" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="5300" topLine="207" />
+			<Cursor1 position="2683" topLine="77" />
+		</Cursor>
+	</File>
+	<File name="Encryptions/AES.h" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1773" topLine="26" />
+		</Cursor>
+	</File>
+	<File name="common/includes.h" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1968" topLine="41" />
+		</Cursor>
+	</File>
+	<File name="Encryptions/DES.h" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1693" topLine="22" />
 		</Cursor>
 	</File>
 	<File name="Encryptions/SymAlg.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -37,9 +37,14 @@
 			<Cursor1 position="1208" topLine="18" />
 		</Cursor>
 	</File>
-	<File name="common/includes.h" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="main.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="3" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1968" topLine="63" />
+			<Cursor1 position="57159" topLine="1959" />
+		</Cursor>
+	</File>
+	<File name="Encryptions/AES.cpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3864" topLine="96" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

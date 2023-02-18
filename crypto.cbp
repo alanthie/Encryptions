@@ -99,6 +99,7 @@
 		<Unit filename="common/cryptomath.h" />
 		<Unit filename="common/includes.cpp" />
 		<Unit filename="common/includes.h" />
+		<Unit filename="ini_parser.hpp" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
