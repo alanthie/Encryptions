@@ -17,12 +17,21 @@ public:
 	decryptor(  std::string ifilename_puzzle,
                 std::string ifilename_encrypted_data,
 			 	std::string ifilename_decrypted_data,
-			 	bool verb = false)
+			 	std::string istaging,
+			 	bool verb = false,
+			 	bool keep = false)
 	{
         filename_puzzle = ifilename_puzzle;
         filename_encrypted_data = ifilename_encrypted_data;
         filename_decrypted_data = ifilename_decrypted_data;
+        staging =istaging;
         verbose = verb;
+        keeping = keep;
+
+        if (staging.size()==0)
+        {
+            staging ="./";
+        }
 	}
 
     ~decryptor()
@@ -84,7 +93,16 @@ public:
 	bool get_key(urlkey& uk)
 	{
 		bool r = true;
-		std::string file = "./staging_url_file.dat";
+
+        if(fs::is_directory(staging)==false)
+        {
+            std::cerr << "ERROR staging is not a folder " << staging << std::endl;
+            return false;
+        }
+
+        std::string file = staging + "decode_staging_url_file_" + std::to_string(staging_cnt) + ".dat";
+        staging_cnt++;
+
         if (fileexists(file))
 		    std::remove(file.data());
 
@@ -157,9 +175,6 @@ public:
                 uint32_t pos = (uk.key_fromH * BASE) + uk.key_fromL ;
                 size_t  key_size = uk.key_size;
 
-//                std::cout << "pos " << pos << " ";
-//                std::cout << "key_size " << key_size << std::endl;
-
                 if (pos >= d.buffer.size() - key_size)
                 {
                     std::string su(u);
@@ -229,7 +244,11 @@ public:
             }
 		}
 
-		std::remove(file.data());
+		if (keeping == false)
+		{
+            if (fileexists(file))
+                std::remove(file.data());
+        }
 		return r;
 	}
 
@@ -242,6 +261,13 @@ public:
         // BINARY DES (double file size on encryption, divide in 2 on decryption)
 		uint32_t nblock = data_encrypted.buffer.size() / 8;
 		uint32_t nkeys  = key_size / 4;
+
+		if (verbose)
+		{
+            std::cout <<    "\nDecryptor decode() - iteration: " << iter <<
+                            ", number of blocks: " << nblock <<
+                            ", number of keys: "   << nkeys  << std::endl;
+        }
 
         // BINARY DES
         //      DES(const char KEY[4]);
@@ -455,7 +481,7 @@ public:
                     }
 
                     // decode(DataN, keyN) => DataN-1+urlkeyN-1     urlkeyN-1=>keyN-1
-                    if (decode(iter, data_temp, &uk.key[0], KEY_SIZE, data_temp_next) == false)
+                    if (decode(iter+1, data_temp, &uk.key[0], KEY_SIZE, data_temp_next) == false)
                     {
                         r = false;
                         std::cerr << "ERROR " << "encrypted_data can not be decoded" << std::endl;
@@ -537,10 +563,13 @@ public:
 	std::string filename_puzzle;
     std::string filename_encrypted_data;
 	std::string filename_decrypted_data;
+	std::string staging;
 
     data        data_temp;
     data        data_temp_next;
     bool        verbose;
+    bool        keeping;
+    int         staging_cnt=0;
 };
 
 

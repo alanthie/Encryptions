@@ -18,16 +18,28 @@ public:
                 std::string ifilename_msg_data,
                 std::string ifilename_puzzle,
                 std::string ifilename_partial_puzzle,
+                std::string ifilename_full_puzzle,
                 std::string ifilename_encrypted_data,
-                bool verb = false
+                std::string istaging,
+                bool verb = false,
+                bool keep = false
+
         )
     {
         filename_urls = ifilename_urls;
         filename_msg_data = ifilename_msg_data;
         filename_puzzle = ifilename_puzzle;
         filename_partial_puzzle = ifilename_partial_puzzle;
+        filename_full_puzzle = ifilename_full_puzzle;
         filename_encrypted_data = ifilename_encrypted_data;
+        staging = istaging;
         verbose = verb;
+        keeping = keep;
+
+        if (staging.size()==0)
+        {
+            staging ="./";
+        }
     }
 
     ~encryptor()
@@ -50,12 +62,10 @@ public:
             {
                 // parse url
                 c = urls_data.buffer.getdata()[i];
-                //std::cout << (int)(unsigned char)c << " ";
                 pos++;
 
                 if (c == '\n')
                 {
-                    //std::cout << std::endl;
 #ifdef _WIN32
                     int len = pos - 1; // rn
 #else
@@ -76,7 +86,6 @@ public:
                     else
                     {
                         // skip!
-                        //std::string s(url);
                         if (len > 0)
                         {
                             std::cerr << "WARNING url skipped, " << "(url.size() >= URL_MIN_SIZE) && (url.size() <= URL_MAX_SIZE)) " << len <<std::endl;
@@ -84,7 +93,6 @@ public:
                     }
                     s.clear();
                     pos = -1;
-                    //std::cout << std::endl;
                 }
                 else
                 {
@@ -102,7 +110,15 @@ public:
 	{
 		bool r = true;
 
-        std::string file = "./staging_url_file.dat";
+        if(fs::is_directory(staging)==false)
+        {
+            std::cerr << "ERROR staging is not a folder " << staging << std::endl;
+            return false;
+        }
+
+        std::string file = staging + "encode_staging_url_file_" + std::to_string(staging_cnt) + ".dat";
+        staging_cnt++;
+
         if (fileexists(file))
 		    std::remove(file.data());
 
@@ -175,7 +191,6 @@ public:
                         std::cout << "vurlkey[i].key_fromH=" << vurlkey[i].key_fromH << " ";
                         std::cout << "vurlkey[i].key_fromL=" << vurlkey[i].key_fromL << " ";
                         std::cout << "key_pos=" << t << " ";
-                        //std::cout << "key_pos=" << BASE*vurlkey[i].key_fromH + vurlkey[i].key_fromL  << " ";
                         std::cout <<  std::endl;
 					}
 
@@ -228,8 +243,11 @@ public:
 
 		}
 
-        if (fileexists(file))
-		    std::remove(file.data());
+		if (keeping == false)
+		{
+            if (fileexists(file))
+                std::remove(file.data());
+        }
 		return r;
 	}
 
@@ -272,6 +290,14 @@ public:
 		uint32_t nblock = data_temp.buffer.size() / 4;
 		uint32_t nkeys  = key_size / 4;
 
+		if (verbose)
+		{
+            std::cout.flush();
+            std::cout <<    "Encryptor encode() - iteration: " << iter  <<
+                            ", number of blocks: " << nblock <<
+                            ", number of keys: "   << nkeys  << std::endl;
+        }
+
 		char KEY[4];
 		char DATA[4];
 		std::string data_encr;
@@ -308,7 +334,12 @@ public:
             std::cerr << "ERROR empty puzzle filename " <<  std::endl;
             return false;
         }
-        filename_full_puzzle = filename_puzzle + ".full";
+
+        if (filename_full_puzzle.size() ==  0)
+        {
+            std::cerr << "ERROR empty filename_full_puzzle filename " <<  std::endl;
+            return false;
+        }
 
         if (filename_msg_data.size() ==  0)
         {
@@ -369,6 +400,9 @@ public:
         }
 
         // before removal of answer
+//        if (verbose)
+//            std::cout << "saving puzzle full " << filename_full_puzzle << std::endl;
+
         if (puz.save_to_file(filename_full_puzzle) == false)
         {
             std::cerr << "ERROR " << "saving puzzle " << filename_full_puzzle << std::endl;
@@ -400,6 +434,12 @@ public:
 
         for(size_t i=0; i<vurlkey.size(); i++)
         {
+            if (verbose)
+            {
+                std::cout.flush();
+                std::cout << "\nEncryptor reading keys - iteration: " << i << std::endl;
+            }
+
             if (make_urlkey_from_url(i) == false)
             {
                 std::cerr << "ERROR " << "extracting url info, url index: " << i << std::endl;
@@ -509,9 +549,12 @@ public:
     std::string filename_msg_data;
     std::string filename_puzzle;
     std::string filename_partial_puzzle;
-    std::string filename_encrypted_data;
     std::string filename_full_puzzle;
+    std::string filename_encrypted_data;
+    std::string staging;
     bool verbose;
+    bool keeping;
+    int staging_cnt=0;
 };
 
 

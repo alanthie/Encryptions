@@ -47,6 +47,17 @@ bool fileexists(const fs::path& p, fs::file_status s = fs::file_status{})
         return false;
 }
 
+int32_t filesize(std::string filename)
+{
+    int32_t sz = -1;
+    std::ifstream ifd(filename.data(), std::ios::binary | std::ios::ate);
+    if (ifd)
+    {
+        sz = ifd.tellg();
+    }
+    ifd.close();
+    return sz;
+}
 
 int getvideo(std::string url, std::string outfile, std::string options = "", bool verbose=false)
 {
@@ -65,13 +76,17 @@ int getvideo(std::string url, std::string outfile, std::string options = "", boo
 int getftp(std::string url, std::string outfile, std::string options = "", bool verbose=false)
 {
     options=options;
-    std::string user="vasts_33625705";
+    std::string user; //="vasts_33625705";
     std::string pwd;
+
+    std::cout << "Looking for a protected ftp file that require user and pwd"<< std::endl;
+    std::cout << "Enter ftp user:";
+    std::cin >> user;
     std::cout << "Enter ftp pwd:";
     std::cin >> pwd;
 
-    //std::string filename  = "./staging_ftp_file.dat";
-    std::remove(outfile.data());
+    if (fileexists(outfile))
+        std::remove(outfile.data());
 
     std::string cmd = "ftp://" + user + ":" + pwd + "@" + url;
     if ( wget(cmd.data(), outfile.data(), verbose) != 0)

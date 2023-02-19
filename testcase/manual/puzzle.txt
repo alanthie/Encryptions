@@ -1,0 +1,39 @@
+REM ===========================================================================
+REM Your have received a secret message file from someone with a puzzle file
+REM 
+REM Answer all questions in this puzzle file
+REM Replace the x with your answer
+REM Save this file when done
+REM 
+REM If your answered puzzle file is named: puzzle.txt
+REM If your secret encrypted message file is named: msg.zip.encrypted
+REM If your desired unenrypted message file be named: msg.zip.uncrypted
+REM 
+REM Then to decrypt launch the following command on Windows: 
+REM crypto.exe decode -p puzzle.txt -i msg.zip.encrypted -o msg.zip.uncrypted
+REM
+REM To decrypt launch the following command on Linux: 
+REM ./crypto decode -p puzzle.txt -i msg.zip.encrypted -o msg.zip.uncrypted
+REM
+REM The crypto tool (source and executable) is available on github:
+REM https://github.com/alanthie/Encryptions
+REM
+REM ===========================================================================
+REM Your puzzle questions start here
+REM ===========================================================================
+"Votre prenom" : "Alain"
+"Le model de votre auto" : "Ford"
+"How long is an Olympic swimming pool (in meters)?" :  "50"
+"Which country do cities of Perth, Adelade & Brisbane belong to?" : "Australia"
+"Sudoku book10, no23 line1" : "123456789"
+"Sudoku book10, no23 line2" : "789123456"
+"Sudoku book10, no23 line3" : "456789123"
+"TV" : "Teamviewer"
+REM ===========================================================================
+REM Your puzzle questions end here
+REM ===========================================================================
+REM
+REM Dont remove contents from this file - just replace the x with your answers
+REM CHKSUM is required to decode your message
+REM Internet access may be needed depending on how your message was encoded
+

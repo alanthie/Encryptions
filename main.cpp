@@ -15,7 +15,7 @@
 #include "decryptor.hpp"
 #include "crypto_test.hpp"
 
-bool batch(std::string mode, std::string inifile, bool verbose = false)
+bool batch(std::string mode, std::string inifile, bool verbose)
 {
     if (fileexists(inifile) == false)
     {
@@ -28,12 +28,13 @@ bool batch(std::string mode, std::string inifile, bool verbose = false)
 
     if (verbose)
     {
+        std::cout << "Crypto batch, config file content " << inifile << std::endl;
         for(auto& [s, m] : map_sections)
         {
             std::cout << "[" << s << "]" << std::endl;
             for(auto& [p, v] : m)
             {
-                std::cout << "[" << p << "]" << "=[" << v << "]" << std::endl;
+                std::cout  << p << "=" << v << std::endl;
             }
         }
         std::cout << std::endl;
@@ -48,11 +49,13 @@ bool batch(std::string mode, std::string inifile, bool verbose = false)
     std::string folder_decoder_input;
     std::string folder_decoder_output;
     std::string folder_staging;
+    std::string keep_staging;
 
     std::string encoding_input_puzzle;
     std::string encoding_input_msg;
     std::string encoding_input_urls;
     std::string encoding_output_qa_puzzle;
+    std::string encoding_output_full_puzzle;
     std::string encoding_output_file_encrypted;
 
     std::string decoding_input_qa_puzzle;
@@ -71,6 +74,12 @@ bool batch(std::string mode, std::string inifile, bool verbose = false)
         folder_decoder_input    = ini.get_string("folder_decoder_input", Config);
         folder_decoder_output   = ini.get_string("folder_decoder_output", Config);
         folder_staging          = ini.get_string("folder_staging", Config);
+        keep_staging            = ini.get_string("keep_stage_file", Config);
+
+        if(fs::exists(folder_staging)==false)
+        {
+            fs::create_directories(folder_staging);
+        }
     }
 
     if (map_sections.find(Decoding) == map_sections.end())
@@ -96,6 +105,7 @@ bool batch(std::string mode, std::string inifile, bool verbose = false)
         encoding_input_msg          = ini.get_string("encoding_input_msg", Encoding);
         encoding_input_urls         = ini.get_string("encoding_input_urls", Encoding);
         encoding_output_qa_puzzle   = ini.get_string("encoding_output_qa_puzzle", Encoding);
+        encoding_output_full_puzzle = ini.get_string("encoding_output_full_puzzle", Encoding);
         encoding_output_file_encrypted= ini.get_string("encoding_output_file_encrypted", Encoding);
     }
 
@@ -132,14 +142,14 @@ bool batch(std::string mode, std::string inifile, bool verbose = false)
             std::cerr << "ERROR not a regular file " << folder_encoder_input + encoding_input_puzzle<< std::endl;
             return false;
         }
-        if(fs::is_regular_file(folder_encoder_output + encoding_output_qa_puzzle) == false)
+
+        if(fs::exists(folder_encoder_output)==false)
         {
-            std::cerr << "ERROR not a regular file " << folder_encoder_output + encoding_output_qa_puzzle<< std::endl;
-            return false;
+            fs::create_directories(folder_encoder_output);
         }
-        if(fs::is_regular_file(folder_encoder_output + encoding_output_file_encrypted) == false)
+        if(fs::is_directory(folder_encoder_output)==false)
         {
-            std::cerr << "ERROR not a regular file " << folder_encoder_output + encoding_output_file_encrypted<< std::endl;
+            std::cerr << "ERROR folder_encoder_output is not a folder " << folder_encoder_output << std::endl;
             return false;
         }
 
@@ -147,14 +157,18 @@ bool batch(std::string mode, std::string inifile, bool verbose = false)
                        folder_encoder_input + encoding_input_msg,
                        folder_encoder_input + encoding_input_puzzle,
                        folder_encoder_output + encoding_output_qa_puzzle,
+                       folder_encoder_output + encoding_output_full_puzzle,
                        folder_encoder_output + encoding_output_file_encrypted,
-                       verbose);
+                       folder_staging,
+                       verbose,
+                       (keep_staging == "true") ? true:false);
 
         if (encr.encrypt(true) == true)
         {
             std::cout << "crypto ENCODING SUCCESS" << std::endl;
-            std::cout << "Encrypted file: "     << folder_encoder_output + encoding_output_file_encrypted << std::endl;
-            std::cout << "Puzzle file   : "     << folder_encoder_output + encoding_output_qa_puzzle << std::endl;
+            std::cout << "Encrypted file  : "     << folder_encoder_output + encoding_output_file_encrypted << std::endl;
+            std::cout << "Puzzle qa file  : "     << folder_encoder_output + encoding_output_qa_puzzle << std::endl;
+            std::cout << "Puzzle full file: "     << folder_encoder_output + encoding_output_full_puzzle << std::endl;
             return true;
         }
         else
@@ -174,11 +188,6 @@ bool batch(std::string mode, std::string inifile, bool verbose = false)
             std::cerr << "ERROR folder_decoder_input is not a folder " << folder_decoder_input << std::endl;
             return false;
         }
-        if(fs::is_directory(folder_decoder_output)==false)
-        {
-            std::cerr << "ERROR folder_decoder_output is not a folder " << folder_decoder_output << std::endl;
-            return false;
-        }
         if(fs::is_regular_file(folder_decoder_input + decoding_input_qa_puzzle) == false)
         {
             std::cerr << "ERROR not a regular file " << folder_decoder_input + decoding_input_qa_puzzle << std::endl;
@@ -189,16 +198,29 @@ bool batch(std::string mode, std::string inifile, bool verbose = false)
             std::cerr << "ERROR not a regular file " << folder_decoder_input + decoding_input_msg_encrypted << std::endl;
             return false;
         }
-        if(fs::is_regular_file(folder_decoder_output + decoding_output_msg_unencrypted) == false)
+
+        if(fs::exists(folder_decoder_output)==false)
         {
-            std::cerr << "ERROR not a regular file " << folder_decoder_output + decoding_output_msg_unencrypted<< std::endl;
+            fs::create_directories(folder_decoder_output);
+        }
+        if(fs::is_directory(folder_decoder_output)==false)
+        {
+            std::cerr << "ERROR folder_decoder_output is not a folder " << folder_decoder_output << std::endl;
             return false;
         }
+
+//        if(fs::is_regular_file(folder_decoder_output + decoding_output_msg_unencrypted) == false)
+//        {
+//            std::cerr << "ERROR not a regular file " << folder_decoder_output + decoding_output_msg_unencrypted<< std::endl;
+//            return false;
+//        }
 
         decryptor decr(folder_decoder_input + decoding_input_qa_puzzle,
                        folder_decoder_input + decoding_input_msg_encrypted,
                        folder_decoder_output + decoding_output_msg_unencrypted,
-                       verbose);
+                       folder_staging,
+                       verbose,
+                       (keep_staging == "true") ? true:false);
 
         if (decr.decrypt() == true)
         {
@@ -257,6 +279,10 @@ int main_crypto(int argc, char **argv)
             .required()
             .help("specify the testcase name.");
 
+        test_command.add_argument("-f", "--folder")
+            .default_value(std::string(""))
+            .help("specify the root folder of test");
+
         test_command.add_argument("-v", "--verbose")
             .default_value(std::string(""))
             .help("specify the verbose");
@@ -283,12 +309,24 @@ int main_crypto(int argc, char **argv)
             .required()
             .help("specify the output qa puzzle file.");
 
+        encode_command.add_argument("-f", "--fullpuzzle")
+            .required()
+            .help("specify the output full puzzle file.");
+
         encode_command.add_argument("-u", "--url")
             .help("specify the (optional input) url list file.");
+
+        encode_command.add_argument("-s", "--staging")
+            .default_value(std::string(""))
+            .help("specify the staging folder.");
 
         encode_command.add_argument("-v", "--verbose")
             .default_value(std::string(""))
             .help("specify the verbose");
+
+        encode_command.add_argument("-k", "--keep")
+            .default_value(std::string(""))
+            .help("specify if keeping staging file");
     }
 
     // Decode subcommand
@@ -309,9 +347,17 @@ int main_crypto(int argc, char **argv)
             .required()
             .help("specify the input puzzle file.");
 
+        decode_command.add_argument("-s", "--staging")
+            .default_value(std::string(""))
+            .help("specify the staging folder.");
+
         decode_command.add_argument("-v", "--verbose")
             .default_value(std::string(""))
             .help("specify the verbose");
+
+        decode_command.add_argument("-k", "--keep")
+            .default_value(std::string(""))
+            .help("specify if keeping staging file");
     }
 
     // Add the subcommands to the main parser
@@ -336,7 +382,9 @@ int main_crypto(int argc, char **argv)
     {
         auto& cmd = test_command;
         auto testname = cmd.get<std::string>("--input");
+        auto folder = cmd.get<std::string>("--folder");
         auto verb = cmd.get<std::string>("--verbose");
+
         bool verbose = verb.size()>0 ? true : false;
 
         if (testname == "core")
@@ -345,9 +393,9 @@ int main_crypto(int argc, char **argv)
         }
         else
         {
-            if (testname == "nowebkey") DOTESTCASE(testname, true, verbose);
-            else if (testname == "zipcontent") DOTESTCASE(testname, false, verbose, "/test.zip");
-            else DOTESTCASE(testname, false, verbose);
+            if      (testname == "nowebkey")   DOTESTCASE(testname, folder, true, verbose);
+            else if (testname == "zipcontent") DOTESTCASE(testname, folder, false, verbose, "/test.zip");
+            else DOTESTCASE(testname, folder, false, verbose);
         }
         return 0;
     }
@@ -382,9 +430,14 @@ int main_crypto(int argc, char **argv)
         auto output_path = cmd.get<std::string>("--output");
         auto puzzle_path  = cmd.get<std::string>("--puzzle");
         auto qa_puzzle_path  = cmd.get<std::string>("--qapuzzle");
+        auto full_puzzle_path  = cmd.get<std::string>("--fullpuzzle");
         auto url_path  = cmd.get<std::string>("--url");
+        auto staging_path  = cmd.get<std::string>("--staging");
         auto verb  = cmd.get<std::string>("--verbose");
+        auto keep = cmd.get<std::string>("--keep");
+
         bool verbose = verb.size()>0 ? true : false;
+        bool keeping = keep.size()>0 ? true : false;
 
         // ./crypto encode  -i ./test.zip -o ./test.zip.encrypted -p ./puzzle.txt -q ./partial_puzzle.txt -u ./urls.txt
         std::cout << "crypto ENCODING..." << std::endl;
@@ -392,8 +445,11 @@ int main_crypto(int argc, char **argv)
                        input_path,
                        puzzle_path,
                        qa_puzzle_path,
+                       full_puzzle_path,
                        output_path,
-                       verbose);
+                       staging_path,
+                       verbose,
+                       keeping);
 
         if (encr.encrypt(false) == true)
         {
@@ -416,15 +472,21 @@ int main_crypto(int argc, char **argv)
         auto input_path  = cmd.get<std::string>("--input");
         auto output_path = cmd.get<std::string>("--output");
         auto puzzle_path  = cmd.get<std::string>("--puzzle");
+        auto staging_path  = cmd.get<std::string>("--staging");
         auto verb  = cmd.get<std::string>("--verbose");
+        auto keep = cmd.get<std::string>("--keep");
+
         bool verbose = verb.size()>0 ? true : false;
+        bool keeping = keep.size()>0 ? true : false;
 
         // ./crypto decode  -i ./test.zip.encrypted -o ./test.zip.unencrypted -p ./puzzle.txt
         std::cout << "crypto DECODING..." << std::endl;
         decryptor decr(puzzle_path,
                        input_path,
                        output_path,
-                       verbose);
+                       staging_path,
+                       verbose,
+                       keeping);
 
         if (decr.decrypt() == true)
         {
