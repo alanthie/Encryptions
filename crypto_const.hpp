@@ -36,6 +36,8 @@ public:
     char urlinfo_with_padding[URLINFO_SIZE] = {0};
 };
 
+int wget(const char *in, const char *out, bool verbose);
+
 namespace fs = std::filesystem;
 bool fileexists(const fs::path& p, fs::file_status s = fs::file_status{})
 {
@@ -58,6 +60,30 @@ int getvideo(std::string url, std::string outfile, std::string options = "", boo
     }
     int r = system(cmd.data());
     return r;
+}
+
+int getftp(std::string url, std::string outfile, std::string options = "", bool verbose=false)
+{
+    options=options;
+    std::string user="vasts_33625705";
+    std::string pwd;
+    std::cout << "Enter ftp pwd:";
+    std::cin >> pwd;
+
+    //std::string filename  = "./staging_ftp_file.dat";
+    std::remove(outfile.data());
+
+    std::string cmd = "ftp://" + user + ":" + pwd + "@" + url;
+    if ( wget(cmd.data(), outfile.data(), verbose) != 0)
+    {
+        std::cout << "ERROR with wget ftp://... " << url  << std::endl;
+        return -1;
+    }
+    else
+    {
+        std::cout << "OK with wget ftp://..." << std::endl;
+        return 0;
+    }
 }
 
 //https://github.com/patrickjennings/General-Haberdashery/blob/master/wget/wget.c

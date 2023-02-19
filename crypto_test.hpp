@@ -226,18 +226,43 @@ void test_core(bool verbose = true)
         std::cout << "getvideo returned " << r << std::endl;
     }
 
+    if (true)
+    {
+        std::string user="vasts_33625705";
+        std::string pwd;
+        std::cout << "Enter ftp pwd:";
+        std::cin >> pwd;
+
+        std::string filename  = "./staging_Buffer.hpp";
+        std::remove(filename.data());
+
+        std::string cmd = "ftp://" + user + ":" + pwd + "@ftp.vastserve.com/htdocs/Buffer.hpp";
+        if ( wget(cmd.data(), filename.data()) != 0)
+        {
+            std::cout << "ERROR with wget ftp://.." << std::endl;
+        }
+        else
+        {
+            std::cout << "OK with wget ftp://.." << std::endl;
+        }
+    }
+
     //https://ln5.sync.com/dl/7259131b0/twwrxp25-j6j6viw3-5a99vmwn-rv43m9e6
     if (false)
     {
         //Sync public TerrePlane (Flat earth) img.pgn
         //std::string url = "https://ln5.sync.com/dl/7259131b0/twwrxp25-j6j6viw3-5a99vmwn-rv43m9e6";
+        // EXTRACT TEMPORARY BLOB
+
         //std::string url = "https://cp.sync.com/9a4886a8-b1b3-4a2c-a3c7-4b0c01d76486";
         //std::string url = "https://cp.sync.com/file/1342219113/view/image";
-        //std::string url = "https://u.pcloud.link/publink/show?code=XZH2QgVZC4KuzbwhtBmqrvCrpMQhTzAkOd2V";
+        std::string url = "https://u.pcloud.link/publink/show?code=XZH2QgVZC4KuzbwhtBmqrvCrpMQhTzAkOd2V";
+        //"downloadlink": "https:\/\/vc577.pcloud.com\/dHZTgqwh1ZJ8HkagZZZC9s5o7Z2ZZLH4ZkZH2QgVZXgFPoVee7xjlQn2NAj6oUHSJKlPy\/Screenshot%20from%202021-06-16%2014-28-40.png",
+
         //"downloadlink": " // EXPIRED
-        std::string url = "https://c326.pcloud.com/dHZTgqwh1ZJ8HkagZZZQaV0o7Z2ZZLH4ZkZH2QgVZ91trCtkdpvFP5vxOxY8VcyStULb7/Screenshot%20from%202021-06-16%2014-28-40.png";
+        //std::string url = "https://c326.pcloud.com/dHZTgqwh1ZJ8HkagZZZQaV0o7Z2ZZLH4ZkZH2QgVZ91trCtkdpvFP5vxOxY8VcyStULb7/Screenshot%20from%202021-06-16%2014-28-40.png";
         //"https:\/\/c326.pcloud.com\/dHZTgqwh1ZJ8HkagZZZQaV0o7Z2ZZLH4ZkZH2QgVZ91trCtkdpvFP5vxOxY8VcyStULb7\/Screenshot%20from%202021-06-16%2014-28-40.png"
-        std::string filename  = "./staging_img.png";
+        std::string filename  = "./staging_img_header.txt";
         std::remove(filename.data());
 
         if ( wget(url.data(), filename.data()) != 0)
@@ -248,7 +273,7 @@ void test_core(bool verbose = true)
         {
             std::cout << "OK with wget " << std::endl;
         }
-        std::remove(filename.data());
+        //std::remove(filename.data());
     }
 }
 

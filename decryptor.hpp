@@ -101,23 +101,39 @@ public:
             for( int16_t j = 0; j< URL_MAX_SIZE; j++)
                 u[j] = uk.url[j];
 
-            bool is_video=  false;
+            bool is_video =  false;
+            bool is_ftp =  false;
             if (u[0]=='[')
             {
                 if (u[1]=='v')
                 {
                     is_video = true;
                 }
+                if (u[1]=='f')
+                {
+                    is_ftp = true;
+                }
             }
 
             int pos_url = 0;
             if (is_video) pos_url = 3;
+            if (is_ftp) pos_url = 3;
             int rc = 0;
 
             if (is_video)
             {
                 std::string s(&u[pos_url]);
                 rc = getvideo(s, file.data(), "", verbose);
+            }
+            else if (is_ftp)
+            {
+                std::string s(&u[pos_url]);
+                rc = getftp(s.data(), file.data(), "", verbose);
+                if (rc!= 0)
+                {
+                    std::cerr << "ERROR with getftp, error code: " << rc << " url: " << s <<  " file: " << file << std::endl;
+                    r = false;
+                }
             }
             else
             {

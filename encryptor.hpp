@@ -108,6 +108,7 @@ public:
 
 		// DOWNLOAD URL FILE
 		bool is_video = false;
+		bool is_ftp = false;
 		if (vurlkey[i].url[0]=='[')
 		{
             if (vurlkey[i].url[1]=='v')
@@ -115,15 +116,32 @@ public:
                 is_video = true;
             }
 		}
+        if (vurlkey[i].url[0]=='[')
+		{
+            if (vurlkey[i].url[1]=='f')
+            {
+                is_ftp = true;
+            }
+		}
 
 		int pos_url = 0;
 		if (is_video) pos_url = 3;
+		if (is_ftp) pos_url = 3;
         int rc = 0;
 
         std::string s(&vurlkey[i].url[pos_url]);
         if (is_video)
         {
             rc = getvideo(s.data(), file.data(), "", verbose);
+            if (rc!= 0)
+            {
+                std::cerr << "ERROR with getvideo using youtube-dl, error code: " << rc << " url: " << s <<  " file: " << file << std::endl;
+                r = false;
+            }
+        }
+        else if (is_ftp)
+        {
+            rc = getftp(s.data(), file.data(), "", verbose);
             if (rc!= 0)
             {
                 std::cerr << "ERROR with getvideo using youtube-dl, error code: " << rc << " url: " << s <<  " file: " << file << std::endl;
