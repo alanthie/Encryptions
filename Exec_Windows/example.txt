@@ -14,9 +14,13 @@ Windows
 
 
 In BATCH mode
-;
+Linux:
 ; ./crypto batch_encode -i /home/server/dev/Encryptions/testcase/manual/crypto_batch_manual.ini 
 ; ./crypto batch_decode -i /home/server/dev/Encryptions/testcase/manual/crypto_batch_manual.ini 
 ;
-
+;
+Windows:
+; ./crypto.exe batch_encode -i D:\000DEV\Encryptions\testcase\manual\crypto_batch_manual_win.ini 
+; ./crypto.exe batch_decode -i D:\000DEV\Encryptions\testcase\manual\crypto_batch_manual_win.ini 
+;
 
