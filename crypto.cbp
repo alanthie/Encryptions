@@ -99,8 +99,15 @@
 		<Unit filename="common/cryptomath.h" />
 		<Unit filename="common/includes.cpp" />
 		<Unit filename="common/includes.h" />
+		<Unit filename="crypto_const.hpp" />
+		<Unit filename="crypto_test.hpp" />
+		<Unit filename="data.hpp" />
+		<Unit filename="decryptor.hpp" />
+		<Unit filename="encryptor.hpp" />
 		<Unit filename="ini_parser.hpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="puzzle.hpp" />
+		<Unit filename="random_engine.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

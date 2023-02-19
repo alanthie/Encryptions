@@ -66,7 +66,6 @@ bool batch(std::string mode, std::string inifile, bool verbose = false)
     }
     else
     {
-        //verb = ini.get_bool("verbose", Config) ;
         folder_encoder_input    = ini.get_string("folder_encoder_input", Config);
         folder_encoder_output   = ini.get_string("folder_encoder_output", Config);
         folder_decoder_input    = ini.get_string("folder_decoder_input", Config);
@@ -107,6 +106,43 @@ bool batch(std::string mode, std::string inifile, bool verbose = false)
     {
         std::cout << "crypto ENCODING..." << std::endl;
 
+        if(fs::is_directory(folder_encoder_input)==false)
+        {
+            std::cerr << "ERROR folder_encoder_input is not a folder " << folder_encoder_input << std::endl;
+            return false;
+        }
+        if(fs::is_directory(folder_encoder_input)==false)
+        {
+            std::cerr << "ERROR folder_encoder_output is not a folder " << folder_encoder_output << std::endl;
+            return false;
+        }
+
+        if(fs::is_regular_file(folder_encoder_input + encoding_input_urls) == false)
+        {
+            std::cerr << "ERROR not a regular file " << folder_encoder_input + encoding_input_urls << std::endl;
+            return false;
+        }
+        if(fs::is_regular_file(folder_encoder_input + encoding_input_msg) == false)
+        {
+            std::cerr << "ERROR not a regular file " << folder_encoder_input + encoding_input_msg<< std::endl;
+            return false;
+        }
+        if(fs::is_regular_file(folder_encoder_input + encoding_input_puzzle) == false)
+        {
+            std::cerr << "ERROR not a regular file " << folder_encoder_input + encoding_input_puzzle<< std::endl;
+            return false;
+        }
+        if(fs::is_regular_file(folder_encoder_output + encoding_output_qa_puzzle) == false)
+        {
+            std::cerr << "ERROR not a regular file " << folder_encoder_output + encoding_output_qa_puzzle<< std::endl;
+            return false;
+        }
+        if(fs::is_regular_file(folder_encoder_output + encoding_output_file_encrypted) == false)
+        {
+            std::cerr << "ERROR not a regular file " << folder_encoder_output + encoding_output_file_encrypted<< std::endl;
+            return false;
+        }
+
         encryptor encr(folder_encoder_input + encoding_input_urls,
                        folder_encoder_input + encoding_input_msg,
                        folder_encoder_input + encoding_input_puzzle,
@@ -116,7 +152,7 @@ bool batch(std::string mode, std::string inifile, bool verbose = false)
 
         if (encr.encrypt(true) == true)
         {
-            std::cerr << "crypto ENCODING SUCCESS" << std::endl;
+            std::cout << "crypto ENCODING SUCCESS" << std::endl;
             std::cout << "Encrypted file: "     << folder_encoder_output + encoding_output_file_encrypted << std::endl;
             std::cout << "Puzzle file   : "     << folder_encoder_output + encoding_output_qa_puzzle << std::endl;
             return true;
@@ -133,6 +169,32 @@ bool batch(std::string mode, std::string inifile, bool verbose = false)
     {
         std::cout << "crypto DECODING..." << std::endl;
 
+        if(fs::is_directory(folder_decoder_input)==false)
+        {
+            std::cerr << "ERROR folder_decoder_input is not a folder " << folder_decoder_input << std::endl;
+            return false;
+        }
+        if(fs::is_directory(folder_decoder_output)==false)
+        {
+            std::cerr << "ERROR folder_decoder_output is not a folder " << folder_decoder_output << std::endl;
+            return false;
+        }
+        if(fs::is_regular_file(folder_decoder_input + decoding_input_qa_puzzle) == false)
+        {
+            std::cerr << "ERROR not a regular file " << folder_decoder_input + decoding_input_qa_puzzle << std::endl;
+            return false;
+        }
+        if(fs::is_regular_file(folder_decoder_input + decoding_input_msg_encrypted) == false)
+        {
+            std::cerr << "ERROR not a regular file " << folder_decoder_input + decoding_input_msg_encrypted << std::endl;
+            return false;
+        }
+        if(fs::is_regular_file(folder_decoder_output + decoding_output_msg_unencrypted) == false)
+        {
+            std::cerr << "ERROR not a regular file " << folder_decoder_output + decoding_output_msg_unencrypted<< std::endl;
+            return false;
+        }
+
         decryptor decr(folder_decoder_input + decoding_input_qa_puzzle,
                        folder_decoder_input + decoding_input_msg_encrypted,
                        folder_decoder_output + decoding_output_msg_unencrypted,
@@ -140,7 +202,7 @@ bool batch(std::string mode, std::string inifile, bool verbose = false)
 
         if (decr.decrypt() == true)
         {
-            std::cerr << "crypto DECODING SUCCESS" << std::endl;
+            std::cout << "crypto DECODING SUCCESS" << std::endl;
             std::cout << "Decrypted file: " << folder_decoder_output + decoding_output_msg_unencrypted << std::endl;
             return true;
         }
@@ -366,7 +428,7 @@ int main_crypto(int argc, char **argv)
 
         if (decr.decrypt() == true)
         {
-            std::cerr << "crypto DECODING SUCCESS" << std::endl;
+            std::cout << "crypto DECODING SUCCESS" << std::endl;
             std::cout << "Decrypted file: " << output_path << std::endl;
             return 0;
         }
