@@ -106,12 +106,12 @@ public:
             if (vQA[i].type == 0)
             {
                 s = "\"" + vQA[i].Q +"\"" +" : " +  "\"" + vQA[i].A + "\"" + "\n";
-                temp.buffer.write(s.data(), s.size(), -1);
+                temp.buffer.write(s.data(), (uint32_t)s.size(), -1);
             }
             else if (vQA[i].type == 1)
             {
                 s = vQA[i].Q + vQA[i].A + "\n";
-                temp.buffer.write(s.data(), s.size(), -1);
+                temp.buffer.write(s.data(), (uint32_t)s.size(), -1);
             }
         }
     }
@@ -152,7 +152,7 @@ public:
         make_puzzle_before_checksum(temp);
 
         std::string s = CHKSUM_TOKEN + " puzzle : " + chksum_puzzle + "\n";
-        temp.buffer.write(s.data(), s.size(), -1);
+        temp.buffer.write(s.data(), (uint32_t)s.size(), -1);
         return temp.save_to_file(filename);
     }
 

@@ -20,9 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\argparse.hpp" />
+    <ClInclude Include="..\..\Base64.h" />
     <ClInclude Include="..\..\Buffer.hpp" />
     <ClInclude Include="..\..\common\cryptomath.h" />
     <ClInclude Include="..\..\common\includes.h" />
+    <ClInclude Include="..\..\crypto_batch.hpp" />
+    <ClInclude Include="..\..\encrypt.h" />
     <ClInclude Include="..\..\Encryptions.h" />
     <ClInclude Include="..\..\Encryptions\AES.h" />
     <ClInclude Include="..\..\Encryptions\AES_Const.h" />
@@ -67,8 +70,10 @@
     <ClInclude Include="..\..\modes\OFB.h" />
     <ClInclude Include="..\..\modes\PCPB.h" />
     <ClInclude Include="..\..\SHA256.h" />
+    <ClInclude Include="..\..\vigenere.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Base64.cpp" />
     <ClCompile Include="..\..\common\includes.cpp" />
     <ClCompile Include="..\..\Encryptions\AES.cpp" />
     <ClCompile Include="..\..\Encryptions\Blowfish.cpp" />

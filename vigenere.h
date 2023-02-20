@@ -52,10 +52,11 @@ bool is_valid_string(std::string s)
 std::string extend_key(std::string& msg, std::string& key)
 {
 	// generating new key
-	int msgLen = msg.size();
+	int msgLen = (int)msg.size();
 	std::string newKey(msgLen, 'x');
 
-	int keyLen = key.size(), i, j;
+    int keyLen = (int)key.size();
+    int i; int j;
 	keyLen = keyLen;
 
     for(i = 0, j = 0; i < msgLen; ++i, ++j)
@@ -72,7 +73,8 @@ std::string extend_key(std::string& msg, std::string& key)
 
 std::string encrypt_vigenere(std::string& msg, std::string& key)
 {
-	int msgLen = msg.size(), i;
+	int msgLen = (int)msg.size();
+    int i = 0;
 
  	std::string encryptedMsg(msgLen, 'x');
     // char newKey[msgLen], encryptedMsg[msgLen], decryptedMsg[msgLen];
@@ -100,7 +102,7 @@ std::string encrypt_vigenere(std::string& msg, std::string& key)
 std::string decrypt_vigenere(std::string& encryptedMsg, std::string& newKey)
 {
 	// decryption
-	int msgLen = encryptedMsg.size();
+	int msgLen = (int)encryptedMsg.size();
 	std::string decryptedMsg(msgLen, 'x');
 	int i;
     for(i = 0; i < msgLen; ++i)

@@ -54,7 +54,7 @@ int32_t filesize(std::string filename)
     std::ifstream ifd(filename.data(), std::ios::binary | std::ios::ate);
     if (ifd)
     {
-        sz = ifd.tellg();
+        sz = (int32_t)ifd.tellg();
     }
     ifd.close();
     return sz;

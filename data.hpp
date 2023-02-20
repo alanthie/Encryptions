@@ -18,7 +18,7 @@ public:
         std::ifstream ifd(filename.data(), std::ios::binary | std::ios::ate);
         if (ifd)
         {
-            int32_t sz = ifd.tellg();
+            int32_t sz = (int32_t)ifd.tellg();
             if(sz<=-1)
             {
                 std::cerr << "ERROR read_from_file can not read size" << filename << std::endl;
@@ -124,8 +124,8 @@ public:
             return -1;
         }
         rout.erase();
-        rout.write(buffer.getdata(), n, 0);
-        return n;
+        rout.write(buffer.getdata(), (int32_t)n, 0);
+        return (int32_t)n;
 	}
 
 	int32_t get_last(size_t n, Buffer& rout)
@@ -136,8 +136,8 @@ public:
             return -1;
         }
         rout.erase();
-        rout.write(buffer.getdata() + buffer.size() - n, n, 0);
-        return n;
+        rout.write(buffer.getdata() + buffer.size() - n, (uint32_t)n, 0);
+        return (int32_t) n;
 	}
 
     bool copy_buffer_to(cryptodata& dst)

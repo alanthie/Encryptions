@@ -43,8 +43,8 @@ std::string Base64::encode(const std::vector<char>& datax)
 {
   std::string::size_type  i;
   char               c;
-  unsigned int       len = datax.size();
-  std::string             ret;
+  unsigned int       len = (unsigned int)datax.size();
+  std::string        ret;
 
   for (i = 0; i < len; ++i)
   {

@@ -80,8 +80,8 @@ bool batch(std::string mode, std::string inifile, bool verbose)
         folder_decoder_output   = ini.get_string("folder_decoder_output", Config);
         folder_staging          = ini.get_string("folder_staging", Config);
         keep_staging            = ini.get_string("keep_stage_file", Config);
-        encryped_ftp_user       = ini.get_string("encryped_ftp_user", Config);
-        encryped_ftp_pwd        = ini.get_string("encryped_ftp_pwd", Config);
+        encryped_ftp_user = ini.get_string("encryped_ftp_user", Config);
+        encryped_ftp_pwd  = ini.get_string("encryped_ftp_pwd", Config);
 
         if(fs::exists(folder_staging)==false)
         {

@@ -222,7 +222,11 @@ class ini_parser
 
         std::string get_string(const std::string& name, const std::string& section = "") const
         {
-            ensure_property_exists(section, name);
+            //ensure_property_exists(section, name);
+            if (check_property_exists(section, name) == false)
+            {
+                return "";
+            }
             return sections.at(section).at(name);
         }
 
@@ -466,6 +470,19 @@ class ini_parser
             {
                 throw std::runtime_error("property \"" + name + "\" does not exist");
             }
+        }
+        bool check_property_exists(const std::string& section, const std::string& name) const
+        {
+            if (section != "" && sections.find(section) == sections.end())
+            {
+                return false;
+            }
+
+            if (sections.at(section).find(name) == sections.at(section).end())
+            {
+                return false;
+            }
+            return true;
         }
 
     private:

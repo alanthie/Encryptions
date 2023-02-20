@@ -153,10 +153,10 @@ public:
 
     void int4ToByte(unsigned long k,  char buff[])
     {
-        buff[0] = (k & 0x000000ff);
-        buff[1] = (k & 0x0000ff00) >> 8;
-        buff[2] = (k & 0x00ff0000) >> 16;
-        buff[3] = (k & 0xff000000) >> 24;
+        buff[0] = (char)(k & 0x000000ff);
+        buff[1] = (char)(k & 0x0000ff00) >> 8;
+        buff[2] = (char)(k & 0x00ff0000) >> 16;
+        buff[3] = (char)(k & 0xff000000) >> 24;
     }
     void int2ToByte(unsigned long k,  char buff[])
     {

@@ -187,7 +187,7 @@ public:
 				if (d.buffer.size() > KEY_SIZE)
 				{
 					random_engine rd;
-					uint32_t t = rd.get_rand() * (d.buffer.size() - KEY_SIZE);
+					uint32_t t = (uint32_t) rd.get_rand() * (d.buffer.size() - KEY_SIZE);
 					vurlkey[i].key_fromH = (t / BASE);
 					vurlkey[i].key_fromL = t - (vurlkey[i].key_fromH  * BASE);
                     if (verbose)
@@ -325,7 +325,7 @@ public:
 
             DES des(KEY);
             data_encr = des.encrypt_bin(DATA, 4);
-            data_temp_next.buffer.write(data_encr.data(), data_encr.size(), -1); // 8 bytes!
+            data_temp_next.buffer.write(data_encr.data(), (uint32_t)data_encr.size(), -1); // 8 bytes!
         }
 
 		return r;
@@ -528,7 +528,7 @@ public:
         Buffer temp(PADDING_MULTIPLE);
 		temp.init(0);
         temp.writeUInt16(PADDING, PADDING_MULTIPLE - 4);
-		temp.writeUInt16(vurlkey.size() + 1, PADDING_MULTIPLE-2);
+		temp.writeUInt16((uint16_t)vurlkey.size() + 1, PADDING_MULTIPLE-2);
         data_temp.append(temp.getdata(), PADDING_MULTIPLE);
 
         //encode(DataN+urlkeyN+Niter,     pwd0) => DataFinal

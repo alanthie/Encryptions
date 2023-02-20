@@ -403,8 +403,8 @@ public:
             size_t file_size = data_temp_next.buffer.size();
             if (file_size >= PADDING_MULTIPLE)
             {
-                PADDING = data_temp_next.buffer.readUInt16(file_size - 4);
-                NITER   = data_temp_next.buffer.readUInt16(file_size-2);
+                PADDING = data_temp_next.buffer.readUInt16((uint16_t)file_size - 4);
+                NITER   = data_temp_next.buffer.readUInt16((uint16_t)file_size-2);
                 NITER = NITER - 1;
 
                 if (NITER < 0)

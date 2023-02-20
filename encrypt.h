@@ -26,7 +26,7 @@ std::string encrypt_simple_string(std::string& msg, std::string& key)
 // https://stackoverflow.com/questions/17316506/strip-invalid-utf8-from-string-in-c-c
 std::string sanitize_utf8(std::string& str)
 {
-    int i,f_size=str.size();
+    int i,f_size= (int)str.size();
     unsigned char c,c2,c3,c4;
     c2=0;
     std::string to;
@@ -51,9 +51,9 @@ std::string sanitize_utf8(std::string& str)
         }
         else if(c<160){//control char (nothing should be defined here either ASCI, ISO_8859-1 or UTF8, so skipping)
             if(c2==128){//fix microsoft mess, add euro
-                to.append(1,226);
-                to.append(1,130);
-                to.append(1,172);
+                to.append(1, (char)226);
+                to.append(1, (char)130);
+                to.append(1, (char)172);
             }
             if(c2==133){//fix IBM mess, add NEL = \n\r
                 to.append(1,10);
