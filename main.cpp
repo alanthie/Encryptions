@@ -236,7 +236,16 @@ int main_crypto(int argc, char **argv)
         auto s    = cmd.get<std::string>("--input");
         auto k    = cmd.get<std::string>("--key");
 
-        std::cout << "The encrypted string is : " << encrypt_simple_string(s, k) << std::endl;
+        auto se = encrypt_simple_string(s, k);
+        bool ok = is_valid_string(se);
+        if (ok==false)
+        {
+            std::cout << "The encrypted string is not a printable string, please use another key " << std::endl;
+        }
+        else
+        {
+            std::cout << "The encrypted string is : " << se << std::endl;
+        }
         return 0;
     }
 
@@ -246,6 +255,12 @@ int main_crypto(int argc, char **argv)
         auto s    = cmd.get<std::string>("--input");
         auto k    = cmd.get<std::string>("--key");
 
+        auto se = decrypt_simple_string(s, k);
+        bool ok = is_valid_string(se);
+        if (ok==false)
+        {
+            std::cout << "The decrypted string is not a printable string, please use another key " << std::endl;
+        }
         std::cout << "The decrypted string is : " << decrypt_simple_string(s, k) << std::endl;
         return 0;
     }

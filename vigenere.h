@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-using namespace std;
+//using namespace std;
 
 std::string AVAILABLE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
 
@@ -25,6 +25,29 @@ int index(char c)
 	return -1;
 }
 
+bool is_valid_string(std::string s)
+{
+    char c;
+    unsigned char v;
+    for(int ii = 0; ii < (int)s.size(); ii++)
+    {
+        c = s[ii];
+        if (index(c) == -1)
+        {
+            v = (unsigned char)c;
+            if ((v >= 32) && (v <= 127))
+            {
+                continue;
+            }
+            else
+            {
+                std::cerr << "Invalid char at position: " << ii << std::endl;
+                return false;
+            }
+        }
+    }
+    return true;
+}
 
 std::string extend_key(std::string& msg, std::string& key)
 {
@@ -57,11 +80,15 @@ std::string encrypt_vigenere(std::string& msg, std::string& key)
 	std::string newKey = extend_key(msg, key);
 
     //encryption
-    for(i = 0; i < msgLen; ++i) {
+    for(i = 0; i < msgLen; ++i)
+    {
     	// std::cout << msg[i] << " " << isalnum(msg[i]) << std::endl;
-    	if(isalnum(msg[i]) or msg[i] == ' ') {
+    	if(isalnum(msg[i]) or msg[i] == ' ')
+    	{
     		encryptedMsg[i] = AVAILABLE_CHARS[((index(msg[i]) + index(newKey[i])) % AVAILABLE_CHARS.size())];
-    	} else {
+    	}
+    	else
+    	{
     		encryptedMsg[i] = msg[i];
     	}
     }
@@ -70,15 +97,20 @@ std::string encrypt_vigenere(std::string& msg, std::string& key)
     return encryptedMsg;
 }
 
-std::string decrypt_vigenere(std::string& encryptedMsg, std::string& newKey) {
+std::string decrypt_vigenere(std::string& encryptedMsg, std::string& newKey)
+{
 	// decryption
 	int msgLen = encryptedMsg.size();
 	std::string decryptedMsg(msgLen, 'x');
 	int i;
-    for(i = 0; i < msgLen; ++i) {
-    	if(isalnum(encryptedMsg[i]) or encryptedMsg[i] == ' ') {
+    for(i = 0; i < msgLen; ++i)
+    {
+    	if(isalnum(encryptedMsg[i]) or encryptedMsg[i] == ' ')
+    	{
     		decryptedMsg[i] = AVAILABLE_CHARS[(((index(encryptedMsg[i]) - index(newKey[i])) + AVAILABLE_CHARS.size()) % AVAILABLE_CHARS.size())];
-    	} else {
+    	}
+    	else
+    	{
     		decryptedMsg[i] = encryptedMsg[i];
     	}
     }

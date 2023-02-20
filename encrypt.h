@@ -9,10 +9,18 @@
 
 std::string encrypt_simple_string(std::string& msg, std::string& key)
 {
-    std::vector<char> msg2(msg.begin(), msg.end());
-    std::string b64_str = Base64::encode(msg2);
-    std::string vigenere_msg = encrypt_vigenere(b64_str, key);
-    return vigenere_msg;
+    std::string s;
+    {
+        std::vector<char> msg2(msg.begin(), msg.end());
+        std::string b64_str = Base64::encode(msg2);
+        std::string vigenere_msg = encrypt_vigenere(b64_str, key);
+        s = vigenere_msg;
+    }
+
+    std::vector<char> msg2b(s.begin(), s.end());
+    std::string b64_str = Base64::encode(msg2b);
+    std::string vigenere_msg2 = encrypt_vigenere(b64_str, key);
+    return vigenere_msg2;
 }
 
 // https://stackoverflow.com/questions/17316506/strip-invalid-utf8-from-string-in-c-c
@@ -21,20 +29,27 @@ std::string sanitize_utf8(std::string& str)
     int i,f_size=str.size();
     unsigned char c,c2,c3,c4;
     c2=0;
-    string to;
+    std::string to;
     to.reserve(f_size);
 
-    for(i=0 ; i<f_size ; i++){
+    for(i=0 ; i<f_size ; i++)
+    {
         c=(unsigned char)(str)[i];
-        if(c<32){//control char
+        if(c<32)
+        {
+            //control char
             if(c==9 || c==10 || c==13){//allow only \t \n \r
                 to.append(1,c);
             }
             continue;
-        }else if(c<127){//normal ASCII
+        }
+        else if(c<127)
+        {
+            //normal ASCII
             to.append(1,c);
             continue;
-        }else if(c<160){//control char (nothing should be defined here either ASCI, ISO_8859-1 or UTF8, so skipping)
+        }
+        else if(c<160){//control char (nothing should be defined here either ASCI, ISO_8859-1 or UTF8, so skipping)
             if(c2==128){//fix microsoft mess, add euro
                 to.append(1,226);
                 to.append(1,130);
@@ -98,11 +113,22 @@ std::string sanitize_utf8(std::string& str)
 
 std::string decrypt_simple_string(std::string& encrypted_msg, std::string& key)
 {
-    std::string newKey = extend_key(encrypted_msg, key);
-    std::string b64_encoded_str = decrypt_vigenere(encrypted_msg, newKey);
+    std::string s;
+    {
+        std::string newKey = extend_key(encrypted_msg, key);
+        std::string b64_encoded_str = decrypt_vigenere(encrypted_msg, newKey);
+        std::vector<char> b64_decode_vec = Base64::decode(b64_encoded_str);
+        std::string b64_decode_str(b64_decode_vec.begin(), b64_decode_vec.end());
+        s = sanitize_utf8(b64_decode_str);
+    }
+
+    std::string newKey = extend_key(s, key);
+    std::string b64_encoded_str = decrypt_vigenere(s, newKey);
     std::vector<char> b64_decode_vec = Base64::decode(b64_encoded_str);
     std::string b64_decode_str(b64_decode_vec.begin(), b64_decode_vec.end());
-    return sanitize_utf8(b64_decode_str);
+    s = sanitize_utf8(b64_decode_str);
+
+    return s;
 }
 
 #endif // _INCLUDES_encrypt_H
