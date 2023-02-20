@@ -7,10 +7,6 @@ REM Your puzzle questions start here
 REM ===========================================================================
 "Your first name" : "Samuel"
 "Your car model" : "Ford"
-"Sudoku book1, puzzle 23 line1" : "123456789"
-"Sudoku book1, puzzle 23 line2" : "789123456"
-"Sudoku book1, puzzle 23 line3" : "456789123"
-"Random001.txt file at 1234" : "214302698"
 REM ===========================================================================
 REM Your puzzle questions end here
 REM ===========================================================================
