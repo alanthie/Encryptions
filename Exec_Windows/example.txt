@@ -8,8 +8,8 @@ Linux:
 
 
 Windows
-./crypto.exe encode  -i ./test.zip -o ./encoder_output/test.zip.encrypted -p ./puzzle.txt -q ./encoder_output/partial_puzzle.txt -u ./urls.txt -v 1 -s ./tmp/ -k 1 -f ./encoder_output/puzzle_full.txt
-./crypto.exe decode  -i ./encoder_output/test.zip.encrypted -p ./encoder_output/puzzle.txt.full -o ./decoder/output/test.zip.unencrypted -v c
+crypto.exe encode  -i ./test.zip -o ./encoder_output/test.zip.encrypted -p ./puzzle.txt -q ./encoder_output/partial_puzzle.txt -u ./urls.txt -v 1 -s ./tmp/ -k 1 -f ./encoder_output/puzzle_full.txt
+crypto.exe decode  -i ./encoder_output/test.zip.encrypted -p ./encoder_output/puzzle.txt.full -o ./decoder/output/test.zip.unencrypted -v c
 
 
 
@@ -20,7 +20,7 @@ Linux:
 ;
 ;
 Windows:
-; ./crypto.exe batch_encode -i D:\000DEV\Encryptions\testcase\manual\crypto_batch_manual_win.ini 
-; ./crypto.exe batch_decode -i D:\000DEV\Encryptions\testcase\manual\crypto_batch_manual_win.ini 
+; D:\000DEV\Encryptions\Exec_Windows\crypto.exe batch_encode -i D:\000DEV\Encryptions\testcase\manual\crypto_batch_manual_win.ini 
+; D:\000DEV\Encryptions\Exec_Windows\crypto.exe batch_decode -i D:\000DEV\Encryptions\testcase\manual\crypto_batch_manual_win.ini 
 ;
 
