@@ -18,39 +18,6 @@
 #include "encrypt.h"
 #include "data.hpp"
 
-bool generate_random_file(std::string filename, long long N=10000)
-{
-    cryptodata data;
-    std::string s;
-    std::string si;
-    std::string sn;
-    const double LIM = 1000*1000*1000;
-    srand ((unsigned int)time(NULL));
-    srand ((unsigned int)time(NULL));
-    long long n;
-    long long t;
-    random_engine rd;
-
-    for(long long i=0;i<N;i++)
-    {
-        n = (long long)(rd.get_rand() * LIM);
-        si = std::to_string(i);
-        sn = std::to_string(n);
-        if (i%10 == 0) s = si + ":" + sn + " \n";
-        else s = si + ":" + sn + " ";
-        data.buffer.write(s.data(), s.size(), -1);
-
-        t = (long long)(rd.get_rand() * 100);
-        for(long long j=0;j<t;j++)
-            rd.get_rand();
-    }
-    s = "\n";
-    data.buffer.write(s.data(), s.size(), -1);
-
-    bool r = data.save_to_file(filename);
-    return r;
-}
-
 int main_crypto(int argc, char **argv)
 {
     // Argument parser
