@@ -6,14 +6,14 @@ REM Replace the x with your answer
 REM Save this file when done
 REM 
 REM If your answered puzzle file is named: puzzle.txt
-REM If your secret encrypted message file is named: msg.zip.encrypted
-REM If your desired unenrypted message file be named: msg.zip.uncrypted
+REM If your secret encrypted message file is named: test.zip
+REM If your desired unenrypted message file be named: test.zip.uncrypted
 REM 
 REM Then to decrypt launch the following command on Windows: 
-REM crypto.exe decode -p puzzle.txt -i msg.zip.encrypted -o msg.zip.uncrypted
+REM crypto.exe decode -p puzzle.txt -i test.zip -o test.zip.uncrypted
 REM
 REM To decrypt launch the following command on Linux: 
-REM ./crypto decode -p puzzle.txt -i msg.zip.encrypted -o msg.zip.uncrypted
+REM ./crypto decode -p puzzle.txt -i test.zip -o test.zip.uncrypted
 REM
 REM The crypto tool (source and executable) is available on github:
 REM https://github.com/alanthie/Encryptions
