@@ -24,7 +24,8 @@ public:
                 bool verb = false,
                 bool keep = false,
                 std::string iencryped_ftp_user = "",
-                std::string iencryped_ftp_pwd = "")
+                std::string iencryped_ftp_pwd  = "",
+                std::string iknown_ftp_server  = "")
     {
         filename_urls = ifilename_urls;
         filename_msg_data = ifilename_msg_data;
@@ -35,8 +36,9 @@ public:
         staging = istaging;
         verbose = verb;
         keeping = keep;
-        encryped_ftp_user =  iencryped_ftp_user;
-        encryped_ftp_pwd = iencryped_ftp_pwd;
+        encryped_ftp_user = iencryped_ftp_user;
+        encryped_ftp_pwd  = iencryped_ftp_pwd;
+        known_ftp_server  = iknown_ftp_server;
 
         if (staging.size()==0)
         {
@@ -160,7 +162,9 @@ public:
         else if (is_ftp)
         {
             rc = getftp(s.data(), file.data(),
-                        encryped_ftp_user, encryped_ftp_pwd,
+                        encryped_ftp_user,
+                        encryped_ftp_pwd,
+                        known_ftp_server,
                         "", verbose);
             if (rc!= 0)
             {
@@ -187,7 +191,11 @@ public:
 				if (d.buffer.size() > KEY_SIZE)
 				{
 					random_engine rd;
-					uint32_t t = (uint32_t) rd.get_rand() * (d.buffer.size() - KEY_SIZE);
+					if (verbose)
+                    {
+                        std::cout << "get a random position in " << (d.buffer.size() - KEY_SIZE) << " bytes of url file" <<  std::endl;
+                    }
+					uint32_t t = (uint32_t) (rd.get_rand() * (d.buffer.size() - KEY_SIZE));
 					vurlkey[i].key_fromH = (t / BASE);
 					vurlkey[i].key_fromL = t - (vurlkey[i].key_fromH  * BASE);
                     if (verbose)
@@ -560,6 +568,7 @@ public:
     bool keeping;
     std::string encryped_ftp_user;
     std::string encryped_ftp_pwd;
+    std::string known_ftp_server;
     int staging_cnt=0;
 };
 

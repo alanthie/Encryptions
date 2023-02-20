@@ -55,6 +55,7 @@ bool batch(std::string mode, std::string inifile, bool verbose)
     std::string keep_staging;
     std::string encryped_ftp_user;
     std::string encryped_ftp_pwd;
+    std::string known_ftp_server;
 
     std::string encoding_input_puzzle;
     std::string encoding_input_msg;
@@ -82,6 +83,7 @@ bool batch(std::string mode, std::string inifile, bool verbose)
         keep_staging            = ini.get_string("keep_stage_file", Config);
         encryped_ftp_user = ini.get_string("encryped_ftp_user", Config);
         encryped_ftp_pwd  = ini.get_string("encryped_ftp_pwd", Config);
+        known_ftp_server  = ini.get_string("known_ftp_server", Config);
 
         if(fs::exists(folder_staging)==false)
         {
@@ -170,7 +172,8 @@ bool batch(std::string mode, std::string inifile, bool verbose)
                        verbose,
                        (keep_staging == "true") ? true:false,
                        encryped_ftp_user,
-                       encryped_ftp_pwd);
+                       encryped_ftp_pwd,
+                       known_ftp_server);
 
         if (encr.encrypt(true) == true)
         {
@@ -231,7 +234,8 @@ bool batch(std::string mode, std::string inifile, bool verbose)
                        verbose,
                        (keep_staging == "true") ? true:false,
                        encryped_ftp_user,
-                       encryped_ftp_pwd);
+                       encryped_ftp_pwd,
+                       known_ftp_server);
 
         if (decr.decrypt() == true)
         {

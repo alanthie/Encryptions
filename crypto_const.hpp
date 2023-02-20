@@ -78,8 +78,65 @@ int getvideo(std::string url, std::string outfile, std::string options = "", boo
     return r;
 }
 
+int find_string(std::string url, char delim, std::string vlist, bool verbose = false)
+{
+    size_t pos_start = 0;
+    size_t pos_end = 0;
+    std::string  token;
+    int cnt = 0;
+
+    if (verbose)
+        std::cout << "searching for match of "<< url << " in list " << vlist << std::endl;
+
+    for(size_t i=0;i<vlist.size();i++)
+    {
+        if (vlist[i]!=delim) pos_end++;
+        else
+        {
+            token = vlist.substr(pos_start, pos_end-pos_start);
+            if (verbose)
+                std::cout << "token "<< token << std::endl;
+            if (url.find(token, 0) != std::string::npos)
+            {
+                return cnt;
+            }
+            pos_start = pos_end+1;
+            cnt++;
+        }
+    }
+    return -1;
+}
+
+std::string get_string_by_index(std::string vlist, char delim, int idx, bool verbose = false)
+{
+    size_t pos_start = 0;
+    size_t pos_end = 0;
+    std::string token;
+    int cnt = 0;
+
+    for(size_t i=0;i<vlist.size();i++)
+    {
+        if (vlist[i]!=delim) pos_end++;
+        else
+        {
+            token = vlist.substr(pos_start, pos_end-pos_start);
+            if (verbose)
+                std::cout << "token "<< token << std::endl;
+            if (idx == cnt)
+                return token;
+
+            pos_start = pos_end+1;
+            i = pos_start;
+            cnt++;
+        }
+    }
+    return "";
+}
+
 int getftp( std::string url, std::string outfile,
-            std::string encryped_ftp_user, std::string encryped_ftp_pwd,
+            std::string encryped_ftp_user,
+            std::string encryped_ftp_pwd,
+            std::string known_ftp_server,
             std::string options = "", bool verbose=false)
 {
     options = options;
@@ -91,7 +148,8 @@ int getftp( std::string url, std::string outfile,
             (encryped_ftp_pwd.size()  == 0) || (encryped_ftp_pwd  == "none")
        )
     {
-        std::cout << "Looking for a protected ftp file that require user and pwd"<< std::endl;
+        std::cout << "Looking for a protected ftp file that require user and pwd."<< std::endl;
+        std::cout << "URL: "<< url << std::endl;
         std::cout << "Enter ftp user:";
         std::cin >> user;
         std::cout << "Enter ftp pwd:";
@@ -99,16 +157,37 @@ int getftp( std::string url, std::string outfile,
     }
     else
     {
-        std::cout << "Looking for a protected ftp file that require user and pwd"<< std::endl;
-        std::cout << "Enter pwd used to encode ftp user/pwd: ";
-        std::cin >> pwd;
-        user = decrypt_simple_string(encryped_ftp_user, pwd);
-        pwd  = decrypt_simple_string(encryped_ftp_pwd, pwd);
-        //std::cout << "Your ftp user/pwd: " << user << ":" << pwd<< std::endl;
+        int pos = find_string(url, ';', known_ftp_server,verbose);
+        if (pos >= 0)
+        {
+            encryped_ftp_user= get_string_by_index(encryped_ftp_user, ';', pos, verbose);
+            encryped_ftp_pwd = get_string_by_index(encryped_ftp_pwd,  ';', pos, verbose);
+            std::cout << "Looking for a protected ftp file that require user and pwd"<< std::endl;
+            std::cout << "URL: "<< url << std::endl;
+            std::cout << "Enter pwd used to encode ftp user/pwd: ";
+            std::cin >> pwd;
+            user = decrypt_simple_string(encryped_ftp_user, pwd);
+            pwd  = decrypt_simple_string(encryped_ftp_pwd,  pwd);
+        }
+        else
+        {
+            std::cout << "Looking for a protected ftp file that require user and pwd"<< std::endl;
+            std::cout << "URL: "<< url << std::endl;
+            std::cout << "Enter ftp user:";
+            std::cin >> user;
+            std::cout << "Enter ftp pwd:";
+            std::cin >> pwd;
+        }
     }
 
     if (fileexists(outfile))
         std::remove(outfile.data());
+
+    int pos = user.find('@');
+    if (pos > 0)
+    {
+        user.replace(pos, 1, "%40");
+    }
 
     std::string cmd = "ftp://" + user + ":" + pwd + "@" + url;
     if ( wget(cmd.data(), outfile.data(), false) != 0)
@@ -174,6 +253,19 @@ int wget(const char *in, const char *out, bool verbose=false)
 	fclose(fp);
 	return res;
 }
+
+//The following commands will get you the IP address list to find public IP addresses for your machine:
+//
+//    curl ifconfig.me
+//    curl -4/-6 icanhazip.com
+//    curl ipinfo.io/ip
+//    curl api.ipify.org
+//    curl checkip.dyndns.org
+//    dig +short myip.opendns.com @resolver1.opendns.com
+//    host myip.opendns.com resolver1.opendns.com
+//    curl ident.me
+//    curl bot.whatismyipaddress.com
+//    curl ipecho.net/plain
 
 #endif
 

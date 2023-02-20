@@ -53,7 +53,7 @@ bool generate_random_file(std::string filename, long long N=10000)
 
 int main_crypto(int argc, char **argv)
 {
-    // Main parser
+    // Argument parser
     try
     {
         argparse::ArgumentParser program("crypto");

@@ -32,6 +32,7 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="Base64.cpp" />
 		<Unit filename="Buffer.hpp" />
 		<Unit filename="Encryptions/AES.cpp" />
 		<Unit filename="Encryptions/AES.h" />
@@ -103,11 +104,13 @@
 		<Unit filename="crypto_test.hpp" />
 		<Unit filename="data.hpp" />
 		<Unit filename="decryptor.hpp" />
+		<Unit filename="encrypt.h" />
 		<Unit filename="encryptor.hpp" />
 		<Unit filename="ini_parser.hpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="puzzle.hpp" />
 		<Unit filename="random_engine.hpp" />
+		<Unit filename="vigenere.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

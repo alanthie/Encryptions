@@ -21,7 +21,8 @@ public:
 			 	bool verb = false,
 			 	bool keep = false,
                 std::string iencryped_ftp_user = "",
-                std::string iencryped_ftp_pwd  = "")
+                std::string iencryped_ftp_pwd  = "",
+                std::string iknown_ftp_server  = "")
 	{
         filename_puzzle = ifilename_puzzle;
         filename_encrypted_data = ifilename_encrypted_data;
@@ -31,6 +32,7 @@ public:
         keeping = keep;
         encryped_ftp_user = iencryped_ftp_user;
         encryped_ftp_pwd  = iencryped_ftp_pwd;
+        known_ftp_server  = iknown_ftp_server;
 
         if (staging.size()==0)
         {
@@ -151,7 +153,9 @@ public:
             {
                 std::string s(&u[pos_url]);
                 rc = getftp(s.data(), file.data(),
-                            encryped_ftp_user, encryped_ftp_pwd,
+                            encryped_ftp_user,
+                            encryped_ftp_pwd,
+                            known_ftp_server,
                             "", verbose);
                 if (rc!= 0)
                 {
@@ -578,6 +582,7 @@ public:
     bool        keeping;
     std::string encryped_ftp_user;
     std::string encryped_ftp_pwd;
+    std::string known_ftp_server;
     int         staging_cnt=0;
 };
 
