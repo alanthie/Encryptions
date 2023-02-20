@@ -97,8 +97,8 @@ int getftp( std::string url, std::string outfile,
         std::cout << "Looking for a protected ftp file that require user and pwd"<< std::endl;
         std::cout << "Enter pwd used to encode ftp user/pwd: ";
         std::cin >> pwd;
-        user = decrypt_string(encryped_ftp_user, pwd);
-        pwd  = decrypt_string(encryped_ftp_pwd, pwd);
+        user = decrypt_simple_string(encryped_ftp_user, pwd);
+        pwd  = decrypt_simple_string(encryped_ftp_pwd, pwd);
         //std::cout << "Your ftp user/pwd: " << user << ":" << pwd<< std::endl;
     }
 

@@ -246,7 +246,7 @@
 	"../common/includes.h"
 	"SymAlg.h"
 
-1676856501 source:/home/server/dev/Encryptions/main.cpp
+1676862835 source:/home/server/dev/Encryptions/main.cpp
 	<iostream>
 	<fstream>
 	<chrono>
@@ -262,6 +262,8 @@
 	"encryptor.hpp"
 	"decryptor.hpp"
 	"crypto_test.hpp"
+	"crypto_batch.hpp"
+	"encrypt.h"
 
 1675991523 source:/home/server/dev/Encryptions/modes/CBC.cpp
 	"CBC.h"
@@ -364,7 +366,7 @@
 1676757361 /home/server/dev/Encryptions/random_engine.hpp
 	<random>
 
-1676861551 /home/server/dev/Encryptions/crypto_const.hpp
+1676862834 /home/server/dev/Encryptions/crypto_const.hpp
 	<filesystem>
 	<curl/curl.h>
 	"encrypt.h"
@@ -406,7 +408,7 @@
 	"data.hpp"
 	"puzzle.hpp"
 
-1676861589 /home/server/dev/Encryptions/crypto_test.hpp
+1676862979 /home/server/dev/Encryptions/crypto_test.hpp
 	"crypto_const.hpp"
 	"data.hpp"
 	"puzzle.hpp"
@@ -420,7 +422,7 @@
 	<string>
 	<vector>
 
-1676861303 /home/server/dev/Encryptions/encrypt.h
+1676862925 /home/server/dev/Encryptions/encrypt.h
 	"Base64.h"
 	"vigenere.h"
 	<iostream>
@@ -452,4 +454,21 @@
 	<stdio.h>
 	<ctype.h>
 	"encrypt.h"
+
+1676862059 /home/server/dev/Encryptions/crypto_batch.hpp
+	<iostream>
+	<fstream>
+	<chrono>
+	"Encryptions/DES.h"
+	"Buffer.hpp"
+	"SHA256.h"
+	"argparse.hpp"
+	"ini_parser.hpp"
+	"random_engine.hpp"
+	"crypto_const.hpp"
+	"data.hpp"
+	"puzzle.hpp"
+	"encryptor.hpp"
+	"decryptor.hpp"
+	"crypto_test.hpp"
 

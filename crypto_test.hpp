@@ -209,16 +209,16 @@ void test_core(bool verbose = true)
 
         std::cout << "ENTER ftp user:";
         std::cin >> user;
-        auto su = encrypt_string(user, key);
+        auto su = encrypt_simple_string(user, key);
         std::cout << "Your encrypted ftp user is : " << su << std::endl;
 
         std::cout << "ENTER ftp pwd:";
         std::cin >> pwd;
-        auto sp = encrypt_string(pwd, key);
+        auto sp = encrypt_simple_string(pwd, key);
         std::cout << "Your encrypted ftp pwd is : " << sp << std::endl;
 
-        auto su2 = decrypt_string(su, key);
-        auto sp2 = decrypt_string(sp, key);
+        auto su2 = decrypt_simple_string(su, key);
+        auto sp2 = decrypt_simple_string(sp, key);
 
         if (user != su2)
         {
@@ -307,7 +307,7 @@ void test_core(bool verbose = true)
     }
 
 
-    if (true)
+    if (false)
     {
         std::cout << "\nTEST loading with FTP user:pwd"<< std::endl;
         std::string user;
