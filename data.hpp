@@ -7,11 +7,11 @@
 #include <fstream>
 #include <stdio.h>
 
-class data
+class cryptodata
 {
 public:
-    data(bool verb = false) {verbose = verb;}
-    ~data() {}
+    cryptodata(bool verb = false) {verbose = verb;}
+    ~cryptodata() {}
 
     virtual bool read_from_file(std::string filename, bool allow_realloc = true)
     {
@@ -140,7 +140,7 @@ public:
         return n;
 	}
 
-    bool copy_buffer_to(data& dst)
+    bool copy_buffer_to(cryptodata& dst)
     {
         dst.realloc(buffer.size() + 1);
         dst.buffer.write(buffer.getdata(), buffer.size(), 0);
@@ -158,8 +158,8 @@ public:
 
 bool is_file_same(std::string filename1, std::string filename2)
 {
-    data data1;
-    data data2;
+    cryptodata data1;
+    cryptodata data2;
 
     if(data1.read_from_file(filename1)==false)
         return false;

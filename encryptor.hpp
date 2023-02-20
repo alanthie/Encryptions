@@ -22,9 +22,9 @@ public:
                 std::string ifilename_encrypted_data,
                 std::string istaging,
                 bool verb = false,
-                bool keep = false
-
-        )
+                bool keep = false,
+                std::string iencryped_ftp_user = "",
+                std::string iencryped_ftp_pwd = "")
     {
         filename_urls = ifilename_urls;
         filename_msg_data = ifilename_msg_data;
@@ -35,6 +35,8 @@ public:
         staging = istaging;
         verbose = verb;
         keeping = keep;
+        encryped_ftp_user =  iencryped_ftp_user;
+        encryped_ftp_pwd = iencryped_ftp_pwd;
 
         if (staging.size()==0)
         {
@@ -157,7 +159,9 @@ public:
         }
         else if (is_ftp)
         {
-            rc = getftp(s.data(), file.data(), "", verbose);
+            rc = getftp(s.data(), file.data(),
+                        encryped_ftp_user, encryped_ftp_pwd,
+                        "", verbose);
             if (rc!= 0)
             {
                 std::cerr << "ERROR with getvideo using youtube-dl, error code: " << rc << " url: " << s <<  " file: " << file << std::endl;
@@ -176,7 +180,7 @@ public:
 
 		if (r)
 		{
-			data d;
+			cryptodata d;
 			r = d.read_from_file(file);
 			if (r)
 			{
@@ -274,7 +278,7 @@ public:
 
 
     // select various encoding algos based on iter, ...
-    bool encode(size_t iter, data& data_temp, const char* key, uint32_t key_size, data& data_temp_next)
+    bool encode(size_t iter, cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
 	{
         iter = iter;
 		bool r = true;
@@ -536,14 +540,14 @@ public:
 		return true;
     }
 
-    data                urls_data;
-    data                msg_data;
+    cryptodata          urls_data;
+    cryptodata          msg_data;
     puzzle              puz;
-    data                encrypted_data;
+    cryptodata          encrypted_data;
 
     std::vector<urlkey> vurlkey;
-    data                data_temp;
-    data                data_temp_next;
+    cryptodata          data_temp;
+    cryptodata          data_temp_next;
 
     std::string filename_urls;
     std::string filename_msg_data;
@@ -554,6 +558,8 @@ public:
     std::string staging;
     bool verbose;
     bool keeping;
+    std::string encryped_ftp_user;
+    std::string encryped_ftp_pwd;
     int staging_cnt=0;
 };
 

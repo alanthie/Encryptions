@@ -3,6 +3,7 @@
 
 #include <filesystem>
 #include <curl/curl.h>
+#include "encrypt.h"
 //-lcurl
 
 constexpr static uint32_t BASE          = 25000; // BASE*BASE >= FILE_SIZE_LIM
@@ -73,17 +74,33 @@ int getvideo(std::string url, std::string outfile, std::string options = "", boo
     return r;
 }
 
-int getftp(std::string url, std::string outfile, std::string options = "", bool verbose=false)
+int getftp( std::string url, std::string outfile,
+            std::string encryped_ftp_user, std::string encryped_ftp_pwd,
+            std::string options = "", bool verbose=false)
 {
     options=options;
-    std::string user; //="vasts_33625705";
+    std::string user;
     std::string pwd;
 
-    std::cout << "Looking for a protected ftp file that require user and pwd"<< std::endl;
-    std::cout << "Enter ftp user:";
-    std::cin >> user;
-    std::cout << "Enter ftp pwd:";
-    std::cin >> pwd;
+    if (    (encryped_ftp_user.size() == 0) || (encryped_ftp_user == "none") ||
+            (encryped_ftp_pwd.size()  == 0) || (encryped_ftp_pwd  == "none")
+       )
+    {
+        std::cout << "Looking for a protected ftp file that require user and pwd"<< std::endl;
+        std::cout << "Enter ftp user:";
+        std::cin >> user;
+        std::cout << "Enter ftp pwd:";
+        std::cin >> pwd;
+    }
+    else
+    {
+        std::cout << "Looking for a protected ftp file that require user and pwd"<< std::endl;
+        std::cout << "Enter pwd used to encode ftp user/pwd: ";
+        std::cin >> pwd;
+        user = decrypt_string(encryped_ftp_user, pwd);
+        pwd  = decrypt_string(encryped_ftp_pwd, pwd);
+        //std::cout << "Your ftp user/pwd: " << user << ":" << pwd<< std::endl;
+    }
 
     if (fileexists(outfile))
         std::remove(outfile.data());

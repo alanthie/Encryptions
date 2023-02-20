@@ -197,6 +197,39 @@ void test_core(bool verbose = true)
         }
     }
 
+    if (false)
+    {
+        std::cout << "\nTEST encode FTP user:pwd"<< std::endl;
+        std::string user;
+        std::string pwd;
+        std::string key;
+
+        std::cout << "ENTER a pwd to encode ftp user:pwd"<< std::endl;
+        std::cin >> key;
+
+        std::cout << "ENTER ftp user:";
+        std::cin >> user;
+        auto su = encrypt_string(user, key);
+        std::cout << "Your encrypted ftp user is : " << su << std::endl;
+
+        std::cout << "ENTER ftp pwd:";
+        std::cin >> pwd;
+        auto sp = encrypt_string(pwd, key);
+        std::cout << "Your encrypted ftp pwd is : " << sp << std::endl;
+
+        auto su2 = decrypt_string(su, key);
+        auto sp2 = decrypt_string(sp, key);
+
+        if (user != su2)
+        {
+            std::cout << "Error cannot decode the encrypted user " << std::endl;
+        }
+        if (pwd != sp2)
+        {
+            std::cout << "Error cannot decode the encrypted pwd " << std::endl;
+        }
+    }
+
     // TEST wget
     if (true)
     {
@@ -273,11 +306,16 @@ void test_core(bool verbose = true)
 		    std::remove(filename.data());
     }
 
+
     if (true)
     {
         std::cout << "\nTEST loading with FTP user:pwd"<< std::endl;
-        std::string user="vasts_33625705";
+        std::string user;
         std::string pwd;
+
+        std::cout << "ENTER ftp user:";
+        std::cin >> user;
+
         std::cout << "ENTER ftp pwd:";
         std::cin >> pwd;
 

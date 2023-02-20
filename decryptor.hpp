@@ -19,7 +19,9 @@ public:
 			 	std::string ifilename_decrypted_data,
 			 	std::string istaging,
 			 	bool verb = false,
-			 	bool keep = false)
+			 	bool keep = false,
+                std::string iencryped_ftp_user = "",
+                std::string iencryped_ftp_pwd  = "")
 	{
         filename_puzzle = ifilename_puzzle;
         filename_encrypted_data = ifilename_encrypted_data;
@@ -27,6 +29,8 @@ public:
         staging =istaging;
         verbose = verb;
         keeping = keep;
+        encryped_ftp_user = iencryped_ftp_user;
+        encryped_ftp_pwd  = iencryped_ftp_pwd;
 
         if (staging.size()==0)
         {
@@ -146,7 +150,9 @@ public:
             else if (is_ftp)
             {
                 std::string s(&u[pos_url]);
-                rc = getftp(s.data(), file.data(), "", verbose);
+                rc = getftp(s.data(), file.data(),
+                            encryped_ftp_user, encryped_ftp_pwd,
+                            "", verbose);
                 if (rc!= 0)
                 {
                     std::cerr << "ERROR with getftp, error code: " << rc << " url: " << s <<  " file: " << file << std::endl;
@@ -167,7 +173,7 @@ public:
 
 		if (r)
 		{
-			data d;
+			cryptodata d;
 			r = d.read_from_file(file);
 
 			if (r)
@@ -252,7 +258,7 @@ public:
 		return r;
 	}
 
-	bool decode(size_t iter, data& data_encrypted, const char* key, uint32_t key_size, data& data_decrypted)
+	bool decode(size_t iter, cryptodata& data_encrypted, const char* key, uint32_t key_size, cryptodata& data_decrypted)
 	{
         iter = iter;
         bool r = true;
@@ -557,18 +563,20 @@ public:
 	}
 
 	puzzle      puz;
-    data        encrypted_data;
-    data        decrypted_data;
+    cryptodata  encrypted_data;
+    cryptodata  decrypted_data;
 
 	std::string filename_puzzle;
     std::string filename_encrypted_data;
 	std::string filename_decrypted_data;
 	std::string staging;
 
-    data        data_temp;
-    data        data_temp_next;
+    cryptodata  data_temp;
+    cryptodata  data_temp_next;
     bool        verbose;
     bool        keeping;
+    std::string encryped_ftp_user;
+    std::string encryped_ftp_pwd;
     int         staging_cnt=0;
 };
 

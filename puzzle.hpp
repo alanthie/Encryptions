@@ -98,7 +98,7 @@ public:
         }
     }
 
-    void make_puzzle_before_checksum(data& temp)
+    void make_puzzle_before_checksum(cryptodata& temp)
     {
         std::string s;
         for(size_t i = 0; i < vQA.size(); i++)
@@ -118,7 +118,7 @@ public:
 
     std::string checksum()
     {
-        data temp;
+        cryptodata temp;
         make_puzzle_before_checksum(temp);
 
         SHA256 sha;
@@ -148,7 +148,7 @@ public:
 
     bool save_to_file(std::string filename)
     {
-        data temp;
+        cryptodata temp;
         make_puzzle_before_checksum(temp);
 
         std::string s = CHKSUM_TOKEN + " puzzle : " + chksum_puzzle + "\n";
@@ -158,7 +158,7 @@ public:
 
     void make_key(Buffer& rout)
     {
-        data temp;
+        cryptodata temp;
         make_puzzle_before_checksum(temp);
 
         size_t r = temp.buffer.size() % PADDING_MULTIPLE;
@@ -331,7 +331,7 @@ public:
         return true;
     }
 
-    data puz_data;
+    cryptodata puz_data;
     std::vector<QA> vQA;
     std::string chksum_puzzle;
     bool verbose;
