@@ -25,6 +25,7 @@
     <ClInclude Include="..\..\common\cryptomath.h" />
     <ClInclude Include="..\..\common\includes.h" />
     <ClInclude Include="..\..\crypto_batch.hpp" />
+    <ClInclude Include="..\..\crypto_test.hpp" />
     <ClInclude Include="..\..\encrypt.h" />
     <ClInclude Include="..\..\Encryptions.h" />
     <ClInclude Include="..\..\Encryptions\AES.h" />

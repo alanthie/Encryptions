@@ -63,7 +63,11 @@ int32_t filesize(std::string filename)
 int getvideo(std::string url, std::string outfile, std::string options = "", bool verbose=false)
 {
     // youtube-dl 'https://www.bitchute.com/video/JjqRgjv5GJmW/'
-    std::string cmd  = std::string("youtube-dl ") + std::string("'") + url + std::string("'")  + std::string(" -o ")  + outfile + options;
+#ifdef _WIN32
+    std::string cmd = std::string("youtube-dl ") + url + std::string(" -o ") + outfile + options;
+#else
+    std::string cmd = std::string("youtube-dl ") + std::string("'") + url + std::string("'") + std::string(" -o ") + outfile + options;
+#endif
     if (verbose)
     {
         std::cout << "getvideo in:  " << url << std::endl;

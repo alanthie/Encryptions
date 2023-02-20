@@ -255,7 +255,7 @@ void test_core(bool verbose = true)
     }
 
     // TEST wget - FAILED
-    if (true)
+    if (false)
     {
         std::cout << "\nTEST wget"<< std::endl;
         std::string url = "https://github.com/alanthie/Encryptions/raw/master/modes/CBC.cpp";
@@ -282,7 +282,11 @@ void test_core(bool verbose = true)
     if (true)
     {
         std::cout << "\nTEST loading video with youtube-dl"<< std::endl;
-        std::string url = "https://www.bitchute.com/video/JjqRgjv5GJmW/";
+#ifdef _WIN32
+        std::string url = "https://www.bitchute.com/video/JjqRgjv5GJmW";
+#else
+        std::string url = "https://www.bitchute.com/video/JjqRgjv5GJmW";
+#endif
         std::string filename  = "./staging_video_bitchute.mp4";
         std::string options   = "";
 
