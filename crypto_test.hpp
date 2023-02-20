@@ -310,7 +310,7 @@ void test_core(bool verbose = true)
 		    std::remove(filename.data());
     }
 
-
+    // FTP
     if (false)
     {
         std::cout << "\nTEST loading with FTP user:pwd"<< std::endl;

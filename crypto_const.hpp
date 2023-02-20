@@ -82,7 +82,8 @@ int getftp( std::string url, std::string outfile,
             std::string encryped_ftp_user, std::string encryped_ftp_pwd,
             std::string options = "", bool verbose=false)
 {
-    options=options;
+    options = options;
+    verbose = verbose;
     std::string user;
     std::string pwd;
 
@@ -110,14 +111,20 @@ int getftp( std::string url, std::string outfile,
         std::remove(outfile.data());
 
     std::string cmd = "ftp://" + user + ":" + pwd + "@" + url;
-    if ( wget(cmd.data(), outfile.data(), verbose) != 0)
+    if ( wget(cmd.data(), outfile.data(), false) != 0)
     {
         std::cout << "ERROR with wget ftp://... " << url  << std::endl;
+        user= "nonenonenonenonenonenonenonenonenonenone";
+        pwd = "nonenonenonenonenonenonenonenonenonenone";
+        cmd = "nonenonenonenonenonenonenonenonenonenone";
         return -1;
     }
     else
     {
         std::cout << "OK with wget ftp://..." << std::endl;
+        user= "nonenonenonenonenonenonenonenonenonenone";
+        pwd = "nonenonenonenonenonenonenonenonenonenone";
+        cmd = "nonenonenonenonenonenonenonenonenonenone";
         return 0;
     }
 }

@@ -16,7 +16,40 @@
 #include "crypto_test.hpp"
 #include "crypto_batch.hpp"
 #include "encrypt.h"
+#include "data.hpp"
 
+bool generate_random_file(std::string filename, long long N=10000)
+{
+    cryptodata data;
+    std::string s;
+    std::string si;
+    std::string sn;
+    const double LIM = 1000*1000*1000;
+    srand ((unsigned int)time(NULL));
+    srand ((unsigned int)time(NULL));
+    long long n;
+    long long t;
+    random_engine rd;
+
+    for(long long i=0;i<N;i++)
+    {
+        n = (long long)(rd.get_rand() * LIM);
+        si = std::to_string(i);
+        sn = std::to_string(n);
+        if (i%10 == 0) s = si + ":" + sn + " \n";
+        else s = si + ":" + sn + " ";
+        data.buffer.write(s.data(), s.size(), -1);
+
+        t = (long long)(rd.get_rand() * 100);
+        for(long long j=0;j<t;j++)
+            rd.get_rand();
+    }
+    s = "\n";
+    data.buffer.write(s.data(), s.size(), -1);
+
+    bool r = data.save_to_file(filename);
+    return r;
+}
 
 int main_crypto(int argc, char **argv)
 {
@@ -24,6 +57,15 @@ int main_crypto(int argc, char **argv)
     try
     {
         argparse::ArgumentParser program("crypto");
+
+        argparse::ArgumentParser random_file_command("random");
+        {
+            random_file_command.add_description("Generate a file with random numbers");
+
+            random_file_command.add_argument("-o", "--output")
+                .default_value(std::string("random.txt"))
+                .help("specify the output file");
+        }
 
         argparse::ArgumentParser string_encode_command("string_encode");
         {
@@ -51,8 +93,6 @@ int main_crypto(int argc, char **argv)
                 .help("specify the key.");
         }
 
-        // ./crypto batch_encode -i ./crypto_batch.ini
-        // ./crypto batch_decode -i ./crypto_batch.ini
         argparse::ArgumentParser batchencode_command("batch_encode");
         {
             batchencode_command.add_description("Encode from a config file");
@@ -176,6 +216,7 @@ int main_crypto(int argc, char **argv)
         program.add_subparser(batchdecode_command);
         program.add_subparser(string_encode_command);
         program.add_subparser(string_decode_command);
+        program.add_subparser(random_file_command);
 
         // Parse the arguments
         try {
@@ -207,6 +248,14 @@ int main_crypto(int argc, char **argv)
                 else if (testname == "zipcontent") DOTESTCASE(testname, folder, false, verbose, "/test.zip");
                 else DOTESTCASE(testname, folder, false, verbose);
             }
+            return 0;
+        }
+
+        if (program.is_subcommand_used("random"))
+        {
+            auto& cmd = random_file_command;
+            auto filename = cmd.get<std::string>("--output");
+            generate_random_file(filename);
             return 0;
         }
 
@@ -351,7 +400,7 @@ int main_crypto(int argc, char **argv)
         {
             std::cerr << program << std::endl;
         }
-    } 
+    }
     catch (...)
     {
         std::cerr << "CRYPTO FAILED - exception thrown" << std::endl;
