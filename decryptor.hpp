@@ -400,21 +400,22 @@ public:
         int16_t PADDING = 0;
         if (r)
 		{
-            size_t file_size = data_temp_next.buffer.size();
+            uint32_t file_size = (uint32_t)data_temp_next.buffer.size();
             if (file_size >= PADDING_MULTIPLE)
             {
-                PADDING = data_temp_next.buffer.readUInt16((uint16_t)file_size - 4);
-                NITER   = data_temp_next.buffer.readUInt16((uint16_t)file_size-2);
+                PADDING = data_temp_next.buffer.readUInt16(file_size - 4);
+                NITER   = data_temp_next.buffer.readUInt16(file_size-2);
                 NITER = NITER - 1;
 
                 if (NITER < 0)
-                    r = false;
-                else if (NITER > NITER_LIM)
-                    r = false;
-
-                if (r==false)
                 {
-                    std::cerr << "ERROR " << "encrypted_data can not be decoded - invalid iteration value" << std::endl;
+                    std::cerr << "ERROR " << "encrypted_data can not be decoded - iteration value less than zero " << NITER << std::endl;
+                    r = false;
+                }
+                else if (NITER > NITER_LIM)
+                {
+                    std::cerr << "ERROR " << "encrypted_data can not be decoded - iteration value bigger than limit " << NITER << std::endl;
+                    r = false;
                 }
             }
             else

@@ -26,6 +26,7 @@
     <ClInclude Include="..\..\common\includes.h" />
     <ClInclude Include="..\..\crypto_batch.hpp" />
     <ClInclude Include="..\..\crypto_test.hpp" />
+    <ClInclude Include="..\..\decryptor.hpp" />
     <ClInclude Include="..\..\encrypt.h" />
     <ClInclude Include="..\..\Encryptions.h" />
     <ClInclude Include="..\..\Encryptions\AES.h" />
@@ -64,6 +65,7 @@
     <ClInclude Include="..\..\Encryptions\Twofish.h" />
     <ClInclude Include="..\..\Encryptions\Twofish_Const.h" />
     <ClInclude Include="..\..\Encryptions\XTEA.h" />
+    <ClInclude Include="..\..\encryptor.hpp" />
     <ClInclude Include="..\..\modes\CBC.h" />
     <ClInclude Include="..\..\modes\CFB.h" />
     <ClInclude Include="..\..\modes\CTR.h" />
