@@ -129,6 +129,7 @@ int main_crypto(int argc, char **argv)
                 .help("specify the output full puzzle file.");
 
             encode_command.add_argument("-u", "--url")
+                .default_value(std::string(""))
                 .help("specify the (optional input) url list file.");
 
             encode_command.add_argument("-s", "--staging")
@@ -391,7 +392,6 @@ int main_crypto(int argc, char **argv)
     catch (...)
     {
         std::cerr << "CRYPTO FAILED - exception thrown" << std::endl;
-
     }
     return 0;
 }
