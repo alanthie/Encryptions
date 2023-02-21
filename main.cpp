@@ -18,12 +18,13 @@
 #include "encrypt.h"
 #include "data.hpp"
 
+std::string VERSION = "0.2";
 int main_crypto(int argc, char **argv)
 {
     // Argument parser
     try
     {
-        argparse::ArgumentParser program("crypto");
+        argparse::ArgumentParser program("crypto", VERSION);
 
         argparse::ArgumentParser random_file_command("random");
         {
@@ -387,7 +388,7 @@ int main_crypto(int argc, char **argv)
     }
     catch (std::exception const& ex)
     {
-        std::cerr << "CRYPTO FAILED - exception thrown " << ex.what() << '\n';
+        std::cerr << "CRYPTO FAILED - std exception thrown " << ex.what() << '\n';
     }
     catch (...)
     {
