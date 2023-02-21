@@ -368,9 +368,30 @@ int main_crypto(int argc, char **argv)
             std::cerr << program << std::endl;
         }
     }
+    catch (std::invalid_argument const& ex)
+    {
+        std::cerr << "CRYPTO FAILED - invalid_argument thrown " << ex.what() << '\n';
+    }
+    catch (std::logic_error const& ex)
+    {
+        std::cerr << "CRYPTO FAILED - logic_error thrown " << ex.what() << '\n';
+    }
+    catch (std::range_error const& ex)
+    {
+        std::cerr << "CRYPTO FAILED - range_error thrown " << ex.what() << '\n';
+    }
+    catch (std::runtime_error const& ex)
+    {
+        std::cerr << "CRYPTO FAILED - runtime_error thrown " << ex.what() << '\n';
+    }
+    catch (std::exception const& ex)
+    {
+        std::cerr << "CRYPTO FAILED - exception thrown " << ex.what() << '\n';
+    }
     catch (...)
     {
         std::cerr << "CRYPTO FAILED - exception thrown" << std::endl;
+
     }
     return 0;
 }
