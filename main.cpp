@@ -18,13 +18,17 @@
 #include "encrypt.h"
 #include "data.hpp"
 
+//cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto
 std::string VERSION = "0.2";
+
 int main_crypto(int argc, char **argv)
 {
+    std::string FULLVERSION = VERSION + "_" + get_current_date();
+
     // Argument parser
     try
     {
-        argparse::ArgumentParser program("crypto", VERSION);
+        argparse::ArgumentParser program("crypto", FULLVERSION);
 
         argparse::ArgumentParser random_file_command("random");
         {

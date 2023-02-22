@@ -93,34 +93,6 @@ int getlocal(std::string url, std::string outfile, std::string options = "", boo
     return -1;
 }
 
-int find_string(std::string url, char delim, std::string vlist, bool verbose = false)
-{
-    size_t pos_start = 0;
-    size_t pos_end = 0;
-    std::string  token;
-    int cnt = 0;
-
-    if (verbose)
-        std::cout << "searching for match of "<< url << " in list " << vlist << std::endl;
-
-    for(size_t i=0;i<vlist.size();i++)
-    {
-        if (vlist[i]!=delim) pos_end++;
-        else
-        {
-            token = vlist.substr(pos_start, pos_end-pos_start);
-            if (verbose)
-                std::cout << "token "<< token << std::endl;
-            if (url.find(token, 0) != std::string::npos)
-            {
-                return cnt;
-            }
-            pos_start = pos_end+1;
-            cnt++;
-        }
-    }
-    return -1;
-}
 
 int getftp( std::string url, std::string outfile,
             std::string encryped_ftp_user,
