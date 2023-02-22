@@ -137,6 +137,10 @@ int main_crypto(int argc, char **argv)
                 .default_value(std::string(""))
                 .help("specify the staging folder.");
 
+            encode_command.add_argument("-l", "--local")
+                .default_value(std::string(""))
+                .help("specify the local folder of known contents.");
+
             encode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
                 .help("specify the verbose");
@@ -167,6 +171,10 @@ int main_crypto(int argc, char **argv)
             decode_command.add_argument("-s", "--staging")
                 .default_value(std::string(""))
                 .help("specify the staging folder.");
+
+            decode_command.add_argument("-l", "--local")
+                .default_value(std::string(""))
+                .help("specify the local folder of known contents.");
 
             decode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
@@ -296,6 +304,7 @@ int main_crypto(int argc, char **argv)
             auto full_puzzle_path = cmd.get<std::string>("--fullpuzzle");
             auto url_path = cmd.get<std::string>("--url");
             auto staging_path = cmd.get<std::string>("--staging");
+            auto local_path = cmd.get<std::string>("--local");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
 
@@ -311,6 +320,7 @@ int main_crypto(int argc, char **argv)
                 full_puzzle_path,
                 output_path,
                 staging_path,
+                local_path,
                 verbose,
                 keeping);
 
@@ -336,6 +346,7 @@ int main_crypto(int argc, char **argv)
             auto output_path = cmd.get<std::string>("--output");
             auto puzzle_path = cmd.get<std::string>("--puzzle");
             auto staging_path = cmd.get<std::string>("--staging");
+            auto local_path = cmd.get<std::string>("--local");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
 
@@ -348,6 +359,7 @@ int main_crypto(int argc, char **argv)
                 input_path,
                 output_path,
                 staging_path,
+                local_path,
                 verbose,
                 keeping);
 

@@ -21,6 +21,7 @@ public:
                 std::string ifilename_full_puzzle,
                 std::string ifilename_encrypted_data,
                 std::string istaging,
+                std::string ifolder_local,
                 bool verb = false,
                 bool keep = false,
                 std::string iencryped_ftp_user = "",
@@ -34,6 +35,7 @@ public:
         filename_full_puzzle = ifilename_full_puzzle;
         filename_encrypted_data = ifilename_encrypted_data;
         staging = istaging;
+        folder_local = ifolder_local;
         verbose = verb;
         keeping = keep;
         encryped_ftp_user = iencryped_ftp_user;
@@ -129,6 +131,7 @@ public:
 		// DOWNLOAD URL FILE
 		bool is_video = false;
 		bool is_ftp = false;
+		bool is_local = false;
 		if (vurlkey[i].url[0]=='[')
 		{
             if (vurlkey[i].url[1]=='v')
@@ -143,10 +146,18 @@ public:
                 is_ftp = true;
             }
 		}
+        if (vurlkey[i].url[0]=='[')
+		{
+            if (vurlkey[i].url[1]=='l')
+            {
+                is_local = true;
+            }
+		}
 
 		int pos_url = 0;
 		if (is_video) pos_url = 3;
-		if (is_ftp) pos_url = 3;
+		else if (is_ftp) pos_url = 3;
+		else if (is_local) pos_url = 3;
         int rc = 0;
 
         std::string s(&vurlkey[i].url[pos_url]);
@@ -156,6 +167,16 @@ public:
             if (rc!= 0)
             {
                 std::cerr << "ERROR with getvideo using youtube-dl, error code: " << rc << " url: " << s <<  " file: " << file << std::endl;
+                r = false;
+            }
+        }
+        else if (is_local)
+        {
+            std::string local_url = folder_local + s;
+            rc = getlocal(local_url.data(), file.data(), "", verbose);
+            if (rc!= 0)
+            {
+                std::cerr << "ERROR with get local file, error code: " << rc << " url: " << local_url <<  " file: " << file << std::endl;
                 r = false;
             }
         }
@@ -564,6 +585,7 @@ public:
     std::string filename_full_puzzle;
     std::string filename_encrypted_data;
     std::string staging;
+    std::string folder_local;
     bool verbose;
     bool keeping;
     std::string encryped_ftp_user;

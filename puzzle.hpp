@@ -8,6 +8,7 @@
 #include "SHA256.h"
 #include "random_engine.hpp"
 #include "crypto_const.hpp"
+#include "crypto_file.hpp"
 #include "data.hpp"
 
 
