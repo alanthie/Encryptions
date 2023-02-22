@@ -39,6 +39,15 @@ int main_crypto(int argc, char **argv)
                 .help("specify the output file");
         }
 
+         argparse::ArgumentParser binary_random_file_command("binary");
+        {
+            binary_random_file_command.add_description("Generate a file with binary random data");
+
+            binary_random_file_command.add_argument("-o", "--output")
+                .default_value(std::string("binary.dat"))
+                .help("specify the output file");
+        }
+
         argparse::ArgumentParser string_encode_command("string_encode");
         {
             string_encode_command.add_description("Encode a string");
@@ -198,6 +207,7 @@ int main_crypto(int argc, char **argv)
         program.add_subparser(string_encode_command);
         program.add_subparser(string_decode_command);
         program.add_subparser(random_file_command);
+        program.add_subparser(binary_random_file_command);
 
         // Parse the arguments
         try {
@@ -237,6 +247,14 @@ int main_crypto(int argc, char **argv)
             auto& cmd = random_file_command;
             auto filename = cmd.get<std::string>("--output");
             generate_random_file(filename);
+            return 0;
+        }
+
+        if (program.is_subcommand_used("binary"))
+        {
+            auto& cmd = binary_random_file_command;
+            auto filename = cmd.get<std::string>("--output");
+            generate_binary_random_file(filename);
             return 0;
         }
 

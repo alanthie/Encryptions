@@ -29,7 +29,7 @@ class random_engine
     }
 };
 
-bool generate_random_file(std::string filename, long long N=10000)
+bool generate_random_file(std::string filename, long long N=1000)
 {
     cryptodata data;
     std::string s;
@@ -58,6 +58,28 @@ bool generate_random_file(std::string filename, long long N=10000)
     s = "\n";
     data.buffer.write(s.data(), s.size(), -1);
 
+    return data.save_to_file(filename);
+}
+
+bool generate_binary_random_file(std::string filename, long long N=10000)
+{
+    cryptodata data;
+    const double LIM = 256*256;
+    srand ((unsigned int)time(NULL));
+    srand ((unsigned int)time(NULL));
+    uint16_t n;
+    long long t;
+    random_engine rd;
+
+    for(long long i=0;i<N;i++)
+    {
+        n = (uint16_t)(rd.get_rand() * LIM);
+        data.buffer.writeUInt16(n, -1);
+
+        t = (long long)(rd.get_rand() * 100);
+        for(long long j=0;j<t;j++)
+            rd.get_rand();
+    }
     return data.save_to_file(filename);
 }
 

@@ -26,12 +26,20 @@
 				<Linker>
 					<Add option="-s" />
 				</Linker>
+				<ExtraCommands>
+					<Add after="cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto" />
+					<Mode after="always" />
+				</ExtraCommands>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<ExtraCommands>
+			<Add after="cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto" />
+			<Mode after="always" />
+		</ExtraCommands>
 		<Unit filename="Base64.cpp" />
 		<Unit filename="Buffer.hpp" />
 		<Unit filename="Encryptions/AES.cpp" />
@@ -100,7 +108,9 @@
 		<Unit filename="common/cryptomath.h" />
 		<Unit filename="common/includes.cpp" />
 		<Unit filename="common/includes.h" />
+		<Unit filename="crypto_batch.hpp" />
 		<Unit filename="crypto_const.hpp" />
+		<Unit filename="crypto_file.hpp" />
 		<Unit filename="crypto_test.hpp" />
 		<Unit filename="data.hpp" />
 		<Unit filename="decryptor.hpp" />
