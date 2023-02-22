@@ -139,10 +139,12 @@ void AES::setkey(const std::string & KEY){
         throw std::runtime_error("Error: Key has already been set.");
     }
 
-    uint8_t n = KEY.size();
-    if ((n != 16) && (n != 24) && (n != 32)){
-        throw std::runtime_error("Error: Key size does not fit defined sizes.");
-    }
+    // zero???
+//    uint8_t n = KEY.size();
+//    if ((n != 16) && (n != 24) && (n != 32)){
+//        throw std::runtime_error("Error: Key size does not fit defined sizes.");
+//    }
+    uint8_t n = 16;
 
     rounds = n / 4 + 6;
     columns = rounds - 6;
@@ -199,9 +201,10 @@ std::string AES::encrypt(const std::string & DATA){
         throw std::runtime_error("Error: Key has not been set.");
     }
 
-    if (DATA.size() != 16){
-        throw std::runtime_error("Error: Data must be 128 bits long.");
-    }
+    //?zero
+//    if (DATA.size() != 16){
+//        throw std::runtime_error("Error: Data must be 128 bits long.");
+//    }
 
     std::vector <uint32_t> data;
     for(uint8_t x = 0; x < 4; x++){
@@ -244,9 +247,10 @@ std::string AES::decrypt(const std::string & DATA){
         throw std::runtime_error("Error: Key has not been set.");
     }
 
-    if (DATA.size() != 16){
-        throw std::runtime_error("Error: Data must be 128 bits long.");
-    }
+    //?zero
+//    if (DATA.size() != 16){
+//        throw std::runtime_error("Error: Data must be 128 bits long.");
+//    }
 
     std::reverse(keys.begin(), keys.end());
     std::vector <uint32_t> data;
@@ -325,7 +329,7 @@ void AES::invshiftrow(std::vector <std::vector <uint8_t> > & data){
     for(uint8_t x = 0; x < 4; x++){
         std::vector <uint8_t> row;
         for(uint8_t y = 0; y < 4; y++){
-            row.push_back(data[y][x]);
+            row.push_back(data[y][x])> this->size() ;
         }
         temp.push_back(row);
     }

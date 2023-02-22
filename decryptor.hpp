@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 #include "Encryptions/DES.h"
+#include "Encryptions/AES.h"
+#include "AESa.h"
 #include "Buffer.hpp"
 #include "SHA256.h"
 #include "crypto_const.hpp"
@@ -282,9 +284,8 @@ public:
 		return r;
 	}
 
-	bool decode(size_t iter, cryptodata& data_encrypted, const char* key, uint32_t key_size, cryptodata& data_decrypted)
+	bool decode_binDES(cryptodata& data_encrypted, const char* key, uint32_t key_size, cryptodata& data_decrypted)
 	{
-        iter = iter;
         bool r = true;
 		char c;
 
@@ -294,7 +295,7 @@ public:
 
 		if (verbose)
 		{
-            std::cout <<    "\nDecryptor decode() - iteration: " << iter <<
+            std::cout <<    "\nDecryptor decode() binDES - " <<
                             ", number of blocks: " << nblock <<
                             ", number of keys: "   << nkeys  << std::endl;
         }
@@ -332,6 +333,83 @@ public:
         }
 
         return r;
+	}
+
+	bool decode_binaes16_16(cryptodata& data_encrypted, const char* key, uint32_t key_size, cryptodata& data_decrypted)
+	{
+        bool r = true;
+		char c;
+
+//        const unsigned char iv[16] = {
+//            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+//            0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+//        };
+
+		uint32_t nblock = data_encrypted.buffer.size() / 16;
+		uint32_t nkeys  = key_size / 16;
+
+		if (verbose)
+		{
+            std::cout <<    "\nDecryptor decode() binaes16_16 - " <<
+                            ", number of blocks: " << nblock <<
+                            ", number of keys: "   << nkeys  << std::endl;
+        }
+
+		unsigned char KEY[16+1];
+        unsigned char encrypted[16+1];
+
+		uint32_t key_idx = 0;
+		for(size_t blocki = 0; blocki < nblock; blocki++)
+		{
+            for(size_t j = 0; j < 16; j++)
+            {
+                c = data_encrypted.buffer.getdata()[16*blocki + j];
+                encrypted[j] = c;
+            }
+            encrypted[16]=0;
+
+            for(size_t j = 0; j < 16; j++)
+            {
+                c = key[16*key_idx + j];
+                KEY[j] = c;
+            }
+            KEY[16]=0;
+
+            key_idx++;
+            if (key_idx >= nkeys) key_idx=0;
+
+//            AES aes(KEY);
+//            sdata_decr = aes.decrypt(DATA);
+
+            // decrypt
+//            unsigned long padded_size = 0;
+//            std::vector<unsigned char> decrypted(16);
+//
+//            plusaes::decrypt_cbc(   &encrypted[0], 16, &KEY[0], 16, &iv,
+//                                    &decrypted[0], 16, &padded_size);
+
+            //unsigned char plain[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff }; //plaintext example
+            //unsigned char key[]   = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f }; //key example
+            unsigned int plainLen = 16 * sizeof(unsigned char);  //bytes in plaintext
+
+            binAES aes(AESKeyLength::AES_128);  ////128 - key length, can be 128, 192 or 256
+            //auto e = aes.EncryptECB(DATA, plainLen, KEY);
+            auto p = aes.DecryptECB(encrypted, plainLen, KEY);
+            //unsigned char *out = new unsigned char[inLen];
+
+            data_decrypted.buffer.write((char*)&p[0], 16, -1);
+            delete []p;
+        }
+
+        return r;
+	}
+
+	bool decode(size_t iter, size_t NITER, cryptodata& data_encrypted, const char* key, uint32_t key_size, cryptodata& data_decrypted)
+	{
+        if ((iter==0) || (iter==NITER-1))
+            return decode_binDES(data_encrypted, key, key_size, data_decrypted);
+		else
+            return decode_binaes16_16(data_encrypted, key, key_size, data_decrypted);
 	}
 
 
@@ -412,7 +490,8 @@ public:
         if (r)
 		{
             data_temp_next.clear_data();
-            if (decode(0, encrypted_data, puz_key.getdata(), puz_key.size(), data_temp_next) == false)
+            //??NITER
+            if (decode(0, 1, encrypted_data, puz_key.getdata(), puz_key.size(), data_temp_next) == false)
             {
                 std::cerr << "ERROR " << "decoding with next key" << std::endl;
                 r = false;
@@ -512,7 +591,7 @@ public:
                     }
 
                     // decode(DataN, keyN) => DataN-1+urlkeyN-1     urlkeyN-1=>keyN-1
-                    if (decode(iter+1, data_temp, &uk.key[0], KEY_SIZE, data_temp_next) == false)
+                    if (decode(iter+1, NITER+1, data_temp, &uk.key[0], KEY_SIZE, data_temp_next) == false)
                     {
                         r = false;
                         std::cerr << "ERROR " << "encrypted_data can not be decoded" << std::endl;

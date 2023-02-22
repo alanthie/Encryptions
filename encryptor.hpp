@@ -4,6 +4,9 @@
 #include <iostream>
 #include <fstream>
 #include "Encryptions/DES.h"
+#include "Encryptions/AES.h"
+#include "AESa.h"
+#include "plusaes.hpp"
 #include "Buffer.hpp"
 #include "SHA256.h"
 #include "crypto_const.hpp"
@@ -305,18 +308,92 @@ public:
 		return r;
 	}
 
-
-    // select various encoding algos based on iter, ...
-    bool encode(size_t iter, cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
+	bool encode_binaes16_16(cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
 	{
-        iter = iter;
+//	    const unsigned char iv[16] = {
+//            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+//            0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+//        };
+
+		bool r = true;
+		char c;
+
+		if (data_temp.buffer.size() % 16 != 0)
+		{
+            r = false;
+            std::cerr << "ERROR " << "encoding file must be multiple of 16 bytes aes16_16" <<  std::endl;
+		}
+		//if ((n != 16) && (n != 24) && (n != 32))
+
+		uint32_t nblock = data_temp.buffer.size() / 16;
+		uint32_t nkeys  = key_size / 16;
+
+		if (verbose)
+		{
+            std::cout.flush();
+            std::cout <<    "Encryptor encode() binaes16_16 -" <<
+                            "number of blocks: " << nblock <<
+                            ", number of keys: "   << nkeys  << std::endl;
+        }
+
+		unsigned char KEY[16+1];
+		unsigned char DATA[16+1];
+		std::string data_encr;
+
+		uint32_t key_idx = 0;
+		for(size_t blocki = 0; blocki < nblock; blocki++)
+		{
+            for(size_t j = 0; j < 16; j++)
+            {
+                c = data_temp.buffer.getdata()[16*blocki + j];
+                DATA[j] = c;
+            }
+            DATA[16] = 0; // Data must be 128 bits long
+
+            for(size_t j = 0; j < 16; j++)
+            {
+                c = key[16*key_idx + j];
+                KEY[j] = c;
+            }
+            KEY[16] = 0;
+
+            key_idx++;
+            if (key_idx >= nkeys) key_idx=0;
+
+            // encrypt
+//            const unsigned long encrypted_size = 16;//plusaes::get_padded_encrypted_size(raw_data.size());
+//            std::vector<unsigned char> encrypted(encrypted_size);
+//            plusaes::encrypt_cbc(&DATA[0], 16, (unsigned char*)&KEY[0], 16, &iv, &encrypted[0], 16, false);
+            // fb 7b ae 95 d5 0f c5 6f 43 7d 14 6b 6a 29 15 70
+
+            //unsigned char plain[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff }; //plaintext example
+            //unsigned char key[]   = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f }; //key example
+            unsigned int plainLen = 16 * sizeof(unsigned char);  //bytes in plaintext
+
+            binAES aes(AESKeyLength::AES_128);  ////128 - key length, can be 128, 192 or 256
+            auto e = aes.EncryptECB(DATA, plainLen, KEY);
+            //auto p = aes.DecryptECB(e, plainLen, KEY);
+            //unsigned char *out = new unsigned char[inLen];
+
+
+//            AES aes(KEY);
+//            data_encr = aes.encrypt(DATA);
+            data_temp_next.buffer.write((char*)&e[0], (uint32_t)16, -1);
+            delete []e;
+        }
+
+		return r;
+	}
+
+	bool encode_binDES(cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
+	{
 		bool r = true;
 		char c;
 
 		if (data_temp.buffer.size() % 4 != 0)
 		{
             r = false;
-            std::cerr << "ERROR " << "encoding file must be multiple of 4 bytes, iter: " << iter << std::endl;
+            std::cerr << "ERROR " << "encoding file must be multiple of 4 bytes, binDES" << std::endl;
 		}
 
         // BINARY DES is multiple of 4
@@ -326,8 +403,8 @@ public:
 		if (verbose)
 		{
             std::cout.flush();
-            std::cout <<    "Encryptor encode() - iteration: " << iter  <<
-                            ", number of blocks: " << nblock <<
+            std::cout <<    "Encryptor encode() binDES - " <<
+                            "number of blocks: " << nblock <<
                             ", number of keys: "   << nkeys  << std::endl;
         }
 
@@ -358,6 +435,16 @@ public:
         }
 
 		return r;
+	}
+
+
+    // select various encoding algos based on iter, ...
+    bool encode(size_t iter, size_t NITER, cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
+	{
+		if ((iter==0) || (iter==NITER))
+            return encode_binDES(data_temp, key, key_size, data_temp_next);
+		else
+            return encode_binaes16_16(data_temp, key, key_size, data_temp_next);
 	}
 
     bool encrypt(bool allow_empty_url = false)
@@ -536,7 +623,7 @@ public:
             }
 
             data_temp_next.clear_data();
-            encode(i, data_temp, &save_key[0], KEY_SIZE, data_temp_next);
+            encode(i, vurlkey.size(), data_temp, &save_key[0], KEY_SIZE, data_temp_next);
 
             data_temp.buffer.swap_with(data_temp_next.buffer);
             data_temp_next.erase();
@@ -561,7 +648,7 @@ public:
         data_temp.append(temp.getdata(), PADDING_MULTIPLE);
 
         //encode(DataN+urlkeyN+Niter,     pwd0) => DataFinal
-        encode(vurlkey.size(), data_temp, puz_key.getdata(), puz_key.size(), data_temp_next);
+        encode(vurlkey.size(), vurlkey.size(), data_temp, puz_key.getdata(), puz_key.size(), data_temp_next);
 
         data_temp_next.copy_buffer_to(encrypted_data);
         encrypted_data.save_to_file(filename_encrypted_data);
