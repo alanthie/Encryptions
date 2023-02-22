@@ -37,6 +37,10 @@ int main_crypto(int argc, char **argv)
             random_file_command.add_argument("-o", "--output")
                 .default_value(std::string("random.txt"))
                 .help("specify the output file");
+
+            random_file_command.add_argument("-c", "--count")
+                .default_value(std::string("1"))
+                .help("specify how many files to generate");
         }
 
          argparse::ArgumentParser binary_random_file_command("binary");
@@ -46,6 +50,10 @@ int main_crypto(int argc, char **argv)
             binary_random_file_command.add_argument("-o", "--output")
                 .default_value(std::string("binary.dat"))
                 .help("specify the output file");
+
+            binary_random_file_command.add_argument("-c", "--count")
+                .default_value(std::string("1"))
+                .help("specify how many files to generate");
         }
 
         argparse::ArgumentParser string_encode_command("string_encode");
@@ -246,7 +254,8 @@ int main_crypto(int argc, char **argv)
         {
             auto& cmd = random_file_command;
             auto filename = cmd.get<std::string>("--output");
-            generate_random_file(filename);
+            auto countn = cmd.get<std::string>("--count");
+            generate_random_file(filename, 1000, std::stol(countn));
             return 0;
         }
 
@@ -254,7 +263,8 @@ int main_crypto(int argc, char **argv)
         {
             auto& cmd = binary_random_file_command;
             auto filename = cmd.get<std::string>("--output");
-            generate_binary_random_file(filename);
+            auto countn = cmd.get<std::string>("--count");
+            generate_binary_random_file(filename, 10000, std::stol(countn));
             return 0;
         }
 

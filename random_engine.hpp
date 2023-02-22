@@ -29,9 +29,8 @@ class random_engine
     }
 };
 
-bool generate_random_file(std::string filename, long long N=1000)
+bool generate_random_file(std::string filename, long long N, long num_files = 1)
 {
-    cryptodata data;
     std::string s;
     std::string si;
     std::string sn;
@@ -39,48 +38,82 @@ bool generate_random_file(std::string filename, long long N=1000)
     srand ((unsigned int)time(NULL));
     srand ((unsigned int)time(NULL));
     long long n;
-    long long t;
+    long t;
+    bool r = true;
     random_engine rd;
 
-    for(long long i=0;i<N;i++)
+    std::string filename_full;
+    for(long long k=0;k<num_files;k++)
     {
-        n = (long long)(rd.get_rand() * LIM);
-        si = std::to_string(i);
-        sn = std::to_string(n);
-        if (i%10 == 0) s = si + ":" + sn + " \n";
-        else s = si + ":" + sn + " ";
+        cryptodata data;
+        for(long long i=0;i<N;i++)
+        {
+            n = (long long)(rd.get_rand() * LIM);
+            si = std::to_string(i);
+            sn = std::to_string(n);
+            if (i%10 == 0) s = si + ":" + sn + " \n";
+            else s = si + ":" + sn + " ";
+            data.buffer.write(s.data(), s.size(), -1);
+
+            t = (long long)(rd.get_rand() * 100);
+            for(long long j=0;j<t;j++)
+                rd.get_rand();
+        }
+        s = "\n";
         data.buffer.write(s.data(), s.size(), -1);
 
-        t = (long long)(rd.get_rand() * 100);
-        for(long long j=0;j<t;j++)
-            rd.get_rand();
-    }
-    s = "\n";
-    data.buffer.write(s.data(), s.size(), -1);
+        if (num_files > 0)
+            filename_full = filename + "." + std::to_string(k+1);
+        else
+            filename_full = filename;
 
-    return data.save_to_file(filename);
+        r = data.save_to_file(filename_full);
+        if (r==false)
+        {
+            std::cerr << "ERROR writing to " << filename_full << std::endl;
+            break;
+        }
+     }
+     return r;
 }
 
-bool generate_binary_random_file(std::string filename, long long N=10000)
+bool generate_binary_random_file(std::string filename, long long N, long num_files = 1)
 {
-    cryptodata data;
     const double LIM = 256*256;
     srand ((unsigned int)time(NULL));
     srand ((unsigned int)time(NULL));
     uint16_t n;
-    long long t;
+    long t;
+    bool r = true;
     random_engine rd;
 
-    for(long long i=0;i<N;i++)
+    std::string filename_full;
+    for(long long k=0;k<num_files;k++)
     {
-        n = (uint16_t)(rd.get_rand() * LIM);
-        data.buffer.writeUInt16(n, -1);
+        cryptodata data;
+        for(long long i=0;i<N;i++)
+        {
+            n = (uint16_t)(rd.get_rand() * LIM);
+            data.buffer.writeUInt16(n, -1);
 
-        t = (long long)(rd.get_rand() * 100);
-        for(long long j=0;j<t;j++)
-            rd.get_rand();
+            t = (long long)(rd.get_rand() * 100);
+            for(long long j=0;j<t;j++)
+                rd.get_rand();
+        }
+
+        if (num_files > 0)
+            filename_full = filename + "." + std::to_string(k+1);
+        else
+            filename_full = filename;
+
+        r = data.save_to_file(filename_full);
+        if (r==false)
+        {
+            std::cerr << "ERROR writing to " << filename_full << std::endl;
+            break;
+        }
     }
-    return data.save_to_file(filename);
+    return r;
 }
 
 #endif
