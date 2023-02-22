@@ -4,7 +4,6 @@
 #include <iostream>
 #include <fstream>
 #include "Encryptions/DES.h"
-#include "Encryptions/AES.h"
 #include "AESa.h"
 #include "plusaes.hpp"
 #include "Buffer.hpp"
@@ -224,25 +223,28 @@ public:
 					vurlkey[i].key_fromL = t - (vurlkey[i].key_fromH  * BASE);
                     if (verbose)
                     {
-                        std::cout << "vurlkey[i].key_fromH=" << vurlkey[i].key_fromH << " ";
-                        std::cout << "vurlkey[i].key_fromL=" << vurlkey[i].key_fromL << " ";
+                        std::cout << "key_fromH=" << vurlkey[i].key_fromH << " ";
+                        std::cout << "key_fromL=" << vurlkey[i].key_fromL << " ";
                         std::cout << "key_pos=" << t << " ";
                         std::cout <<  std::endl;
 					}
 
-					for( size_t j = 0; j< KEY_SIZE; j++)
 					{
-						vurlkey[i].key[j] = d.buffer.getdata()[t+j];
-						if (verbose)
-                            std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
+                        for( size_t j = 0; j< KEY_SIZE; j++)
+                        {
+                            vurlkey[i].key[j] = d.buffer.getdata()[t+j];
+                            if (verbose)
+                                std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
+                        }
+                        if (verbose)
+                            std::cout <<  std::endl;
                     }
-                    if (verbose)
-                        std::cout <<  std::endl;
 				}
 				else
 				{
                     if (verbose)
                         std::cout << "key_pos=" << (int32_t)0 << " ";
+
 					for( size_t j = 0; j< d.buffer.size(); j++)
 					{
 						vurlkey[i].key[j] = d.buffer.getdata()[j];
@@ -258,6 +260,13 @@ public:
                     if (verbose)
                         std::cout <<  std::endl;
 				}
+
+				if      (i%3==0)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc;
+				else if (i%3==1)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb;
+				else              vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb;
+
+				if (verbose)
+                    std::cout << "crypto_algo=" << vurlkey[i].crypto_algo << std::endl;
 
                 {
                     SHA256 sha;
@@ -293,6 +302,7 @@ public:
 
 		Buffer temp(URLINFO_SIZE);
 		temp.init(0);
+		temp.writeUInt16(vurlkey[i].crypto_algo, -1);
 		temp.writeUInt16(vurlkey[i].url_size, -1);
 		temp.write(&vurlkey[i].url[0], URL_MAX_SIZE, -1);
 		temp.write(&vurlkey[i].magic[0], 4, -1);
@@ -308,13 +318,9 @@ public:
 		return r;
 	}
 
-	bool encode_binaes16_16(cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
+	bool encode_binaes16_16(cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next,
+                            CRYPTO_ALGO_AES aes_type)
 	{
-//	    const unsigned char iv[16] = {
-//            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-//            0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
-//        };
-
 		bool r = true;
 		char c;
 
@@ -323,7 +329,6 @@ public:
             r = false;
             std::cerr << "ERROR " << "encoding file must be multiple of 16 bytes aes16_16" <<  std::endl;
 		}
-		//if ((n != 16) && (n != 24) && (n != 32))
 
 		uint32_t nblock = data_temp.buffer.size() / 16;
 		uint32_t nkeys  = key_size / 16;
@@ -331,14 +336,13 @@ public:
 		if (verbose)
 		{
             std::cout.flush();
-            std::cout <<    "Encryptor encode() binaes16_16 -" <<
-                            "number of blocks: " << nblock <<
+            std::cout <<    "Encryptor encode() binaes16_16 - aes_type: " << (int)aes_type <<
+                            ", number of blocks: " << nblock <<
                             ", number of keys: "   << nkeys  << std::endl;
         }
 
 		unsigned char KEY[16+1];
 		unsigned char DATA[16+1];
-		std::string data_encr;
 
 		uint32_t key_idx = 0;
 		for(size_t blocki = 0; blocki < nblock; blocki++)
@@ -360,26 +364,45 @@ public:
             key_idx++;
             if (key_idx >= nkeys) key_idx=0;
 
-            // encrypt
-//            const unsigned long encrypted_size = 16;//plusaes::get_padded_encrypted_size(raw_data.size());
-//            std::vector<unsigned char> encrypted(encrypted_size);
-//            plusaes::encrypt_cbc(&DATA[0], 16, (unsigned char*)&KEY[0], 16, &iv, &encrypted[0], 16, false);
-            // fb 7b ae 95 d5 0f c5 6f 43 7d 14 6b 6a 29 15 70
+            unsigned int plainLen = 16 * sizeof(unsigned char);
 
-            //unsigned char plain[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff }; //plaintext example
-            //unsigned char key[]   = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f }; //key example
-            unsigned int plainLen = 16 * sizeof(unsigned char);  //bytes in plaintext
+            if (aes_type == CRYPTO_ALGO_AES::ECB)
+            {
+                binAES aes(AESKeyLength::AES_128);  //128 - key length, can be 128, 192 or 256
+                auto e = aes.EncryptECB(DATA, plainLen, KEY);
 
-            binAES aes(AESKeyLength::AES_128);  ////128 - key length, can be 128, 192 or 256
-            auto e = aes.EncryptECB(DATA, plainLen, KEY);
-            //auto p = aes.DecryptECB(e, plainLen, KEY);
-            //unsigned char *out = new unsigned char[inLen];
+                data_temp_next.buffer.write((char*)&e[0], (uint32_t)16, -1);
+                delete []e;
+            }
+            else if (aes_type == CRYPTO_ALGO_AES::CBC)
+            {
+                const unsigned char iv[16] = {
+                    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                    0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
 
+                binAES aes(AESKeyLength::AES_128);  //128 - key length, can be 128, 192 or 256
+                auto e = aes.EncryptCBC(DATA, plainLen, KEY, iv);
 
-//            AES aes(KEY);
-//            data_encr = aes.encrypt(DATA);
-            data_temp_next.buffer.write((char*)&e[0], (uint32_t)16, -1);
-            delete []e;
+                data_temp_next.buffer.write((char*)&e[0], (uint32_t)16, -1);
+                delete []e;
+            }
+            else if (aes_type == CRYPTO_ALGO_AES::CFB)
+            {
+                const unsigned char iv[16] = {
+                    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                    0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
+
+                binAES aes(AESKeyLength::AES_128);  //128 - key length, can be 128, 192 or 256
+                auto e = aes.EncryptCFB(DATA, plainLen, KEY, iv);
+
+                data_temp_next.buffer.write((char*)&e[0], (uint32_t)16, -1);
+                delete []e;
+            }
+            else
+            {
+                std::cerr << "ERROR unsupportes AES type " << (int)aes_type << std::endl;
+                r = false;
+            }
         }
 
 		return r;
@@ -437,14 +460,33 @@ public:
 		return r;
 	}
 
-
     // select various encoding algos based on iter, ...
-    bool encode(size_t iter, size_t NITER, cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
+    bool encode(size_t iter, size_t NITER, uint16_t crypto_algo,
+                cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
 	{
 		if ((iter==0) || (iter==NITER))
             return encode_binDES(data_temp, key, key_size, data_temp_next);
 		else
-            return encode_binaes16_16(data_temp, key, key_size, data_temp_next);
+		{
+            //vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16
+            if (iter-1 >= vurlkey.size())
+            {
+                std::cerr << "WARNING mismatch iter out of range " <<  iter-1 << std::endl;
+            }
+            else if ((crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
+                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
+                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb)
+                     )
+            {
+                std::cerr << "WARNING mismatch algo at iter " <<  iter-1 << std::endl;
+            }
+
+            CRYPTO_ALGO_AES aes_type = CRYPTO_ALGO_AES::ECB;
+            if (crypto_algo      == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) aes_type = CRYPTO_ALGO_AES::CBC;
+            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) aes_type = CRYPTO_ALGO_AES::CFB;
+
+            return encode_binaes16_16(data_temp, key, key_size, data_temp_next, aes_type);
+        }
 	}
 
     bool encrypt(bool allow_empty_url = false)
@@ -520,9 +562,6 @@ public:
         }
 
         // before removal of answer
-//        if (verbose)
-//            std::cout << "saving puzzle full " << filename_full_puzzle << std::endl;
-
         if (puz.save_to_file(filename_full_puzzle) == false)
         {
             std::cerr << "ERROR " << "saving puzzle " << filename_full_puzzle << std::endl;
@@ -585,11 +624,20 @@ public:
 
         int16_t PADDING = 0;
         auto sz_msg = data_temp.buffer.size();
+        if (verbose)
+        {
+            std::cout << "MESSAGE is " << sz_msg  << " bytes"<< std::endl;
+        }
+
         if (sz_msg % PADDING_MULTIPLE != 0)
         {
-            //std::cout << "WARNING " << "Padding msg to multiple of " << PADDING_MULTIPLE << " " << sz_msg << std::endl;
-
             int16_t n = PADDING_MULTIPLE - (sz_msg % PADDING_MULTIPLE);
+            if (verbose)
+            {
+                if (n > 0)
+                    std::cout << "Padding msg with bytes: " << n  << std::endl;
+            }
+
             PADDING = n;
             char c[1] = {' '};
             for(int16_t i= 0; i< n; i++)
@@ -623,7 +671,7 @@ public:
             }
 
             data_temp_next.clear_data();
-            encode(i, vurlkey.size(), data_temp, &save_key[0], KEY_SIZE, data_temp_next);
+            encode(i, vurlkey.size(), vurlkey[i].crypto_algo, data_temp, &save_key[0], KEY_SIZE, data_temp_next);
 
             data_temp.buffer.swap_with(data_temp_next.buffer);
             data_temp_next.erase();
@@ -644,11 +692,12 @@ public:
         Buffer temp(PADDING_MULTIPLE);
 		temp.init(0);
         temp.writeUInt16(PADDING, PADDING_MULTIPLE - 4);
-		temp.writeUInt16((uint16_t)vurlkey.size() + 1, PADDING_MULTIPLE-2);
+		temp.writeUInt16((uint16_t)vurlkey.size() + 1, PADDING_MULTIPLE - 2);
         data_temp.append(temp.getdata(), PADDING_MULTIPLE);
 
         //encode(DataN+urlkeyN+Niter,     pwd0) => DataFinal
-        encode(vurlkey.size(), vurlkey.size(), data_temp, puz_key.getdata(), puz_key.size(), data_temp_next);
+        encode( vurlkey.size(), vurlkey.size(), (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES,
+                data_temp, puz_key.getdata(), puz_key.size(), data_temp_next);
 
         data_temp_next.copy_buffer_to(encrypted_data);
         encrypted_data.save_to_file(filename_encrypted_data);

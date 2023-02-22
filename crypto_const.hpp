@@ -11,16 +11,38 @@
 #include <string>
 // LINKER -lcurl
 
+enum class CRYPTO_ALGO : uint16_t
+{
+    ALGO_BIN_DES = 1,
+    ALGO_BIN_AES_16_16_ecb,
+    ALGO_BIN_AES_16_16_cbc,
+    ALGO_BIN_AES_16_16_cfb,
+};
+enum class CRYPTO_ALGO_AES
+{
+    ECB,
+    CBC,
+    CFB
+};
+
 constexpr static uint32_t BASE          = 25000; // BASE*BASE >= FILE_SIZE_LIM
+constexpr static int16_t MAGIC_SIZE     = 4;
+constexpr static int16_t KEYPOS_ENCODESIZE  = 6;
+constexpr static int16_t URL_LEN_ENCODESIZE = 2;
+constexpr static int16_t CRYPTO_ALGO_ENCODESIZE = 2;
 constexpr static int16_t URL_MIN_SIZE   = 10;
 constexpr static int16_t URL_MAX_SIZE   = 256;
-constexpr static int16_t KEY_SIZE       = 256;
+constexpr static int16_t KEY_SIZE       = 256*2; // KEYS extract from URL files - Make it dynamic...
 constexpr static int16_t CHKSUM_SIZE    = 64;
-constexpr static int16_t URLINFO_SIZE   = 2+URL_MAX_SIZE+4+6+CHKSUM_SIZE+KEY_SIZE+4; // padding 16x
-constexpr static int16_t PADDING_MULTIPLE = 8;
-constexpr static int16_t NITER_LIM      = 100;
-constexpr static int16_t PUZZLE_SIZE_LIM = 10000;
-constexpr static uint32_t FILE_SIZE_LIM = 100*1000*1000;
+constexpr static int16_t PADDING_LEN_ENCODESIZE = 2;
+constexpr static int16_t URLINFO_SIZE   =   URL_LEN_ENCODESIZE + URL_MAX_SIZE + MAGIC_SIZE +
+                                            KEYPOS_ENCODESIZE  + CHKSUM_SIZE  + KEY_SIZE +
+                                            CRYPTO_ALGO_ENCODESIZE + PADDING_LEN_ENCODESIZE; // padding 16x
+
+constexpr static int16_t PADDING_MULTIPLE   = 16; // should be 16x with AES
+constexpr static int16_t NITER_LIM          = 100;
+constexpr static int16_t PUZZLE_SIZE_LIM    = 10000;
+constexpr static uint32_t FILE_SIZE_LIM     = 100*1000*1000;
 
 const std::string REM_TOKEN             = "REM";
 const std::string CHKSUM_TOKEN          = "CHKSUM";
@@ -30,6 +52,7 @@ class urlkey
 public:
     urlkey() {}
 
+    uint16_t crypto_algo = 1;           // 2
     uint16_t url_size = 0;              // 2
     char url[URL_MAX_SIZE]= {0};        // 256
     char magic[4]= {'a','b','c','d'};   // 4

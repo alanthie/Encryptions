@@ -443,10 +443,6 @@ int main_crypto(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-//    batch("encode", "/home/server/dev/Encryptions/crypto_batch.ini", true);
-//    batch("decode", "/home/server/dev/Encryptions/crypto_batch.ini", true);
-//    return 0;
-
     std::chrono::time_point<std::chrono::steady_clock> tstart ;
     std::chrono::time_point<std::chrono::steady_clock> tend ;
 
