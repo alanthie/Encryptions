@@ -1,4 +1,4 @@
-A C++ program (Linux and Windows) to encrypt/decrypt
+A C++ program (Linux and Windows) to encrypt/decrypt (whithout the usual limitation)
 
 Multiple encryption keys for one message to encrypt.
 <pre>
