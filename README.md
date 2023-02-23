@@ -1,6 +1,6 @@
 A C++ program (Linux and Windows) to encrypt/decrypt
 
-Multiple encryption keys.
+Multiple encryption keys for one message to encrypt.
 <pre>
 [Keys extracted from a puzzle question-answer].
 [Keys extracted from local common file shared between 2 parties, public web files, protected ftp files].
