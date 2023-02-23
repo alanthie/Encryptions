@@ -234,7 +234,11 @@ public:
                         {
                             vurlkey[i].key[j] = d.buffer.getdata()[t+j];
                             if (verbose)
-                                std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
+                            {
+                                if (j<32) std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
+                                else if (j==32) {std::cout << " ... [" << KEY_SIZE << "] ... ";}
+                                else if (j>KEY_SIZE-32) std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
+                            }
                         }
                         if (verbose)
                             std::cout <<  std::endl;
@@ -249,13 +253,21 @@ public:
 					{
 						vurlkey[i].key[j] = d.buffer.getdata()[j];
 						if (verbose)
-                            std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
+                        {
+                            if (j<32) std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
+                            else if (j==32) {std::cout << " ... [" << d.buffer.size() << "] ... ";}
+                            else if (j>KEY_SIZE-32) std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
+                        }
                     }
 					for( size_t j = d.buffer.size(); j< KEY_SIZE; j++)
 					{
 						vurlkey[i].key[j] = j % 7;
-						if (verbose)
-                            std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
+                        if (verbose)
+                        {
+                            if (j<32) std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
+                            else if (j==32) {std::cout << " ... [" << KEY_SIZE - d.buffer.size() << "] ... ";}
+                            else if (j>KEY_SIZE-32) std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
+                        }
                     }
                     if (verbose)
                         std::cout <<  std::endl;
@@ -337,8 +349,8 @@ public:
 		{
             std::cout.flush();
             std::cout <<    "Encryptor encode() binaes16_16 - aes_type: " << (int)aes_type <<
-                            ", number of blocks: " << nblock <<
-                            ", number of keys: "   << nkeys  << std::endl;
+                            ", number of blocks (16 bytes): " << nblock <<
+                            ", number of keys (16 bytes): "   << nkeys  << std::endl;
         }
 
 		unsigned char KEY[16+1];
@@ -427,8 +439,8 @@ public:
 		{
             std::cout.flush();
             std::cout <<    "Encryptor encode() binDES - " <<
-                            "number of blocks: " << nblock <<
-                            ", number of keys: "   << nkeys  << std::endl;
+                            "number of blocks (4 bytes): " << nblock <<
+                            ", number of keys (4 bytes): "   << nkeys  << std::endl;
         }
 
 		char KEY[4];

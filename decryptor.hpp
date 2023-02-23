@@ -227,13 +227,21 @@ public:
                     {
                         uk.key[j] = d.buffer.getdata()[pos+j];
                         if (verbose)
-                            std::cout << (int)(unsigned char)uk.key[j]<< " ";
+                        {
+                            if (j<32) std::cout << (int)(unsigned char)uk.key[j]<< " ";
+                            else if (j==32) {std::cout << " ... [" << key_size << "] ... ";}
+                            else if (j>KEY_SIZE-32) std::cout << (int)(unsigned char)uk.key[j] << " ";
+                        }
                     }
                     for( size_t j = key_size; j < KEY_SIZE; j++)
                     {
     					uk.key[j] = j % 7;
-    					if (verbose)
-                            std::cout << (int)(unsigned char)uk.key[j]<< " ";
+                        if (verbose)
+                        {
+                            if (j<32) std::cout << (int)(unsigned char)uk.key[j]<< " ";
+                            else if (j==32) {std::cout << " ... [" << KEY_SIZE - key_size << "] ... ";}
+                            else if (j>KEY_SIZE-32) std::cout << (int)(unsigned char)uk.key[j] << " ";
+                        }
                     }
                     if (verbose)
                         std::cout << std::endl;
@@ -303,8 +311,8 @@ public:
 		if (verbose)
 		{
             std::cout <<    "\nDecryptor decode() binDES - " <<
-                            ", number of blocks: " << nblock <<
-                            ", number of keys: "   << nkeys  << std::endl;
+                            "number of blocks (8 bytes): " << nblock <<
+                            ", number of keys (4 bytes): "   << nkeys  << std::endl;
         }
 
         // BINARY DES
@@ -353,9 +361,9 @@ public:
 
 		if (verbose)
 		{
-            std::cout <<    "\nDecryptor decode() binaes16_16 - aes_type: " << (int)aes_type <<
-                            ", number of blocks: " << nblock <<
-                            ", number of keys: "   << nkeys  << std::endl;
+            std::cout <<    "\nDecryptor decode() binAES 16_16 - aes_type: " << (int)aes_type <<
+                            ", number of blocks (16 bytes): " << nblock <<
+                            ", number of keys (16 bytes): "   << nkeys  << std::endl;
         }
 
 		unsigned char KEY[16+1];

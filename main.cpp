@@ -255,7 +255,7 @@ int main_crypto(int argc, char **argv)
             auto& cmd = random_file_command;
             auto filename = cmd.get<std::string>("--output");
             auto countn = cmd.get<std::string>("--count");
-            generate_random_file(filename, 1000, std::stol(countn));
+            generate_random_file(filename, 2000, std::stol(countn));
             return 0;
         }
 
@@ -264,7 +264,7 @@ int main_crypto(int argc, char **argv)
             auto& cmd = binary_random_file_command;
             auto filename = cmd.get<std::string>("--output");
             auto countn = cmd.get<std::string>("--count");
-            generate_binary_random_file(filename, 10000, std::stol(countn));
+            generate_binary_random_file(filename, 20000, std::stol(countn));
             return 0;
         }
 
