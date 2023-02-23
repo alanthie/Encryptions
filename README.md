@@ -1,13 +1,18 @@
-A C++ to encrypt/decrypt
+A C++ program (Linux and Windows) to encrypt/decrypt
 
-Multiple encryption keys 
-[Keys extracted from a puzzle question-answer]
-[Keys extracted from local common file shared between 2 parties, public web files, protected ftp files]
+Multiple encryption keys.
+<pre>
+[Keys extracted from a puzzle question-answer].
+[Keys extracted from local common file shared between 2 parties, public web files, protected ftp files].
+</pre>
 
-Multiple encryption algorithms for one message to encrypt
-Unlimited encryption keys size (soon...)
+Multiple encryption algorithms for one message to encrypt.
+
+Unlimited encryption keys size (soon...).
 
 <pre>
+Example
+
 ./crypto encode -h
 Usage: encode [-h] --input VAR --output VAR --puzzle VAR --qapuzzle VAR --fullpuzzle VAR [--url VAR] [--staging VAR] [--keep VAR]
 
