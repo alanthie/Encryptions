@@ -8,6 +8,8 @@ Multiple encryption keys for one message to encrypt.
 
 Multiple encryption algorithms for one message to encrypt.
 
+Deep recursive encryption
+
 Unlimited encryption keys size (soon...).
 
 Example, encodes a file into an encrypted file
