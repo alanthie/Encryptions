@@ -51,3 +51,9 @@ Subcommands:
   string_encode Encode a string
   test          Test a case
 </pre>
+
+Videos describing the project:
+<pre>
+https://odysee.com/@C++_alanthier:0/screenshot-from-2023-02-20-22-10-02_qpG2gyJg:c
+https://odysee.com/@C++_alanthier:0/screenshot-from-2023-02-09-21-50-13_uIWWm6KM:1
+</pre>
