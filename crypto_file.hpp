@@ -53,7 +53,8 @@ int getvideo(std::string url, std::string outfile, std::string options = "", boo
     int r = system(cmd.data());
     return r;
 }
-
+static std::string s_last_local_file = "";
+static bool s_use_last = false;
 int getlocal(std::string url, cryptodata& dataout, std::string options = "", bool verbose=false)
 {
     options=options;
@@ -63,20 +64,40 @@ int getlocal(std::string url, cryptodata& dataout, std::string options = "", boo
     }
 
     std::string nfile;
-    if (fileexists(url) == false)
+    if (fileexists(url) == false) // MAY CONFLICT with current folder....
     {
-        std::cout << "Please, enter the path to the local file: "  << nfile << std::endl;
         std::string token;
-        std:: cin >> token;
+        if (s_use_last == true)
+        {
+            token = s_last_local_file;
+        }
+        else if (s_last_local_file.size() > 0)
+        {
+            std::cout << "Please, enter the path to the local file: [* == always use last path] "  << url << " " << " last path: " << s_last_local_file << std::endl;
+            std:: cin >> token;
+            if (token == "*")
+            {
+                s_use_last = true;
+                token = s_last_local_file;
+            }
+        }
+        else
+        {
+            std::cout << "Please, enter the path to the local file: "  << url << std::endl;
+            std:: cin >> token;
+        }
+
         nfile = token + url;
         if (fileexists(nfile) == false)
         {
             std::cerr << "Invalid path to the local file: "  << nfile << std::endl;
             return -1;
         }
+        s_last_local_file = token;
     }
     else
     {
+        std::cout << "WARNING Using local file in current folder (remove it if want to specify another path)"  << url << std::endl;
         nfile = url;
     }
 

@@ -1,21 +1,11 @@
 REM ===========================================================================
-REM The crypto tool (source and executable) is available on github:
-REM https://github.com/alanthie/Encryptions
-REM
-REM ===========================================================================
 REM Your puzzle questions start here
 REM ===========================================================================
-"Your first name" : "Samuel"
-"Your car model" : "Ford"
-"Sudoku book1, puzzle 23 line1" : "123456789"
-"Sudoku book1, puzzle 23 line2" : "789123456"
-"Sudoku book1, puzzle 23 line3" : "456789123"
-"Random001.txt file at 1234" : "214302698"
+"Votre prenom " : "Alain"
+"Le model de votre auto" : "Ford"
 REM ===========================================================================
 REM Your puzzle questions end here
 REM ===========================================================================
 REM
-REM Dont remove contents from this file - just replace the x with your answers
-REM CHKSUM is required to decode your message
-REM Internet access may be needed depending on how your message was encoded
+
 

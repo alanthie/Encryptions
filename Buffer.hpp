@@ -85,7 +85,7 @@ public:
         std::swap( alloc_size, r.alloc_size);
     }
 
-    void increase_size(uint32_t n)
+    void increase_size(uint32_t n) // bug
     {
         if(n==0)
         {
@@ -97,17 +97,37 @@ public:
             throw bad_buffer_operation(alloc_size);
         }
 
+        if (alloc_size > n)
+            return;
+
         if (length == 0)
         {
             realloc(n);
             return;
         }
 
-        Buffer temp(length);
-        temp.write(data, length, 0);
+        if (data == nullptr)
+        {
+            realloc(n);
+        }
+        else
+        {
+            // save data    n>=alloc_size
+            Buffer temp(length);
+            temp.write(data, length, 0);
 
-        realloc(n);
-        write(temp.getdata(), temp.length, 0);
+            realloc(n);
+
+            // reload data
+            if (temp.length <= n)
+            {
+                write(temp.getdata(), temp.length, 0);
+            }
+            else
+            {
+                write(temp.getdata(), n, 0);
+            }
+        }
     }
 
     int32_t read(std::ifstream& is, uint32_t sz, int32_t offset = -1)
@@ -297,7 +317,7 @@ public:
         if (last_of >= alloc_size)
             increase_size(last_of+1);
 
-        int appendOffset = offset == -1 ? length : offset;
+        int appendOffset = ((offset == -1) ? length : offset);
 
         memcpy(data + appendOffset, buffer, len);
 
