@@ -211,66 +211,64 @@ public:
 			r = d.read_from_file(file);
 			if (r)
 			{
-				if (d.buffer.size() > KEY_SIZE)
+                int32_t databuffer_size = (int32_t)d.buffer.size();
+				if (databuffer_size >= perfect_key_size)
 				{
 					random_engine rd;
 					if (verbose)
                     {
-                        std::cout << "get a random position in " << (d.buffer.size() - KEY_SIZE) << " bytes of url file" <<  std::endl;
+                        std::cout << "get a random position in " << (databuffer_size - perfect_key_size) << " bytes of url file" <<  std::endl;
                     }
-					uint32_t t = (uint32_t) (rd.get_rand() * (d.buffer.size() - KEY_SIZE));
+
+                    vurlkey[i].key_size = perfect_key_size;
+
+					uint32_t t = (uint32_t) (rd.get_rand() * (databuffer_size - perfect_key_size));
 					vurlkey[i].key_fromH = (t / BASE);
 					vurlkey[i].key_fromL = t - (vurlkey[i].key_fromH  * BASE);
+
                     if (verbose)
                     {
                         std::cout << "key_fromH=" << vurlkey[i].key_fromH << " ";
                         std::cout << "key_fromL=" << vurlkey[i].key_fromL << " ";
-                        std::cout << "key_pos=" << t << " ";
+                        std::cout << "key_pos="   << t << " ";
+                        std::cout << "key_size="  << vurlkey[i].key_size << " ";
                         std::cout <<  std::endl;
 					}
 
-					{
-                        for( size_t j = 0; j< KEY_SIZE; j++)
+                    Buffer* b = vurlkey[i].get_buffer(); // allocate
+                    b->increase_size(perfect_key_size);
+                    b->write(&d.buffer.getdata()[t], perfect_key_size, -1);
+
+                    if (verbose)
+                    {
+                        for( int32_t j = 0; j< perfect_key_size; j++)
                         {
-                            vurlkey[i].key[j] = d.buffer.getdata()[t+j];
-                            if (verbose)
-                            {
-                                if (j<32) std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
-                                else if (j==32) {std::cout << " ... [" << KEY_SIZE << "] ... ";}
-                                else if (j>KEY_SIZE-32) std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
-                            }
+                            //vurlkey[i].key[j] = d.buffer.getdata()[t+j];
+                            if (j<32) std::cout << (int)(unsigned char)d.buffer.getdata()[t+j] << " ";
+                            else if (j==32) {std::cout << " ... [" << perfect_key_size << "] ... ";}
+                            else if (j>perfect_key_size-32) std::cout << (int)(unsigned char)d.buffer.getdata()[t+j] << " ";
                         }
-                        if (verbose)
-                            std::cout <<  std::endl;
+                        std::cout <<  std::endl;
                     }
 				}
 				else
 				{
                     if (verbose)
-                        std::cout << "key_pos=" << (int32_t)0 << " ";
+                    {
+                        std::cout << "WARNING URL file size less than key size (padding remaining) "  << "key_pos=" << (int32_t)0 <<  std::endl;
+                        std::cout << "WARNING Increase number of URL (or use bigger URL file size) for perfect security" <<  std::endl;
+                    }
 
-					for( size_t j = 0; j< d.buffer.size(); j++)
+                    Buffer* b = vurlkey[i].get_buffer(); // allocate
+                    b->increase_size(perfect_key_size);
+                    b->write(&d.buffer.getdata()[0], databuffer_size, -1);
+
+                    char c[1];
+					for( int32_t j = databuffer_size; j< perfect_key_size; j++)
 					{
-						vurlkey[i].key[j] = d.buffer.getdata()[j];
-						if (verbose)
-                        {
-                            if (j<32) std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
-                            else if (j==32) {std::cout << " ... [" << d.buffer.size() << "] ... ";}
-                            else if (j>KEY_SIZE-32) std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
-                        }
+						c[0] = (char) ( (unsigned char)(j % 7) );
+                        b->write(&c[0], 1, -1);
                     }
-					for( size_t j = d.buffer.size(); j< KEY_SIZE; j++)
-					{
-						vurlkey[i].key[j] = j % 7;
-                        if (verbose)
-                        {
-                            if (j<32) std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
-                            else if (j==32) {std::cout << " ... [" << KEY_SIZE - d.buffer.size() << "] ... ";}
-                            else if (j>KEY_SIZE-32) std::cout << (int)(unsigned char)vurlkey[i].key[j] << " ";
-                        }
-                    }
-                    if (verbose)
-                        std::cout <<  std::endl;
 				}
 
 				if      (i%3==0)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc;
@@ -297,7 +295,6 @@ public:
             {
                 std::cerr << "ERROR reading file " << file << std::endl;
             }
-
 		}
 
 		if (keeping == false)
@@ -321,7 +318,7 @@ public:
 		temp.writeUInt16(vurlkey[i].key_fromH, -1);
 		temp.writeUInt16(vurlkey[i].key_fromL, -1);
 		temp.writeUInt16(vurlkey[i].key_size, -1);
-		temp.write(&vurlkey[i].key[0], KEY_SIZE, -1);
+		temp.write(&vurlkey[i].key[0], MIN_KEY_SIZE, -1);
 		temp.write(&vurlkey[i].checksum[0], CHKSUM_SIZE, -1);
 
 		for( size_t j = 0; j< URLINFO_SIZE; j++)
@@ -603,6 +600,30 @@ public:
             return false;
         }
 
+        if (msg_data.read_from_file(filename_msg_data) == false)
+        {
+            std::cerr << "ERROR " << "reading msg file" << filename_msg_data <<std::endl;
+            return false;
+        }
+
+        msg_input_size = msg_data.buffer.size();
+        NURL_ITERATIONS = (int32_t)vurlkey.size();
+		if (NURL_ITERATIONS >= 1)
+		{
+            perfect_key_size = ((int32_t)msg_input_size) / NURL_ITERATIONS; // ignore extra and ignore first encoding
+            if (perfect_key_size % MIN_KEY_SIZE != 0)
+            {
+                perfect_key_size += MIN_KEY_SIZE - (perfect_key_size % MIN_KEY_SIZE);
+            }
+		}
+		if (perfect_key_size < MIN_KEY_SIZE) perfect_key_size = MIN_KEY_SIZE;
+        if (verbose)
+        {
+            std::cout << "msg_input_size = " << msg_input_size << " ";
+            std::cout << "number of URL keys = " << NURL_ITERATIONS << " ";
+            std::cout << "perfect_key_size = " << perfect_key_size <<  std::endl;
+        }
+
         for(size_t i=0; i<vurlkey.size(); i++)
         {
             if (verbose)
@@ -623,11 +644,6 @@ public:
             }
         }
 
-        if (msg_data.read_from_file(filename_msg_data) == false)
-        {
-            std::cerr << "ERROR " << "reading msg file" << filename_msg_data <<std::endl;
-            return false;
-        }
         if (msg_data.copy_buffer_to(data_temp)== false)
         {
             std::cerr << "ERROR " << "reading copying msg file" << filename_msg_data <<std::endl;
@@ -670,20 +686,18 @@ public:
                 // skip msg_data already read into data_temp
             }
 
-            char save_key[KEY_SIZE];
-            for(size_t ii=0; ii<KEY_SIZE; ii++)
-                save_key[ii] = vurlkey[i].key[ii];
-
             if (i>0)
             {
-                for(size_t ii=0; ii<KEY_SIZE; ii++)
+                for(size_t ii=0; ii<MIN_KEY_SIZE; ii++)
                     vurlkey[i-1].key[ii] = 0;
 
                 data_temp.append(&vurlkey[i-1].urlinfo_with_padding[0], URLINFO_SIZE);
             }
 
             data_temp_next.clear_data();
-            encode(i, vurlkey.size(), vurlkey[i].crypto_algo, data_temp, &save_key[0], KEY_SIZE, data_temp_next);
+            encode( i, vurlkey.size(), vurlkey[i].crypto_algo, data_temp,
+                    &vurlkey[i].get_buffer()->getdata()[0], vurlkey[i].key_size,
+                    data_temp_next);
 
             data_temp.buffer.swap_with(data_temp_next.buffer);
             data_temp_next.erase();
@@ -691,13 +705,10 @@ public:
 
         if (vurlkey.size()>0)
         {
-            for(size_t ii=0; ii<KEY_SIZE; ii++)
+            for(size_t ii=0; ii<MIN_KEY_SIZE; ii++)
                 vurlkey[vurlkey.size()-1].key[ii] = 0;
 
             data_temp.append(&vurlkey[vurlkey.size()-1].urlinfo_with_padding[0], URLINFO_SIZE);
-        }
-        else
-        {
         }
 
         // Save number of iterations (N web keys + 1 puzzle key) in the last 2 byte! + PADDING_MULTIPLE-2
@@ -740,6 +751,10 @@ public:
     std::string encryped_ftp_pwd;
     std::string known_ftp_server;
     int staging_cnt=0;
+
+    size_t msg_input_size = 0;
+    int32_t NURL_ITERATIONS = 0;
+	int32_t perfect_key_size = 0;
 };
 
 

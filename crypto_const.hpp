@@ -32,14 +32,14 @@ constexpr static int16_t URL_LEN_ENCODESIZE = 2;
 constexpr static int16_t CRYPTO_ALGO_ENCODESIZE = 2;
 constexpr static int16_t URL_MIN_SIZE   = 10;
 constexpr static int16_t URL_MAX_SIZE   = 256;
-constexpr static int16_t KEY_SIZE       = 256*4; // KEYS extract from URL files - Make it dynamic...
+constexpr static int16_t MIN_KEY_SIZE   = 64; // KEYS are extract from URL files (local or web)
 constexpr static int16_t CHKSUM_SIZE    = 64;
 constexpr static int16_t PADDING_LEN_ENCODESIZE = 2;
 constexpr static int16_t URLINFO_SIZE   =   URL_LEN_ENCODESIZE + URL_MAX_SIZE + MAGIC_SIZE +
-                                            KEYPOS_ENCODESIZE  + CHKSUM_SIZE  + KEY_SIZE +
+                                            KEYPOS_ENCODESIZE  + CHKSUM_SIZE  + MIN_KEY_SIZE +
                                             CRYPTO_ALGO_ENCODESIZE + PADDING_LEN_ENCODESIZE; // padding 16x
 
-constexpr static int16_t PADDING_MULTIPLE   = 16; // should be 16x with AES
+constexpr static int16_t PADDING_MULTIPLE   = 16; // should be 16x with AES 128bits data size requirement
 constexpr static int16_t NITER_LIM          = 100;
 constexpr static int16_t PUZZLE_SIZE_LIM    = 10000;
 constexpr static uint32_t FILE_SIZE_LIM     = 100*1000*1000;
@@ -47,23 +47,50 @@ constexpr static uint32_t FILE_SIZE_LIM     = 100*1000*1000;
 const std::string REM_TOKEN             = "REM";
 const std::string CHKSUM_TOKEN          = "CHKSUM";
 
-// test
 class urlkey
 {
 public:
     urlkey() {}
+    ~urlkey()
+    {
+        if (buff_key != nullptr)
+        {
+            delete buff_key;
+            buff_key = nullptr;
+        }
+    }
 
-    uint16_t crypto_algo = 1;           // 2
+    Buffer* get_buffer()
+    {
+        if (buff_key == nullptr)
+        {
+            buff_key = new Buffer(MIN_KEY_SIZE);
+        }
+        return buff_key;
+    }
+
+    void erase_buffer()
+    {
+        if (buff_key != nullptr)
+        {
+            buff_key->erase();
+        }
+    }
+
+    uint16_t crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES; // 2
     uint16_t url_size = 0;              // 2
     char url[URL_MAX_SIZE]= {0};        // 256
     char magic[4]= {'a','b','c','d'};   // 4
-    uint16_t key_fromH = 0;             // 2 random offset
+    uint16_t key_fromH = 0;             // 2 random offset where to extract a key
     uint16_t key_fromL = 0;             // 2
-    uint16_t key_size = KEY_SIZE;       // 2
-    char key[KEY_SIZE] = {0};           // 256
+    uint16_t key_size = MIN_KEY_SIZE;   // 2 TODO 4 bytes
+    char key[MIN_KEY_SIZE] = {0};       // NOT THE FULL KEY, a small default buffer for small keys for future usage
     char checksum[CHKSUM_SIZE] = {0};   // 64
 
     char urlinfo_with_padding[URLINFO_SIZE] = {0};
+
+protected:
+    Buffer* buff_key = nullptr;
 };
 
 std::string get_current_time_and_date()

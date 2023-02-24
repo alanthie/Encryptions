@@ -40,6 +40,8 @@
 			<Add after="cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto" />
 			<Mode after="always" />
 		</ExtraCommands>
+		<Unit filename="AESa.cpp" />
+		<Unit filename="AESa.h" />
 		<Unit filename="Base64.cpp" />
 		<Unit filename="Buffer.hpp" />
 		<Unit filename="Encryptions/AES.cpp" />
