@@ -29,7 +29,7 @@ class random_engine
     }
 };
 
-bool generate_random_file(std::string filename, long long N, long num_files = 1)
+bool generate_random_file(std::string filename, long Nk, long num_files = 1)
 {
     std::string s;
     std::string si;
@@ -41,10 +41,13 @@ bool generate_random_file(std::string filename, long long N, long num_files = 1)
     long t;
     bool r = true;
     random_engine rd;
+    long N = Nk*1000;
+    long sz=0;
 
     std::string filename_full;
     for(long long k=0;k<num_files;k++)
     {
+        sz=0;
         cryptodata data;
         for(long long i=0;i<N;i++)
         {
@@ -53,7 +56,11 @@ bool generate_random_file(std::string filename, long long N, long num_files = 1)
             sn = std::to_string(n);
             if (i%10 == 0) s = si + ":" + sn + " \n";
             else s = si + ":" + sn + " ";
+            sz += s.size();
             data.buffer.write(s.data(), s.size(), -1);
+
+            if (sz >= N)
+                break;
 
             t = (long long)(rd.get_rand() * 100);
             for(long long j=0;j<t;j++)
@@ -77,7 +84,7 @@ bool generate_random_file(std::string filename, long long N, long num_files = 1)
      return r;
 }
 
-bool generate_binary_random_file(std::string filename, long long N, long num_files = 1)
+bool generate_binary_random_file(std::string filename, long Nk, long num_files = 1)
 {
     const double LIM = 256*256;
     srand ((unsigned int)time(NULL));
@@ -86,6 +93,7 @@ bool generate_binary_random_file(std::string filename, long long N, long num_fil
     long t;
     bool r = true;
     random_engine rd;
+    long N = Nk*1000/2;
 
     std::string filename_full;
     for(long long k=0;k<num_files;k++)

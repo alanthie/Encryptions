@@ -41,6 +41,10 @@ int main_crypto(int argc, char **argv)
             random_file_command.add_argument("-c", "--count")
                 .default_value(std::string("1"))
                 .help("specify how many files to generate");
+
+           random_file_command.add_argument("-s", "--size")
+                .default_value(std::string("1"))
+                .help("specify the file size in kilo bytes (1000 bytes) to generate");
         }
 
          argparse::ArgumentParser binary_random_file_command("binary");
@@ -54,6 +58,10 @@ int main_crypto(int argc, char **argv)
             binary_random_file_command.add_argument("-c", "--count")
                 .default_value(std::string("1"))
                 .help("specify how many files to generate");
+
+            binary_random_file_command.add_argument("-s", "--size")
+                .default_value(std::string("1"))
+                .help("specify the file size in kilo bytes (1000 bytes) to generate");
         }
 
         argparse::ArgumentParser string_encode_command("string_encode");
@@ -255,7 +263,20 @@ int main_crypto(int argc, char **argv)
             auto& cmd = random_file_command;
             auto filename = cmd.get<std::string>("--output");
             auto countn = cmd.get<std::string>("--count");
-            generate_random_file(filename, 2000, std::stol(countn));
+            auto str_dec = cmd.get<std::string>("--size");
+            size_t sz = 0; long li_dec=1; long cnt=1;
+            try
+            {
+                li_dec = std::stol (str_dec, &sz);
+                cnt =  std::stol(countn);
+            }
+            catch(...)
+            {
+                std::cout << "Warning some unvalid numeric value, numeric values reset to 1" << std::endl;
+                li_dec = 1;
+                cnt = 1;
+            }
+            generate_random_file(filename, li_dec, cnt);
             return 0;
         }
 
@@ -264,7 +285,20 @@ int main_crypto(int argc, char **argv)
             auto& cmd = binary_random_file_command;
             auto filename = cmd.get<std::string>("--output");
             auto countn = cmd.get<std::string>("--count");
-            generate_binary_random_file(filename, 20000, std::stol(countn));
+            auto str_dec = cmd.get<std::string>("--size");
+            size_t sz = 0; long li_dec=1; long cnt=1;
+            try
+            {
+                li_dec = std::stol (str_dec, &sz);
+                cnt =  std::stol(countn);
+            }
+            catch(...)
+            {
+                std::cout << "Warning some unvalid numeric value, numeric values reset to 1" << std::endl;
+                li_dec = 1;
+                cnt = 1;
+            }
+            generate_binary_random_file(filename, li_dec, cnt);
             return 0;
         }
 
