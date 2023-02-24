@@ -101,7 +101,15 @@ uint32_t parseUInt32(const char (&buf)[4])
 
 bool generate_binary_random_file(std::string filename, long long Nk, long num_files = 1)
 {
+    //UINT_MAX   = 4294967295
+    //ULONG_MAX  = 18446744073709551615
+    //ULLONG_MAX = 18446744073709551615
+#ifdef _WIN32
+    uint32_t LIM = UINT_MAX;
+#else
     uint32_t LIM = std::numeric_limits<uint32_t>::max();
+#endif
+
     srand ((unsigned int)time(NULL));
     srand ((unsigned int)time(NULL));
     uint32_t n;

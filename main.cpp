@@ -19,6 +19,7 @@
 #include "data.hpp"
 
 //cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto
+//copy x64\Release\crypto.exe ..\..\Exec_Windows\*
 std::string VERSION = "0.3";
 
 int main_crypto(int argc, char **argv)

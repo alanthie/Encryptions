@@ -19,100 +19,43 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\AESa.h" />
     <ClInclude Include="..\..\argparse.hpp" />
     <ClInclude Include="..\..\Base64.h" />
     <ClInclude Include="..\..\Buffer.hpp" />
     <ClInclude Include="..\..\common\cryptomath.h" />
     <ClInclude Include="..\..\common\includes.h" />
     <ClInclude Include="..\..\crypto_batch.hpp" />
+    <ClInclude Include="..\..\crypto_const.hpp" />
+    <ClInclude Include="..\..\crypto_file.hpp" />
+    <ClInclude Include="..\..\crypto_package.hpp" />
     <ClInclude Include="..\..\crypto_test.hpp" />
+    <ClInclude Include="..\..\data.hpp" />
     <ClInclude Include="..\..\decryptor.hpp" />
+    <ClInclude Include="..\..\DES.h" />
+    <ClInclude Include="..\..\DES_Const.h" />
     <ClInclude Include="..\..\encrypt.h" />
     <ClInclude Include="..\..\Encryptions.h" />
-    <ClInclude Include="..\..\Encryptions\AES.h" />
-    <ClInclude Include="..\..\Encryptions\AES_Const.h" />
-    <ClInclude Include="..\..\Encryptions\Blowfish.h" />
-    <ClInclude Include="..\..\Encryptions\Blowfish_Const.h" />
-    <ClInclude Include="..\..\Encryptions\Camellia.h" />
-    <ClInclude Include="..\..\Encryptions\Camellia_Const.h" />
-    <ClInclude Include="..\..\Encryptions\CAST128.h" />
-    <ClInclude Include="..\..\Encryptions\CAST128_Const.h" />
-    <ClInclude Include="..\..\Encryptions\CAST256.h" />
-    <ClInclude Include="..\..\Encryptions\CAST_Const.h" />
-    <ClInclude Include="..\..\Encryptions\DES.h" />
-    <ClInclude Include="..\..\Encryptions\DESX.h" />
-    <ClInclude Include="..\..\Encryptions\DES_Const.h" />
-    <ClInclude Include="..\..\Encryptions\GOST.h" />
-    <ClInclude Include="..\..\Encryptions\GOST_Const.h" />
-    <ClInclude Include="..\..\Encryptions\IDEA.h" />
-    <ClInclude Include="..\..\Encryptions\MISTY1.h" />
-    <ClInclude Include="..\..\Encryptions\MISTY1_Const.h" />
-    <ClInclude Include="..\..\Encryptions\RC2.h" />
-    <ClInclude Include="..\..\Encryptions\RC2_Const.h" />
-    <ClInclude Include="..\..\Encryptions\RC4.h" />
-    <ClInclude Include="..\..\Encryptions\RC5.h" />
-    <ClInclude Include="..\..\Encryptions\RC6.h" />
-    <ClInclude Include="..\..\Encryptions\RC_PQ.h" />
-    <ClInclude Include="..\..\Encryptions\SAFERK64.h" />
-    <ClInclude Include="..\..\Encryptions\SAFERK64_Const.h" />
-    <ClInclude Include="..\..\Encryptions\SEED.h" />
-    <ClInclude Include="..\..\Encryptions\SEED_Const.h" />
-    <ClInclude Include="..\..\Encryptions\Skipjack.h" />
-    <ClInclude Include="..\..\Encryptions\Skipjack_Const.h" />
-    <ClInclude Include="..\..\Encryptions\SymAlg.h" />
-    <ClInclude Include="..\..\Encryptions\TDES.h" />
-    <ClInclude Include="..\..\Encryptions\TEA.h" />
-    <ClInclude Include="..\..\Encryptions\Twofish.h" />
-    <ClInclude Include="..\..\Encryptions\Twofish_Const.h" />
-    <ClInclude Include="..\..\Encryptions\XTEA.h" />
     <ClInclude Include="..\..\encryptor.hpp" />
-    <ClInclude Include="..\..\modes\CBC.h" />
-    <ClInclude Include="..\..\modes\CFB.h" />
-    <ClInclude Include="..\..\modes\CTR.h" />
-    <ClInclude Include="..\..\modes\ECB.h" />
-    <ClInclude Include="..\..\modes\OFB.h" />
-    <ClInclude Include="..\..\modes\PCPB.h" />
+    <ClInclude Include="..\..\ini_parser.hpp" />
+    <ClInclude Include="..\..\puzzle.hpp" />
+    <ClInclude Include="..\..\random_engine.hpp" />
+    <ClInclude Include="..\..\rng.h" />
     <ClInclude Include="..\..\SHA256.h" />
+    <ClInclude Include="..\..\SymAlg.h" />
     <ClInclude Include="..\..\vigenere.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\AESa.cpp" />
     <ClCompile Include="..\..\Base64.cpp" />
     <ClCompile Include="..\..\common\includes.cpp" />
-    <ClCompile Include="..\..\Encryptions\AES.cpp" />
-    <ClCompile Include="..\..\Encryptions\Blowfish.cpp" />
-    <ClCompile Include="..\..\Encryptions\Camellia.cpp" />
-    <ClCompile Include="..\..\Encryptions\CAST128.cpp" />
-    <ClCompile Include="..\..\Encryptions\CAST256.cpp" />
-    <ClCompile Include="..\..\Encryptions\DES.cpp" />
-    <ClCompile Include="..\..\Encryptions\DESX.cpp" />
-    <ClCompile Include="..\..\Encryptions\GOST.cpp" />
-    <ClCompile Include="..\..\Encryptions\IDEA.cpp" />
-    <ClCompile Include="..\..\Encryptions\MISTY1.cpp" />
-    <ClCompile Include="..\..\Encryptions\RC2.cpp" />
-    <ClCompile Include="..\..\Encryptions\RC4.cpp" />
-    <ClCompile Include="..\..\Encryptions\RC5.cpp" />
-    <ClCompile Include="..\..\Encryptions\RC6.cpp" />
-    <ClCompile Include="..\..\Encryptions\RC_PQ.cpp" />
-    <ClCompile Include="..\..\Encryptions\SAFERK64.cpp" />
-    <ClCompile Include="..\..\Encryptions\SEED.cpp" />
-    <ClCompile Include="..\..\Encryptions\Skipjack.cpp" />
-    <ClCompile Include="..\..\Encryptions\SymAlg.cpp" />
-    <ClCompile Include="..\..\Encryptions\TDES.cpp" />
-    <ClCompile Include="..\..\Encryptions\TEA.cpp" />
-    <ClCompile Include="..\..\Encryptions\Twofish.cpp" />
-    <ClCompile Include="..\..\Encryptions\XTEA.cpp" />
+    <ClCompile Include="..\..\DES.cpp" />
     <ClCompile Include="..\..\main.cpp" />
-    <ClCompile Include="..\..\modes\CBC.cpp" />
-    <ClCompile Include="..\..\modes\CFB.cpp" />
-    <ClCompile Include="..\..\modes\CTR.cpp" />
-    <ClCompile Include="..\..\modes\ECB.cpp" />
-    <ClCompile Include="..\..\modes\OFB.cpp" />
-    <ClCompile Include="..\..\modes\PCPB.cpp" />
     <ClCompile Include="..\..\SHA256.cpp" />
+    <ClCompile Include="..\..\SymAlg.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\Encryptions\CMakeLists.txt" />
-    <Text Include="..\..\modes\CMakeLists.txt" />
+    <None Include="..\..\crypto.cbp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -209,6 +152,9 @@
       <AdditionalDependencies>libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>copy x64\Release\crypto.exe ..\..\Exec_Windows\*</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -229,6 +175,9 @@
       <AdditionalDependencies>libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>copy x64\Release\crypto.exe ..\..\Exec_Windows\*</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
