@@ -10,7 +10,7 @@ Multiple encryption algorithms for one message to encrypt.
 
 Deep recursive encryption
 
-Unlimited encryption keys size (soon...).
+Unlimited encryption keys size!
 
 **Allow perfect secrecy**:
 <pre>
