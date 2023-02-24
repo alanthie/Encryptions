@@ -25,8 +25,6 @@ public:
 
 class Buffer
 {
-//friend class data;
-
 public:
     explicit Buffer(uint32_t sz = BUFFER_SIZE_INIT)
     {
@@ -34,6 +32,7 @@ public:
         length = 0;
         alloc_size = sz;
     }
+
     ~Buffer()
     {
         erase();

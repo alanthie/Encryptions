@@ -72,13 +72,12 @@ public:
         for( int16_t j = 0; j< 4; j++)
         {
             out_uk.magic[j] = temp.getdata()[pos+j];
-            //std::cout << "out_uk.magic[j] " << out_uk.magic[j]<< std::endl;
         }
         pos += 4;
 
 		out_uk.key_fromH = temp.readUInt16(pos); pos+=2;
 		out_uk.key_fromL = temp.readUInt16(pos); pos+=2;
-		out_uk.key_size = temp.readUInt16(pos);  pos+=2;
+		out_uk.key_size  = temp.readUInt16(pos);  pos+=2;
 
         if (verbose)
         {
@@ -94,15 +93,13 @@ public:
         }
 
         // zero
-        for( int16_t j = 0; j< KEY_SIZE; j++) out_uk.key[j] = 0;
-        pos += KEY_SIZE;
+        for( int16_t j = 0; j< MIN_KEY_SIZE; j++) out_uk.key[j] = 0;
+        pos += MIN_KEY_SIZE;
 
 		for( int16_t j = 0; j< CHKSUM_SIZE; j++)
 		{
             out_uk.checksum[j] = temp.getdata()[pos+j];
-            //std::cout << out_uk.checksum[j];
         }
-        //std::cout << std::endl;
         pos += CHKSUM_SIZE;
 
 		return r;
@@ -157,7 +154,7 @@ public:
             }
 
             int pos_url = 0;
-            if (is_video)   pos_url = 3;
+            if      (is_video)   pos_url = 3;
             else if (is_ftp)     pos_url = 3;
             else if (is_local)   pos_url = 3;
             int rc = 0;
@@ -212,7 +209,7 @@ public:
 			if (r)
 			{
                 uint32_t pos = (uk.key_fromH * BASE) + uk.key_fromL ;
-                size_t  key_size = uk.key_size;
+                int32_t  key_size = uk.key_size;
 
                 if (pos >= d.buffer.size() - key_size)
                 {
@@ -221,30 +218,22 @@ public:
                     r = false;
                 }
 
-                if (r && (key_size <= KEY_SIZE))
+                if (r)
                 {
-                    for( size_t j = 0; j< key_size; j++)
-                    {
-                        uk.key[j] = d.buffer.getdata()[pos+j];
-                        if (verbose)
-                        {
-                            if (j<32) std::cout << (int)(unsigned char)uk.key[j]<< " ";
-                            else if (j==32) {std::cout << " ... [" << key_size << "] ... ";}
-                            else if (j>KEY_SIZE-32) std::cout << (int)(unsigned char)uk.key[j] << " ";
-                        }
-                    }
-                    for( size_t j = key_size; j < KEY_SIZE; j++)
-                    {
-    					uk.key[j] = j % 7;
-                        if (verbose)
-                        {
-                            if (j<32) std::cout << (int)(unsigned char)uk.key[j]<< " ";
-                            else if (j==32) {std::cout << " ... [" << KEY_SIZE - key_size << "] ... ";}
-                            else if (j>KEY_SIZE-32) std::cout << (int)(unsigned char)uk.key[j] << " ";
-                        }
-                    }
+                    Buffer* b = uk.get_buffer(); // allocate
+                    b->increase_size(key_size);
+                    b->write(&d.buffer.getdata()[pos], key_size, -1);
+
                     if (verbose)
-                        std::cout << std::endl;
+                    {
+                        for( int32_t j = 0; j< key_size; j++)
+                        {
+                            if (j<32) std::cout << (int)(unsigned char)b->getdata()[j] << " ";
+                            else if (j==32) {std::cout << " ... [" << key_size << "] ... ";}
+                            else if (j>key_size-32) std::cout << (int)(unsigned char)b->getdata()[j] << " ";
+                        }
+                        std::cout <<  std::endl;
+                    }
 
                     std::string checksum;
                     {
@@ -278,11 +267,6 @@ public:
                         }
                     }
                 }
-                else
-                {
-                    std::cerr << "ERROR " << "invalid web key size: " << key_size << std::endl;
-                    r = false;
-                }
             }
             else
             {
@@ -312,7 +296,7 @@ public:
 		{
             std::cout <<    "\nDecryptor decode() binDES - " <<
                             "number of blocks (8 bytes): " << nblock <<
-                            ", number of keys (4 bytes): "   << nkeys  << std::endl;
+                            ", number of keys (4 bytes): " << nkeys  << std::endl;
         }
 
         // BINARY DES
@@ -630,8 +614,10 @@ public:
                 for(int16_t iter=0; iter<NITER; iter++)
                 {
                     // Get KeyN from uk info read from the web
+                    uk.erase_buffer();
+
                     r = get_key(uk);
-                    if (r==false)
+                    if (r == false)
                     {
                         break;
                     }
@@ -646,7 +632,10 @@ public:
                     }
 
                     // decode(DataN, keyN) => DataN-1+urlkeyN-1     urlkeyN-1=>keyN-1
-                    if (decode(iter+1, NITER+1, uk.crypto_algo, data_temp, &uk.key[0], KEY_SIZE, data_temp_next) == false)
+                    if (decode( iter+1, NITER+1, uk.crypto_algo, data_temp,
+                                &uk.get_buffer()->getdata()[0], uk.key_size,
+                                //&uk.key[0], MIN_KEY_SIZE,
+                                data_temp_next) == false)
                     {
                         r = false;
                         std::cerr << "ERROR " << "encrypted_data can not be decoded" << std::endl;
