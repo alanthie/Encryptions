@@ -44,7 +44,7 @@ int main_crypto(int argc, char **argv)
 
            random_file_command.add_argument("-s", "--size")
                 .default_value(std::string("1"))
-                .help("specify the file size in kilo bytes (1000 bytes) to generate");
+                .help("specify the file size in kilo bytes (1024 bytes) to generate");
         }
 
          argparse::ArgumentParser binary_random_file_command("binary");
@@ -61,7 +61,7 @@ int main_crypto(int argc, char **argv)
 
             binary_random_file_command.add_argument("-s", "--size")
                 .default_value(std::string("1"))
-                .help("specify the file size in kilo bytes (1000 bytes) to generate");
+                .help("specify the file size in kilo bytes (1024 bytes) to generate");
         }
 
         argparse::ArgumentParser string_encode_command("string_encode");

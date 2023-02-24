@@ -238,12 +238,6 @@ bool batch(std::string mode, std::string inifile, bool verbose)
             return false;
         }
 
-//        if(fs::is_regular_file(folder_decoder_output + decoding_output_msg_unencrypted) == false)
-//        {
-//            std::cerr << "ERROR not a regular file " << folder_decoder_output + decoding_output_msg_unencrypted<< std::endl;
-//            return false;
-//        }
-
         decryptor decr(folder_decoder_input + decoding_input_qa_puzzle,
                        folder_decoder_input + decoding_input_msg_encrypted,
                        folder_decoder_output + decoding_output_msg_unencrypted,

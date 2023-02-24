@@ -3,12 +3,14 @@
 
 #include <random>
 #include "data.hpp"
+#include "rng.h"
 
 class random_engine
 {
   public:
-    std::random_device                      rd;
-    std::mt19937                            mt;
+    std::random_device                    rd;
+    std::mt19937                          mt;
+    //std::minstd_rand                    mt;
     std::uniform_real_distribution<double>  dist;
 
     random_engine() : rd{}, mt{rd()}, dist{0.0, 1.0}
@@ -27,6 +29,7 @@ class random_engine
         int n = rand() % 100;
         for (int i=0;i<n;i++) get_rand(); // random seed
     }
+
 };
 
 bool generate_random_file(std::string filename, long Nk, long num_files = 1)
@@ -84,29 +87,64 @@ bool generate_random_file(std::string filename, long Nk, long num_files = 1)
      return r;
 }
 
+void serializeUInt32(char (&buf)[4], uint32_t val)
+{
+  memcpy(buf, &val, 4);
+}
+
+uint32_t parseUInt32(const char (&buf)[4])
+{
+  uint32_t val;
+  memcpy(&val, buf, 4);
+  return val;
+}
+
 bool generate_binary_random_file(std::string filename, long long Nk, long num_files = 1)
 {
-    uint32_t LIM = (uint32_t) ( ((uint64_t)(256ull*256ull*256ull*256ull)) - 1);
+    uint32_t LIM = std::numeric_limits<uint32_t>::max();
     srand ((unsigned int)time(NULL));
     srand ((unsigned int)time(NULL));
     uint32_t n;
-    long t;
+    char buf[4];
     bool r = true;
     random_engine rd;
-    long long N = Nk*1000/4;
+    long long N = Nk*1024/4;
+    long long t;
+
+    rng::tsc_seed seed;
+    rng::rng128 gen(seed());
+
+    std::cerr << "LIM  " << LIM << std::endl;
 
     std::string filename_full;
     for(long long k=0;k<num_files;k++)
     {
         cryptodata data;
+        data.realloc(Nk*1024);
         for(long long i=0;i<N;i++)
         {
-            n = (uint32_t)(rd.get_rand() * LIM);
-            data.buffer.writeUInt32(n, -1);
+            if (i%2 == 0)
+                n = (uint32_t)(rd.get_rand() * LIM);
+            else
+                n = gen() % LIM;
 
-            t = (long long)(rd.get_rand() * 2);
+            serializeUInt32(buf, n);;
+            data.buffer.write(buf, 4, -1);
+
+            t = (long long)(rd.get_rand() * 3);
             for(long long j=0;j<t;j++)
+            {
                 rd.get_rand();
+                gen();
+            }
+            if (i%20 == 0)
+                srand ((unsigned int)time(NULL));
+            t = rand() % 3;
+            for(long long j=0;j<t;j++)
+            {
+                rd.get_rand();
+                gen();
+            }
         }
 
         if (num_files > 0)

@@ -167,36 +167,6 @@ void test_core(bool verbose = true)
     }
 
 
-    // TEST CLASSIC STRING AES
-//    if (false)
-//    {
-//        std::cout << "\nTEST CLASSIC STRING AES"<< std::endl;
-//        std::string KEY  = std::string("EWTW;RLd")+std::string("hgjhfg88");   // 16 24 32 bytes
-//        std::string data = std::string("65431234")+std::string("3bhgfdfg");   // 16 bytes
-//
-//        AES aes(KEY);
-//        std::string data_encr = aes.encrypt(data);
-//        std::string data_back = aes.decrypt(data_encr);
-//        if (data != data_back)
-//        {
-//            std::cout << "Error with AES algo"
-//            << "\nkey " << KEY
-//            << "\ndata " << data
-//            //<< "\ndata_encr " << data_encr
-//            << "\ndata_back " << data_back
-//            << std::endl;
-//        }
-//        else
-//        {
-//            std::cout << "OK with AES algo "
-//            << "\nkey " << KEY
-//            << "\ndata " << data
-//            //<< "\ndata_encr " << data_encr
-//            << "\ndata_back " << data_back
-//            << std::endl;
-//        }
-//    }
-
     // TEST CLASSIC STRING DES
     if (false)
     {

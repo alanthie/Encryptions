@@ -154,8 +154,22 @@ public:
                | (uint16_t)(unsigned char)buff[0];
     }
 
+//    void uint8ToByte(uint64_t k, char buff[])
+//    {
+//        //memcpy(buff, &k, 8);
+//        buff[0] = (char)(k & 0x00000000000000ff);
+//        buff[1] = (char)(k & 0x000000000000ff00) >> 8;
+//        buff[2] = (char)(k & 0x0000000000ff0000) >> 16;
+//        buff[3] = (char)(k & 0x00000000ff000000) >> 24;
+//        buff[4] = (char)(k & 0x000000ff00000000) >> 32;
+//        buff[5] = (char)(k & 0x0000ff0000000000) >> 40;
+//        buff[6] = (char)(k & 0x00ff000000000000) >> 48;
+//        buff[7] = (char)(k & 0xff00000000000000) >> 56;
+//    }
+
     void uint4ToByte(uint32_t k, char buff[])
     {
+        //memcpy(buff, &k, 4);
         buff[0] = (char)(k & 0x000000ff);
         buff[1] = (char)(k & 0x0000ff00) >> 8;
         buff[2] = (char)(k & 0x00ff0000) >> 16;
@@ -180,13 +194,11 @@ public:
     uint16_t readUInt16(uint32_t offset)
     {
         if (offset+2-1 >= alloc_size) throw bad_buffer_operation(alloc_size);
-        //return (uint16_t)data[offset];
         return (int16_t) byteToUInt2(&data[offset]);
     }
     uint32_t readUInt32(uint32_t offset)
     {
         if (offset+4-1 >= alloc_size) throw bad_buffer_operation(alloc_size);
-        //return (uint16_t)data[offset];
         return (uint32_t) byteToUInt4(&data[offset]);
     }
     int8_t readInt8(uint32_t offset)
@@ -229,29 +241,41 @@ public:
 
         uint32_t appendOffset = (offset == -1) ? length : (uint32_t)offset;
 
-        //memcpy(this->data + appendOffset, &number, sizeof(uint16_t));
-        char buff[2];
-        int2ToByte(number, buff);
+//        char buff[2];
+//        int2ToByte(number, buff);
+//        memcpy(this->data + appendOffset, buff, 2);
         memcpy(this->data + appendOffset, &number, 2);
-
-        //if (appendOffset + sizeof(uint16_t) > length) length = appendOffset + sizeof(uint16_t);
         if (appendOffset + 2 > length) length = appendOffset + 2;
     }
 
     void writeUInt32(uint32_t number, int32_t offset = -1)
     {
-        uint32_t of = (uint32_t)(offset == -1 ? length : offset)+2-1;
+        uint32_t of = (uint32_t)(offset == -1 ? length : offset)+4-1;
         if (of >= alloc_size) increase_size(of);
 
         uint32_t appendOffset = (offset == -1) ? length : (uint32_t)offset;
 
-        //memcpy(this->data + appendOffset, &number, sizeof(uint16_t));
-        char buff[4];
-        uint4ToByte(number, buff);
-        memcpy(this->data + appendOffset, &number, 4);
+//        char buff[4];
+//        uint4ToByte(number, buff);
+//        memcpy(this->data + appendOffset, buff, 4);
 
-        //if (appendOffset + sizeof(uint16_t) > length) length = appendOffset + sizeof(uint16_t);
+        memcpy(this->data + appendOffset, &number, 4);
         if (appendOffset + 4 > length) length = appendOffset + 4;
+    }
+
+    void writeUInt64(uint64_t number, int32_t offset = -1)
+    {
+        uint32_t of = (uint32_t)(offset == -1 ? length : offset)+8-1;
+        if (of >= alloc_size) increase_size(of);
+
+        uint32_t appendOffset = (offset == -1) ? length : (uint32_t)offset;
+
+//        char buff[8];
+//        uint8ToByte(number, buff);
+//        memcpy(this->data + appendOffset, buff, 8);
+
+        memcpy(this->data + appendOffset, &number, 8);
+        if (appendOffset + 8 > length) length = appendOffset + 8;
     }
 
     void writeInt8(int8_t number, int32_t offset = -1)
