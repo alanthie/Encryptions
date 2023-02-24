@@ -4,7 +4,7 @@
 #include "crypto_const.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
-#include "Encryptions/AES.h"
+//#include "Encryptions/AES.h"
 #include "Encryptions/DES.h"
 #include "AESa.h"
 
@@ -141,64 +141,10 @@ void test_core(bool verbose = true)
         }
     }
 
-    if (true)
-    {
-        // parameters
-        const std::string raw_data = "Hello, plusaes";
-        const std::vector<unsigned char> key = plusaes::key_from_string(&"EncryptionKey128"); // 16-char = 128-bit
-        const unsigned char iv[16] = {
-            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-            0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
-        };
 
-        // encrypt
-        const unsigned long encrypted_size = plusaes::get_padded_encrypted_size(raw_data.size());
-        std::vector<unsigned char> encrypted(encrypted_size);
-
-        plusaes::encrypt_cbc((unsigned char*)raw_data.data(), raw_data.size(), &key[0], key.size(), &iv, &encrypted[0], encrypted.size(), true);
-        // fb 7b ae 95 d5 0f c5 6f 43 7d 14 6b 6a 29 15 70
-
-        // decrypt
-        unsigned long padded_size = 0;
-        std::vector<unsigned char> decrypted(encrypted_size);
-
-        plusaes::decrypt_cbc(&encrypted[0], encrypted.size(), &key[0], key.size(), &iv, &decrypted[0], decrypted.size(), &padded_size);
-        // Hello, plusaes
-        for(size_t i=0;i<16;i++)
-        {
-            if (decrypted[i] != raw_data[i])
-            {
-                std::cout << "Error with string AES algo "<< i <<std::endl;
-                std::cout << (int)decrypted[i]<<std::endl;
-                std::cout << (int)raw_data[i]<<std::endl;
-                break;
-            }
-        }
-        std::cout << "OK with string AES algo "<<std::endl;
-    }
 
     if (true)
     {
-//        const unsigned char iv[16] = {
-//            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-//            0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
-//
-//        //unsigned char KEY[16+1] = {0x02, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x00};
-//        unsigned char KEY[16+1] = "1234567812345678";
-//		//unsigned char DATA[16+1]= {0x01, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x00};
-//		unsigned char DATA[16+1]= "1234567812345678";
-//        unsigned char encrypted[32+1];
-//        unsigned char decrypted[32+1];
-//		// encrypt
-//        //const unsigned long encrypted_size = 16;//plusaes::get_padded_encrypted_size(raw_data.size());
-//        //std::vector<unsigned char> encrypted(encrypted_size);
-//        plusaes::encrypt_cbc(&DATA[0], 16, &KEY[0], 16, &iv, &encrypted[0], 16, false);
-//
-//        unsigned long padded_size = 0;
-//        //std::vector<unsigned char> decrypted(16);
-//        plusaes::decrypt_cbc(   &encrypted[0], 16, &KEY[0], 16, &iv,
-//                                &decrypted[0], 16, &padded_size);
-
         unsigned char plain[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff }; //plaintext example
         unsigned char key[]   = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f }; //key example
         unsigned int plainLen = 16 * sizeof(unsigned char);  //bytes in plaintext
@@ -223,34 +169,34 @@ void test_core(bool verbose = true)
 
 
     // TEST CLASSIC STRING AES
-    if (false)
-    {
-        std::cout << "\nTEST CLASSIC STRING AES"<< std::endl;
-        std::string KEY  = std::string("EWTW;RLd")+std::string("hgjhfg88");   // 16 24 32 bytes
-        std::string data = std::string("65431234")+std::string("3bhgfdfg");   // 16 bytes
-
-        AES aes(KEY);
-        std::string data_encr = aes.encrypt(data);
-        std::string data_back = aes.decrypt(data_encr);
-        if (data != data_back)
-        {
-            std::cout << "Error with AES algo"
-            << "\nkey " << KEY
-            << "\ndata " << data
-            //<< "\ndata_encr " << data_encr
-            << "\ndata_back " << data_back
-            << std::endl;
-        }
-        else
-        {
-            std::cout << "OK with AES algo "
-            << "\nkey " << KEY
-            << "\ndata " << data
-            //<< "\ndata_encr " << data_encr
-            << "\ndata_back " << data_back
-            << std::endl;
-        }
-    }
+//    if (false)
+//    {
+//        std::cout << "\nTEST CLASSIC STRING AES"<< std::endl;
+//        std::string KEY  = std::string("EWTW;RLd")+std::string("hgjhfg88");   // 16 24 32 bytes
+//        std::string data = std::string("65431234")+std::string("3bhgfdfg");   // 16 bytes
+//
+//        AES aes(KEY);
+//        std::string data_encr = aes.encrypt(data);
+//        std::string data_back = aes.decrypt(data_encr);
+//        if (data != data_back)
+//        {
+//            std::cout << "Error with AES algo"
+//            << "\nkey " << KEY
+//            << "\ndata " << data
+//            //<< "\ndata_encr " << data_encr
+//            << "\ndata_back " << data_back
+//            << std::endl;
+//        }
+//        else
+//        {
+//            std::cout << "OK with AES algo "
+//            << "\nkey " << KEY
+//            << "\ndata " << data
+//            //<< "\ndata_encr " << data_encr
+//            << "\ndata_back " << data_back
+//            << std::endl;
+//        }
+//    }
 
     // TEST CLASSIC STRING DES
     if (false)

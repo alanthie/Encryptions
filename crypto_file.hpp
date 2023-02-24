@@ -12,7 +12,6 @@
 #include "crypto_const.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
-//-lcurl
 
 int wget(const char *in, const char *out, bool verbose);
 
