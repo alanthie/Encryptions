@@ -137,7 +137,7 @@ int getftp( std::string url, std::string outfile,
     if (fileexists(outfile))
         std::remove(outfile.data());
 
-    int pos = user.find('@');
+    int pos = (int)user.find('@');
     if (pos > 0)
     {
         user.replace(pos, 1, "%40");
