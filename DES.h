@@ -27,9 +27,8 @@ THE SOFTWARE.
 
 #include <algorithm>
 
-#include "../common/includes.h"
+#include "common/includes.h"
 #include "SymAlg.h"
-
 #include "DES_Const.h"
 
 class DES : public SymAlg{

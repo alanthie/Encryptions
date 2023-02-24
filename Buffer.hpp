@@ -53,6 +53,10 @@ public:
     {
         length = 0;
     }
+    void seek_begin()
+    {
+        length = 0;
+    }
 
     void remove_last_n_char(uint32_t n)
     {

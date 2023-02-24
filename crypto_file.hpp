@@ -54,13 +54,12 @@ int getvideo(std::string url, std::string outfile, std::string options = "", boo
     return r;
 }
 
-int getlocal(std::string url, std::string outfile, std::string options = "", bool verbose=false)
+int getlocal(std::string url, cryptodata& dataout, std::string options = "", bool verbose=false)
 {
     options=options;
     if (verbose)
     {
         std::cout << "getlocal in:  " << url << std::endl;
-        std::cout << "getlocal out: " << outfile << std::endl;
     }
 
     std::string nfile;
@@ -81,12 +80,7 @@ int getlocal(std::string url, std::string outfile, std::string options = "", boo
         nfile = url;
     }
 
-    cryptodata d;
-    bool r = d.read_from_file(nfile);
-    if (r)
-    {
-        r = d.save_to_file(outfile);
-    }
+    bool r = dataout.read_from_file(nfile);
     if (r) return 0;
 
     return -1;

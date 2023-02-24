@@ -25,12 +25,12 @@ enum class CRYPTO_ALGO_AES
     CFB
 };
 
-constexpr static uint32_t BASE          = 25000; // BASE*BASE >= FILE_SIZE_LIM
+constexpr static uint32_t BASE          = 255*256; // BASE*BASE >= FILE_SIZE_LIM, BASE < 256*256 (64k)
 constexpr static int16_t MAGIC_SIZE     = 4;
 constexpr static int16_t KEYPOS_ENCODESIZE  = 8;
 constexpr static int16_t URL_LEN_ENCODESIZE = 2;
 constexpr static int16_t CRYPTO_ALGO_ENCODESIZE = 2;
-constexpr static int16_t URL_MIN_SIZE   = 10;
+constexpr static int16_t URL_MIN_SIZE   = 4;
 constexpr static int16_t URL_MAX_SIZE   = 256;
 constexpr static int16_t MIN_KEY_SIZE   = 64; // KEYS are extract from URL files (local or web)
 constexpr static int16_t CHKSUM_SIZE    = 64;
@@ -39,10 +39,10 @@ constexpr static int16_t URLINFO_SIZE   =   URL_LEN_ENCODESIZE + URL_MAX_SIZE + 
                                             KEYPOS_ENCODESIZE  + CHKSUM_SIZE  + MIN_KEY_SIZE +
                                             CRYPTO_ALGO_ENCODESIZE + PADDING_LEN_ENCODESIZE + 14; // padding 16x
 
-constexpr static int16_t PADDING_MULTIPLE   = 16; // should be 16x with AES 128bits data size requirement
-constexpr static int16_t NITER_LIM          = 100;
-constexpr static int16_t PUZZLE_SIZE_LIM    = 10000;
-constexpr static uint32_t FILE_SIZE_LIM     = 100*1000*1000;
+constexpr static int16_t PADDING_MULTIPLE   = 16; // should be at least 16x with AES 128bits data size requirement
+constexpr static int16_t NITER_LIM          = 128;
+constexpr static int16_t PUZZLE_SIZE_LIM    = 64*256;
+constexpr static uint32_t FILE_SIZE_LIM     = 128*1024*1024; // 128MB
 
 const std::string REM_TOKEN             = "REM";
 const std::string CHKSUM_TOKEN          = "CHKSUM";

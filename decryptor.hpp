@@ -62,7 +62,7 @@ public:
 		if (verbose)
 		{
             std::cout << "crypto_algo " << out_uk.crypto_algo << " "<< std::endl;
-            std::cout << "url_size " << out_uk.url_size << " "<< std::endl;
+            std::cout << "url_size "    << out_uk.url_size << " "<< std::endl;
         }
 
 		for( int16_t j = 0; j< out_uk.url_size; j++) out_uk.url[j] = temp.getdata()[pos+j];
@@ -128,15 +128,19 @@ public:
         }
 
 		// DOWNLOAD URL FILE
+		cryptodata dataout_local;
+        cryptodata dataout_other;
 		char u[URL_MAX_SIZE+1] = {0};
+
+        bool is_video =  false;
+        bool is_ftp   =  false;
+        bool is_local =  false;
+
 		if (r)
 		{
             for( int16_t j = 0; j< URL_MAX_SIZE; j++)
                 u[j] = uk.url[j];
 
-            bool is_video =  false;
-            bool is_ftp =  false;
-            bool is_local =  false;
             if (u[0]=='[')
             {
                 if (u[1]=='v')
@@ -168,7 +172,7 @@ public:
             {
                 std::string s(&u[pos_url]);
                 std::string local_url = folder_local + s;
-                rc = getlocal(local_url.data(), file.data(), "", verbose);
+                rc = getlocal(local_url.data(), dataout_local, "", verbose);
                 if (rc!= 0)
                 {
                     std::cerr << "ERROR with get local file, error code: " << rc << " url: " << local_url <<  " file: " << file << std::endl;
@@ -203,8 +207,17 @@ public:
 
 		if (r)
 		{
-			cryptodata d;
-			r = d.read_from_file(file);
+			cryptodata* pointer_datafile;
+			if (is_local == false)
+			{
+                r = dataout_other.read_from_file(file);
+                pointer_datafile = &dataout_other;
+            }
+            else
+            {
+                pointer_datafile = &dataout_local;
+            }
+            cryptodata& d = *pointer_datafile;
 
 			if (r)
 			{
@@ -222,7 +235,24 @@ public:
                 {
                     Buffer* b = uk.get_buffer(); // allocate
                     b->increase_size(key_size);
-                    b->write(&d.buffer.getdata()[pos], key_size, -1);
+
+                    int32_t databuffer_size = (int32_t)d.buffer.size();
+                    if (databuffer_size < key_size)
+                    {
+                        b->write(&d.buffer.getdata()[0], databuffer_size, -1);
+
+                        // PADDING...
+                        char c[1];
+                        for( int32_t j = databuffer_size; j< key_size; j++)
+                        {
+                            c[0] = (char) ( (unsigned char)(j % 127) );
+                            b->write(&c[0], 1, -1);
+                        }
+                    }
+                    else
+                    {
+                        b->write(&d.buffer.getdata()[pos], key_size, -1);
+                    }
 
                     if (verbose)
                     {
@@ -299,11 +329,6 @@ public:
                             ", number of keys (4 bytes): " << nkeys  << std::endl;
         }
 
-        // BINARY DES
-        //      DES(const char KEY[4]);
-        //      std::string encrypt_bin(const char* data, int data_size=4);
-        //      void decrypt_bin(const std::string& DATA, char* out, int out_size=4);
-
 		char KEY[4];
 		std::string DATA;
         char data_decr[4];
@@ -334,83 +359,126 @@ public:
         return r;
 	}
 
-	bool decode_binaes16_16(cryptodata& data_encrypted, const char* key, uint32_t key_size, cryptodata& data_decrypted,
+	bool decode_binaes16_16(cryptodata& data_encrypted,
+                            const char* key, uint32_t key_size,
+                            cryptodata& data_decrypted,
                             CRYPTO_ALGO_AES aes_type)
 	{
         bool r = true;
 		char c;
 
+		uint32_t nround = 1;
 		uint32_t nblock = data_encrypted.buffer.size() / 16;
 		uint32_t nkeys  = key_size / 16;
+
+		if (data_encrypted.buffer.size() > 0)
+		{
+            if (key_size > data_encrypted.buffer.size() )
+            {
+                nround = key_size / data_encrypted.buffer.size();
+                nround++;
+            }
+		}
 
 		if (verbose)
 		{
             std::cout <<    "\nDecryptor decode() binAES 16_16 - aes_type: " << (int)aes_type <<
+                            ", number of rounds : " << nround <<
                             ", number of blocks (16 bytes): " << nblock <<
                             ", number of keys (16 bytes): "   << nkeys  << std::endl;
         }
 
 		unsigned char KEY[16+1];
         unsigned char encrypted[16+1];
-
 		uint32_t key_idx = 0;
-		for(size_t blocki = 0; blocki < nblock; blocki++)
+
+		for(size_t roundi = 0; roundi < nround; roundi++)
 		{
-            for(size_t j = 0; j < 16; j++)
+            if (roundi > 0)
             {
-                c = data_encrypted.buffer.getdata()[16*blocki + j];
-                encrypted[j] = c;
+                data_decrypted.buffer.seek_begin();
             }
-            encrypted[16]=0;
 
-            for(size_t j = 0; j < 16; j++)
+            if (nround > 0)
             {
-                c = key[16*key_idx + j];
-                KEY[j] = c;
+                key_idx = ((nround - roundi - 1) *  nblock) % nkeys;
             }
-            KEY[16]=0;
+            //std::cout << "roundi " << roundi << " key_idx " << key_idx << std::endl;
 
-            key_idx++;
-            if (key_idx >= nkeys) key_idx=0;
+            if (r == false)
+                break;
 
-            unsigned int plainLen = 16 * sizeof(unsigned char);  //bytes in plaintext
-
-            if (aes_type == CRYPTO_ALGO_AES::ECB)
+            for(size_t blocki = 0; blocki < nblock; blocki++)
             {
-                binAES aes(AESKeyLength::AES_128);  //128 - key length, can be 128, 192 or 256
-                auto p = aes.DecryptECB(encrypted, plainLen, KEY);
+                if (roundi == 0)
+                {
+                    for(size_t j = 0; j < 16; j++)
+                    {
+                        c = data_encrypted.buffer.getdata()[16*blocki + j];
+                        encrypted[j] = c;
+                    }
+                    encrypted[16]=0;
+                }
+                else
+                {
+                    for(size_t j = 0; j < 16; j++)
+                    {
+                        c = data_decrypted.buffer.getdata()[16*blocki + j];
+                        encrypted[j] = c;
+                    }
+                    encrypted[16]=0;
+                }
 
-                data_decrypted.buffer.write((char*)&p[0], 16, -1);
-                delete []p;
-            }
-            else if (aes_type == CRYPTO_ALGO_AES::CBC)
-            {
-                const unsigned char iv[16] = {
-                    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-                    0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
+                for(size_t j = 0; j < 16; j++)
+                {
+                    c = key[16*key_idx + j];
+                    KEY[j] = c;
+                }
+                KEY[16]=0;
 
-                binAES aes(AESKeyLength::AES_128);  //128 - key length, can be 128, 192 or 256
-                auto p = aes.DecryptCBC(encrypted, plainLen, KEY, iv);
+                key_idx++;
+                if (key_idx >= nkeys) key_idx=0;
 
-                data_decrypted.buffer.write((char*)&p[0], 16, -1);
-                delete []p;
-            }
-            else if (aes_type == CRYPTO_ALGO_AES::CFB)
-            {
-                const unsigned char iv[16] = {
-                    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-                    0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
+                unsigned int plainLen = 16 * sizeof(unsigned char);  //bytes in plaintext
 
-                binAES aes(AESKeyLength::AES_128);  //128 - key length, can be 128, 192 or 256
-                auto p = aes.DecryptCFB(encrypted, plainLen, KEY, iv);
+                if (aes_type == CRYPTO_ALGO_AES::ECB)
+                {
+                    binAES aes(AESKeyLength::AES_128);  //128 - key length, can be 128, 192 or 256
+                    auto p = aes.DecryptECB(encrypted, plainLen, KEY);
 
-                data_decrypted.buffer.write((char*)&p[0], 16, -1);
-                delete []p;
-            }
-            else
-            {
-                std::cerr << "ERROR unsupportes AES type " << (int)aes_type << std::endl;
-                r = false;
+                    data_decrypted.buffer.write((char*)&p[0], 16, -1);
+                    delete []p;
+                }
+                else if (aes_type == CRYPTO_ALGO_AES::CBC)
+                {
+                    const unsigned char iv[16] = {
+                        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
+
+                    binAES aes(AESKeyLength::AES_128);  //128 - key length, can be 128, 192 or 256
+                    auto p = aes.DecryptCBC(encrypted, plainLen, KEY, iv);
+
+                    data_decrypted.buffer.write((char*)&p[0], 16, -1);
+                    delete []p;
+                }
+                else if (aes_type == CRYPTO_ALGO_AES::CFB)
+                {
+                    const unsigned char iv[16] = {
+                        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
+
+                    binAES aes(AESKeyLength::AES_128);  //128 - key length, can be 128, 192 or 256
+                    auto p = aes.DecryptCFB(encrypted, plainLen, KEY, iv);
+
+                    data_decrypted.buffer.write((char*)&p[0], 16, -1);
+                    delete []p;
+                }
+                else
+                {
+                    std::cerr << "ERROR unsupportes AES type " << (int)aes_type << std::endl;
+                    r = false;
+                    break;
+                }
             }
         }
 
