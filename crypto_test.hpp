@@ -4,8 +4,7 @@
 #include "crypto_const.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
-//#include "Encryptions/AES.h"
-#include "Encryptions/DES.h"
+#include "DES.h"
 #include "AESa.h"
 
 // ./crypto test -i manywebkey

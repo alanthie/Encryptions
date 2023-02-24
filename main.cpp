@@ -2,7 +2,7 @@
 #include <fstream>
 #include <chrono>
 
-#include "Encryptions/DES.h"
+#include "DES.h"
 #include "Buffer.hpp"
 #include "SHA256.h"
 #include "argparse.hpp"
@@ -181,7 +181,7 @@ int main_crypto(int argc, char **argv)
             encode_command.add_argument("-x", "--keyfactor")
                 .default_value(std::string("1"))
                 .help("specify a key_size_factor, this multiply the key size by the factor");
-        }`
+        }
 
         // Decode subcommand
         argparse::ArgumentParser decode_command("decode");

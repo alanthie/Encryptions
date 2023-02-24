@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "Encryptions/DES.h"
+#include "DES.h"
 #include "Buffer.hpp"
 #include "SHA256.h"
 #include "random_engine.hpp"

@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "Encryptions/DES.h"
+#include "DES.h"
 #include "AESa.h"
 #include "Buffer.hpp"
 #include "SHA256.h"

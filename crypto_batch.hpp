@@ -5,7 +5,7 @@
 #include <fstream>
 #include <chrono>
 
-#include "Encryptions/DES.h"
+#include "DES.h"
 #include "Buffer.hpp"
 #include "SHA256.h"
 #include "argparse.hpp"
