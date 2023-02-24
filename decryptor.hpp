@@ -77,7 +77,7 @@ public:
 
 		out_uk.key_fromH = temp.readUInt16(pos); pos+=2;
 		out_uk.key_fromL = temp.readUInt16(pos); pos+=2;
-		out_uk.key_size  = temp.readUInt16(pos);  pos+=2;
+		out_uk.key_size  = temp.readUInt32(pos); pos+=4;
 
         if (verbose)
         {

@@ -28,7 +28,8 @@ public:
                 bool keep = false,
                 std::string iencryped_ftp_user = "",
                 std::string iencryped_ftp_pwd  = "",
-                std::string iknown_ftp_server  = "")
+                std::string iknown_ftp_server  = "",
+                long ikey_size_factor = 1)
     {
         filename_urls = ifilename_urls;
         filename_msg_data = ifilename_msg_data;
@@ -43,6 +44,8 @@ public:
         encryped_ftp_user = iencryped_ftp_user;
         encryped_ftp_pwd  = iencryped_ftp_pwd;
         known_ftp_server  = iknown_ftp_server;
+        key_size_factor = ikey_size_factor;
+        if (key_size_factor < 1) key_size_factor = 1;
 
         if (staging.size()==0)
         {
@@ -212,15 +215,15 @@ public:
 			if (r)
 			{
                 int32_t databuffer_size = (int32_t)d.buffer.size();
+                vurlkey[i].key_size = perfect_key_size;
+
 				if (databuffer_size >= perfect_key_size)
 				{
 					random_engine rd;
 					if (verbose)
                     {
-                        std::cout << "get a random position in " << (databuffer_size - perfect_key_size) << " bytes of url file" <<  std::endl;
+                        std::cout << "get a random position in " << databuffer_size << " bytes of url file" <<  std::endl;
                     }
-
-                    vurlkey[i].key_size = perfect_key_size;
 
 					uint32_t t = (uint32_t) (rd.get_rand() * (databuffer_size - perfect_key_size));
 					vurlkey[i].key_fromH = (t / BASE);
@@ -317,7 +320,7 @@ public:
 		temp.write(&vurlkey[i].magic[0], 4, -1);
 		temp.writeUInt16(vurlkey[i].key_fromH, -1);
 		temp.writeUInt16(vurlkey[i].key_fromL, -1);
-		temp.writeUInt16(vurlkey[i].key_size, -1);
+		temp.writeUInt32(vurlkey[i].key_size, -1);
 		temp.write(&vurlkey[i].key[0], MIN_KEY_SIZE, -1);
 		temp.write(&vurlkey[i].checksum[0], CHKSUM_SIZE, -1);
 
@@ -617,11 +620,12 @@ public:
             }
 		}
 		if (perfect_key_size < MIN_KEY_SIZE) perfect_key_size = MIN_KEY_SIZE;
+		perfect_key_size = perfect_key_size * key_size_factor;
         if (verbose)
         {
             std::cout << "msg_input_size = " << msg_input_size << " ";
             std::cout << "number of URL keys = " << NURL_ITERATIONS << " ";
-            std::cout << "perfect_key_size = " << perfect_key_size <<  std::endl;
+            std::cout << "perfect_key_size (* key_size_factor) = " << perfect_key_size <<  std::endl;
         }
 
         for(size_t i=0; i<vurlkey.size(); i++)
@@ -755,6 +759,7 @@ public:
     size_t msg_input_size = 0;
     int32_t NURL_ITERATIONS = 0;
 	int32_t perfect_key_size = 0;
+	long    key_size_factor = 1;
 };
 
 

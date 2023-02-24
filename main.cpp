@@ -177,6 +177,10 @@ int main_crypto(int argc, char **argv)
             encode_command.add_argument("-k", "--keep")
                 .default_value(std::string(""))
                 .help("specify if keeping staging file");
+
+            encode_command.add_argument("-x", "--keyfactor")
+                .default_value(std::string("1"))
+                .help("specify the key_size_factor");
         }
 
         // Decode subcommand
@@ -272,7 +276,7 @@ int main_crypto(int argc, char **argv)
             }
             catch(...)
             {
-                std::cout << "Warning some unvalid numeric value, numeric values reset to 1" << std::endl;
+                std::cout << "Warning some invalid numeric value, numeric values reset to 1" << std::endl;
                 li_dec = 1;
                 cnt = 1;
             }
@@ -290,11 +294,11 @@ int main_crypto(int argc, char **argv)
             try
             {
                 li_dec = std::stol (str_dec, &sz);
-                cnt =  std::stol(countn);
+                cnt =  std::stol(countn, &sz);
             }
             catch(...)
             {
-                std::cout << "Warning some unvalid numeric value, numeric values reset to 1" << std::endl;
+                std::cout << "Warning some invalid numeric value, numeric values reset to 1" << std::endl;
                 li_dec = 1;
                 cnt = 1;
             }
@@ -373,6 +377,18 @@ int main_crypto(int argc, char **argv)
             auto local_path = cmd.get<std::string>("--local");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
+            auto keyfactor = cmd.get<std::string>("--keyfactor");
+
+            size_t sz = 0;long ikeyfactor = 1;
+            try
+            {
+                ikeyfactor = std::stol (keyfactor, &sz);
+            }
+            catch(...)
+            {
+                std::cout << "Warning invalid keyfactor value, keyfactor reset to 1" << std::endl;
+                ikeyfactor = 1;
+            }
 
             bool verbose = verb.size() > 0 ? true : false;
             bool keeping = keep.size() > 0 ? true : false;
@@ -388,7 +404,9 @@ int main_crypto(int argc, char **argv)
                 staging_path,
                 local_path,
                 verbose,
-                keeping);
+                keeping,
+                "","","",
+                ikeyfactor);
 
             if (encr.encrypt(false) == true)
             {

@@ -124,6 +124,21 @@ void test_core(bool verbose = true)
 
         std::cout << "hex2 " << makehex((char)255, 2) << " to uint8_t " << (int)hextobin(makehex((char)255, 2), uint8_t(0)) << std::endl;
         std::cout << "hex4 " << makehex((uint32_t)2565  , 4) << " to uint32_t " << (int)hextobin(makehex((uint32_t)2565  , 4), uint32_t(0)) << std::endl;
+
+        Buffer b(4);
+        uint32_t n = 30*256*256*256 + 20*256*256 + 10*256 + 5;
+        b.writeUInt32(n, 0);
+        uint32_t nn = b.readUInt32(0);
+        if (n != nn)
+        {
+            std::cout << "Error with writeUInt32 readUInt32"<<std::endl;
+            std::cout << n << " " << nn << std::endl;
+        }
+        else
+        {
+            std::cout << "OK with writeUInt32 readUInt32"<<std::endl;
+            std::cout << n << " " << nn << std::endl;
+        }
     }
 
     if (true)

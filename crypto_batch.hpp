@@ -57,6 +57,7 @@ bool batch(std::string mode, std::string inifile, bool verbose)
     std::string encryped_ftp_user;
     std::string encryped_ftp_pwd;
     std::string known_ftp_server;
+    std::string key_factor;
 
     std::string encoding_input_puzzle;
     std::string encoding_input_msg;
@@ -86,6 +87,7 @@ bool batch(std::string mode, std::string inifile, bool verbose)
         encryped_ftp_user = ini.get_string("encryped_ftp_user", Config);
         encryped_ftp_pwd  = ini.get_string("encryped_ftp_pwd", Config);
         known_ftp_server  = ini.get_string("known_ftp_server", Config);
+        key_factor        = ini.get_string("key_factor", Config);
 
         if(fs::exists(folder_staging)==false)
         {
@@ -164,6 +166,17 @@ bool batch(std::string mode, std::string inifile, bool verbose)
             return false;
         }
 
+        size_t sz = 0; long ikeyfactor = 1;
+        try
+        {
+            ikeyfactor = std::stol (key_factor, &sz);
+        }
+        catch(...)
+        {
+            std::cout << "Warning invalid keyfactor value, keyfactor reset to 1" << std::endl;
+            ikeyfactor = 1;
+        }
+
         encryptor encr(folder_encoder_input + encoding_input_urls,
                        folder_encoder_input + encoding_input_msg,
                        folder_encoder_input + encoding_input_puzzle,
@@ -176,7 +189,8 @@ bool batch(std::string mode, std::string inifile, bool verbose)
                        (keep_staging == "true") ? true:false,
                        encryped_ftp_user,
                        encryped_ftp_pwd,
-                       known_ftp_server);
+                       known_ftp_server,
+                       ikeyfactor);
 
         if (encr.encrypt(true) == true)
         {
