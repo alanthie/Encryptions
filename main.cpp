@@ -181,6 +181,18 @@ int main_crypto(int argc, char **argv)
             encode_command.add_argument("-x", "--keyfactor")
                 .default_value(std::string("1"))
                 .help("specify a key_size_factor, this multiply the key size by the factor");
+
+            encode_command.add_argument("-fs", "--known_ftp_server")
+                .default_value(std::string(""))
+                .help("specify list of ftp protected server");
+
+            encode_command.add_argument("-fu", "--encryped_ftp_user")
+                .default_value(std::string(""))
+                .help("specify list of ftp username (encrypted with string_encode)");
+
+            encode_command.add_argument("-fp", "--encryped_ftp_pwd")
+                .default_value(std::string(""))
+                .help("specify list of ftp password (encrypted with string_encode)");
         }
 
         // Decode subcommand
@@ -216,6 +228,18 @@ int main_crypto(int argc, char **argv)
             decode_command.add_argument("-k", "--keep")
                 .default_value(std::string(""))
                 .help("specify if keeping staging file");
+
+            decode_command.add_argument("-fs", "--known_ftp_server")
+                .default_value(std::string(""))
+                .help("specify list of ftp protected server");
+
+            decode_command.add_argument("-fu", "--encryped_ftp_user")
+                .default_value(std::string(""))
+                .help("specify list of ftp username (encrypted with string_encode)");
+
+            decode_command.add_argument("-fp", "--encryped_ftp_pwd")
+                .default_value(std::string(""))
+                .help("specify list of ftp password (encrypted with string_encode)");
         }
 
         // Add the subcommands to the main parser
@@ -378,6 +402,9 @@ int main_crypto(int argc, char **argv)
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
             auto keyfactor = cmd.get<std::string>("--keyfactor");
+            auto known_ftp_server  = cmd.get<std::string>("--known_ftp_server");
+            auto encryped_ftp_user = cmd.get<std::string>("--encryped_ftp_user");
+            auto encryped_ftp_pwd  = cmd.get<std::string>("--encryped_ftp_pwd");
 
             size_t sz = 0;long ikeyfactor = 1;
             try
@@ -393,7 +420,6 @@ int main_crypto(int argc, char **argv)
             bool verbose = verb.size() > 0 ? true : false;
             bool keeping = keep.size() > 0 ? true : false;
 
-            // ./crypto encode  -i ./test.zip -o ./test.zip.encrypted -p ./puzzle.txt -q ./partial_puzzle.txt -u ./urls.txt
             std::cout << "crypto ENCODING..." << std::endl;
             encryptor encr(url_path,
                 input_path,
@@ -405,7 +431,9 @@ int main_crypto(int argc, char **argv)
                 local_path,
                 verbose,
                 keeping,
-                "","","",
+                encryped_ftp_user,
+                encryped_ftp_pwd,
+                known_ftp_server,
                 ikeyfactor);
 
             if (encr.encrypt(false) == true)
@@ -433,11 +461,13 @@ int main_crypto(int argc, char **argv)
             auto local_path = cmd.get<std::string>("--local");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
+            auto known_ftp_server  = cmd.get<std::string>("--known_ftp_server");
+            auto encryped_ftp_user = cmd.get<std::string>("--encryped_ftp_user");
+            auto encryped_ftp_pwd  = cmd.get<std::string>("--encryped_ftp_pwd");
 
             bool verbose = verb.size() > 0 ? true : false;
             bool keeping = keep.size() > 0 ? true : false;
 
-            // ./crypto decode  -i ./test.zip.encrypted -o ./test.zip.unencrypted -p ./puzzle.txt
             std::cout << "crypto DECODING..." << std::endl;
             decryptor decr(puzzle_path,
                 input_path,
@@ -445,7 +475,10 @@ int main_crypto(int argc, char **argv)
                 staging_path,
                 local_path,
                 verbose,
-                keeping);
+                keeping,
+                encryped_ftp_user,
+                encryped_ftp_pwd,
+                known_ftp_server);
 
             if (decr.decrypt() == true)
             {

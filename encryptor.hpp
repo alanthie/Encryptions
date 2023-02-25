@@ -50,6 +50,10 @@ public:
         {
             staging ="./";
         }
+
+//        std::cout << "known_ftp_serve   " << known_ftp_server << std::endl;
+//        std::cout << "encryped_ftp_user " << encryped_ftp_user << std::endl;
+//        std::cout << "encryped_ftp_pwd  " << encryped_ftp_pwd << std::endl;
     }
 
     ~encryptor()
