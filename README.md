@@ -22,22 +22,26 @@ the key length must be at least as large as the message and only used once (this
 Example, encodes a file into an encrypted file
 <pre>
 ./crypto encode -h
-Usage: encode [-h] --input VAR --output VAR --puzzle VAR --qapuzzle VAR --fullpuzzle VAR [--url VAR] [--staging VAR] [--keep VAR]
+Usage: encode [-h] --input VAR --output VAR --puzzle VAR --qapuzzle VAR --fullpuzzle VAR 
+                   [--url VAR] [--staging VAR] [--local VAR] [--keep VAR] [--keyfactor VAR]
 
 Encodes a file into an encrypted file
 
 Optional arguments:
-  -h, --help 		shows help message and exits
-  -v, --version  	prints version information and exits
-  -i, --input		specify the input file. [required]
-  -o, --output   	specify the output encrypted file. [required]
-  -p, --puzzle   	specify the input puzzle file. [required]
-  -q, --qapuzzle 	specify the output qa puzzle file. [required]
-  -f, --fullpuzzle  specify the output full puzzle file. [required]
-  -u, --url  		specify the (optional input) url list file.
-  -s, --staging  	specify the staging folder. [default: ""]
-  -v, --verbose  	specify the verbose [default: ""]
-  -k, --keep 		specify if keeping staging file [default: ""]
+  -h, --help      	shows help message and exits 
+  -v, --version   	prints version information and exits 
+  -i, --input     	specify the input file. [required]
+  -o, --output    	specify the output encrypted file. [required]
+  -p, --puzzle    	specify the input puzzle file. [required]
+  -q, --qapuzzle  	specify the output qa puzzle file. [required]
+  -f, --fullpuzzle	specify the output full puzzle file. [required]
+  -u, --url       	specify the (optional input) url list file. [default: ""]
+  -s, --staging   	specify the staging folder. [default: ""]
+  -l, --local     	specify the local folder of known contents. [default: ""]
+  -v, --verbose   	specify the verbose [default: ""]
+  -k, --keep      	specify if keeping staging file [default: ""]
+  -x, --keyfactor 	specify a key_size_factor, this multiply the key size by the factor [default: "1"]
+
 </pre>
 
 Help:
