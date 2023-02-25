@@ -40,36 +40,36 @@ void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false,
     std::string file_msg_encrypted  = "/msg_encrypted.dat";
 
     std::cout << "TESTCASE " + TEST << std::endl;
-
+    std::string BASE_FOLDER = FOLDER + TESTCASE + "/" + TEST;
     {
-        std::string file = FOLDER + TESTCASE+ "/" + TEST+file_partial_puzzle;
+        std::string file = BASE_FOLDER + file_partial_puzzle;
         if (fileexists(file))
             std::remove(file.data());
 
-		file = FOLDER + TESTCASE+"/"+TEST+file_msg_encrypted;
+		file = BASE_FOLDER + file_msg_encrypted;
 		if (fileexists(file))
             std::remove(file.data());
 
-        file = FOLDER + TESTCASE + "/" + TEST + file_puzzle;
+        file = BASE_FOLDER+ file_puzzle;
         if (fileexists(file) == false)
         {
             std::cout << "ERROR missing puzzle file " << file <<  std::endl;
             return;
         }
 
-        file = FOLDER + TESTCASE + "/" + TEST + file_msg;
+        file = BASE_FOLDER + file_msg;
         if (fileexists(file) == false)
         {
             std::cout << "ERROR missing msg file " << file <<  std::endl;
             return;
         }
 
-        encryptor encr( FOLDER + TESTCASE + "/" + TEST + file_url,
-                        FOLDER + TESTCASE + "/" + TEST + file_msg,
-                        FOLDER + TESTCASE + "/" + TEST + file_puzzle,
-                        FOLDER + TESTCASE + "/" + TEST + file_partial_puzzle,
-                        FOLDER + TESTCASE + "/" + TEST + file_full_puzzle,
-                        FOLDER + TESTCASE + "/" + TEST + file_msg_encrypted,
+        encryptor encr( BASE_FOLDER + file_url,
+                        BASE_FOLDER + file_msg,
+                        BASE_FOLDER + file_puzzle,
+                        BASE_FOLDER + file_partial_puzzle,
+                        BASE_FOLDER + file_full_puzzle,
+                        BASE_FOLDER + file_msg_encrypted,
                         "",
                         "",
                         verb);
@@ -136,7 +136,6 @@ void test_core(bool verbose = true)
         else
         {
             std::cout << "OK with writeUInt32 readUInt32"<<std::endl;
-            std::cout << n << " " << nn << std::endl;
         }
     }
 

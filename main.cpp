@@ -18,15 +18,6 @@
 #include "encrypt.h"
 #include "data.hpp"
 
-// Post builds
-//cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto
-//copy x64\Release\crypto.exe ..\..\Exec_Windows\*
-
-// Windows:
-//D:\000DEV\Encryptions\testcase\manual > D:\000DEV\Encryptions\Exec_Windows\crypto.exe batch_encode - i crypto_batch_manual_win.ini
-//
-// Linux:
-//
 
 std::string VERSION = "0.3";
 

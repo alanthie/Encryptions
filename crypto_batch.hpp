@@ -166,14 +166,22 @@ bool batch(std::string mode, std::string inifile, bool verbose)
             return false;
         }
 
-        size_t sz = 0; long ikeyfactor = 1;
+        size_t sz = 0;
+        long ikeyfactor = 1;
         try
         {
-            ikeyfactor = std::stol (key_factor, &sz);
+            if (key_factor.size()==0)
+            {
+                ikeyfactor = 1;
+            }
+            else
+            {
+                ikeyfactor = std::stol (key_factor, &sz);
+            }
         }
         catch(...)
         {
-            std::cout << "Warning invalid keyfactor value, keyfactor reset to 1" << std::endl;
+            std::cout << "Warning invalid keyfactor format, keyfactor reset to 1" << std::endl;
             ikeyfactor = 1;
         }
 

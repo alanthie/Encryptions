@@ -81,7 +81,8 @@ public:
 #else
                     int16_t len = pos;   // n
 #endif
-                    if ((len >= URL_MIN_SIZE) && (len <= URL_MAX_SIZE))
+                    if ( ((len >= URL_MIN_SIZE) && (len <= URL_MAX_SIZE)) &&
+                        (url[0]!=';') )
                     {
                         urlkey uk;
                         for(int16_t ii=0;ii<URL_MAX_SIZE;ii++) uk.url[ii] = 0;
@@ -98,7 +99,8 @@ public:
                         // skip!
                         if (len > 0)
                         {
-                            std::cerr << "WARNING url skipped, " << "(url.size() >= URL_MIN_SIZE) && (url.size() <= URL_MAX_SIZE)) " << len <<std::endl;
+                            if (url[0]!=';')
+                                std::cerr << "WARNING url skipped, " << "(url.size() >= URL_MIN_SIZE) && (url.size() <= URL_MAX_SIZE))  url=" << url <<std::endl;
                         }
                     }
                     s.clear();
