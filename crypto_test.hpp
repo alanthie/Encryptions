@@ -8,6 +8,7 @@
 #include "AESa.h"
 #include "twofish.h"
 #include "Salsa20.h"
+#include "IDEA.hpp"
 
 
 // ./crypto test -i manywebkey
@@ -139,6 +140,93 @@ void test_core(bool verbose = true)
         else
         {
             std::cout << "OK with writeUInt32 readUInt32"<<std::endl;
+        }
+    }
+
+
+    if (true)
+    {
+        idea algo;
+
+        uint8_t KEY[16]    = {0x12, 0x00, 0x56, 0x78, 0x00, 0xbc, 0xde, 0xde, 0x12, 0x34, 0x56, 0x78, 0x00, 0xbc, 0xde, 0xde};
+        uint8_t DATA[8]    = {0x11, 0x12, 0x00, 0x78, 0x00, 0xbc, 0xde, 0xde};
+
+        uint16_t copydata[4];
+        uint16_t data[4];
+        uint16_t key[8];
+        uint16_t data2[4];
+
+        for(int i=0;i<8;i++)
+        {
+            key[i] = 256*KEY[2*i] + KEY[2*i+1];
+        }
+        for(int i=0;i<4;i++)
+        {
+            data[i] = 256*DATA[2*i] + DATA[2*i+1];
+            copydata[i] = data[i];
+        }
+
+        algo.IDEA(data, key, true);
+
+        {
+
+            for(int i=0;i<4;i++)
+            {
+                data2[i] = data[i];
+            }
+
+            algo.IDEA(data2, key, false);
+        }
+
+        // Print initial data
+//        printf("Initial data:   %04X %04X %04X %04X\n", copydata[0], copydata[1], copydata[2], data[3]);
+//        printf("Encrypted data: %04X %04X %04X %04X\n", data[0], data[1], data[2], data[3]);
+//        printf("Decrypted data: %04X %04X %04X %04X\n", data2[0], data2[1], data2[2], data2[3]);
+
+        bool ok = true;
+        for(size_t i=0;i<4;i++)
+        {
+            if (copydata[i] != data2[i])
+            {
+                std::cout << "Error with IDEA "<< i <<std::endl;
+                std::cout << (int)data[i]<<std::endl;
+                std::cout << (int)data2[i]<<std::endl;
+                ok = false;
+                break;
+            }
+        }
+        if (ok)
+        {
+            std::cout << "OK with IDEA encrypt decrypt " << std::endl;
+        }
+    }
+
+        if (true)
+    {
+        idea algo;
+
+        uint8_t KEY[16]    = {0x12, 0x00, 0x56, 0x78, 0x00, 0xbc, 0xde, 0xde, 0x12, 0x34, 0x56, 0x78, 0x00, 0xbc, 0xde, 0xde};
+        uint8_t DATA[8]    = {0x11, 0x12, 0x00, 0x78, 0x00, 0xbc, 0xde, 0xde};
+        uint8_t DATA1[8]   = {0x11, 0x12, 0x00, 0x78, 0x00, 0xbc, 0xde, 0xde};
+
+        algo.IDEA(DATA1, KEY, true);
+        algo.IDEA(DATA1, KEY, false);
+
+        bool ok = true;
+        for(size_t i=0;i<4;i++)
+        {
+            if (DATA[i] != DATA1[i])
+            {
+                std::cout << "Error with IDEA "<< i <<std::endl;
+                std::cout << (int)DATA[i]<<std::endl;
+                std::cout << (int)DATA1[i]<<std::endl;
+                ok = false;
+                break;
+            }
+        }
+        if (ok)
+        {
+            std::cout << "OK with IDEA encrypt decrypt " << std::endl;
         }
     }
 

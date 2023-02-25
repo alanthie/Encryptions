@@ -11,6 +11,7 @@
 #include "crypto_file.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
+#include "IDEA.hpp"
 
 class decryptor
 {
@@ -354,6 +355,110 @@ public:
             DES des(KEY);
             des.decrypt_bin(DATA, data_decr, 4);
             data_decrypted.buffer.write(&data_decr[0], 4, -1); // 8 bytes to 4 bytes!
+        }
+
+        return r;
+	}
+
+
+	bool decode_idea(   cryptodata& data_encrypted,
+                        const char* key, uint32_t key_size,
+                        cryptodata& data_decrypted)
+	{
+        bool r = true;
+		char c;
+
+		if (key_size % 16 != 0)
+		{
+            r = false;
+            std::cerr << "ERROR " << "decode_sidea key must be multiple of 16 bytes " <<  key_size << std::endl;
+            return r;
+		}
+		if (data_encrypted.buffer.size() % 8 != 0)
+		{
+            r = false;
+            std::cerr << "ERROR " << "decode_idea data must be multiple of 8 bytes " <<  data_encrypted.buffer.size() << std::endl;
+            return r;
+		}
+
+		uint32_t nround = 1;
+		uint32_t nblock = data_encrypted.buffer.size() / 8;
+		uint32_t nkeys  = key_size / 16;
+
+
+		if (data_encrypted.buffer.size() > 0)
+		{
+            if (key_size > data_encrypted.buffer.size() )
+            {
+                nround = key_size / data_encrypted.buffer.size();
+                nround++;
+            }
+		}
+
+		if (verbose)
+		{
+            std::cout <<    "\nDecryptor decode() idea 8_16              " <<
+                            ", number of rounds : " << nround <<
+                            ", number of blocks (8 bytes): " << nblock <<
+                            ", number of keys (16 bytes): "  << nkeys  << std::endl;
+        }
+
+		uint8_t KEY[16+1];
+		uint8_t DATA[8+1];
+		uint32_t key_idx = 0;
+
+		for(size_t roundi = 0; roundi < nround; roundi++)
+		{
+            if (roundi > 0)
+            {
+                data_decrypted.buffer.seek_begin();
+            }
+
+            if (nround > 0)
+            {
+                key_idx = ((nround - roundi - 1) *  nblock) % nkeys;
+            }
+            //std::cout << "roundi " << roundi << " key_idx " << key_idx << std::endl;
+
+            if (r == false)
+                break;
+
+            for(size_t blocki = 0; blocki < nblock; blocki++)
+            {
+                if (roundi == 0)
+                {
+                    for(size_t j = 0; j < 8; j++)
+                    {
+                        c = data_encrypted.buffer.getdata()[8*blocki + j];
+                        DATA[j] = c;
+                    }
+                    DATA[8]=0;
+                }
+                else
+                {
+                    for(size_t j = 0; j < 8; j++)
+                    {
+                        c = data_decrypted.buffer.getdata()[8*blocki + j];
+                        DATA[j] = c;
+                    }
+                    DATA[8]=0;
+                }
+
+                for(size_t j = 0; j < 16; j++)
+                {
+                    c = key[16*key_idx + j];
+                    KEY[j] = c;
+                }
+                KEY[16]=0;
+
+                key_idx++;
+                if (key_idx >= nkeys) key_idx=0;
+
+                idea algo;
+                algo.IDEA(DATA, KEY, true);
+
+                data_decrypted.buffer.write((char*)&DATA[0], 8, -1);
+            }
         }
 
         return r;
@@ -712,6 +817,10 @@ public:
         {
             return decode_twofish(data_encrypted, key, key_size, data_decrypted);
         }
+        else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_IDEA)
+        {
+            return decode_idea(data_encrypted, key, key_size, data_decrypted);
+        }
         else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_Salsa20)
         {
             return decode_salsa20(data_encrypted, key, key_size, data_decrypted);
@@ -919,7 +1028,8 @@ public:
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) &&
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH) &&
-                        (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_Salsa20)
+                        (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_Salsa20) &&
+                        (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_IDEA)
                        )
                     {
                         std::cerr << "WARNING mismatch algo at url iter: " <<  iter << std::endl;

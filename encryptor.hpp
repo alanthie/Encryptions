@@ -12,6 +12,7 @@
 #include "puzzle.hpp"
 #include "twofish.h"
 #include "Salsa20.h"
+#include "IDEA.hpp"
 
 static bool s_Twofish_initialise = false;
 
@@ -294,11 +295,12 @@ public:
                     }
 				}
 
-				if      (i%5==0)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc;
-				else if (i%5==1)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb;
-				else if (i%5==2)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb;
-				else if (i%5==3)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH;
-				else              vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_Salsa20;
+				if      (i%6==0)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc;
+				else if (i%6==1)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb;
+				else if (i%6==2)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb;
+				else if (i%6==3)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH;
+				else if (i%6==4)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_Salsa20;
+				else              vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_IDEA;
 
 				if (verbose)
                     std::cout << "crypto_algo=" << vurlkey[i].crypto_algo << std::endl;
@@ -348,6 +350,102 @@ public:
 
 		for( size_t j = 0; j< URLINFO_SIZE; j++)
             vurlkey[i].urlinfo_with_padding[j] = temp.getdata()[j];
+
+		return r;
+	}
+
+    bool encode_idea(cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
+	{
+		bool r = true;
+		char c;
+
+		if (data_temp.buffer.size() % 8 != 0)
+		{
+            r = false;
+            std::cerr << "ERROR " << "encode_idea data file must be multiple of 8 bytes idea" << data_temp.buffer.size() << std::endl;
+            return r;
+		}
+
+		if (key_size % 16 != 0)
+		{
+            r = false;
+            std::cerr << "ERROR " << "encode_idea key must be multiple of 16 bytes " <<  key_size << std::endl;
+            return r;
+		}
+
+		uint32_t nround = 1;
+		uint32_t nblock = data_temp.buffer.size() / 8;
+		uint32_t nkeys  = key_size / 16;
+
+		if (data_temp.buffer.size() > 0)
+		{
+            if (key_size > data_temp.buffer.size() )
+            {
+                nround = key_size / data_temp.buffer.size();
+                nround++;
+            }
+		}
+
+		if (verbose)
+		{
+            std::cout.flush();
+            std::cout <<    "Encryptor encode() idea 8_16                 " <<
+                            ", number of rounds : " << nround <<
+                            ", number of blocks (8 bytes): " << nblock <<
+                            ", number of keys (16 bytes): "  << nkeys  << std::endl;
+        }
+
+		uint8_t KEY[16+1];
+		uint8_t DATA[8+1];
+		uint32_t key_idx = 0;
+
+		for(size_t roundi = 0; roundi < nround; roundi++)
+		{
+            if (r == false)
+                break;
+
+            if (roundi > 0)
+                data_temp_next.buffer.seek_begin();
+
+            //std::cout << "roundi " << roundi << " key_idx " << key_idx << std::endl;
+
+            for(size_t blocki = 0; blocki < nblock; blocki++)
+            {
+                if (roundi == 0)
+                {
+                    for(size_t j = 0; j < 8; j++)
+                    {
+                        c = data_temp.buffer.getdata()[8*blocki + j];
+                        DATA[j] = c;
+                    }
+                    DATA[8] = 0; // Data must be 128 bits long
+                }
+                else
+                {
+                    for(size_t j = 0; j < 8; j++)
+                    {
+                        c = data_temp_next.buffer.getdata()[8*blocki + j];
+                        DATA[j] = c;
+                    }
+                    DATA[8] = 0; // Data must be 128 bits long
+                }
+
+                for(size_t j = 0; j < 16; j++)
+                {
+                    c = key[16*key_idx + j];
+                    KEY[j] = c;
+                }
+                KEY[16] = 0;
+
+                key_idx++;
+                if (key_idx >= nkeys) key_idx=0;
+
+                idea algo;
+                algo.IDEA(DATA, KEY, true);
+
+                data_temp_next.buffer.write((char*)&DATA[0], (uint32_t)8, -1);
+            }
+        }
 
 		return r;
 	}
@@ -755,8 +853,9 @@ public:
             else if ((crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
                      (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
                      (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) &&
-                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH)  &&
-                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_Salsa20)
+                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH) &&
+                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_Salsa20) &&
+                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_IDEA)
                      )
             {
                 std::cerr << "WARNING mismatch algo at iter " <<  iter-1 << std::endl;
@@ -769,6 +868,10 @@ public:
             else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_Salsa20)
             {
                 return encode_salsa20(data_temp, key, key_size, data_temp_next);
+            }
+            else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_IDEA)
+            {
+                return encode_idea(data_temp, key, key_size, data_temp_next);
             }
             else
             {
