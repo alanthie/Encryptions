@@ -30,6 +30,7 @@ enum class CRYPTO_ALGO : uint16_t
     ALGO_BIN_AES_16_16_cbc,
     ALGO_BIN_AES_16_16_cfb,
     ALGO_TWOFISH,
+    ALGO_Salsa20
 };
 enum class CRYPTO_ALGO_AES
 {
@@ -50,9 +51,9 @@ constexpr static int16_t CHKSUM_SIZE    = 64;
 constexpr static int16_t PADDING_LEN_ENCODESIZE = 2;
 constexpr static int16_t URLINFO_SIZE   =   URL_LEN_ENCODESIZE + URL_MAX_SIZE + MAGIC_SIZE +
                                             KEYPOS_ENCODESIZE  + CHKSUM_SIZE  + MIN_KEY_SIZE +
-                                            CRYPTO_ALGO_ENCODESIZE + PADDING_LEN_ENCODESIZE + 14; // padding 16x
+                                            CRYPTO_ALGO_ENCODESIZE + PADDING_LEN_ENCODESIZE + 14 + 32; // padding 64
 
-constexpr static int16_t PADDING_MULTIPLE   = 16; // should be at least 16x with AES 128bits data size requirement
+constexpr static int16_t PADDING_MULTIPLE   = 64; // should be at least 64x with Salsa20 requirement
 constexpr static int16_t NITER_LIM          = 128;
 constexpr static int16_t PUZZLE_SIZE_LIM    = 64*256;
 constexpr static uint32_t FILE_SIZE_LIM     = 128*1024*1024; // 128MB

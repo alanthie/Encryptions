@@ -7,6 +7,7 @@
 #include "DES.h"
 #include "AESa.h"
 #include "twofish.h"
+#include "Salsa20.h"
 
 
 // ./crypto test -i manywebkey
@@ -138,6 +139,73 @@ void test_core(bool verbose = true)
         else
         {
             std::cout << "OK with writeUInt32 readUInt32"<<std::endl;
+        }
+    }
+
+    if (true)
+    {
+        /**
+         * \brief Constructs cypher with given key.
+         * \param[in] key 256-bit key
+         */
+        uint8_t key[32]  = {0x12, 0x34, 0x56, 0x78, 0x00, 0xbc, 0xde, 0xde,  0x00, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde,
+                            0x12, 0x34, 0x00, 0x78, 0x9a, 0xbc, 0xde, 0xde,  0x00, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde};
+
+        ucstk::Salsa20 s20(key);
+
+        /**
+         * \brief Sets IV.
+         * \param[in] iv 64-bit IV
+         */
+        uint8_t iv[8]  = {0x12, 0x01, 0x56, 0x78, 0x00, 0xbc, 0xde, 0xde};
+        s20.setIv(iv);
+
+         /**
+         * \brief Processes blocks.
+         * \param[in] input input
+         * \param[out] output output
+         * \param[in] numBlocks number of blocks
+         */
+//        enum: size_t
+//        {
+//                VECTOR_SIZE = 16,
+//                BLOCK_SIZE = 64,
+//                KEY_SIZE = 32,
+//                IV_SIZE = 8
+//        };
+        uint8_t data[64] = {0x11, 0x12, 0x13, 0x78, 0x00, 0xbc, 0xde, 0xde,  0x00, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde,
+                            0x12, 0x34, 0x00, 0x78, 0x9a, 0xbc, 0xde, 0xde,  0x00, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde,
+                            0x11, 0x12, 0x13, 0x78, 0x00, 0xbc, 0xde, 0xde,  0x00, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde,
+                            0x12, 0x34, 0x00, 0x78, 0x9a, 0xbc, 0xde, 0xde,  0x00, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde
+                            };
+        uint8_t enc[64]= {0};
+        uint8_t dec[64]= {0};
+
+        s20.processBlocks(data, enc, 1);
+
+        {
+            uint8_t sskey[32]  = {  0x12, 0x34, 0x56, 0x78, 0x00, 0xbc, 0xde, 0xde,  0x00, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde,
+                                    0x12, 0x34, 0x00, 0x78, 0x9a, 0xbc, 0xde, 0xde,  0x00, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde};
+            ucstk::Salsa20 ss20(sskey);
+            ss20.setIv(iv);
+            ss20.processBlocks(enc, dec, 1);
+        }
+
+        bool ok = true;
+        for(size_t i=0;i<64;i++)
+        {
+            if (data[i] != dec[i])
+            {
+                std::cout << "Error with Salsa20 "<< i <<std::endl;
+                std::cout << (int)data[i]<<std::endl;
+                std::cout << (int)dec[i]<<std::endl;
+                ok = false;
+                break;
+            }
+        }
+        if (ok)
+        {
+            std::cout << "OK with Salsa20 encrypt decrypt " << std::endl;
         }
     }
 

@@ -369,7 +369,7 @@
 	"data.hpp"
 	"rng.h"
 
-1677347013 /home/server/dev/Encryptions/crypto_const.hpp
+1677353315 /home/server/dev/Encryptions/crypto_const.hpp
 	<filesystem>
 	<curl/curl.h>
 	"encrypt.h"
@@ -397,7 +397,7 @@
 	"crypto_file.hpp"
 	"data.hpp"
 
-1677349207 /home/server/dev/Encryptions/encryptor.hpp
+1677354213 /home/server/dev/Encryptions/encryptor.hpp
 	<iostream>
 	<fstream>
 	"DES.h"
@@ -408,8 +408,9 @@
 	"data.hpp"
 	"puzzle.hpp"
 	"twofish.h"
+	"Salsa20.h"
 
-1677349402 /home/server/dev/Encryptions/decryptor.hpp
+1677354316 /home/server/dev/Encryptions/decryptor.hpp
 	<iostream>
 	<fstream>
 	"DES.h"
@@ -421,13 +422,14 @@
 	"data.hpp"
 	"puzzle.hpp"
 
-1677346898 /home/server/dev/Encryptions/crypto_test.hpp
+1677352735 /home/server/dev/Encryptions/crypto_test.hpp
 	"crypto_const.hpp"
 	"data.hpp"
 	"puzzle.hpp"
 	"DES.h"
 	"AESa.h"
 	"twofish.h"
+	"Salsa20.h"
 
 1676905265 source:/home/server/dev/Encryptions/Base64.cpp
 	"Base64.h"
@@ -562,4 +564,14 @@
 	<stdint.h>
 	<stdlib.h>
 	"twofish.h"
+
+1422809261 /home/server/dev/Encryptions/Salsa20.h
+	<cassert>
+	<climits>
+	<cstdint>
+	<cstring>
+	"Salsa20.inl"
+
+1422809261 /home/server/dev/Encryptions/Salsa20.inl
+	"Salsa20.h"
 

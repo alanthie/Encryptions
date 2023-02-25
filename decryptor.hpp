@@ -359,6 +359,113 @@ public:
         return r;
 	}
 
+
+	bool decode_salsa20(    cryptodata& data_encrypted,
+                            const char* key, uint32_t key_size,
+                            cryptodata& data_decrypted)
+	{
+        bool r = true;
+		char c;
+
+		if (key_size % 32 != 0)
+		{
+            r = false;
+            std::cerr << "ERROR " << "decode_salsa20 key must be multiple of 32 bytes " <<  key_size << std::endl;
+            return r;
+		}
+		if (data_encrypted.buffer.size() % 64 != 0)
+		{
+            r = false;
+            std::cerr << "ERROR " << "decode_salsa20 data must be multiple of 64 bytes " <<  data_encrypted.buffer.size() << std::endl;
+            return r;
+		}
+
+		uint32_t nround = 1;
+		uint32_t nblock = data_encrypted.buffer.size() / 64;
+		uint32_t nkeys  = key_size / 32;
+
+		uint8_t iv[8]  = {0x12, 0x01, 0x56, 0x78, 0x00, 0xbc, 0xde, 0xde};
+
+		if (data_encrypted.buffer.size() > 0)
+		{
+            if (key_size > data_encrypted.buffer.size() )
+            {
+                nround = key_size / data_encrypted.buffer.size();
+                nround++;
+            }
+		}
+
+		if (verbose)
+		{
+            std::cout <<    "\nDecryptor decode() salsa20 32_64           " <<
+                            ", number of rounds : " << nround <<
+                            ", number of blocks (64 bytes): " << nblock <<
+                            ", number of keys (32 bytes): "   << nkeys  << std::endl;
+        }
+
+		uint8_t KEY[32+1];
+        uint8_t encrypted[64+1];
+        uint8_t out[64+1];
+		uint32_t key_idx = 0;
+
+		for(size_t roundi = 0; roundi < nround; roundi++)
+		{
+            if (roundi > 0)
+            {
+                data_decrypted.buffer.seek_begin();
+            }
+
+            if (nround > 0)
+            {
+                key_idx = ((nround - roundi - 1) *  nblock) % nkeys;
+            }
+            //std::cout << "roundi " << roundi << " key_idx " << key_idx << std::endl;
+
+            if (r == false)
+                break;
+
+            for(size_t blocki = 0; blocki < nblock; blocki++)
+            {
+                if (roundi == 0)
+                {
+                    for(size_t j = 0; j < 64; j++)
+                    {
+                        c = data_encrypted.buffer.getdata()[64*blocki + j];
+                        encrypted[j] = c;
+                    }
+                    encrypted[64]=0;
+                }
+                else
+                {
+                    for(size_t j = 0; j < 64; j++)
+                    {
+                        c = data_decrypted.buffer.getdata()[64*blocki + j];
+                        encrypted[j] = c;
+                    }
+                    encrypted[64]=0;
+                }
+
+                for(size_t j = 0; j < 32; j++)
+                {
+                    c = key[32*key_idx + j];
+                    KEY[j] = c;
+                }
+                KEY[32]=0;
+
+                key_idx++;
+                if (key_idx >= nkeys) key_idx=0;
+
+                ucstk::Salsa20 s20(KEY);
+                s20.setIv(iv);
+                s20.processBlocks(encrypted, out, 1);
+
+                data_decrypted.buffer.write((char*)&out[0], 64, -1);
+            }
+        }
+
+        return r;
+	}
+
 	bool decode_twofish(cryptodata& data_encrypted,
                             const char* key, uint32_t key_size,
                             cryptodata& data_decrypted)
@@ -605,6 +712,10 @@ public:
         {
             return decode_twofish(data_encrypted, key, key_size, data_decrypted);
         }
+        else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_Salsa20)
+        {
+            return decode_salsa20(data_encrypted, key, key_size, data_decrypted);
+        }
 		else
 		{
             CRYPTO_ALGO_AES aes_type = CRYPTO_ALGO_AES::ECB;
@@ -807,16 +918,16 @@ public:
                     if ((uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) &&
-                        (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH)
+                        (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH) &&
+                        (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_Salsa20)
                        )
                     {
-                        std::cerr << "WARNING mismatch algo at url iter " <<  iter << std::endl;
+                        std::cerr << "WARNING mismatch algo at url iter: " <<  iter << std::endl;
                     }
 
                     // decode(DataN, keyN) => DataN-1+urlkeyN-1     urlkeyN-1=>keyN-1
                     if (decode( iter+1, NITER+1, uk.crypto_algo, data_temp,
                                 &uk.get_buffer()->getdata()[0], uk.key_size,
-                                //&uk.key[0], MIN_KEY_SIZE,
                                 data_temp_next) == false)
                     {
                         r = false;

@@ -49,6 +49,8 @@
 		<Unit filename="DES_Const.h" />
 		<Unit filename="SHA256.cpp" />
 		<Unit filename="SHA256.h" />
+		<Unit filename="Salsa20.h" />
+		<Unit filename="Salsa20.inl" />
 		<Unit filename="SymAlg.cpp" />
 		<Unit filename="SymAlg.h" />
 		<Unit filename="common/cryptomath.h" />
