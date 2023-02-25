@@ -44,8 +44,13 @@
 		<Unit filename="AESa.h" />
 		<Unit filename="Base64.cpp" />
 		<Unit filename="Buffer.hpp" />
+		<Unit filename="DES.cpp" />
+		<Unit filename="DES.h" />
+		<Unit filename="DES_Const.h" />
 		<Unit filename="SHA256.cpp" />
 		<Unit filename="SHA256.h" />
+		<Unit filename="SymAlg.cpp" />
+		<Unit filename="SymAlg.h" />
 		<Unit filename="common/cryptomath.h" />
 		<Unit filename="common/includes.cpp" />
 		<Unit filename="common/includes.h" />
