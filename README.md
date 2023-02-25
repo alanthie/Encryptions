@@ -83,4 +83,5 @@ Current set of encryption algorithms
     Binary AES cfb
     TWOFISH
     Salsa20
+    IDEA
 </pre>
