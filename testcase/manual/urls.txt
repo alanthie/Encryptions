@@ -1,5 +1,6 @@
 https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz
 [f]ftp.alanthier001.com/random.txt
+[f]ftp.vastserve.com/htdocs/random.txt
 [l]random.txt.1
 [l]binary.dat.7
 

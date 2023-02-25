@@ -119,6 +119,9 @@ int getftp( std::string url, std::string outfile,
     std::string user;
     std::string pwd;
 
+    static bool s_ftp_use_last_pwd = false;
+    static std::string s_ftp_last_pwd = "";
+
     if (    (encryped_ftp_user.size() == 0) || (encryped_ftp_user == "none") ||
             (encryped_ftp_pwd.size()  == 0) || (encryped_ftp_pwd  == "none")
        )
@@ -137,10 +140,32 @@ int getftp( std::string url, std::string outfile,
         {
             encryped_ftp_user= get_string_by_index(encryped_ftp_user, ';', pos, verbose);
             encryped_ftp_pwd = get_string_by_index(encryped_ftp_pwd,  ';', pos, verbose);
-            std::cout << "Looking for a protected ftp file that require user and pwd"<< std::endl;
-            std::cout << "URL: "<< url << std::endl;
-            std::cout << "Enter pwd used to encode ftp user/pwd: ";
-            std::cin >> pwd;
+
+            if (s_ftp_last_pwd.size() == 0)
+            {
+                std::cout << "Looking for a protected ftp file that require user and pwd"<< std::endl;
+                std::cout << "URL: "<< url << std::endl;
+                std::cout << "Enter pwd used to encode ftp user/pwd: ";
+                std::cin >> pwd;
+                s_ftp_last_pwd = pwd;
+            }
+            else if (s_ftp_use_last_pwd == true)
+            {
+                pwd = s_ftp_last_pwd;
+            }
+            else
+            {
+                std::cout << "Looking for a protected ftp file that require user and pwd"<< std::endl;
+                std::cout << "URL: "<< url << std::endl;
+                std::cout << "Enter pwd used to encode ftp user/pwd [* == always use last one]: ";
+                std::cin >> pwd;
+                if (pwd == "*")
+                {
+                    pwd = s_ftp_last_pwd;
+                    s_ftp_use_last_pwd = true;
+                }
+                s_ftp_last_pwd = pwd;
+            }
             user = decrypt_simple_string(encryped_ftp_user, pwd);
             pwd  = decrypt_simple_string(encryped_ftp_pwd,  pwd);
         }
