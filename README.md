@@ -15,7 +15,8 @@ Unlimited encryption keys size!
 **Allow perfect secrecy**:
 <pre>
 Shannon's work on information theory showed that to achieve so-called 'perfect secrecy', 
-the key length must be at least as large as the message and only used once (this algorithm is called the one-time pad). 
+the key length must be at least as large as the message and only used once
+(this algorithm is called the one-time pad). 
 </pre>
  
 
