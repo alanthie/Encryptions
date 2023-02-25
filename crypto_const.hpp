@@ -29,6 +29,7 @@ enum class CRYPTO_ALGO : uint16_t
     ALGO_BIN_AES_16_16_ecb,
     ALGO_BIN_AES_16_16_cbc,
     ALGO_BIN_AES_16_16_cfb,
+    ALGO_TWOFISH,
 };
 enum class CRYPTO_ALGO_AES
 {

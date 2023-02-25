@@ -122,9 +122,6 @@ bool batch(std::string mode, std::string inifile, bool verbose)
         encoding_output_file_encrypted= ini.get_string("encoding_output_file_encrypted", Encoding);
     }
 
-    // ./crypto encode  -i ./test.zip -o ./test.zip.encrypted -p ./puzzle.txt -q ./partial_puzzle.txt -u ./urls.txt -v 1
-    // ./crypto decode  -i ./test.zip.encrypted -p ./puzzle.txt.full -o ./test.zip.unencrypted -v 1
-
     if (mode == "encode")
     {
         std::cout << "crypto ENCODING..." << std::endl;

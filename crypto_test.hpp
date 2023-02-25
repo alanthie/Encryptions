@@ -6,6 +6,8 @@
 #include "puzzle.hpp"
 #include "DES.h"
 #include "AESa.h"
+#include "twofish.h"
+
 
 // ./crypto test -i manywebkey
 void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false, bool verb = false, std::string file_msg = "/msg.txt")
@@ -139,6 +141,105 @@ void test_core(bool verbose = true)
         }
     }
 
+    if (true)
+    {
+        int  r = Twofish_initialise();
+        if (r < 0)
+        {
+            std::cout << "Error with Twofish_initialise " <<r << std::endl;
+        }
+        else
+        {
+            std::cout << "OK with Twofish_initialise "<< std::endl;
+
+            Twofish_Byte key[] = {0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde,  0x00, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde};
+            Twofish_key xkey;
+            r = Twofish_prepare_key( key, 16, &xkey );
+            if (r < 0)
+            {
+                std::cout << "Error with Twofish Twofish_prepare_key " << r << std::endl;
+            }
+            else
+            {
+                std::cout << "OK with Twofish Twofish_prepare_key " << r << std::endl;
+
+                Twofish_Byte p[16] = {0x12, 0x34, 0x56, 0x00, 0x9a, 0xbc, 0xde, 0x12, 0x34, 0x00, 0x78, 0x9a, 0xbc, 0xde, 0xbc, 0xde};
+                Twofish_Byte c[16] = {0};
+                Twofish_Byte d[16] = {0};
+                Twofish_encrypt(&xkey, p, c);
+                Twofish_decrypt(&xkey, c, d);
+
+                bool ok = true;
+                for(size_t i=0;i<16;i++)
+                {
+                    if (p[i] != d[i])
+                    {
+                        std::cout << "Error with Twofish_encrypt  Twofish_decrypt"<< i <<std::endl;
+                        std::cout << (int)p[i]<<std::endl;
+                        std::cout << (int)d[i]<<std::endl;
+                        ok = false;
+                        break;
+                    }
+                }
+                if (ok)
+                {
+                    std::cout << "OK with Twofish_encrypt  Twofish_decrypt " << std::endl;
+                }
+            }
+        }
+    }
+
+    // FAILED
+    if (false)
+    {
+        //Unlike most Twofish implementations, this one allows any key size from * 0 to 32 byte
+        int  r = Twofish_initialise();
+        if (r < 0)
+        {
+            std::cout << "Error with Twofish_initialise 32 " <<r << std::endl;
+        }
+        else
+        {
+            std::cout << "OK with Twofish_initialise 32 "<< std::endl;
+
+            Twofish_Byte key[] = {  0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde,
+                                    0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde};
+            Twofish_key xkey;
+            r = Twofish_prepare_key( key, 32, &xkey );
+            if (r < 0)
+            {
+                std::cout << "Error with Twofish 32 Twofish_prepare_key " << r << std::endl;
+            }
+            else
+            {
+                std::cout << "OK with Twofish 32 Twofish_prepare_key " << r << std::endl;
+
+                Twofish_Byte p[32] = {  0x11, 0x12, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde,
+                                        0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xde};
+                Twofish_Byte c[32] = {0};
+                Twofish_Byte d[32] = {0};
+                Twofish_encrypt(&xkey, p, c);
+                Twofish_decrypt(&xkey, c, d);
+
+                bool ok = true;
+                for(size_t i=0;i<32;i++)
+                {
+                    if (p[i] != d[i])
+                    {
+                        std::cout << "Error with Twofish_encrypt  Twofish_decrypt 32 "<< i <<std::endl;
+                        std::cout << (int)p[i]<<std::endl;
+                        std::cout << (int)d[i]<<std::endl;
+                        ok = false;
+                        break;
+                    }
+                }
+                if (ok)
+                {
+                    std::cout << "OK with Twofish_encrypt  Twofish_decrypt 32" << std::endl;
+                }
+            }
+        }
+    }
 
 
     if (true)

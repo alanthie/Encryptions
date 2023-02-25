@@ -53,6 +53,7 @@ int getvideo(std::string url, std::string outfile, std::string options = "", boo
     int r = system(cmd.data());
     return r;
 }
+
 static std::string s_last_local_file = "";
 static bool s_use_last = false;
 int getlocal(std::string url, cryptodata& dataout, std::string options = "", bool verbose=false)
@@ -97,7 +98,7 @@ int getlocal(std::string url, cryptodata& dataout, std::string options = "", boo
     }
     else
     {
-        std::cout << "WARNING Using local file in current folder (remove it if want to specify another path)"  << url << std::endl;
+        //std::cout << "WARNING Using local file in current folder (remove it if want to specify another path)"  << url << std::endl;
         nfile = url;
     }
 

@@ -10,6 +10,9 @@
 #include "crypto_const.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
+#include "twofish.h"
+
+static bool s_Twofish_initialise = false;
 
 class encryptor
 {
@@ -290,9 +293,10 @@ public:
                     }
 				}
 
-				if      (i%3==0)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc;
-				else if (i%3==1)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb;
-				else              vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb;
+				if      (i%4==0)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc;
+				else if (i%4==1)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb;
+				else if (i%4==2)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb;
+				else              vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH;
 
 				if (verbose)
                     std::cout << "crypto_algo=" << vurlkey[i].crypto_algo << std::endl;
@@ -342,6 +346,116 @@ public:
 
 		for( size_t j = 0; j< URLINFO_SIZE; j++)
             vurlkey[i].urlinfo_with_padding[j] = temp.getdata()[j];
+
+		return r;
+	}
+
+    bool encode_twofish(cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
+	{
+		bool r = true;
+		char c;
+
+		if (data_temp.buffer.size() % 16 != 0)
+		{
+            r = false;
+            std::cerr << "ERROR " << "encoding file must be multiple of 16 bytes twofish" <<  std::endl;
+		}
+
+		uint32_t nround = 1;
+		uint32_t nblock = data_temp.buffer.size() / 16;
+		uint32_t nkeys  = key_size / 16;
+
+		if (data_temp.buffer.size() > 0)
+		{
+            if (key_size > data_temp.buffer.size() )
+            {
+                nround = key_size / data_temp.buffer.size();
+                nround++;
+            }
+		}
+
+		int rr = 0;
+		if (s_Twofish_initialise == false)
+		{
+            rr = Twofish_initialise();
+            if (rr < 0)
+            {
+                std::cout << "Error with Twofish_initialise " << rr << std::endl;
+                r = false;
+                return r;
+            }
+            s_Twofish_initialise = true;
+        }
+
+		if (verbose)
+		{
+            std::cout.flush();
+            std::cout <<    "Encryptor encode() twofish 16_16             " <<
+                            ", number of rounds : " << nround <<
+                            ", number of blocks (16 bytes): " << nblock <<
+                            ", number of keys (16 bytes): "   << nkeys  << std::endl;
+        }
+
+		Twofish_Byte KEY[16+1];
+		Twofish_Byte DATA[16+1];
+		Twofish_Byte out[16+1];
+		uint32_t key_idx = 0;
+
+		for(size_t roundi = 0; roundi < nround; roundi++)
+		{
+            if (r == false)
+                break;
+
+            if (roundi > 0)
+                data_temp_next.buffer.seek_begin();
+
+            //std::cout << "roundi " << roundi << " key_idx " << key_idx << std::endl;
+
+            for(size_t blocki = 0; blocki < nblock; blocki++)
+            {
+                if (roundi == 0)
+                {
+                    for(size_t j = 0; j < 16; j++)
+                    {
+                        c = data_temp.buffer.getdata()[16*blocki + j];
+                        DATA[j] = c;
+                    }
+                    DATA[16] = 0; // Data must be 128 bits long
+                }
+                else
+                {
+                    for(size_t j = 0; j < 16; j++)
+                    {
+                        c = data_temp_next.buffer.getdata()[16*blocki + j];
+                        DATA[j] = c;
+                    }
+                    DATA[16] = 0; // Data must be 128 bits long
+                }
+
+                for(size_t j = 0; j < 16; j++)
+                {
+                    c = key[16*key_idx + j];
+                    KEY[j] = c;
+                }
+                KEY[16] = 0;
+
+                key_idx++;
+                if (key_idx >= nkeys) key_idx=0;
+
+
+                Twofish_key xkey;
+                rr = Twofish_prepare_key( KEY, 16, &xkey );
+                if (rr < 0)
+                {
+                    std::cerr << "ERROR Twofish_prepare_key " << rr << std::endl;
+                    r = false;
+                    break;
+                }
+
+                Twofish_encrypt(&xkey, DATA, out);
+                data_temp_next.buffer.write((char*)&out[0], (uint32_t)16, -1);
+            }
+        }
 
 		return r;
 	}
@@ -538,17 +652,25 @@ public:
             }
             else if ((crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
                      (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
-                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb)
+                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) &&
+                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH)
                      )
             {
                 std::cerr << "WARNING mismatch algo at iter " <<  iter-1 << std::endl;
             }
 
-            CRYPTO_ALGO_AES aes_type = CRYPTO_ALGO_AES::ECB;
-            if (crypto_algo      == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) aes_type = CRYPTO_ALGO_AES::CBC;
-            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) aes_type = CRYPTO_ALGO_AES::CFB;
+            if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH)
+            {
+                return encode_twofish(data_temp, key, key_size, data_temp_next);
+            }
+            else
+            {
+                CRYPTO_ALGO_AES aes_type = CRYPTO_ALGO_AES::ECB;
+                if (crypto_algo      == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) aes_type = CRYPTO_ALGO_AES::CBC;
+                else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) aes_type = CRYPTO_ALGO_AES::CFB;
 
-            return encode_binaes16_16(data_temp, key, key_size, data_temp_next, aes_type);
+                return encode_binaes16_16(data_temp, key, key_size, data_temp_next, aes_type);
+            }
         }
 	}
 

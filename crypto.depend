@@ -369,7 +369,7 @@
 	"data.hpp"
 	"rng.h"
 
-1677288576 /home/server/dev/Encryptions/crypto_const.hpp
+1677347013 /home/server/dev/Encryptions/crypto_const.hpp
 	<filesystem>
 	<curl/curl.h>
 	"encrypt.h"
@@ -397,7 +397,7 @@
 	"crypto_file.hpp"
 	"data.hpp"
 
-1677302450 /home/server/dev/Encryptions/encryptor.hpp
+1677349207 /home/server/dev/Encryptions/encryptor.hpp
 	<iostream>
 	<fstream>
 	"DES.h"
@@ -407,8 +407,9 @@
 	"crypto_const.hpp"
 	"data.hpp"
 	"puzzle.hpp"
+	"twofish.h"
 
-1677256965 /home/server/dev/Encryptions/decryptor.hpp
+1677349402 /home/server/dev/Encryptions/decryptor.hpp
 	<iostream>
 	<fstream>
 	"DES.h"
@@ -420,12 +421,13 @@
 	"data.hpp"
 	"puzzle.hpp"
 
-1677290399 /home/server/dev/Encryptions/crypto_test.hpp
+1677346898 /home/server/dev/Encryptions/crypto_test.hpp
 	"crypto_const.hpp"
 	"data.hpp"
 	"puzzle.hpp"
 	"DES.h"
 	"AESa.h"
+	"twofish.h"
 
 1676905265 source:/home/server/dev/Encryptions/Base64.cpp
 	"Base64.h"
@@ -469,7 +471,7 @@
 	<ctype.h>
 	"encrypt.h"
 
-1677288738 /home/server/dev/Encryptions/crypto_batch.hpp
+1677344055 /home/server/dev/Encryptions/crypto_batch.hpp
 	<iostream>
 	<fstream>
 	<chrono>
@@ -486,7 +488,7 @@
 	"decryptor.hpp"
 	"crypto_test.hpp"
 
-1677305290 /home/server/dev/Encryptions/crypto_file.hpp
+1677348715 /home/server/dev/Encryptions/crypto_file.hpp
 	<filesystem>
 	<curl/curl.h>
 	"encrypt.h"
@@ -547,4 +549,17 @@
 	<mmintrin.h>
 	<altivec.h>
 	<spe.h>
+
+1590687588 /home/server/dev/Encryptions/twofish.h
+
+1677348522 source:/home/server/dev/Encryptions/twofish.c
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+	"twofish.h"
+
+1590687588 source:/home/server/dev/Encryptions/twofish_cfb.c
+	<stdint.h>
+	<stdlib.h>
+	"twofish.h"
 

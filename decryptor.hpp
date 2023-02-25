@@ -359,6 +359,115 @@ public:
         return r;
 	}
 
+	bool decode_twofish(cryptodata& data_encrypted,
+                            const char* key, uint32_t key_size,
+                            cryptodata& data_decrypted)
+	{
+        bool r = true;
+		char c;
+
+		uint32_t nround = 1;
+		uint32_t nblock = data_encrypted.buffer.size() / 16;
+		uint32_t nkeys  = key_size / 16;
+
+		if (data_encrypted.buffer.size() > 0)
+		{
+            if (key_size > data_encrypted.buffer.size() )
+            {
+                nround = key_size / data_encrypted.buffer.size();
+                nround++;
+            }
+		}
+
+        int rr = 0;
+		if (s_Twofish_initialise == false)
+		{
+            rr = Twofish_initialise();
+            if (rr < 0)
+            {
+                std::cout << "Error with Twofish_initialise " << rr << std::endl;
+                r = false;
+                return r;
+            }
+            s_Twofish_initialise = true;
+        }
+
+		if (verbose)
+		{
+            std::cout <<    "\nDecryptor decode() twofish                 " <<
+                            ", number of rounds : " << nround <<
+                            ", number of blocks (16 bytes): " << nblock <<
+                            ", number of keys (16 bytes): "   << nkeys  << std::endl;
+        }
+
+		Twofish_Byte KEY[16+1];
+        Twofish_Byte encrypted[16+1];
+        Twofish_Byte out[16+1];
+		uint32_t key_idx = 0;
+
+		for(size_t roundi = 0; roundi < nround; roundi++)
+		{
+            if (roundi > 0)
+            {
+                data_decrypted.buffer.seek_begin();
+            }
+
+            if (nround > 0)
+            {
+                key_idx = ((nround - roundi - 1) *  nblock) % nkeys;
+            }
+            //std::cout << "roundi " << roundi << " key_idx " << key_idx << std::endl;
+
+            if (r == false)
+                break;
+
+            for(size_t blocki = 0; blocki < nblock; blocki++)
+            {
+                if (roundi == 0)
+                {
+                    for(size_t j = 0; j < 16; j++)
+                    {
+                        c = data_encrypted.buffer.getdata()[16*blocki + j];
+                        encrypted[j] = c;
+                    }
+                    encrypted[16]=0;
+                }
+                else
+                {
+                    for(size_t j = 0; j < 16; j++)
+                    {
+                        c = data_decrypted.buffer.getdata()[16*blocki + j];
+                        encrypted[j] = c;
+                    }
+                    encrypted[16]=0;
+                }
+
+                for(size_t j = 0; j < 16; j++)
+                {
+                    c = key[16*key_idx + j];
+                    KEY[j] = c;
+                }
+                KEY[16]=0;
+
+                key_idx++;
+                if (key_idx >= nkeys) key_idx=0;
+
+                Twofish_key xkey;
+                rr = Twofish_prepare_key( KEY, 16, &xkey );
+                if (rr < 0)
+                {
+                    std::cerr << "ERROR Twofish_prepare_key " << rr << std::endl;
+                    r = false;
+                    break;
+                }
+                Twofish_decrypt(&xkey, encrypted, out);
+                data_decrypted.buffer.write((char*)&out[0], 16, -1);
+            }
+        }
+
+        return r;
+	}
+
 	bool decode_binaes16_16(cryptodata& data_encrypted,
                             const char* key, uint32_t key_size,
                             cryptodata& data_decrypted,
@@ -491,6 +600,10 @@ public:
         if ((iter==0) || (iter==NITER-1))
         {
             return decode_binDES(data_encrypted, key, key_size, data_decrypted);
+        }
+        else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_TWOFISH)
+        {
+            return decode_twofish(data_encrypted, key, key_size, data_decrypted);
         }
 		else
 		{
@@ -693,7 +806,8 @@ public:
                     // uk.crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16
                     if ((uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
-                        (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb)
+                        (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) &&
+                        (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH)
                        )
                     {
                         std::cerr << "WARNING mismatch algo at url iter " <<  iter << std::endl;
