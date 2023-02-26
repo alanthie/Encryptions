@@ -19,7 +19,7 @@
 #include "data.hpp"
 
 
-std::string VERSION = "0.3";
+std::string VERSION = "0.4";
 
 int main_crypto(int argc, char **argv)
 {
