@@ -91,3 +91,7 @@ Current set of encryption algorithms
 
 Puzzle:
 ![Alt text](/Doc/puzzle.png?raw=true "puzzle")
+
+Shared private information:
+![Alt text](/Doc/shared info.png?raw=true "shared info")
+
