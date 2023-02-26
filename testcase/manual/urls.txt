@@ -7,5 +7,10 @@ https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz
 [l]binary.dat.9
 [l]binary.dat.2
 [l]binary.dat.3
-
+[l]random.txt.1
+[l]binary.dat.7
+[l]binary.dat.8
+[l]binary.dat.9
+[l]binary.dat.2
+[l]binary.dat.3
 
