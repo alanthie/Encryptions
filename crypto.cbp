@@ -40,41 +40,23 @@
 			<Add after="cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto" />
 			<Mode after="always" />
 		</ExtraCommands>
-		<Unit filename="AESa.cpp" />
-		<Unit filename="AESa.h" />
-		<Unit filename="Base64.cpp" />
-		<Unit filename="Buffer.hpp" />
-		<Unit filename="DES.cpp" />
-		<Unit filename="DES.h" />
 		<Unit filename="DES_Const.h" />
-		<Unit filename="SHA256.cpp" />
 		<Unit filename="SHA256.h" />
 		<Unit filename="Salsa20.h" />
-		<Unit filename="Salsa20.inl" />
-		<Unit filename="SymAlg.cpp" />
 		<Unit filename="SymAlg.h" />
 		<Unit filename="common/cryptomath.h" />
 		<Unit filename="common/includes.cpp" />
 		<Unit filename="common/includes.h" />
 		<Unit filename="crypto_batch.hpp" />
-		<Unit filename="crypto_const.hpp" />
 		<Unit filename="crypto_file.hpp" />
 		<Unit filename="crypto_test.hpp" />
-		<Unit filename="data.hpp" />
 		<Unit filename="decryptor.hpp" />
 		<Unit filename="encrypt.h" />
 		<Unit filename="encryptor.hpp" />
 		<Unit filename="ini_parser.hpp" />
-		<Unit filename="main.cpp" />
 		<Unit filename="puzzle.hpp" />
 		<Unit filename="random_engine.hpp" />
-		<Unit filename="twofish.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="twofish.h" />
-		<Unit filename="twofish_cfb.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="vigenere.h" />
 		<Extensions>
 			<code_completion />
