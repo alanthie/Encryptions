@@ -24,8 +24,8 @@ Example, encodes a file into an encrypted file
 <pre>
 ./crypto encode -h
 Usage: encode [-h] --input VAR --output VAR --puzzle VAR --qapuzzle VAR --fullpuzzle VAR [--url VAR] 
-                   [--staging VAR] [--local VAR] [--keep VAR] [--keyfactor VAR] 
-                   [--known_ftp_server VAR] [--encryped_ftp_user VAR] [--encryped_ftp_pwd VAR]
+              [--staging VAR] [--local VAR] [--keep VAR] [--keyfactor VAR] 
+              [--known_ftp_server VAR] [--encryped_ftp_user VAR] [--encryped_ftp_pwd VAR]
 
 Encodes a file into an encrypted file
 
