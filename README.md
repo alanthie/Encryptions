@@ -114,5 +114,5 @@ Puzzle:
 ![Alt text](/Doc/puzzle.png?raw=true "puzzle")
 
 Shared private information:
-![Alt text](/Doc/sharedinfo.png?raw=true "shared info")
+![Alt text](/Doc/keys.png?raw=true "shared info")
 
