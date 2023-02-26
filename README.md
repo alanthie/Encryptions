@@ -3,7 +3,10 @@ A C++ program (Linux and Windows) to encrypt/decrypt (without the usual limitati
 Multiple encryption keys for one message to encrypt.
 <pre>
 [Keys extracted from a puzzle question-answer].
-[Keys extracted from local common file shared between 2 parties, public web files, protected ftp files].
+[Keys extracted from local common file shared between 2 parties (like USB keys), 
+                     public web files, 
+                     public video web files (using youtube-dl), 
+                     user/password protected ftp files].
 </pre>
 
 Multiple encryption algorithms for one message to encrypt.
