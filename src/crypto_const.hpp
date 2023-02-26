@@ -59,7 +59,10 @@ constexpr static int16_t NITER_LIM          = 128;
 constexpr static int16_t PUZZLE_SIZE_LIM    = 64*256;
 constexpr static uint32_t FILE_SIZE_LIM     = 128*1024*1024; // 128MB
 
+const std::string QA_TOKEN              = "QA";
 const std::string REM_TOKEN             = "REM";
+const std::string BLOCK_START_TOKEN     = "BLOCK_START";
+const std::string BLOCK_END_TOKEN       = "BLOCK_END";
 const std::string CHKSUM_TOKEN          = "CHKSUM";
 
 class urlkey

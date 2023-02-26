@@ -1,8 +1,35 @@
 REM ===========================================================================
 REM Your puzzle questions start here
 REM ===========================================================================
-"Votre prenom " : "Alain"
-"Le model de votre auto" : "Ford"
+QA "Votre prenom " : "Alain"
+QA "Le model de votre auto" : "Ford"
+REM 
+BLOCK_START Sudoku book 20, puz12
+123456789
+123456789
+123456789
+123456789
+123456789
+123456789
+123456789
+123456789
+123456789
+BLOCK_END
+REM 
+BLOCK_START Sudoku book 21, puz10
+123456789
+123456789
+123456789
+123456789
+123456789
+123456789
+123456789
+123456789
+123456789
+BLOCK_END
+REM 
+QA "Votre prenom " : "Alain"
+REM 
 REM ===========================================================================
 REM Your puzzle questions end here
 REM ===========================================================================
