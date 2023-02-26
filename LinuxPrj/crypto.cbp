@@ -27,7 +27,7 @@
 					<Add option="-s" />
 				</Linker>
 				<ExtraCommands>
-					<Add after="cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto" />
+					<Add after="cp ../bin/Release/crypto ../Exec_Linux/crypto" />
 					<Mode after="always" />
 				</ExtraCommands>
 			</Target>
