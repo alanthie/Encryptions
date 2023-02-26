@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="crypto" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="../bin/Debug/crypto" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="../bin/Release/crypto" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto" />
+					<Mode after="always" />
+				</ExtraCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<ExtraCommands>
+			<Add after="cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto" />
+			<Mode after="always" />
+		</ExtraCommands>
+		<Unit filename="../src/AESa.cpp" />
+		<Unit filename="../src/AESa.h" />
+		<Unit filename="../src/Base64.cpp" />
+		<Unit filename="../src/Base64.h" />
+		<Unit filename="../src/Buffer.hpp" />
+		<Unit filename="../src/DES.cpp" />
+		<Unit filename="../src/DES.h" />
+		<Unit filename="../src/DES_Const.h" />
+		<Unit filename="../src/IDEA.hpp" />
+		<Unit filename="../src/README.md" />
+		<Unit filename="../src/SHA256.cpp" />
+		<Unit filename="../src/SHA256.h" />
+		<Unit filename="../src/Salsa20.h" />
+		<Unit filename="../src/Salsa20.inl" />
+		<Unit filename="../src/SymAlg.cpp" />
+		<Unit filename="../src/SymAlg.h" />
+		<Unit filename="../src/argparse.hpp" />
+		<Unit filename="../src/common/cryptomath.h" />
+		<Unit filename="../src/common/includes.cpp" />
+		<Unit filename="../src/common/includes.h" />
+		<Unit filename="../src/crypto_batch.hpp" />
+		<Unit filename="../src/crypto_batch.ini" />
+		<Unit filename="../src/crypto_const.hpp" />
+		<Unit filename="../src/crypto_file.hpp" />
+		<Unit filename="../src/crypto_package.hpp" />
+		<Unit filename="../src/crypto_test.hpp" />
+		<Unit filename="../src/data.hpp" />
+		<Unit filename="../src/decryptor.hpp" />
+		<Unit filename="../src/encrypt.h" />
+		<Unit filename="../src/encryptor.hpp" />
+		<Unit filename="../src/ini_parser.hpp" />
+		<Unit filename="../src/main.cpp" />
+		<Unit filename="../src/puzzle.hpp" />
+		<Unit filename="../src/random_engine.hpp" />
+		<Unit filename="../src/rng.h" />
+		<Unit filename="../src/twofish.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/twofish.h" />
+		<Unit filename="../src/twofish_cfb.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/vigenere.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
