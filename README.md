@@ -88,3 +88,6 @@ Current set of encryption algorithms
     Salsa20
     IDEA
 </pre>
+
+Puzzle:
+![Alt text](/Doc/puzzle.png?raw=true "puzzle")
