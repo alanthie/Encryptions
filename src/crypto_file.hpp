@@ -255,6 +255,26 @@ int wget(const char *in, const char *out, bool verbose=false)
 	return res;
 }
 
+std::string file_checksum(std::string filename)
+{
+    std::string s = "";
+    cryptodata temp;
+    bool r = temp.read_from_file(filename);
+    if (r==true)
+    {
+        SHA256 sha;
+        sha.update(reinterpret_cast<const uint8_t*> (temp.buffer.getdata()), temp.buffer.size() );
+        uint8_t* digest = sha.digest();
+        s = SHA256::toString(digest);
+        delete[] digest;
+    }
+    else
+    {
+        std::cerr << "ERROR reading " << filename << ", code: " << r << std::endl;
+    }
+    return s;
+}
+
 //The following commands will get you the IP address list to find public IP addresses for your machine:
 //
 //    curl ifconfig.me

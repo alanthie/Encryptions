@@ -30,6 +30,15 @@ int main_crypto(int argc, char **argv)
     {
         argparse::ArgumentParser program("crypto", FULLVERSION);
 
+        argparse::ArgumentParser checksum_command("checksum");
+        {
+            checksum_command.add_description("Get SHA256 digest key (len = 64 bytes) of file");
+
+            checksum_command.add_argument("-i", "--input")
+                .required()
+                .help("specify the input file.");
+        }
+
         argparse::ArgumentParser random_file_command("random");
         {
             random_file_command.add_description("Generate a file with random numbers");
@@ -252,6 +261,7 @@ int main_crypto(int argc, char **argv)
         program.add_subparser(string_decode_command);
         program.add_subparser(random_file_command);
         program.add_subparser(binary_random_file_command);
+        program.add_subparser(checksum_command);
 
         // Parse the arguments
         try {
@@ -322,11 +332,25 @@ int main_crypto(int argc, char **argv)
             }
             catch(...)
             {
-                std::cout << "Warning some invalid numeric value, numeric values reset to 1" << std::endl;
+                std::cerr << "Warning some invalid numeric value, numeric values reset to 1" << std::endl;
                 li_dec = 1;
                 cnt = 1;
             }
             generate_binary_random_file(filename, li_dec, cnt);
+            return 0;
+        }
+
+        if (program.is_subcommand_used("checksum"))
+        {
+            auto& cmd = checksum_command;
+            auto file = cmd.get<std::string>("--input");
+            if (fileexists(file) == false)
+            {
+                std::cerr << "ERROR File not found " << file << std::endl;
+                return -1;
+            }
+            auto s = file_checksum(file);
+            std::cout << s << std::endl;
             return 0;
         }
 
