@@ -93,11 +93,6 @@ public:
         std::string s2 = read_checksum();
         if (s1!=s2)
         {
-            //f (verbose)
-//            {
-//                std::cerr << "calc checksum() "  << s1 << std::endl;
-//                std::cerr << "read checksum() "  << " "  << s2 << std::endl;
-//            }
             return false;
         }
         return true;
@@ -114,27 +109,16 @@ public:
     void make_puzzle_before_checksum(cryptodata& temp)
     {
         std::string s;
-        //size_t sz = 0;
         for(size_t i = 0; i < vQA.size(); i++)
         {
             if (vQA[i].type == 0) // QA_
             {
                 s = QA_TOKEN + " " + "\"" + vQA[i].Q +"\"" +" : " +  "\"" + vQA[i].A + "\"" + "\n";
-//                if (verbose)
-//                {
-//                    sz+=s.size();
-//                    std::cout << "Puzzle[i] " << i << "[" << s << "] "<< sz << std::endl;
-//                }
                 temp.buffer.write(s.data(), (uint32_t)s.size(), -1);
             }
             else if (vQA[i].type == 1) // REM
             {
                 s = REM_TOKEN + " " + vQA[i].Q + vQA[i].A + "\n";
-//                if (verbose)
-//                {
-//                    sz+=s.size();
-//                    std::cout << "Puzzle[i] " << i << "[" << s << "] "<< sz << std::endl;
-//                }
                 temp.buffer.write(s.data(), (uint32_t)s.size(), -1);
             }
              else if (vQA[i].type == 3) //BLOCK
@@ -142,18 +126,9 @@ public:
                 s = BLOCK_START_TOKEN + vQA[i].sblockstart + "\n"
                     + vQA[i].Q + vQA[i].A
                     + BLOCK_END_TOKEN + vQA[i].sblockend + "\n";
-//                if (verbose)
-//                {
-//                    sz+=s.size();
-//                    std::cout << "Puzzle[i] " << i << "[" << s << "] "<< sz << std::endl;
-//                }
                 temp.buffer.write(s.data(), (uint32_t)s.size(), -1);
             }
         }
-//        if (verbose)
-//        {
-//            std::cout << "make_puzzle_before_checksum size: " << temp.buffer.size() << " " << std::endl;
-//        }
     }
 
     std::string checksum()
@@ -192,12 +167,6 @@ public:
     {
         cryptodata temp;
         make_puzzle_before_checksum(temp);
-
-//        if (verbose)
-//        {
-//            std::cout << "Puzzle save_to_file size before checksum " << temp.buffer.size() << std::endl;
-//            std::cout << "filename" << filename << std::endl;
-//        }
 
         std::string s = CHKSUM_TOKEN + " puzzle : " + chksum_puzzle + "\n";
         temp.buffer.write(s.data(), (uint32_t)s.size(), -1);
@@ -269,8 +238,6 @@ public:
                     }
                     else if ((sline.size() >= BLOCK_START_TOKEN.size()) && (sline.substr(0,BLOCK_START_TOKEN.size()) == BLOCK_START_TOKEN))
                     {
-                        //td::cout << "BLOCK_START_TOKEN\n";
-
                         in_block = true;
                         std::string sblock = "";
                         std::string sblockstart = "";
@@ -291,8 +258,6 @@ public:
                                 {
                                     if ((sline.size() >= BLOCK_END_TOKEN.size()) && (sline.substr(0,BLOCK_END_TOKEN.size()) == BLOCK_END_TOKEN))
                                     {
-                                        //std::cout << "BLOCK_END_TOKEN\n";
-
                                         in_block = false;
                                         if (sline.size() > BLOCK_START_TOKEN.size()) sblockend = sline.substr(BLOCK_START_TOKEN.size());
                                         sline.clear();
@@ -303,7 +268,6 @@ public:
                                     {
                                         if (sline.size() > 0) // "\r\n"; 2lines
                                         {
-                                            //std::cout << "BLOCK_LINE : " << sline << std::endl;;
 #ifdef _WIN32
                                             sblock += sline + "\n";
 #else
@@ -320,7 +284,6 @@ public:
                     else
                     {
                         // skip (remove)
-                        //std::cout << "SKIP LINE : " << sline << std::endl;;
                     }
                     sline.clear();
                 }
