@@ -25,6 +25,9 @@ int main_crypto(int argc, char **argv)
 {
     std::string FULLVERSION = VERSION + "_" + get_current_date();
 
+    // TODO [*.crypto self contained file] => [header+qa_puzzle+data].crypto
+
+
     // Argument parser
     try
     {
