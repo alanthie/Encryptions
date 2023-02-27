@@ -65,6 +65,25 @@ const std::string BLOCK_START_TOKEN     = "BLOCK_START";
 const std::string BLOCK_END_TOKEN       = "BLOCK_END";
 const std::string CHKSUM_TOKEN          = "CHKSUM";
 
+constexpr static uint32_t CRYPTO_HEADER_SIZE = 64+64;
+struct CRYPTO_HEADER {
+    std::uint8_t  sig[6];                       // File Signature (CRYPTO)
+    std::uint16_t version;                      // Format Version
+    std::uint32_t enc_puzzle_size;              // Size of encrypted puzzle
+    std::uint32_t enc_puzzle_padding_size;      // Size of encrypted puzzle before padding
+    std::uint32_t enc_data_size;                // Size of encrypted data before padding
+    std::uint32_t enc_data_padding_size;
+    std::uint32_t crc_enc_data_hash;            // CRC32 hash of encrypted data before padding
+    std::uint32_t crc_enc_puzzle_hash;
+    std::uint8_t  enc_puzzle_key_hint[32+64];   // Encrypted Puzzle Extract Key Hint
+    //std::uint8_t  reserved[0];                // Filled with zeros
+};
+static_assert(sizeof(CRYPTO_HEADER) == CRYPTO_HEADER_SIZE);
+//auto padded_data = std::make_unique<uint8_t[]>(padded_size);
+//CRC32 crc;
+//crc.update(padded_data.get(), size);
+//header.hash   = crc.get_hash();
+
 class urlkey
 {
 public:

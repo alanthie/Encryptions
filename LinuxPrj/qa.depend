@@ -1,0 +1,426 @@
+# depslib dependency file v1.0
+1677437812 source:/home/server/dev/Encryptions/src/qa/BigInteger.cpp
+	"BigInteger.h"
+	<iostream>
+	<string>
+	<sstream>
+	<cmath>
+
+1677528671 /home/server/dev/Encryptions/src/qa/BigInteger.h
+	<string>
+	"mathcommon.h"
+
+1676335963 /home/server/dev/Encryptions/src/qa/common.h
+	<math\wide_integer\uintwide_t.h>
+	"uinteger_t.hh"
+	<bitset>
+	<bits/stdc++.h>
+	<math/wide_decimal/decwide_t.h>
+	<iostream>
+	<cmath>
+	<iomanip>
+	<atomic>
+	<vector>
+	<set>
+	<thread>
+	<mutex>
+	<algorithm>
+	<unordered_map>
+	<cstdint>
+	<stdio.h>
+	<iostream>
+	<fstream>
+	<limits>
+	<map>
+	<set>
+	<future>
+	<chrono>
+	<cstdlib>
+	<stdlib.h>
+	<cstdio>
+	<type_traits>
+	<random>
+	<list>
+	<numeric>
+	<stdexcept>
+
+1674779516 /home/server/dev/Encryptions/src/qa/uinteger_t.hh
+	<cassert>
+	<vector>
+	<string>
+	<utility>
+	<cstring>
+	<cstdint>
+	<iostream>
+	<algorithm>
+	<stdexcept>
+	<functional>
+	<type_traits>
+	<intrin.h>
+
+1674779516 source:/home/server/dev/Encryptions/src/qa/matrix.cpp
+	"matrix.hpp"
+
+1674779516 /home/server/dev/Encryptions/src/qa/matrix.hpp
+	<iostream>
+	<iomanip>
+	<iterator>
+	<limits>
+	<cmath>
+	<tuple>
+	<algorithm>
+
+1675776496 source:/home/server/dev/Encryptions/src/qa/rational.cpp
+	"rational.h"
+
+1677528555 /home/server/dev/Encryptions/src/qa/rational.h
+	<iostream>
+	"mathcommon.h"
+	"BigInteger.h"
+
+1677530644 source:/home/server/dev/Encryptions/src/qa/qa.cpp
+	"mathcommon.h"
+	"qa_internal_empty.hpp"
+	"qa_internal.hpp"
+
+1677528555 /home/server/dev/Encryptions/src/qa/prime.h
+	"mathcommon.h"
+	"matrix.hpp"
+	"atomic_bitvector.hpp"
+
+1677438075 /home/server/dev/Encryptions/src/qa/atomic_bitvector.hpp
+	<vector>
+	<atomic>
+	<cassert>
+	<cstddef>
+	<limits>
+	"iterator_tpl.h"
+
+1589882733 /home/server/dev/Encryptions/src/qa/iterator_tpl.h
+
+1677531219 /home/server/dev/Encryptions/src/qa/qa_internal.hpp
+	"qa_internal_empty.hpp"
+
+1677531265 /home/server/dev/Encryptions/src/qa/qa_internal_empty.hpp
+	"mathcommon.h"
+	"prime.h"
+	"../../src/data.hpp"
+	"../../src/crypto_file.hpp"
+	"../../src/Buffer.hpp"
+	"../../src/crypto_const.hpp"
+
+1676335963 /home/server/dev/Encryptions/src/qa/mathcommon.h
+	<math\wide_integer\uintwide_t.h>
+	"uinteger_t.hh"
+	<bitset>
+	<bits/stdc++.h>
+	<math/wide_decimal/decwide_t.h>
+	<iostream>
+	<cmath>
+	<iomanip>
+	<atomic>
+	<vector>
+	<set>
+	<thread>
+	<mutex>
+	<algorithm>
+	<unordered_map>
+	<cstdint>
+	<stdio.h>
+	<iostream>
+	<fstream>
+	<limits>
+	<map>
+	<set>
+	<future>
+	<chrono>
+	<cstdlib>
+	<stdlib.h>
+	<cstdio>
+	<type_traits>
+	<random>
+	<list>
+	<numeric>
+	<stdexcept>
+
+1676905265 /home/server/dev/Encryptions/src/data.hpp
+	<iostream>
+	"Buffer.hpp"
+	"crypto_const.hpp"
+	<fstream>
+	<stdio.h>
+
+1677277541 /home/server/dev/Encryptions/src/Buffer.hpp
+	<stdint.h>
+	<string.h>
+	<algorithm>
+	<iostream>
+	<fstream>
+	<stdio.h>
+
+1677510743 /home/server/dev/Encryptions/src/crypto_const.hpp
+	<filesystem>
+	<curl/curl.h>
+	"encrypt.h"
+	<chrono>
+	<ctime>
+	<sstream>
+	<iomanip>
+	<string>
+
+1676905265 /home/server/dev/Encryptions/src/encrypt.h
+	"Base64.h"
+	"vigenere.h"
+	<iostream>
+	<string>
+
+1665053199 /home/server/dev/Encryptions/src/Base64.h
+	<string>
+	<vector>
+
+1676905265 /home/server/dev/Encryptions/src/vigenere.h
+	<stdio.h>
+	<string.h>
+	<string>
+	<iostream>
+	<stdio.h>
+	<ctype.h>
+
+1677466545 /home/server/dev/Encryptions/src/crypto_file.hpp
+	<filesystem>
+	<curl/curl.h>
+	"encrypt.h"
+	<iostream>
+	<fstream>
+	"DES.h"
+	"Buffer.hpp"
+	"SHA256.h"
+	"crypto_const.hpp"
+	"data.hpp"
+	"puzzle.hpp"
+
+1677377037 /home/server/dev/Encryptions/src/DES.h
+	<algorithm>
+	"common/includes.h"
+	"SymAlg.h"
+	"DES_Const.h"
+
+1676638050 /home/server/dev/Encryptions/src/common/includes.h
+	<cstdint>
+	<iostream>
+	<sstream>
+	<stdexcept>
+	<algorithm>
+
+1675991523 /home/server/dev/Encryptions/src/SymAlg.h
+	<iostream>
+	<memory>
+	<stdexcept>
+
+1675991523 /home/server/dev/Encryptions/src/DES_Const.h
+
+1655389906 /home/server/dev/Encryptions/src/SHA256.h
+	<string>
+	<array>
+
+1677463414 /home/server/dev/Encryptions/src/puzzle.hpp
+	<iostream>
+	<fstream>
+	"DES.h"
+	"Buffer.hpp"
+	"SHA256.h"
+	"random_engine.hpp"
+	"crypto_const.hpp"
+	"crypto_file.hpp"
+	"data.hpp"
+
+1677275796 /home/server/dev/Encryptions/src/random_engine.hpp
+	<random>
+	"data.hpp"
+	"rng.h"
+
+1507620195 /home/server/dev/Encryptions/src/rng.h
+	<cstdint>
+	<random>
+	<thread>
+	<intrin.h>
+	<x86intrin.h>
+	<arm_neon.h>
+	<mmintrin.h>
+	<altivec.h>
+	<spe.h>
+
+1677050291 source:/home/server/dev/Encryptions/src/AESa.cpp
+	"AESa.h"
+
+1677050298 /home/server/dev/Encryptions/src/AESa.h
+	<cstdio>
+	<cstring>
+	<iostream>
+	<stdexcept>
+	<string>
+	<vector>
+
+1676905265 source:/home/server/dev/Encryptions/src/Base64.cpp
+	"Base64.h"
+	<fstream>
+	<iostream>
+
+1675900833 source:/home/server/dev/Encryptions/src/crc32a.cpp
+	"crc32a.hpp"
+
+1675900833 /home/server/dev/Encryptions/src/crc32a.hpp
+	<cstdint>
+	<cstddef>
+
+1676139675 source:/home/server/dev/Encryptions/src/DES.cpp
+	"DES.h"
+
+1677472648 source:/home/server/dev/Encryptions/src/main.cpp
+	<iostream>
+	<fstream>
+	<chrono>
+	"DES.h"
+	"Buffer.hpp"
+	"SHA256.h"
+	"argparse.hpp"
+	"ini_parser.hpp"
+	"random_engine.hpp"
+	"crypto_const.hpp"
+	"data.hpp"
+	"puzzle.hpp"
+	"encryptor.hpp"
+	"decryptor.hpp"
+	"crypto_test.hpp"
+	"crypto_batch.hpp"
+	"encrypt.h"
+	"data.hpp"
+
+1667074001 /home/server/dev/Encryptions/src/argparse.hpp
+	<algorithm>
+	<any>
+	<array>
+	<cerrno>
+	<charconv>
+	<cstdlib>
+	<functional>
+	<iomanip>
+	<iostream>
+	<iterator>
+	<limits>
+	<list>
+	<map>
+	<numeric>
+	<optional>
+	<sstream>
+	<stdexcept>
+	<string>
+	<string_view>
+	<tuple>
+	<type_traits>
+	<utility>
+	<variant>
+	<vector>
+
+1676905265 /home/server/dev/Encryptions/src/ini_parser.hpp
+	<map>
+	<string>
+	<vector>
+	<utility>
+	<sstream>
+	<fstream>
+	<stdexcept>
+	<algorithm>
+	<cctype>
+	<locale>
+
+1677461080 /home/server/dev/Encryptions/src/encryptor.hpp
+	<iostream>
+	<fstream>
+	"DES.h"
+	"AESa.h"
+	"Buffer.hpp"
+	"SHA256.h"
+	"crypto_const.hpp"
+	"data.hpp"
+	"puzzle.hpp"
+	"twofish.h"
+	"Salsa20.h"
+	"IDEA.hpp"
+
+1590687588 /home/server/dev/Encryptions/src/twofish.h
+
+1422809261 /home/server/dev/Encryptions/src/Salsa20.h
+	<cassert>
+	<climits>
+	<cstdint>
+	<cstring>
+	"Salsa20.inl"
+
+1422809261 /home/server/dev/Encryptions/src/Salsa20.inl
+	"Salsa20.h"
+
+1677364028 /home/server/dev/Encryptions/src/IDEA.hpp
+	<stdio.h>
+	<string.h>
+
+1677458540 /home/server/dev/Encryptions/src/decryptor.hpp
+	<iostream>
+	<fstream>
+	"DES.h"
+	"AESa.h"
+	"Buffer.hpp"
+	"SHA256.h"
+	"crypto_const.hpp"
+	"crypto_file.hpp"
+	"data.hpp"
+	"puzzle.hpp"
+	"IDEA.hpp"
+
+1677362985 /home/server/dev/Encryptions/src/crypto_test.hpp
+	"crypto_const.hpp"
+	"data.hpp"
+	"puzzle.hpp"
+	"DES.h"
+	"AESa.h"
+	"twofish.h"
+	"Salsa20.h"
+	"IDEA.hpp"
+
+1677377037 /home/server/dev/Encryptions/src/crypto_batch.hpp
+	<iostream>
+	<fstream>
+	<chrono>
+	"DES.h"
+	"Buffer.hpp"
+	"SHA256.h"
+	"argparse.hpp"
+	"ini_parser.hpp"
+	"random_engine.hpp"
+	"crypto_const.hpp"
+	"data.hpp"
+	"puzzle.hpp"
+	"encryptor.hpp"
+	"decryptor.hpp"
+	"crypto_test.hpp"
+
+1655389906 source:/home/server/dev/Encryptions/src/SHA256.cpp
+	"SHA256.h"
+	<cstring>
+	<sstream>
+	<iomanip>
+
+1675991523 source:/home/server/dev/Encryptions/src/SymAlg.cpp
+	"SymAlg.h"
+
+1677348522 source:/home/server/dev/Encryptions/src/twofish.c
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+	"twofish.h"
+
+1590687588 source:/home/server/dev/Encryptions/src/twofish_cfb.c
+	<stdint.h>
+	<stdlib.h>
+	"twofish.h"
+

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="qa" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="../bin/Debug/qa" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="../bin/Release/qa" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="cp /home/server/dev/Encryptions/bin/Release/qa /home/server/dev/Encryptions/Exec_Linux/qa" />
+					<Mode after="always" />
+				</ExtraCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="../src/qa/BigInteger.cpp" />
+		<Unit filename="../src/qa/common.h" />
+		<Unit filename="../src/qa/matrix.cpp" />
+		<Unit filename="../src/qa/matrix.hpp" />
+		<Unit filename="../src/qa/prime.h" />
+		<Unit filename="../src/qa/qa.cpp" />
+		<Unit filename="../src/qa/qa_internal_empty.hpp" />
+		<Unit filename="../src/qa/rational.cpp" />
+		<Unit filename="../src/qa/rational.h" />
+		<Unit filename="../src/qa/uinteger_t.hh" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -60,6 +60,8 @@
 		<Unit filename="../src/common/cryptomath.h" />
 		<Unit filename="../src/common/includes.cpp" />
 		<Unit filename="../src/common/includes.h" />
+		<Unit filename="../src/crc32a.cpp" />
+		<Unit filename="../src/crc32a.hpp" />
 		<Unit filename="../src/crypto_batch.hpp" />
 		<Unit filename="../src/crypto_batch.ini" />
 		<Unit filename="../src/crypto_const.hpp" />
