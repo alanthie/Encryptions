@@ -42,6 +42,8 @@ public:
         {
             staging ="./";
         }
+
+        puz.verbose = verb;
 	}
 
     ~decryptor()
@@ -886,6 +888,7 @@ public:
 			if (puz.is_valid_checksum() == false)
 			{
                 std::cerr << "ERROR " << "invalid puzzle answers or checksum" << std::endl;
+                std::cerr << "      " << "puz size " << puz.puz_data.buffer.size() << std::endl;
 				r = false;
 			}
 		}

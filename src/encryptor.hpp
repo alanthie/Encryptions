@@ -56,6 +56,8 @@ public:
             staging ="./";
         }
 
+        puz.verbose = verb;
+
 //        std::cout << "known_ftp_serve   " << known_ftp_server << std::endl;
 //        std::cout << "encryped_ftp_user " << encryped_ftp_user << std::endl;
 //        std::cout << "encryped_ftp_pwd  " << encryped_ftp_pwd << std::endl;
@@ -949,6 +951,14 @@ public:
             std::cerr << "ERROR " << "puzzle file empty " << filename_puzzle << std::endl;
             return false;
         }
+//        else
+//        {
+//            if (verbose)
+//            {
+//                std::cout << "Initial draft puzzle size " << puz.puz_data.buffer.size() << std::endl;
+//                std::cout << "Initial draft_puzzle " << filename_puzzle << std::endl;
+//            }
+//        }
 
 		if (puz.is_all_answered() == false)
         {
@@ -957,6 +967,7 @@ public:
         }
 
         // before removal of answer
+        // call internally puz.make_puzzle_before_checksum(temp);
         if (puz.save_to_file(filename_full_puzzle) == false)
         {
             std::cerr << "ERROR " << "saving puzzle " << filename_full_puzzle << std::endl;
