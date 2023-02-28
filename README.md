@@ -115,5 +115,5 @@ Puzzle:
 ![Alt text](/Doc/puzzle.png?raw=true "puzzle")
 
 Overview:
-![Alt text](/Doc/CRYPTO.png?raw=true "Overview")
+![Alt text](/Doc/Overview.png?raw=true "Overview")
 
