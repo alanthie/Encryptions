@@ -325,6 +325,27 @@ public:
         bool r = true;
 		char c;
 
+        if (key_size == 0)
+		{
+            std::cerr << "ERROR decode_binDES - key_size = 0 " <<  "" << std::endl;
+            return false;
+        }
+        if (data_encrypted.buffer.size() == 0)
+		{
+            std::cerr << "ERROR decode_binDES - data file is empty " << std::endl;
+            return false;
+        }
+        if (key_size % 4 != 0)
+		{
+            std::cerr << "ERROR decode_binDES - key_size must be 4x " <<  key_size << std::endl;
+            return false;
+        }
+        if (data_encrypted.buffer.size() % 8 != 0)
+		{
+            std::cerr << "ERROR decode_binDES - data size must be 8x " <<  data_encrypted.buffer.size() << std::endl;
+            return false;
+        }
+
         // BINARY DES (double file size on encryption, divide in 2 on decryption)
 		uint32_t nblock = data_encrypted.buffer.size() / 8;
 		uint32_t nkeys  = key_size / 4;
@@ -386,6 +407,16 @@ public:
             std::cerr << "ERROR " << "decode_idea data must be multiple of 8 bytes " <<  data_encrypted.buffer.size() << std::endl;
             return r;
 		}
+        if (key_size == 0)
+		{
+            std::cerr << "ERROR decode_sidea - key_size = 0 " <<  "" << std::endl;
+            return false;
+        }
+        if (data_encrypted.buffer.size() == 0)
+		{
+            std::cerr << "ERROR decode_sidea - data file is empty " << std::endl;
+            return false;
+        }
 
 		uint32_t nround = 1;
 		uint32_t nblock = data_encrypted.buffer.size() / 8;
@@ -490,6 +521,16 @@ public:
             std::cerr << "ERROR " << "decode_salsa20 data must be multiple of 64 bytes " <<  data_encrypted.buffer.size() << std::endl;
             return r;
 		}
+        if (key_size == 0)
+		{
+            std::cerr << "ERROR decode_salsa20 - key_size = 0 " <<  "" << std::endl;
+            return false;
+        }
+        if (data_encrypted.buffer.size() == 0)
+		{
+            std::cerr << "ERROR decode_salsa20 - data file is empty " << std::endl;
+            return false;
+        }
 
 		uint32_t nround = 1;
 		uint32_t nblock = data_encrypted.buffer.size() / 64;
@@ -586,17 +627,22 @@ public:
 
 		if (key_size == 0)
 		{
-            std::cerr << "ERROR udecode_twofish - key_size = 0 " <<  "" << std::endl;
+            std::cerr << "ERROR decode_twofish - key_size = 0 " <<  "" << std::endl;
             return false;
         }
         if (key_size % 16 != 0)
 		{
-            std::cerr << "ERROR udecode_twofish - key_size must be 16x " <<  key_size << std::endl;
+            std::cerr << "ERROR decode_twofish - key_size must be 16x " <<  key_size << std::endl;
             return false;
         }
         if (data_encrypted.buffer.size() % 16 != 0)
 		{
-            std::cerr << "ERROR udecode_twofish - data size must be 16x " <<  data_encrypted.buffer.size() << std::endl;
+            std::cerr << "ERROR decode_twofish - data size must be 16x " <<  data_encrypted.buffer.size() << std::endl;
+            return false;
+        }
+        if (data_encrypted.buffer.size() == 0)
+		{
+            std::cerr << "ERROR decode_twofish - data file is empty " << std::endl;
             return false;
         }
 
@@ -709,6 +755,28 @@ public:
 	{
         bool r = true;
 		char c;
+
+        if (key_size == 0)
+		{
+            std::cerr << "ERROR decode_binaes16_16 - key_size = 0 " <<  "" << std::endl;
+            return false;
+        }
+        if (data_encrypted.buffer.size() == 0)
+		{
+            std::cerr << "ERROR decode_binaes16_16 - data file is empty " << std::endl;
+            return false;
+        }
+
+        if (key_size % 16 != 0)
+		{
+            std::cerr << "ERROR decode_binaes16_16 - key_size must be 16x " <<  key_size << std::endl;
+            return false;
+        }
+        if (data_encrypted.buffer.size() % 16 != 0)
+		{
+            std::cerr << "ERROR decode_binaes16_16 - data size must be 16x " <<  data_encrypted.buffer.size() << std::endl;
+            return false;
+        }
 
 		uint32_t nround = 1;
 		uint32_t nblock = data_encrypted.buffer.size() / 16;
@@ -860,10 +928,12 @@ public:
 
     bool decrypt()
 	{
+        bool empty_puzzle = false;
+
         if (filename_puzzle.size() ==  0)
         {
-            std::cout << "ERROR empty puzzle filename " <<  std::endl;
-            return false;
+            std::cout << "WARNING empty puzzle filename (using default empty puzzle)" <<  std::endl;
+            empty_puzzle = true;
         }
         if (filename_encrypted_data.size() ==  0)
         {
@@ -871,10 +941,13 @@ public:
             return false;
         }
 
-        if (fileexists(filename_puzzle) == false)
+        if (empty_puzzle == false)
         {
-            std::cout << "ERROR missing puzzle file " << filename_puzzle <<  std::endl;
-            return false;
+            if (fileexists(filename_puzzle) == false)
+            {
+                std::cout << "ERROR missing puzzle file " << filename_puzzle <<  std::endl;
+                return false;
+            }
         }
         if (fileexists(filename_encrypted_data) == false)
         {
@@ -887,29 +960,46 @@ public:
 
 		if (r)
 		{
-			if (puz.read_from_file(filename_puzzle, false) == false)
+            if (empty_puzzle == false)
+            {
+                if (puz.read_from_file(filename_puzzle, false) == false)
+                {
+                    std::cerr << "ERROR " << "reading puzzle file " << filename_puzzle << std::endl;
+                    r = false;
+                }
+			}
+			else
 			{
-                std::cerr << "ERROR " << "reading puzzle file" << std::endl;
-				r = false;
+                if (puz.read_from_empty_puzzle() == false)
+                {
+                    std::cerr << "ERROR " << "reading empty puzzle" << std::endl;
+                    r = false;
+                }
 			}
 		}
 
 		if (r)
 		{
-			if (puz.is_all_answered() == false)
-			{
-                std::cerr << "ERROR " << "puzzle not fully answered" << std::endl;
-				r = false;
+            if (empty_puzzle == false)
+            {
+                if (puz.is_all_answered() == false)
+                {
+                    std::cerr << "ERROR " << "puzzle not fully answered" << std::endl;
+                    r = false;
+                }
 			}
 		}
 
 		if (r)
 		{
-			if (puz.is_valid_checksum() == false)
-			{
-                std::cerr << "ERROR " << "invalid puzzle answers or checksum" << std::endl;
-                std::cerr << "      " << "puz size " << puz.puz_data.buffer.size() << std::endl;
-				r = false;
+            if (empty_puzzle == false)
+            {
+                if (puz.is_valid_checksum() == false)
+                {
+                    std::cerr << "ERROR " << "invalid puzzle answers or checksum" << std::endl;
+                    std::cerr << "      " << "puz size " << puz.puz_data.buffer.size() << std::endl;
+                    r = false;
+                }
 			}
 		}
 

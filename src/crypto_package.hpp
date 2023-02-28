@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include "crypto_const.hpp"
 #include "crc32a.hpp"
+#include "puzzle.hpp"
 
 class crypto_package
 {
@@ -20,6 +21,10 @@ public:
     bool unpack(std::string input_crypto_file, std::string output_qa_puzzle_file, std::string output_enc_data_file,
                 std::string input_puzzle_enc_key)
     {
+        bool empty_puzzle_output = false;
+        if (output_qa_puzzle_file.size() == 0)
+            empty_puzzle_output = true;
+
         bool r = true;
 
         if (fileexists(input_crypto_file) == false)
@@ -38,9 +43,9 @@ public:
         }
 
         std::uint32_t sz_input_crypto = input_crypto.buffer.size();
-        if (sz_input_crypto < 128)
+        if (sz_input_crypto < CRYPTO_HEADER_SIZE)
         {
-            std::cerr << "ERROR " << "invalid crypto file size " << sz_input_crypto <<std::endl;
+            std::cerr << "ERROR " << "invalid crypto file size (too small) " << sz_input_crypto <<std::endl;
             return false;
         }
 
@@ -53,7 +58,7 @@ public:
         if (input_crypto.buffer.getdata()[4] != 'T') r = false;
         if (input_crypto.buffer.getdata()[5] != 'O') r = false;
 
-        if (r== false)
+        if (r == false)
         {
             std::cerr << "ERROR " << "invalid crypto file signature" << input_crypto_file <<std::endl;
             return false;
@@ -67,13 +72,17 @@ public:
         header.enc_data_padding_size    = input_crypto.buffer.readUInt32(pos);pos+=4;
         header.crc_enc_data_hash        = input_crypto.buffer.readUInt32(pos);pos+=4;
         header.crc_enc_puzzle_hash      = input_crypto.buffer.readUInt32(pos);pos+=4;
+        header.crc_enc_puzzle_key_hash  = input_crypto.buffer.readUInt32(pos);pos+=4;
 
-        for(size_t i=0;i<32+64;i++) header.enc_puzzle_key_hint[i]=0;
-        for(size_t i=0;i<32+64;i++)
+        // TODO header values range check...
+
+        for(size_t i=0;i<HINT_SIZE;i++) header.enc_puzzle_key_hint[i]=0;
+        for(size_t i=0;i<HINT_SIZE;i++)
         {
             header.enc_puzzle_key_hint[i] = input_crypto.buffer.getdata()[pos+i];
         }
-        pos+=32+64;
+        header.enc_puzzle_key_hint[HINT_SIZE-1] = 0;
+        pos+=HINT_SIZE;
 
         if (verbose)
         {
@@ -84,9 +93,11 @@ public:
             std::cout << "INFO " << "enc_data_padding_size :" << header.enc_data_padding_size <<std::endl;
             std::cout << "INFO " << "crc_enc_data_hash :" << header.crc_enc_data_hash <<std::endl;
             std::cout << "INFO " << "crc_enc_puzzle_hash :" << header.crc_enc_puzzle_hash <<std::endl;
+            std::cout << "INFO " << "crc_enc_puzzle_key_hash :" << header.crc_enc_puzzle_key_hash <<std::endl;
         }
 
-        std::uint32_t sz_file_in_header = 128 +
+
+        std::uint32_t sz_file_in_header = CRYPTO_HEADER_SIZE +
                         header.enc_puzzle_size + header.enc_puzzle_padding_size +
                         header.enc_data_size   + header.enc_data_padding_size;
 
@@ -94,6 +105,40 @@ public:
         {
             std::cerr << "ERROR " << "invalid crypto header content, total file size mismatch " << sz_file_in_header << std::endl;
             return false;
+        }
+
+        // TODO crc check...
+        // TODO size limit check...
+
+
+        if (header.crc_enc_puzzle_key_hash != 0)
+        {
+            if (empty_puzzle_output == true)
+            {
+                if (input_puzzle_enc_key.size() == 0)
+                {
+                    std::cerr << "WARNING " << "The puzzle was encrypted with a key, a key is needed to unpack the puzzle "<< std::endl;
+                    std::cerr << "This may be ok if no initial puzzle was use for encoding" << std::endl;
+                }
+                else
+                {
+                    CRC32 crc;
+                    crc.update(input_puzzle_enc_key.data(), input_puzzle_enc_key.size());
+                    auto c = crc.get_hash();
+                    if (c != header.crc_enc_puzzle_key_hash )
+                    {
+                        std::cerr << "ERROR " << "Invalid key provided to unpack, header crc: "<< header.crc_enc_puzzle_key_hash << ", crc key: " << c << std::endl;
+                        std::string h(header.enc_puzzle_key_hint);
+                        std::cerr << "Hint for the key is " << h << std::endl;
+                        return false;
+                    }
+                }
+            }
+            else if (empty_puzzle_output == false)
+            {
+                std::cerr << "WARNING " << "The puzzle was encrypted with a key, you are unpacking without extracting the unencrypted qa puzzle "<< std::endl;
+                std::cerr << "This may be ok if no initial puzzle was use for encoding" << std::endl;
+            }
         }
 
         input_enc_qa_puzzle.buffer.write(&input_crypto.buffer.getdata()[pos], header.enc_puzzle_size, -1);
@@ -112,15 +157,16 @@ public:
 
         if (input_puzzle_enc_key.size() == 0)
         {
-            // warning...
-            if (verbose)
-                std::cout << "INFO " << "(input_puzzle_enc_key.size() == 0)" << " pos " << pos << std::endl;
+            std::cerr << "WARNING " << "input puzzle enc key size == 0" << std::endl;
 
-            r = input_enc_qa_puzzle.save_to_file(output_qa_puzzle_file);
-            if (r == false)
+            if (empty_puzzle_output == false)
             {
-                std::cerr << "ERROR " << "writing output qa puzzle file " << output_qa_puzzle_file <<std::endl;
-                return false;
+                r = input_enc_qa_puzzle.save_to_file(output_qa_puzzle_file);
+                if (r == false)
+                {
+                    std::cerr << "ERROR " << "writing output qa puzzle file " << output_qa_puzzle_file <<std::endl;
+                    return false;
+                }
             }
 
             if (r)
@@ -136,24 +182,34 @@ public:
         else
         {
             if (verbose)
-                std::cout << "INFO " << "input_puzzle_enc_key.size() " << input_puzzle_enc_key.size() << " pos " << pos << std::endl;
+                std::cout << "INFO " << "input_puzzle_enc_key.size() " << input_puzzle_enc_key.size() << std::endl;
 
             cryptodata data_temp_next;
             int16_t crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH;
 
-            r = decode(crypto_algo, input_enc_qa_puzzle, input_puzzle_enc_key.data(), input_puzzle_enc_key.size(), data_temp_next);
-            if (r)
+            if (input_enc_qa_puzzle.buffer.size() > 0)
             {
-                r = data_temp_next.save_to_file(output_qa_puzzle_file);
+                r = decode(crypto_algo, input_enc_qa_puzzle, input_puzzle_enc_key.data(), input_puzzle_enc_key.size(), data_temp_next);
                 if (r == false)
                 {
-                    std::cerr << "ERROR " << "writing output qa puzzle file " << output_qa_puzzle_file <<std::endl;
-                    return false;
+                    std::cerr << "ERROR " << "decoding encrypted puzzle " << std::endl;
                 }
             }
             else
             {
-                std::cerr << "ERROR " << "decoding ALGO_TWOFISH" << std::endl;
+            }
+
+            if (r)
+            {
+                if (empty_puzzle_output == false)
+                {
+                    r = data_temp_next.save_to_file(output_qa_puzzle_file);
+                    if (r == false)
+                    {
+                        std::cerr << "ERROR " << "writing output qa puzzle file " << output_qa_puzzle_file <<std::endl;
+                        return false;
+                    }
+                }
             }
 
             if (r)
@@ -173,13 +229,15 @@ public:
     bool pack(  std::string qa_puzzle_file, std::string enc_data_file, char* puzzle_enc_key, std::uint32_t puzzle_enc_key_size,
                 std::string output_crypto_file, std::string puzzle_hint = "")
     {
+        bool empty_puzzle = false;
         bool r = true;
 
         if (fileexists(qa_puzzle_file) == false)
         {
-            std::cerr << "ERROR missing qa puzzle file " << qa_puzzle_file <<  std::endl;
-            return false;
+            std::cerr << "WARNING missing qa puzzle file (using default puzzle)" <<  std::endl;
+            empty_puzzle = true;
         }
+
         if (fileexists(enc_data_file) == false)
         {
             std::cerr << "ERROR missing encrypted data file " << enc_data_file <<  std::endl;
@@ -188,20 +246,30 @@ public:
 
         cryptodata enc_puzzle_data;
 
-        if (enc_puzzle_data.read_from_file(qa_puzzle_file) == false)
+        if (empty_puzzle == false)
         {
-            std::cerr << "ERROR " << "reading qa puzzle file " << qa_puzzle_file <<std::endl;
-            return false;
+            if (enc_puzzle_data.read_from_file(qa_puzzle_file) == false)
+            {
+                std::cerr << "ERROR " << "reading qa puzzle file " << qa_puzzle_file <<std::endl;
+                return false;
+            }
+        }
+        else
+        {
+            puzzle p;
+            p.read_from_empty_puzzle(enc_puzzle_data);
+            std::cerr << "WARNING " << "using default qa puzzle " <<std::endl;
+            //enc_puzzle_data.save_to_file("test.qa");
         }
 
         if (puzzle_enc_key_size == 0)
         {
-            // warning...
-            r = pack_internal(enc_puzzle_data, enc_data_file, output_crypto_file, puzzle_hint);
+            r = pack_internal(enc_puzzle_data, enc_data_file, output_crypto_file, puzzle_enc_key, puzzle_enc_key_size, puzzle_hint );
         }
         else
         {
             std::uint32_t sz = enc_puzzle_data.buffer.size();
+
             std::uint32_t sz_padding = 0;
             if (sz % PADDING_MULTIPLE != 0)
             {
@@ -215,17 +283,28 @@ public:
 
             cryptodata data_temp_next;
             int16_t crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH;
-            r = encode(crypto_algo, enc_puzzle_data, puzzle_enc_key, puzzle_enc_key_size, data_temp_next, sz_padding);
+
+            if (sz == 0)
+            {
+                std::cerr << "ERROR " << "Default qa puzzle should not be empty " <<std::endl;
+            }
+            else
+            {
+                r = encode(crypto_algo, enc_puzzle_data, puzzle_enc_key, puzzle_enc_key_size, data_temp_next, sz_padding);
+            }
+
             if (r)
             {
-                r = pack_internal(data_temp_next, enc_data_file, output_crypto_file, puzzle_hint, sz_padding);
+                r = pack_internal(data_temp_next, enc_data_file, output_crypto_file, puzzle_enc_key, puzzle_enc_key_size, puzzle_hint, sz_padding);
             }
         }
 
         return r;
     }
 
-    bool pack_internal( cryptodata& input_enc_puzzle, std::string enc_data_file, std::string output_crypto_file, std::string hint = "",
+    bool pack_internal( cryptodata& input_enc_puzzle, std::string enc_data_file, std::string output_crypto_file,
+                        char* puzzle_enc_key, std::uint32_t puzzle_enc_key_size,
+                        std::string hint = "",
                         std::uint32_t sz_padding_puzzle = 0)
     {
         bool r = true;
@@ -254,10 +333,21 @@ public:
             return false;
         }
 
+
         std::uint32_t sz_input_enc_puzzle = input_enc_puzzle.buffer.size();
         std::uint32_t sz_input_enc_data   = input_enc_data.buffer.size();
         header.enc_puzzle_size = sz_input_enc_puzzle;
-        header.enc_data_size= sz_input_enc_data;
+        header.enc_data_size   = sz_input_enc_data;
+
+        if (sz_input_enc_puzzle == 0)
+        {
+            // empty puzzle!
+        }
+
+        if (sz_input_enc_data == 0)
+        {
+            // empty data!
+        }
 
         std::uint32_t sz_padding_input_enc_puzzle  = 0;;
         std::uint32_t sz_padding_input_enc_data = 0;
@@ -269,31 +359,59 @@ public:
         {
             sz_padding_input_enc_data = PADDING_MULTIPLE - (sz_padding_input_enc_data % PADDING_MULTIPLE );
         }
-        header.enc_puzzle_padding_size = sz_padding_input_enc_puzzle; // + sz_padding_puzzle;
+        header.enc_puzzle_padding_size = sz_padding_input_enc_puzzle;
         header.enc_data_padding_size = sz_padding_input_enc_data;
+
+        // TODO size limit check...
+        // TODO sz_padding_puzzle == 0 check...
 
         std::uint32_t crc_input_enc_puzzle= 0;
         std::uint32_t crc_input_enc_data = 0;
 
+        if (sz_input_enc_puzzle > 0)
         {
             CRC32 crc;
             crc.update(&input_enc_puzzle.buffer.getdata()[0], sz_input_enc_puzzle);
             crc_input_enc_puzzle = crc.get_hash();
-            header.crc_enc_data_hash = crc_input_enc_puzzle;
+            header.crc_enc_puzzle_hash = crc_input_enc_puzzle;
         }
+        else
+        {
+            header.crc_enc_puzzle_hash = 0;
+        }
+
+        if (sz_input_enc_data > 0)
         {
             CRC32 crc;
             crc.update(&input_enc_data.buffer.getdata()[0], sz_input_enc_data);
             crc_input_enc_data = crc.get_hash();
             header.crc_enc_data_hash = crc_input_enc_data;
         }
+        else
+        {
+            header.crc_enc_data_hash = 0;
+        }
 
-        for(size_t i=0;i<32+64;i++) header.enc_puzzle_key_hint[i]=0;
-        for(size_t i=0;i<32+64;i++)
+        if (puzzle_enc_key_size > 0)
+        {
+            CRC32 crc;
+            crc.update(puzzle_enc_key, puzzle_enc_key_size);
+            auto n = crc.get_hash();
+            header.crc_enc_puzzle_key_hash = n;
+            //std::cerr << "Writing " << "crc_enc_puzzle_key_hash " << header.crc_enc_puzzle_key_hash <<std::endl;
+        }
+        else
+        {
+            header.crc_enc_puzzle_key_hash = 0;
+        }
+
+        for(size_t i=0;i<HINT_SIZE;i++) header.enc_puzzle_key_hint[i]=0;
+        for(size_t i=0;i<HINT_SIZE;i++)
         {
             if (i < hint.size())
                 header.enc_puzzle_key_hint[i] = hint[i];
         }
+        header.enc_puzzle_key_hint[HINT_SIZE-1] = 0;// a string
 
         output_data.buffer.write(&header.sig[0], 6, -1);
         output_data.buffer.writeUInt16(header.version, -1);
@@ -303,16 +421,17 @@ public:
         output_data.buffer.writeUInt32(header.enc_data_padding_size, -1);
         output_data.buffer.writeUInt32(header.crc_enc_data_hash, -1);
         output_data.buffer.writeUInt32(header.crc_enc_puzzle_hash, -1);
-        output_data.buffer.write(&header.enc_puzzle_key_hint[0], 32+64, -1);
+        output_data.buffer.writeUInt32(header.crc_enc_puzzle_key_hash, -1);
+        output_data.buffer.write(&header.enc_puzzle_key_hint[0], HINT_SIZE, -1);
 
-        output_data.buffer.write(&input_enc_puzzle.buffer.getdata()[0], sz_input_enc_puzzle, -1);
+        output_data.buffer.write(&input_enc_puzzle.buffer.getdata()[0], sz_input_enc_puzzle, -1); // if (sz_input_enc_puzzle==0) nothing written
         char c[1] = {0};
         for(std::uint32_t i=0;i<sz_padding_input_enc_puzzle;i++)
         {
             output_data.buffer.write(&c[0], 1, -1);
         }
 
-        output_data.buffer.write(&input_enc_data.buffer.getdata()[0], sz_input_enc_data, -1);
+        output_data.buffer.write(&input_enc_data.buffer.getdata()[0], sz_input_enc_data, -1); // if (sz_input_enc_data==0) nothing written
         for(std::uint32_t i=0;i<sz_padding_input_enc_data;i++)
         {
             output_data.buffer.write(&c[0], 1, -1);
@@ -406,6 +525,96 @@ public:
         }
 
         return false;
+	}
+
+	std::string DUMPheader(std::string input_crypto_file)
+	{
+        bool r = true;
+        std::string s;
+
+        if (fileexists(input_crypto_file) == false)
+        {
+            std::cerr << "ERROR missing crypto file " << input_crypto_file <<  std::endl;
+            return "";
+        }
+
+        cryptodata input_crypto;
+        cryptodata input_enc_qa_puzzle;
+
+        if (input_crypto.read_from_file(input_crypto_file) == false)
+        {
+            std::cerr << "ERROR " << "reading crypto file " << input_crypto_file <<std::endl;
+            return s;
+        }
+
+        std::uint32_t sz_input_crypto = input_crypto.buffer.size();
+        if (sz_input_crypto < CRYPTO_HEADER_SIZE)
+        {
+            std::cerr << "ERROR " << "invalid crypto file size (too small) " << sz_input_crypto <<std::endl;
+            return s;
+        }
+
+        CRYPTO_HEADER header;
+
+        if (input_crypto.buffer.getdata()[0] != 'C') r = false;
+        if (input_crypto.buffer.getdata()[1] != 'R') r = false;
+        if (input_crypto.buffer.getdata()[2] != 'Y') r = false;
+        if (input_crypto.buffer.getdata()[3] != 'P') r = false;
+        if (input_crypto.buffer.getdata()[4] != 'T') r = false;
+        if (input_crypto.buffer.getdata()[5] != 'O') r = false;
+
+        if (r == false)
+        {
+            std::cerr << "ERROR " << "invalid crypto file signature " << input_crypto_file <<std::endl;
+            return s;
+        }
+
+        std::uint32_t pos = 6;
+        header.version                  = input_crypto.buffer.readUInt16(pos);pos+=2;
+        header.enc_puzzle_size          = input_crypto.buffer.readUInt32(pos);pos+=4;
+        header.enc_puzzle_padding_size  = input_crypto.buffer.readUInt32(pos);pos+=4;
+        header.enc_data_size            = input_crypto.buffer.readUInt32(pos);pos+=4;
+        header.enc_data_padding_size    = input_crypto.buffer.readUInt32(pos);pos+=4;
+        header.crc_enc_data_hash        = input_crypto.buffer.readUInt32(pos);pos+=4;
+        header.crc_enc_puzzle_hash      = input_crypto.buffer.readUInt32(pos);pos+=4;
+        header.crc_enc_puzzle_key_hash  = input_crypto.buffer.readUInt32(pos);pos+=4;
+
+        // TODO header values range check...
+
+        for(size_t i=0;i<HINT_SIZE;i++) header.enc_puzzle_key_hint[i]=0;
+        for(size_t i=0;i<HINT_SIZE;i++)
+        {
+            header.enc_puzzle_key_hint[i] = input_crypto.buffer.getdata()[pos+i];
+        }
+        header.enc_puzzle_key_hint[HINT_SIZE-1]=0;
+        pos+=HINT_SIZE;
+
+        std::stringstream ss;
+        if (verbose)
+        {
+            ss << "size of file : " << sz_input_crypto << std::endl;
+            ss << "header.version : " << header.version <<std::endl;
+            ss << "header.enc_puzzle_size : " << header.enc_puzzle_size <<std::endl;
+            ss << "header.enc_puzzle_padding_size : " << header.enc_puzzle_padding_size <<std::endl;
+            ss << "header.enc_data_size : " << header.enc_data_size <<std::endl;
+            ss << "header.enc_data_padding_size : " << header.enc_data_padding_size <<std::endl;
+            ss << "header.crc_enc_data_hash : " << header.crc_enc_data_hash <<std::endl;
+            ss << "header.crc_enc_puzzle_hash : " << header.crc_enc_puzzle_hash <<std::endl;
+            ss << "header.crc_enc_puzzle_key_hash : " << header.crc_enc_puzzle_key_hash <<std::endl;
+            ss << "header.enc_puzzle_key_hint : " << std::string(header.enc_puzzle_key_hint) <<std::endl;
+        }
+        s = ss.str();
+
+        std::uint32_t sz_file_in_header = CRYPTO_HEADER_SIZE +
+                        header.enc_puzzle_size + header.enc_puzzle_padding_size +
+                        header.enc_data_size   + header.enc_data_padding_size;
+
+        if (sz_input_crypto != sz_file_in_header)
+        {
+            std::cerr << "ERROR " << "invalid crypto header content, total file size mismatch " << sz_file_in_header << std::endl;
+            return s;
+        }
+        return s;
 	}
 
 	bool verbose = false;

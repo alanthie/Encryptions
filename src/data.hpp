@@ -90,25 +90,28 @@ public:
         std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
         if (ofd.bad() == false)
         {
-            int32_t r = buffer.write(ofd, buffer.size());
-            if (r==-1)
+            if (buffer.size() > 0) // make empty file
             {
-                std::cerr << "ERROR save_to_file" << "Failed for buffer.write(ofd, buffer.size()" << buffer.size() <<  std::endl;
-                ofd.close();
-                return false;
-            }
-            if (r!=(int32_t)buffer.size())
-            {
-                std::cerr << "ERROR save_to_file" << "Failed for buffer.write(ofd, buffer.size() " << r << std::endl;
-                ofd.close();
-                return false;
+                int32_t r = buffer.write(ofd, buffer.size());
+                if (r==-1)
+                {
+                    std::cerr << "ERROR save file " << "Failed for buffer.write(ofd, buffer.size()" << buffer.size() <<  std::endl;
+                    ofd.close();
+                    return false;
+                }
+                if (r!=(int32_t)buffer.size())
+                {
+                    std::cerr << "ERROR save file " << "Failed for buffer.write(ofd, buffer.size() " << r << std::endl;
+                    ofd.close();
+                    return false;
+                }
             }
             ofd.close();
             return true;
         }
         else
         {
-            std::cerr << "ERROR save_to_file" << "Failed  to open file " << filename << std::endl;
+            std::cerr << "ERROR save file " << "Failed to open file " << filename << std::endl;
         }
         return false;
     }

@@ -15,6 +15,9 @@
 class puzzle
 {
 public:
+    const std::string EMPTY_PUZZLE = "REM ==================\nREM EMPTY PUZZLE\nREM ==================\n\n";
+
+public:
     struct QA
     {
         int type = 0; // 0==QA, 1==REM, 2==CHK, 3==BLOCK
@@ -176,6 +179,41 @@ public:
             return r;
         }
         return false;
+    }
+
+    bool read_from_empty_puzzle()
+    {
+        if (EMPTY_PUZZLE.size() % PADDING_MULTIPLE != 0)
+        {
+            std::cerr << "EMPTY PUZZLE not proper multiple of " << PADDING_MULTIPLE << " " << EMPTY_PUZZLE.size() << std::endl;
+            return false;
+        }
+
+        puz_data.buffer.write(EMPTY_PUZZLE.data(), EMPTY_PUZZLE.size());
+
+        bool r = parse_puzzle();
+        if (r)
+        {
+            chksum_puzzle = checksum();
+        }
+        return r;
+    }
+
+    bool read_from_empty_puzzle(cryptodata& d)
+    {
+        if (EMPTY_PUZZLE.size() % PADDING_MULTIPLE != 0)
+        {
+            std::cerr << "EMPTY PUZZLE not proper multiple of " << PADDING_MULTIPLE << " " << EMPTY_PUZZLE.size() << std::endl;
+            return false;
+        }
+        d.buffer.write(EMPTY_PUZZLE.data(), EMPTY_PUZZLE.size());
+
+        bool r = parse_puzzle();
+        if (r)
+        {
+            chksum_puzzle = checksum();
+        }
+        return r;
     }
 
     bool save_to_file(std::string filename)

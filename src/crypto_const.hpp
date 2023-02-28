@@ -15,13 +15,6 @@
 //cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto
 //copy x64\Release\crypto.exe ..\..\Exec_Windows\*
 
-// Windows:
-//D:\000DEV\Encryptions\testcase\manual > D:\000DEV\Encryptions\Exec_Windows\crypto.exe batch_encode - i crypto_batch_manual_win.ini
-//
-// Linux:
-//~/dev/Encryptions/testcase/manual$ ./../../bin/Release/crypto batch_encode -i manual.ini -v 1
-
-
 
 enum class CRYPTO_ALGO : uint16_t
 {
@@ -55,7 +48,7 @@ constexpr static int16_t URLINFO_SIZE   =   URL_LEN_ENCODESIZE + URL_MAX_SIZE + 
                                             CRYPTO_ALGO_ENCODESIZE + PADDING_LEN_ENCODESIZE + 14 + 32; // padding 64
 
 constexpr static int16_t PADDING_MULTIPLE   = 64; // should be at least 64x with Salsa20 requirement
-constexpr static int16_t PADDING_KEY_MULTIPLE   = 32; // should be at least 64x with Salsa20 requirement
+constexpr static int16_t PADDING_KEY_MULTIPLE   = 32; // should be at least 32x with Salsa20 requirement
 constexpr static int16_t NITER_LIM          = 128;
 constexpr static int16_t PUZZLE_SIZE_LIM    = 64*256;
 constexpr static uint32_t FILE_SIZE_LIM     = 128*1024*1024; // 128MB
@@ -67,6 +60,7 @@ const std::string BLOCK_END_TOKEN       = "BLOCK_END";
 const std::string CHKSUM_TOKEN          = "CHKSUM";
 
 constexpr static uint32_t CRYPTO_HEADER_SIZE = 64+64;
+constexpr static int16_t HINT_SIZE           = 32+64-4;
 struct CRYPTO_HEADER {
     char sig[6];                               // File Signature (CRYPTO)
     std::uint16_t version;                      // Format Version
@@ -76,8 +70,8 @@ struct CRYPTO_HEADER {
     std::uint32_t enc_data_padding_size;
     std::uint32_t crc_enc_data_hash;            // CRC32 hash of encrypted data before padding
     std::uint32_t crc_enc_puzzle_hash;
-    char enc_puzzle_key_hint[32+64];            // Encrypted Puzzle Extract Key Hint
-    //std::uint8_t  reserved[0];                // Filled with zeros
+    std::uint32_t crc_enc_puzzle_key_hash = 0;  // 0 if no enc key for puzzle
+    char enc_puzzle_key_hint[HINT_SIZE];        // Encrypted Puzzle Extract Key Hint
 };
 static_assert(sizeof(CRYPTO_HEADER) == CRYPTO_HEADER_SIZE);
 

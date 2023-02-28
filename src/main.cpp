@@ -29,6 +29,17 @@
 //  crypto decode -i msg.zip.encrypted -o msg.zip -p puzzle_qa.txt -v 1 -l ./AL_SAM/
 // ------------------------------------------------------------------------------------------------------------
 
+// ------------------------------------------------------------------------------------------------------------
+// No puzzle needed with local URL files
+// ------------------------------------------------------------------------------------------------------------
+//  crypto encode -i msg.zip -u ./urls.txt -v 1 -l ./AL_SAM/
+//  crypto pack -i msg.zip.encrypted -o msg.crypto
+//
+//  crypto unpack -o msg2.zip.encrypted -i msg.crypto
+//  crypto decode -i msg2.zip.encrypted -o msg2.zip  -v 1 -l ./AL_SAM/
+// ------------------------------------------------------------------------------------------------------------
+
+
 std::string VERSION = "0.5";
 
 int main_crypto(int argc, char **argv)
@@ -47,6 +58,32 @@ int main_crypto(int argc, char **argv)
             checksum_command.add_argument("-i", "--input")
                 .required()
                 .help("specify the input file.");
+        }
+
+        argparse::ArgumentParser dump_command("dump");
+        {
+            dump_command.add_description("Dump header file of a crypto file");
+
+            dump_command.add_argument("-i", "--input")
+                .required()
+                .help("specify the input crypto file.");
+        }
+
+        argparse::ArgumentParser hex_command("hex");
+        {
+            hex_command.add_description("Hexadecimal dump of a part of a file");
+
+            hex_command.add_argument("-i", "--input")
+                .required()
+                .help("specify the input file.");
+
+            hex_command.add_argument("-p", "--position")
+                .required()
+                .help("specify the position in the file.");
+
+            hex_command.add_argument("-s", "--size")
+                .required()
+                .help("specify the size to extract");
         }
 
         argparse::ArgumentParser random_file_command("random");
@@ -158,8 +195,9 @@ int main_crypto(int argc, char **argv)
             pack_command.add_description("Pack into a crypto file");
 
             pack_command.add_argument("-q", "--qapuzzle")
-                .required()
-                .help("specify the input qa puzzle file.");
+                //.required()
+                .default_value(std::string(""))
+                .help("specify the input (optional) qa puzzle file.");
 
             pack_command.add_argument("-i", "--input")
                 .required()
@@ -181,15 +219,16 @@ int main_crypto(int argc, char **argv)
         // Unack subcommand
         argparse::ArgumentParser unpack_command("unpack");
         {
-            unpack_command.add_description("Unpack into a crypto file");
+            unpack_command.add_description("Unpack the puzzle file and the data file from a crypto file");
 
             unpack_command.add_argument("-i", "--input")
                 .required()
                 .help("specify the input crypto file.");
 
             unpack_command.add_argument("-q", "--qapuzzle")
-                .required()
-                .help("specify the output qa puzzle file.");
+                //.required()
+                .default_value(std::string(""))
+                .help("specify the output (optional) qa puzzle file.");
 
             unpack_command.add_argument("-o", "--output")
                 .required()
@@ -210,20 +249,21 @@ int main_crypto(int argc, char **argv)
                 .help("specify the input file.");
 
             encode_command.add_argument("-o", "--output")
-                .required()
-                .help("specify the output encrypted file.");
+                .default_value(std::string(""))
+                .help("specify the output encrypted file (default to <input path>.encrypted)");
 
             encode_command.add_argument("-p", "--puzzle")
-                .required()
-                .help("specify the input puzzle file.");
+                //.required()
+                .default_value(std::string(""))
+                .help("specify the input (optional) puzzle file.");
 
             encode_command.add_argument("-q", "--qapuzzle")
-                .required()
-                .help("specify the output qa puzzle file.");
+                .default_value(std::string(""))
+                .help("specify the output qa puzzle file (default to <puzzle path>.qa)");
 
             encode_command.add_argument("-f", "--fullpuzzle")
-                .required()
-                .help("specify the output full puzzle file.");
+                .default_value(std::string(""))
+                .help("specify the output (optional) full puzzle file.");
 
             encode_command.add_argument("-u", "--url")
                 .default_value(std::string(""))
@@ -277,8 +317,9 @@ int main_crypto(int argc, char **argv)
                 .help("specify the output decrypted file.");
 
             decode_command.add_argument("-p", "--puzzle")
-                .required()
-                .help("specify the input puzzle file.");
+                //.required()
+                .default_value(std::string(""))
+                .help("specify the input (optional) puzzle file.");
 
             decode_command.add_argument("-s", "--staging")
                 .default_value(std::string(""))
@@ -322,6 +363,8 @@ int main_crypto(int argc, char **argv)
         program.add_subparser(checksum_command);
         program.add_subparser(pack_command);
         program.add_subparser(unpack_command);
+        program.add_subparser(hex_command);
+        program.add_subparser(dump_command);
 
         // Parse the arguments
         try {
@@ -353,6 +396,63 @@ int main_crypto(int argc, char **argv)
                 else if (testname == "zipcontent") DOTESTCASE(testname, folder, false, verbose, "/test.zip");
                 else DOTESTCASE(testname, folder, false, verbose);
             }
+            return 0;
+        }
+
+
+        if (program.is_subcommand_used("dump"))
+        {
+            auto& cmd = dump_command;
+            auto filename = cmd.get<std::string>("--input");
+
+            if (fileexists(filename) == false)
+            {
+                std::cerr << "ERROR File not found " << filename << std::endl;
+                return -1;
+            }
+
+            crypto_package p;
+            std::string s = p.DUMPheader(filename);
+            std::cout << s << std::endl;
+            return 0;
+        }
+
+        if (program.is_subcommand_used("hex"))
+        {
+            auto& cmd = hex_command;
+            auto filename = cmd.get<std::string>("--input");
+            auto spos = cmd.get<std::string>("--position");
+            auto ssize = cmd.get<std::string>("--size");
+            size_t sz = 0; long long pos=1; long long cnt=1;
+
+            if (fileexists(filename) == false)
+            {
+                std::cerr << "ERROR File not found " << filename << std::endl;
+                return -1;
+            }
+            try
+            {
+                pos = std::stoll(spos,  &sz);
+                cnt = std::stoll(ssize, &sz);
+            }
+            catch(...)
+            {
+                std::cout << "Warning some invalid numeric value, numeric values reset to 1" << std::endl;
+                pos = 1;
+                cnt = 1;
+            }
+            if (pos<0)
+            {
+                std::cout << "Warning invalid position numeric value, numeric value reset to 0" << std::endl;
+                pos = 0;
+            }
+            if (cnt<0)
+            {
+                std::cout << "Warning invalid size numeric value, numeric value reset to 1" << std::endl;
+                cnt = 1;
+            }
+            std::string s = HEX(filename, pos, cnt);
+            std::cout << s << std::endl;
             return 0;
         }
 
@@ -565,6 +665,17 @@ int main_crypto(int argc, char **argv)
             auto known_ftp_server  = cmd.get<std::string>("--known_ftp_server");
             auto encryped_ftp_user = cmd.get<std::string>("--encryped_ftp_user");
             auto encryped_ftp_pwd  = cmd.get<std::string>("--encryped_ftp_pwd");
+
+            if (qa_puzzle_path.size() == 0)
+            {
+                if (puzzle_path.size() > 0)
+                    qa_puzzle_path = puzzle_path + ".qa";
+            }
+            if (output_path.size() == 0)
+            {
+                if (input_path.size() > 0)
+                    output_path = input_path + ".encrypted";
+            }
 
             size_t sz = 0;long ikeyfactor = 1;
             try
