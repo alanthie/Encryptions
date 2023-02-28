@@ -19,43 +19,50 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\AESa.h" />
-    <ClInclude Include="..\..\argparse.hpp" />
-    <ClInclude Include="..\..\Base64.h" />
-    <ClInclude Include="..\..\Buffer.hpp" />
-    <ClInclude Include="..\..\common\cryptomath.h" />
-    <ClInclude Include="..\..\common\includes.h" />
-    <ClInclude Include="..\..\crypto_batch.hpp" />
-    <ClInclude Include="..\..\crypto_const.hpp" />
-    <ClInclude Include="..\..\crypto_file.hpp" />
-    <ClInclude Include="..\..\crypto_package.hpp" />
-    <ClInclude Include="..\..\crypto_test.hpp" />
-    <ClInclude Include="..\..\data.hpp" />
-    <ClInclude Include="..\..\decryptor.hpp" />
-    <ClInclude Include="..\..\DES.h" />
-    <ClInclude Include="..\..\DES_Const.h" />
-    <ClInclude Include="..\..\encrypt.h" />
-    <ClInclude Include="..\..\Encryptions.h" />
-    <ClInclude Include="..\..\encryptor.hpp" />
-    <ClInclude Include="..\..\ini_parser.hpp" />
-    <ClInclude Include="..\..\puzzle.hpp" />
-    <ClInclude Include="..\..\random_engine.hpp" />
-    <ClInclude Include="..\..\rng.h" />
-    <ClInclude Include="..\..\SHA256.h" />
-    <ClInclude Include="..\..\SymAlg.h" />
-    <ClInclude Include="..\..\vigenere.h" />
+    <ClCompile Include="..\..\src\AESa.cpp" />
+    <ClCompile Include="..\..\src\Base64.cpp" />
+    <ClCompile Include="..\..\src\common\includes.cpp" />
+    <ClCompile Include="..\..\src\crc32a.cpp" />
+    <ClCompile Include="..\..\src\DES.cpp" />
+    <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\SHA256.cpp" />
+    <ClCompile Include="..\..\src\SymAlg.cpp" />
+    <ClCompile Include="..\..\src\twofish.c" />
+    <ClCompile Include="..\..\src\twofish_cfb.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\AESa.cpp" />
-    <ClCompile Include="..\..\Base64.cpp" />
-    <ClCompile Include="..\..\common\includes.cpp" />
-    <ClCompile Include="..\..\DES.cpp" />
-    <ClCompile Include="..\..\main.cpp" />
-    <ClCompile Include="..\..\SHA256.cpp" />
-    <ClCompile Include="..\..\SymAlg.cpp" />
+    <ClInclude Include="..\..\src\AESa.h" />
+    <ClInclude Include="..\..\src\argparse.hpp" />
+    <ClInclude Include="..\..\src\Base64.h" />
+    <ClInclude Include="..\..\src\Buffer.hpp" />
+    <ClInclude Include="..\..\src\common\cryptomath.h" />
+    <ClInclude Include="..\..\src\common\includes.h" />
+    <ClInclude Include="..\..\src\crc32a.hpp" />
+    <ClInclude Include="..\..\src\crypto_batch.hpp" />
+    <ClInclude Include="..\..\src\crypto_const.hpp" />
+    <ClInclude Include="..\..\src\crypto_file.hpp" />
+    <ClInclude Include="..\..\src\crypto_package.hpp" />
+    <ClInclude Include="..\..\src\crypto_test.hpp" />
+    <ClInclude Include="..\..\src\data.hpp" />
+    <ClInclude Include="..\..\src\decryptor.hpp" />
+    <ClInclude Include="..\..\src\DES.h" />
+    <ClInclude Include="..\..\src\DES_Const.h" />
+    <ClInclude Include="..\..\src\encrypt.h" />
+    <ClInclude Include="..\..\src\encryptor.hpp" />
+    <ClInclude Include="..\..\src\IDEA.hpp" />
+    <ClInclude Include="..\..\src\ini_parser.hpp" />
+    <ClInclude Include="..\..\src\puzzle.hpp" />
+    <ClInclude Include="..\..\src\random_engine.hpp" />
+    <ClInclude Include="..\..\src\rng.h" />
+    <ClInclude Include="..\..\src\Salsa20.h" />
+    <ClInclude Include="..\..\src\SHA256.h" />
+    <ClInclude Include="..\..\src\SymAlg.h" />
+    <ClInclude Include="..\..\src\twofish.h" />
+    <ClInclude Include="..\..\src\vigenere.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\crypto.cbp" />
+    <None Include="..\..\src\crypto_batch.ini" />
+    <None Include="..\..\src\Salsa20.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
