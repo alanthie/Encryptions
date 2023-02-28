@@ -72,25 +72,27 @@ Puzzle full file: /home/server/dev/Encryptions/testcase/manual/encoder_output/pu
 Elapsed time in seconds: 11 sec
 </pre>
 
-Help:
+Example of msg.crypto:
 <pre>
-crypto -h
-Usage: crypto [-h] {batch_decode,batch_encode,binary,decode,encode,random,string_decode,string_encode,test}
+// ------------------------------------------------------------------------------------------------------------
+// *.crypto file available!
+// ------------------------------------------------------------------------------------------------------------
+//  ./../../bin/Release/crypto encode -p puzzle.txt -i msg.zip -o msg.zip.encrypted -f puzzle.txt.full -q puzzle_qa.txt -u ./urls.txt -v 1 -l ./AL_SAM/
+//  ./../../bin/Release/crypto pack -q puzzle_qa.txt -i msg.zip.encrypted -o msg.crypto -k alain -ht alain
+//
+//  ./../../bin/Release/crypto unpack -q puzzle_qa.txt -o msg.zip.encrypted -i msg.crypto -k alain
+//  ./../../bin/Release/crypto decode -i msg.zip.encrypted -o msg.zip -p puzzle_qa.txt -v 1 -l ./AL_SAM/
+// ------------------------------------------------------------------------------------------------------------
 
-Optional arguments:
-  -h, --help   	shows help message and exits 
-  -v, --version	prints version information and exits 
-
-Subcommands:
-  batch_decode  Decode from a config file
-  batch_encode  Encode from a config file
-  binary        Generate a file with binary random data
-  decode        Decodes and extracts a file from an encrypted file
-  encode        Encodes a file into an encrypted file
-  random        Generate a file with random numbers
-  string_decode Decode a string
-  string_encode Encode a string
-  test          Test a case
+urls.txt:
+https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz
+[l]binary.dat.71
+[l]binary.dat.81
+[l]binary.dat.91
+[l]binary.dat.57
+[l]binary.dat.48
+[l]binary.dat.29
+[l]binary.dat.37
 </pre>
 
 Videos describing the project:
