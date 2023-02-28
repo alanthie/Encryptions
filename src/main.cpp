@@ -19,8 +19,11 @@
 #include "encrypt.h"
 #include "data.hpp"
 
+// *.crypto file available!
+//  ./../../bin/Release/crypto pack   -q ./encoder_output/puzzle_qa.txt  -i ./encoder_output/test.zip.encrypted  -o msg.crypto -k alain -ht alain
+//  ./../../bin/Release/crypto unpack -q ./decoder_output/puzzle_qa2.txt -o ./decoder_output/test2.zip.encrypted -i msg.crypto -k alain
 
-std::string VERSION = "0.4";
+std::string VERSION = "0.5";
 
 int main_crypto(int argc, char **argv)
 {
