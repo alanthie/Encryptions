@@ -77,11 +77,11 @@ Example of msg.crypto:
 // ------------------------------------------------------------------------------------------------------------
 // *.crypto file available!
 // ------------------------------------------------------------------------------------------------------------
-//  ./../../bin/Release/crypto encode -p puzzle.txt -i msg.zip -o msg.zip.encrypted -f puzzle.txt.full -q puzzle_qa.txt -u ./urls.txt -v 1 -l ./AL_SAM/
-//  ./../../bin/Release/crypto pack -q puzzle_qa.txt -i msg.zip.encrypted -o msg.crypto -k alain -ht alain
+//  crypto encode -p puzzle.txt -i msg.zip -o msg.zip.encrypted -f puzzle.txt.full -q puzzle_qa.txt -u ./urls.txt -v 1 -l ./AL_SAM/
+//  crypto pack -q puzzle_qa.txt -i msg.zip.encrypted -o msg.crypto -k alain -ht alain
 //
-//  ./../../bin/Release/crypto unpack -q puzzle_qa.txt -o msg.zip.encrypted -i msg.crypto -k alain
-//  ./../../bin/Release/crypto decode -i msg.zip.encrypted -o msg.zip -p puzzle_qa.txt -v 1 -l ./AL_SAM/
+//  crypto unpack -q puzzle_qa.txt -o msg.zip.encrypted -i msg.crypto -k alain
+//  crypto decode -i msg.zip.encrypted -o msg.zip -p puzzle_qa.txt -v 1 -l ./AL_SAM/
 // ------------------------------------------------------------------------------------------------------------
 
 urls.txt:
@@ -112,9 +112,6 @@ Current set of encryption algorithms
     Salsa20
     IDEA
 </pre>
-
-Puzzle:
-![Alt text](/Doc/puzzle.png?raw=true "puzzle")
 
 Overview:
 ![Alt text](/Doc/Overview.png?raw=true "Overview")
