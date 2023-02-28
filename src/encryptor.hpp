@@ -18,6 +18,10 @@ static bool s_Twofish_initialise = false;
 
 class encryptor
 {
+friend class crypto_package;
+private:
+    encryptor() {}
+
 public:
 
     encryptor(  std::string ifilename_urls,
@@ -560,8 +564,24 @@ public:
 		if (data_temp.buffer.size() % 16 != 0)
 		{
             r = false;
-            std::cerr << "ERROR " << "encoding file must be multiple of 16 bytes twofish" <<  std::endl;
+            std::cerr << "ERROR " << "encode_twofish encoding file must be multiple of 16 bytes" <<  std::endl;
 		}
+		if (key_size == 0)
+		{
+            std::cerr << "ERROR encode_twofish - key_size = 0 " <<  "" << std::endl;
+            return false;
+        }
+        if (key_size % 16 != 0)
+		{
+            std::cerr << "ERROR encode_twofish - key_size must be 16x " <<  key_size << std::endl;
+            return false;
+        }
+        if (data_temp.buffer.size() == 0)
+		{
+            std::cerr << "ERROR encode_twofish - data size is 0 " << std::endl;
+            return false;
+        }
+
 
 		uint32_t nround = 1;
 		uint32_t nblock = data_temp.buffer.size() / 16;

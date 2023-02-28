@@ -15,6 +15,10 @@
 
 class decryptor
 {
+friend class crypto_package;
+private:
+    decryptor() {}
+
 public:
 	decryptor(  std::string ifilename_puzzle,
                 std::string ifilename_encrypted_data,
@@ -579,6 +583,22 @@ public:
 	{
         bool r = true;
 		char c;
+
+		if (key_size == 0)
+		{
+            std::cerr << "ERROR udecode_twofish - key_size = 0 " <<  "" << std::endl;
+            return false;
+        }
+        if (key_size % 16 != 0)
+		{
+            std::cerr << "ERROR udecode_twofish - key_size must be 16x " <<  key_size << std::endl;
+            return false;
+        }
+        if (data_encrypted.buffer.size() % 16 != 0)
+		{
+            std::cerr << "ERROR udecode_twofish - data size must be 16x " <<  data_encrypted.buffer.size() << std::endl;
+            return false;
+        }
 
 		uint32_t nround = 1;
 		uint32_t nblock = data_encrypted.buffer.size() / 16;

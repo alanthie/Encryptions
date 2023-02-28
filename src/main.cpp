@@ -15,6 +15,7 @@
 #include "decryptor.hpp"
 #include "crypto_test.hpp"
 #include "crypto_batch.hpp"
+#include "crypto_package.hpp"
 #include "encrypt.h"
 #include "data.hpp"
 
@@ -24,9 +25,6 @@ std::string VERSION = "0.4";
 int main_crypto(int argc, char **argv)
 {
     std::string FULLVERSION = VERSION + "_" + get_current_date();
-
-    // TODO [*.crypto self contained file] => [header+qa_puzzle+data].crypto
-
 
     // Argument parser
     try
@@ -143,6 +141,56 @@ int main_crypto(int argc, char **argv)
             test_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
                 .help("specify the verbose");
+        }
+
+        // Pack subcommand
+        argparse::ArgumentParser pack_command("pack");
+        {
+            pack_command.add_description("Pack into a crypto file");
+
+            pack_command.add_argument("-q", "--qapuzzle")
+                .required()
+                .help("specify the input qa puzzle file.");
+
+            pack_command.add_argument("-i", "--input")
+                .required()
+                .help("specify the encrypted input file.");
+
+            pack_command.add_argument("-o", "--output")
+                .required()
+                .help("specify the output crypto file.");
+
+            pack_command.add_argument("-k", "--key")
+                .default_value(std::string(""))
+                .help("specify the qa puzzle encryption key.");
+
+            pack_command.add_argument("-ht", "--hint")
+                .default_value(std::string(""))
+                .help("specify the qa puzzle encryption key hint.");
+        }
+
+        // Unack subcommand
+//            bool unpack(std::string input_crypto_file, std::string output_qa_puzzle_file, std::string output_enc_data_file,
+//                std::string input_puzzle_enc_key)
+        argparse::ArgumentParser unpack_command("unpack");
+        {
+            unpack_command.add_description("Unpack into a crypto file");
+
+            unpack_command.add_argument("-i", "--input")
+                .required()
+                .help("specify the input crypto file.");
+
+            unpack_command.add_argument("-q", "--qapuzzle")
+                .required()
+                .help("specify the output qa puzzle file.");
+
+            unpack_command.add_argument("-o", "--output")
+                .required()
+                .help("specify the output encrypted file.");
+
+            unpack_command.add_argument("-k", "--key")
+                .default_value(std::string(""))
+                .help("specify the qa puzzle encryption key.");
         }
 
         // Encode subcommand
@@ -265,6 +313,8 @@ int main_crypto(int argc, char **argv)
         program.add_subparser(random_file_command);
         program.add_subparser(binary_random_file_command);
         program.add_subparser(checksum_command);
+        program.add_subparser(pack_command);
+        program.add_subparser(unpack_command);
 
         // Parse the arguments
         try {
@@ -412,6 +462,82 @@ int main_crypto(int argc, char **argv)
             }
             std::cout << "The decrypted string is : " << decrypt_simple_string(s, k) << std::endl;
             return 0;
+        }
+
+        if (program.is_subcommand_used("pack"))
+        {
+            std::cout << "crypto PACKAGING..." << std::endl;
+            auto& cmd = pack_command;
+            auto input_path = cmd.get<std::string>("--input");
+            auto output_path = cmd.get<std::string>("--output");
+            auto qa_puzzle_path = cmd.get<std::string>("--qapuzzle");
+            auto key = cmd.get<std::string>("--key");
+            auto hint = cmd.get<std::string>("--hint");
+
+            if (key.size() != 0)
+            {
+                if (key.size() % PADDING_KEY_MULTIPLE != 0)
+                {
+                    int n = PADDING_KEY_MULTIPLE - (key.size() % PADDING_KEY_MULTIPLE);
+                    for(int i=0;i<n;i++)
+                    {
+                       key += " ";
+                    }
+                }
+            }
+
+            crypto_package p;
+            bool ok = p.pack(qa_puzzle_path, input_path, key.data(), key.size(), output_path, hint);
+            if (ok == true)
+            {
+                std::cerr << "crypto PACKAGING SUCCESS" << std::endl;
+                std::cout << "Crypto file: " << output_path << std::endl;
+                return 0;
+            }
+            else
+            {
+                std::cerr << "PACKAGING FAILED" << std::endl;
+                return -1;
+            }
+        }
+
+
+        // Unack subcommand
+        if (program.is_subcommand_used("unpack"))
+        {
+            std::cout << "crypto UNPACKAGING..." << std::endl;
+            auto& cmd = unpack_command;
+            auto input_path = cmd.get<std::string>("--input");
+            auto output_path = cmd.get<std::string>("--output");
+            auto qa_puzzle_path = cmd.get<std::string>("--qapuzzle");
+            auto key = cmd.get<std::string>("--key");
+
+            if (key.size() != 0)
+            {
+                if (key.size() % PADDING_KEY_MULTIPLE != 0)
+                {
+                    int n = PADDING_KEY_MULTIPLE - (key.size() % PADDING_KEY_MULTIPLE);
+                    for(int i=0;i<n;i++)
+                    {
+                       key += " ";
+                    }
+                }
+            }
+
+            crypto_package p;
+            bool ok = p.unpack(input_path, qa_puzzle_path, output_path, key);
+            if (ok == true)
+            {
+                std::cerr << "crypto UNPACKAGING SUCCESS" << std::endl;
+                std::cout << "encrypted file: " << output_path << std::endl;
+                std::cout << "qa puzzle file: " << qa_puzzle_path << std::endl;
+                return 0;
+            }
+            else
+            {
+                std::cerr << "UNPACKAGING FAILED" << std::endl;
+                return -1;
+            }
         }
 
         // Encode command

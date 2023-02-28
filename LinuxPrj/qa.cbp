@@ -36,12 +36,20 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="../src/Base64.cpp" />
+		<Unit filename="../src/Buffer.hpp" />
+		<Unit filename="../src/SHA256.cpp" />
+		<Unit filename="../src/crc32a.cpp" />
+		<Unit filename="../src/crc32a.hpp" />
+		<Unit filename="../src/crypto_const.hpp" />
+		<Unit filename="../src/crypto_file.hpp" />
+		<Unit filename="../src/data.hpp" />
 		<Unit filename="../src/qa/BigInteger.cpp" />
-		<Unit filename="../src/qa/common.h" />
 		<Unit filename="../src/qa/matrix.cpp" />
 		<Unit filename="../src/qa/matrix.hpp" />
 		<Unit filename="../src/qa/prime.h" />
 		<Unit filename="../src/qa/qa.cpp" />
+		<Unit filename="../src/qa/qa_internal.hpp" />
 		<Unit filename="../src/qa/qa_internal_empty.hpp" />
 		<Unit filename="../src/qa/rational.cpp" />
 		<Unit filename="../src/qa/rational.h" />

@@ -129,6 +129,21 @@ public:
                 temp.buffer.write(s.data(), (uint32_t)s.size(), -1);
             }
         }
+
+        std::string sc = CHKSUM_TOKEN + " puzzle :  ";
+        auto sz =  temp.buffer.size() + sc.size();
+        std::uint32_t sz_padding = 0;
+        if (sz % PADDING_MULTIPLE != 0)
+        {
+            sz_padding = PADDING_MULTIPLE - (sz % PADDING_MULTIPLE );
+            char c[1] = {' '};
+            for(std::uint32_t i=0;i<sz_padding;i++)
+            {
+                if (i==sz_padding - 1) c[0] = '\n';
+                temp.buffer.write(&c[0], 1, -1);
+            }
+            std::cout << "padding puzzle " << sz_padding << " total " << sz+sz_padding << std::endl;
+        }
     }
 
     std::string checksum()

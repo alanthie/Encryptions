@@ -55,6 +55,7 @@ constexpr static int16_t URLINFO_SIZE   =   URL_LEN_ENCODESIZE + URL_MAX_SIZE + 
                                             CRYPTO_ALGO_ENCODESIZE + PADDING_LEN_ENCODESIZE + 14 + 32; // padding 64
 
 constexpr static int16_t PADDING_MULTIPLE   = 64; // should be at least 64x with Salsa20 requirement
+constexpr static int16_t PADDING_KEY_MULTIPLE   = 32; // should be at least 64x with Salsa20 requirement
 constexpr static int16_t NITER_LIM          = 128;
 constexpr static int16_t PUZZLE_SIZE_LIM    = 64*256;
 constexpr static uint32_t FILE_SIZE_LIM     = 128*1024*1024; // 128MB
@@ -67,7 +68,7 @@ const std::string CHKSUM_TOKEN          = "CHKSUM";
 
 constexpr static uint32_t CRYPTO_HEADER_SIZE = 64+64;
 struct CRYPTO_HEADER {
-    std::uint8_t  sig[6];                       // File Signature (CRYPTO)
+    char sig[6];                               // File Signature (CRYPTO)
     std::uint16_t version;                      // Format Version
     std::uint32_t enc_puzzle_size;              // Size of encrypted puzzle
     std::uint32_t enc_puzzle_padding_size;      // Size of encrypted puzzle before padding
@@ -75,14 +76,10 @@ struct CRYPTO_HEADER {
     std::uint32_t enc_data_padding_size;
     std::uint32_t crc_enc_data_hash;            // CRC32 hash of encrypted data before padding
     std::uint32_t crc_enc_puzzle_hash;
-    std::uint8_t  enc_puzzle_key_hint[32+64];   // Encrypted Puzzle Extract Key Hint
+    char enc_puzzle_key_hint[32+64];            // Encrypted Puzzle Extract Key Hint
     //std::uint8_t  reserved[0];                // Filled with zeros
 };
 static_assert(sizeof(CRYPTO_HEADER) == CRYPTO_HEADER_SIZE);
-//auto padded_data = std::make_unique<uint8_t[]>(padded_size);
-//CRC32 crc;
-//crc.update(padded_data.get(), size);
-//header.hash   = crc.get_hash();
 
 class urlkey
 {
