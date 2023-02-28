@@ -11,21 +11,6 @@
 #include "crypto_const.hpp"
 #include "crc32a.hpp"
 
-/*
-struct CRYPTO_HEADER {
-    std::uint8_t  sig[6];                       // File Signature (CRYPTO)
-    std::uint16_t version;                      // Format Version
-    std::uint32_t enc_puzzle_size;              // Size of encrypted puzzle
-    std::uint32_t enc_puzzle_padding_size;      // Size of encrypted puzzle before padding
-    std::uint32_t enc_data_size;                // Size of encrypted data before padding
-    std::uint32_t enc_data_padding_size;
-    std::uint32_t crc_enc_data_hash;            // CRC32 hash of encrypted data before padding
-    std::uint32_t crc_enc_puzzle_hash;
-    std::uint8_t  enc_puzzle_key_hint[32+64];   // Encrypted Puzzle Extract Key Hint
-    //std::uint8_t  reserved[0];                // Filled with zeros
-};
-*/
-
 class crypto_package
 {
 public:

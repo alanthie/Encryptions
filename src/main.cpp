@@ -170,8 +170,6 @@ int main_crypto(int argc, char **argv)
         }
 
         // Unack subcommand
-//            bool unpack(std::string input_crypto_file, std::string output_qa_puzzle_file, std::string output_enc_data_file,
-//                std::string input_puzzle_enc_key)
         argparse::ArgumentParser unpack_command("unpack");
         {
             unpack_command.add_description("Unpack into a crypto file");
