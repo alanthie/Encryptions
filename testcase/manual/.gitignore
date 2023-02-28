@@ -1,3 +1,9 @@
 /decoder_output/
 /encoder_output/
 /tmp/
+/AL_SAM/
+/msg.crypto
+/msg.zip
+/msg.zip.encrypted
+/puzzle.txt.full
+/puzzle_qa.txt

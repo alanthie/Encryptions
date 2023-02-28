@@ -5,21 +5,14 @@ https://i.postimg.cc/ZKGMV8SP/Screenshot-from-2023-02-23-19-39-28.png
 ;User=F...0@alanthier001.com
 ;Pwd=1...9
 ;[f]ftp.alanthier001.com/binary20230226.dat.1
-[l]random.txt.1
-[l]binary.dat.7
-[l]binary.dat.8
-[l]binary.dat.9
-[l]binary.dat.7
-[l]binary.dat.8
-[l]binary.dat.9
-[l]binary.dat.7
-[l]binary.dat.8
-[l]binary.dat.9
-[l]binary.dat.7
-[l]binary.dat.8
-[l]binary.dat.9
-[l]binary.dat.7
-[l]binary.dat.8
-[l]binary.dat.9
+;[l]random.txt.11
+[l]binary.dat.71
+[l]binary.dat.81
+[l]binary.dat.91
+[l]binary.dat.57
+[l]binary.dat.48
+[l]binary.dat.29
+[l]binary.dat.37
+
 
 
