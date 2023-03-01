@@ -13,6 +13,7 @@
 #include "twofish.h"
 #include "Salsa20.h"
 #include "IDEA.hpp"
+#include "crc32a.hpp"
 
 static bool s_Twofish_initialise = false;
 
@@ -1103,9 +1104,11 @@ public:
 		perfect_key_size = perfect_key_size * key_size_factor;
         if (verbose)
         {
-            std::cout << "msg_input_size = " << msg_input_size << " ";
-            std::cout << "number of URL keys = " << NURL_ITERATIONS << " ";
-            std::cout << "perfect_key_size (* key_size_factor) = " << perfect_key_size <<  std::endl;
+            std::cout << "msg_input_size = " << msg_input_size;
+            std::cout << ", number of URL keys = " << NURL_ITERATIONS;
+            std::cout << ", key_size_factor = " << key_size_factor;
+            std::cout << ", perfect_key_size (* key_size_factor) = " << perfect_key_size <<
+                         ", total keys size: " << NURL_ITERATIONS * perfect_key_size + puz_key.size() << std::endl;
         }
 
         for(size_t i=0; i<vurlkey.size(); i++)
@@ -1196,8 +1199,14 @@ public:
         }
 
         // Save number of iterations (N web keys + 1 puzzle key) in the last 2 byte! + PADDING_MULTIPLE-2
+
+        CRC32 crc;
+        crc.update(&puz_key.getdata()[0], puz_key.size());
+        auto crc_puz_key = crc.get_hash();
+
         Buffer temp(PADDING_MULTIPLE);
 		temp.init(0);
+		temp.writeUInt32(crc_puz_key, PADDING_MULTIPLE - 8);
         temp.writeUInt16(PADDING, PADDING_MULTIPLE - 4);
 		temp.writeUInt16((uint16_t)vurlkey.size() + 1, PADDING_MULTIPLE - 2);
         data_temp.append(temp.getdata(), PADDING_MULTIPLE);
@@ -1205,6 +1214,14 @@ public:
         //encode(DataN+urlkeyN+Niter,     pwd0) => DataFinal
         encode( vurlkey.size(), vurlkey.size(), (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES,
                 data_temp, puz_key.getdata(), puz_key.size(), data_temp_next);
+
+        // crc_puz_key at end
+        data_temp_next.buffer.writeUInt32(crc_puz_key, -1);
+        if (verbose)
+        {
+            std::cout << "data size                           "  << data_temp_next.buffer.size() << std::endl;
+            std::cout << "CRC32 of puzzle key when encoded is "  << crc_puz_key << std::endl;
+        }
 
         data_temp_next.copy_buffer_to(encrypted_data);
         encrypted_data.save_to_file(filename_encrypted_data);

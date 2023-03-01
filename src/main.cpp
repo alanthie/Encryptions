@@ -309,9 +309,8 @@ int main_crypto(int argc, char **argv)
                 .help("specify the input encrypted file.");
 
             decode_command.add_argument("-o", "--output")
-                .required()
                 .default_value(std::string(""))
-                .help("specify the output decrypted file.");
+                .help("specify the output decrypted file (default to <input path>.decrypted)");
 
             decode_command.add_argument("-p", "--puzzle")
                 .default_value(std::string(""))
@@ -707,7 +706,10 @@ int main_crypto(int argc, char **argv)
             {
                 std::cerr << "crypto ENCODING SUCCESS" << std::endl;
                 std::cout << "Encrypted file: " << output_path << std::endl;
-                std::cout << "Puzzle file   : " << qa_puzzle_path << std::endl;
+                if (puzzle_path.size() > 0)
+                    std::cout << "Puzzle file   : " << qa_puzzle_path << std::endl;
+                else
+                    std::cout << "Puzzle file   : " << "<default>"<< std::endl;
                 return 0;
             }
             else
@@ -734,6 +736,11 @@ int main_crypto(int argc, char **argv)
 
             bool verbose = verb.size() > 0 ? true : false;
             bool keeping = keep.size() > 0 ? true : false;
+
+            if (output_path.size() == 0)
+            {
+                output_path = input_path + ".decrypted";
+            }
 
             std::cout << "crypto DECODING..." << std::endl;
             decryptor decr(puzzle_path,

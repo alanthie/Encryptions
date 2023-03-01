@@ -15,7 +15,7 @@
 class puzzle
 {
 public:
-    const std::string EMPTY_PUZZLE = "REM ==================\nREM EMPTY PUZZLE\nREM ==================\n\n";
+    const std::string CONST_EMPTY_PUZZLE = "REM ==================\nREM EMPTY PUZZLE\nREM ==================\n\n";
 
 public:
     struct QA
@@ -26,7 +26,6 @@ public:
         std::string sblockstart;
         std::string sblockend;
     };
-
 
     puzzle(bool verb = false) {verbose = verb;}
 
@@ -96,6 +95,8 @@ public:
         std::string s2 = read_checksum();
         if (s1!=s2)
         {
+            std::cout << "DEBUG: checksum= " << s1 << std::endl;
+            std::cout << "DEBUG: read_checksum = " << s2 << std::endl;
             return false;
         }
         return true;
@@ -133,6 +134,7 @@ public:
             }
         }
 
+        //auto sztempinitial =  temp.buffer.size();
         std::string sc = CHKSUM_TOKEN + " puzzle :  ";
         auto sz =  temp.buffer.size() + sc.size();
         std::uint32_t sz_padding = 0;
@@ -145,7 +147,16 @@ public:
                 if (i==sz_padding - 1) c[0] = '\n';
                 temp.buffer.write(&c[0], 1, -1);
             }
-            std::cout << "padding puzzle " << sz_padding << " total " << sz+sz_padding << std::endl;
+
+//            if (verbose)
+//            {
+//                std::cout << "DEBUG: puzzle      = [puzzle initial parsed][puzzle padding for qa multiple]"<< std::endl;
+//                std::cout << "DEBUG: qa puzzle   = [puzzle initial parsed][puzzle padding for qa multiple] + [chksum_token][checksum(64)]"<< std::endl;
+//                std::cout << "DEBUG: puzzle key  = [puzzle][key padding (with 0) for key multiple]"<< std::endl;
+//                std::cout << "DEBUG: chksum_token size: " << sc.size() << " token: [" << sc << "]"<<std::endl;
+//                std::cout << "DEBUG: puzzle padding for qa multiple: " << sz_padding << std::endl;
+//                std::cout << "DEBUG: puzzle size = " << sztempinitial + sz_padding << std::endl<< std::endl;
+//            }
         }
     }
 
@@ -158,13 +169,25 @@ public:
         sha.update(reinterpret_cast<const uint8_t*> (temp.buffer.getdata()), temp.buffer.size() );
         uint8_t* digest = sha.digest();
         std::string s = SHA256::toString(digest);
-        if (verbose)
-        {
-            std::cout << "chksum puzzle " << temp.buffer.size() << " " << s << std::endl;
-        }
+//        if (verbose)
+//        {
+//            std::cout << "DEBUG: chksum of puzzle, size puzzle: " << temp.buffer.size() << " chksum digest: " << s << std::endl;
+//        }
         delete[] digest;
 
         return s;
+    }
+
+    bool read_from_data(cryptodata& d)
+    {
+        puz_data.buffer.write(d.buffer.getdata(), d.buffer.size());
+
+        bool r = parse_puzzle();
+        if (r)
+        {
+            chksum_puzzle = checksum();
+        }
+        return r;
     }
 
     bool read_from_file(std::string filename, bool b)
@@ -181,11 +204,21 @@ public:
         return false;
     }
 
-    bool read_from_empty_puzzle()
+    std::string empty_puzzle()
     {
+        return CONST_EMPTY_PUZZLE;
+    }
+
+    bool read_from_empty_puzzle(bool include_chksum = false)
+    {
+        std::string EMPTY_PUZZLE = empty_puzzle();
+        if (include_chksum)
+        {
+        }
+
         if (EMPTY_PUZZLE.size() % PADDING_MULTIPLE != 0)
         {
-            std::cerr << "EMPTY PUZZLE not proper multiple of " << PADDING_MULTIPLE << " " << EMPTY_PUZZLE.size() << std::endl;
+            std::cerr << "DEFAULT PUZZLE not proper multiple of " << PADDING_MULTIPLE << " " << EMPTY_PUZZLE.size() << std::endl;
             return false;
         }
 
@@ -201,9 +234,10 @@ public:
 
     bool read_from_empty_puzzle(cryptodata& d)
     {
+        std::string EMPTY_PUZZLE = empty_puzzle();
         if (EMPTY_PUZZLE.size() % PADDING_MULTIPLE != 0)
         {
-            std::cerr << "EMPTY PUZZLE not proper multiple of " << PADDING_MULTIPLE << " " << EMPTY_PUZZLE.size() << std::endl;
+            std::cerr << "DEFAULT PUZZLE not proper multiple of " << PADDING_MULTIPLE << " " << EMPTY_PUZZLE.size() << std::endl;
             return false;
         }
         d.buffer.write(EMPTY_PUZZLE.data(), EMPTY_PUZZLE.size());
@@ -236,7 +270,7 @@ public:
         size_t r = temp.buffer.size() % PADDING_MULTIPLE;
         rout.write(temp.buffer.getdata(), temp.buffer.size(), 0);
 
-        char c[1] = {'0'};
+        char c[1] = {' '};
         for(size_t i = 0; i < PADDING_MULTIPLE - r; i++)
         {
             // padding

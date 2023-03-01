@@ -12,6 +12,7 @@
 #include "data.hpp"
 #include "puzzle.hpp"
 #include "IDEA.hpp"
+#include "crc32a.hpp"
 
 class decryptor
 {
@@ -932,12 +933,12 @@ public:
 
         if (filename_puzzle.size() ==  0)
         {
-            std::cout << "WARNING empty puzzle filename (using default empty puzzle)" <<  std::endl;
+            std::cout << "WARNING empty puzzle filename (using default puzzle)" <<  std::endl;
             empty_puzzle = true;
         }
         if (filename_encrypted_data.size() ==  0)
         {
-            std::cout << "ERROR empty encrypted_data filename " <<  std::endl;
+            std::cout << "ERROR empty encrypted data filename " <<  std::endl;
             return false;
         }
 
@@ -970,9 +971,9 @@ public:
 			}
 			else
 			{
-                if (puz.read_from_empty_puzzle() == false)
+                if (puz.read_from_empty_puzzle(true) == false)
                 {
-                    std::cerr << "ERROR " << "reading empty puzzle" << std::endl;
+                    std::cerr << "ERROR " << "reading default puzzle" << std::endl;
                     r = false;
                 }
 			}
@@ -997,9 +998,51 @@ public:
                 if (puz.is_valid_checksum() == false)
                 {
                     std::cerr << "ERROR " << "invalid puzzle answers or checksum" << std::endl;
-                    std::cerr << "      " << "puz size " << puz.puz_data.buffer.size() << std::endl;
+                    std::cerr << "puzzle size: " << puz.puz_data.buffer.size() << std::endl;
                     r = false;
                 }
+			}
+			else if (false) // no need here - puzzle crc is saved when encoding
+			{
+                // Make qa puzzle from default puzzle
+                bool rr = true;
+                puzzle p;
+                p.verbose = false;
+                std::string e = p.empty_puzzle();
+
+                cryptodata temp;
+                temp.buffer.write(e.data(), (uint32_t)e.size(), -1);
+                temp.save_to_file(staging + "staging_temp_preqa.txt");
+
+                rr = p.read_from_file(staging + "staging_temp_preqa.txt" , true);  // parse_puzzle
+                if (rr == false) {r = false;}
+
+                if (r)
+                {
+                    rr = p.save_to_file(staging + "staging_temp_qa.txt");          // CHKSUM_TOKEN
+                    if (rr == false) {r = false;}
+                }
+
+                if (r)
+                {
+                    rr = puz.read_from_file(staging + "staging_temp_qa.txt", true);
+                    if (rr == false) {r = false;}
+                }
+
+                if (r)
+                {
+                    if (puz.is_valid_checksum() == false)
+                    {
+                        std::cerr << "ERROR " << "invalid puzzle answers or checksum" << std::endl;
+                        std::cerr << "puzzle size: " << puz.puz_data.buffer.size() << std::endl;
+                        r = false;
+                    }
+                }
+
+                if (fileexists(staging + "staging_temp_preqa.txt"))
+                    std::remove(std::string(staging + "staging_temp_preqa.txt").data());
+                if (fileexists(staging + "staging_temp_qa.txt"))
+                    std::remove(std::string(staging + "staging_temp_qa.txt").data());
 			}
 		}
 
@@ -1022,6 +1065,44 @@ public:
 			}
 		}
 
+		auto file_size = encrypted_data.buffer.size();
+		if (file_size < 4)
+		{
+            r = false;
+		}
+
+		if (r)
+		{
+            auto crc_read_puz_key = encrypted_data.buffer.readUInt32(file_size - 4);
+
+            CRC32 crc;
+            crc.update(&puz_key.getdata()[0], puz_key.size());
+            auto crc_puz_key = crc.get_hash();
+
+            if (crc_puz_key != crc_read_puz_key)
+            {
+                std::cerr << "ERROR " << "Invalid puzzle"  << std::endl;
+                std::cerr << "CRC32 of puzzle key provided is     "  << crc_puz_key << std::endl;
+                std::cerr << "CRC32 of puzzle key when encoded is "  << crc_read_puz_key << std::endl;
+                r = false;
+            }
+            else if (verbose)
+            {
+                std::cout << "data sise                           "  << file_size << std::endl;
+                std::cout << "CRC32 of puzzle key provided is     "  << crc_puz_key << std::endl;
+                std::cout << "CRC32 of puzzle key when encoded is "  << crc_read_puz_key << std::endl;
+            }
+        }
+
+        if (r)
+		{
+            encrypted_data.buffer.remove_last_n_char(4);
+            if (verbose)
+            {
+                std::cout << "crc of puzzle key removed from data, new size:"  << encrypted_data.buffer.size()  << std::endl;
+            }
+		}
+
 		// decode(DataFinal, pwd0) => DataN+urlkeyN+NITER  urlkeyN=>keyN
         if (r)
 		{
@@ -1037,6 +1118,7 @@ public:
 		// N(urls keys)+1(puzzle key) = Number of iterations in the last 2 byte! + PADDING + PADDING_MULTIPLE-2
 		int16_t NITER = 0;
         int16_t PADDING = 0;
+
         if (r)
 		{
             uint32_t file_size = (uint32_t)data_temp_next.buffer.size();
