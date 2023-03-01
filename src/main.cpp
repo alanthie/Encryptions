@@ -195,7 +195,6 @@ int main_crypto(int argc, char **argv)
             pack_command.add_description("Pack into a crypto file");
 
             pack_command.add_argument("-q", "--qapuzzle")
-                //.required()
                 .default_value(std::string(""))
                 .help("specify the input (optional) qa puzzle file.");
 
@@ -226,7 +225,6 @@ int main_crypto(int argc, char **argv)
                 .help("specify the input crypto file.");
 
             unpack_command.add_argument("-q", "--qapuzzle")
-                //.required()
                 .default_value(std::string(""))
                 .help("specify the output (optional) qa puzzle file.");
 
@@ -253,7 +251,6 @@ int main_crypto(int argc, char **argv)
                 .help("specify the output encrypted file (default to <input path>.encrypted)");
 
             encode_command.add_argument("-p", "--puzzle")
-                //.required()
                 .default_value(std::string(""))
                 .help("specify the input (optional) puzzle file.");
 
@@ -317,7 +314,6 @@ int main_crypto(int argc, char **argv)
                 .help("specify the output decrypted file.");
 
             decode_command.add_argument("-p", "--puzzle")
-                //.required()
                 .default_value(std::string(""))
                 .help("specify the input (optional) puzzle file.");
 

@@ -118,7 +118,7 @@ public:
                 if (input_puzzle_enc_key.size() == 0)
                 {
                     std::cerr << "WARNING " << "The puzzle was encrypted with a key, a key is needed to unpack the puzzle "<< std::endl;
-                    std::cerr << "This may be ok if no initial puzzle was use for encoding" << std::endl;
+                    std::cerr << "This may be ok if no initial puzzle was provided for encoding" << std::endl;
                 }
                 else
                 {
@@ -137,28 +137,22 @@ public:
             else if (empty_puzzle_output == false)
             {
                 std::cerr << "WARNING " << "The puzzle was encrypted with a key, you are unpacking without extracting the unencrypted qa puzzle "<< std::endl;
-                std::cerr << "This may be ok if no initial puzzle was use for encoding" << std::endl;
+                std::cerr << "This may be ok if no initial puzzle was provided for encoding" << std::endl;
             }
         }
 
         input_enc_qa_puzzle.buffer.write(&input_crypto.buffer.getdata()[pos], header.enc_puzzle_size, -1);
         pos += header.enc_puzzle_size;
         pos += header.enc_puzzle_padding_size;
-        if (verbose)
-            std::cout << "INFO " << "input_enc_qa_puzzle read " << " pos " << pos << std::endl;
 
         cryptodata output_enc_data;
 
         output_enc_data.buffer.write(&input_crypto.buffer.getdata()[pos], header.enc_data_size, -1);
         pos += header.enc_data_size;
         pos += header.enc_data_padding_size;
-        if (verbose)
-            std::cout << "INFO " << "output_enc_data read " << " pos " << pos << std::endl;
 
         if (input_puzzle_enc_key.size() == 0)
         {
-            std::cerr << "WARNING " << "input puzzle enc key size == 0" << std::endl;
-
             if (empty_puzzle_output == false)
             {
                 r = input_enc_qa_puzzle.save_to_file(output_qa_puzzle_file);
@@ -338,16 +332,6 @@ public:
         std::uint32_t sz_input_enc_data   = input_enc_data.buffer.size();
         header.enc_puzzle_size = sz_input_enc_puzzle;
         header.enc_data_size   = sz_input_enc_data;
-
-        if (sz_input_enc_puzzle == 0)
-        {
-            // empty puzzle!
-        }
-
-        if (sz_input_enc_data == 0)
-        {
-            // empty data!
-        }
 
         std::uint32_t sz_padding_input_enc_puzzle  = 0;;
         std::uint32_t sz_padding_input_enc_data = 0;
