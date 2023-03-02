@@ -222,7 +222,7 @@ public:
             return false;
         }
 
-        puz_data.buffer.write(EMPTY_PUZZLE.data(), EMPTY_PUZZLE.size());
+        puz_data.buffer.write(EMPTY_PUZZLE.data(), (uint32_t)EMPTY_PUZZLE.size());
 
         bool r = parse_puzzle();
         if (r)
@@ -240,7 +240,7 @@ public:
             std::cerr << "DEFAULT PUZZLE not proper multiple of " << PADDING_MULTIPLE << " " << EMPTY_PUZZLE.size() << std::endl;
             return false;
         }
-        d.buffer.write(EMPTY_PUZZLE.data(), EMPTY_PUZZLE.size());
+        d.buffer.write(EMPTY_PUZZLE.data(), (uint32_t)EMPTY_PUZZLE.size());
 
         bool r = parse_puzzle();
         if (r)

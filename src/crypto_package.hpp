@@ -189,7 +189,7 @@ public:
 
             if (input_enc_qa_puzzle.buffer.size() > 0)
             {
-                r = decode(crypto_algo, input_enc_qa_puzzle, input_puzzle_enc_key.data(), input_puzzle_enc_key.size(), data_temp_next);
+                r = decode(crypto_algo, input_enc_qa_puzzle, input_puzzle_enc_key.data(), (uint32_t)input_puzzle_enc_key.size(), data_temp_next);
                 if (r == false)
                 {
                     std::cerr << "ERROR " << "decoding encrypted puzzle " << std::endl;

@@ -589,7 +589,7 @@ int main_crypto(int argc, char **argv)
             }
 
             crypto_package p;
-            bool ok = p.pack(qa_puzzle_path, input_path, key.data(), key.size(), output_path, hint);
+            bool ok = p.pack(qa_puzzle_path, input_path, key.data(), (uint32_t)key.size(), output_path, hint);
             if (ok == true)
             {
                 std::cerr << "crypto PACKAGING SUCCESS" << std::endl;

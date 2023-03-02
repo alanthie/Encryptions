@@ -294,7 +294,7 @@ std::string HEX(std::string sfile, long long pos, long long keysize)
          keysize = 1;
     }
 
-    cryptodata d;
+       cryptodata d;
     r = d.read_from_file(sfile);
     if (r == false)
     {
@@ -310,8 +310,8 @@ std::string HEX(std::string sfile, long long pos, long long keysize)
     }
 
     Buffer b;
-    b.increase_size(keysize);
-    b.write(&d.buffer.getdata()[pos], keysize, -1);
+    b.increase_size((uint32_t)keysize);
+    b.write(&d.buffer.getdata()[pos], (uint32_t)keysize, -1);
 
     std::string hex;
     char c;
