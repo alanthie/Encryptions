@@ -8,12 +8,16 @@
 #include "Buffer.hpp"
 #include "SHA256.h"
 #include "crypto_const.hpp"
+#include "crypto_urlkey.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
 #include "twofish.h"
 #include "Salsa20.h"
 #include "IDEA.hpp"
 #include "crc32a.hpp"
+
+namespace cryptoAL
+{
 
 static bool s_Twofish_initialise = false;
 
@@ -33,12 +37,15 @@ public:
                 std::string ifilename_encrypted_data,
                 std::string istaging,
                 std::string ifolder_local,
+                std::string ifolder_local_rsa,
                 bool verb = false,
                 bool keep = false,
                 std::string iencryped_ftp_user = "",
                 std::string iencryped_ftp_pwd  = "",
                 std::string iknown_ftp_server  = "",
-                long ikey_size_factor = 1)
+                long ikey_size_factor = 1,
+				bool iuse_gmp = false,
+				bool iself_test = false)
     {
         filename_urls = ifilename_urls;
         filename_msg_data = ifilename_msg_data;
@@ -48,12 +55,16 @@ public:
         filename_encrypted_data = ifilename_encrypted_data;
         staging = istaging;
         folder_local = ifolder_local;
+        folder_local_rsa = ifolder_local_rsa;
         verbose = verb;
         keeping = keep;
         encryped_ftp_user = iencryped_ftp_user;
         encryped_ftp_pwd  = iencryped_ftp_pwd;
         known_ftp_server  = iknown_ftp_server;
         key_size_factor = ikey_size_factor;
+		use_gmp = iuse_gmp;
+		self_test = iself_test;
+
         if (key_size_factor < 1) key_size_factor = 1;
 
         if (staging.size()==0)
@@ -62,10 +73,6 @@ public:
         }
 
         puz.verbose = verb;
-
-//        std::cout << "known_ftp_serve   " << known_ftp_server << std::endl;
-//        std::cout << "encryped_ftp_user " << encryped_ftp_user << std::endl;
-//        std::cout << "encryped_ftp_pwd  " << encryped_ftp_pwd << std::endl;
     }
 
     ~encryptor()
@@ -79,8 +86,9 @@ public:
         r = urls_data.read_from_file(filename);
 
         std::string s;
-        char url[URL_MAX_SIZE+1] = { 0 };
+        char url[URL_MAX_SIZE] = { 0 };
         int pos = -1;
+        uint32_t idx=0;
 
         if (r)
         {
@@ -90,24 +98,35 @@ public:
                 c = urls_data.buffer.getdata()[i];
                 pos++;
 
-                if (c == '\n')
+                if ((c == '\n') || (i==urls_data.buffer.size()-1))
                 {
-#ifdef _WIN32
-                    int len = pos - 1; // rn
-#else
-                    int16_t len = pos;   // n
-#endif
-                    if ( ((len >= URL_MIN_SIZE) && (len <= URL_MAX_SIZE)) &&
-                        (url[0]!=';') )
+					if (i==urls_data.buffer.size()-1)
+					{
+						if ((c!=0) && (c!='\r') && (c!='\n'))
+						{
+							url[idx] = c;
+							idx++;
+						}
+					}
+
+                    uint32_t len = idx;
+
+                    if ( ((len >= URL_MIN_SIZE) && (len <= URL_MAX_SIZE)) && (url[0]!=';') )
                     {
                         urlkey uk;
-                        for(int16_t ii=0;ii<URL_MAX_SIZE;ii++) uk.url[ii] = 0;
-                        for (int16_t ii = 0; ii < len; ii++)
-                        {
-                            uk.url[ii] = url[ii];
-                        }
+                        for(uint32_t ii=0;ii<URL_MAX_SIZE;ii++) uk.url[ii] = 0;
 
-                        uk.url_size = len;
+                        uint32_t idx2=0;
+                        for (uint32_t ii = 0; ii < len; ii++)
+                        {
+                            if ((url[ii] != '\n') && (url[ii] != '\r'))
+                                uk.url[idx2] = url[ii];
+                            idx2++;
+                        }
+                        std::string su(url);
+                        std::cout << "[" << su << "]\n";
+
+                        uk.url_size = idx2;
                         vurlkey.push_back(uk);
                     }
                     else
@@ -120,13 +139,24 @@ public:
                         }
                     }
                     s.clear();
+                    for(uint32_t ii=0;ii<URL_MAX_SIZE;ii++) url[ii] = 0;
                     pos = -1;
+                    idx = 0;
                 }
                 else
                 {
                     if ((c!=0) && (c!='\r') && (c!='\n'))
                     {
-                        url[pos] = c;
+						if (idx < URL_MAX_SIZE)
+						{
+							url[idx] = c;
+							idx++;
+						}
+						else
+						{
+							std::string su(url);
+							std::cerr << "WARNING url skipped, " << "url size >= URL_MAX_SIZE url=" << su << std::endl;
+						}
                     }
                 }
             }
@@ -140,7 +170,7 @@ public:
 
         if(fs::is_directory(staging)==false)
         {
-            std::cerr << "ERROR staging is not a folder " << staging << std::endl;
+            std::cerr << "ERROR staging is not a folder: " << staging << std::endl;
             return false;
         }
 
@@ -151,38 +181,42 @@ public:
 		    std::remove(file.data());
 
 		// DOWNLOAD URL FILE
-		bool is_video = false;
-		bool is_ftp = false;
-		bool is_local = false;
+		bool is_video   = false;
+		bool is_ftp     = false;
+		bool is_local   = false;
+		bool is_rsa     = false;
+
 		if (vurlkey[i].url[0]=='[')
 		{
             if (vurlkey[i].url[1]=='v')
             {
                 is_video = true;
             }
-		}
-        if (vurlkey[i].url[0]=='[')
-		{
-            if (vurlkey[i].url[1]=='f')
+            else if (vurlkey[i].url[1]=='f')
             {
                 is_ftp = true;
             }
-		}
-        if (vurlkey[i].url[0]=='[')
-		{
-            if (vurlkey[i].url[1]=='l')
+            else if (vurlkey[i].url[1]=='l')
             {
                 is_local = true;
+            }
+            else if (vurlkey[i].url[1]=='r')
+            {
+                is_rsa = true;
             }
 		}
 
 		int pos_url = 0;
-		if      (is_video) pos_url = 3;
-		else if (is_ftp)   pos_url = 3;
-		else if (is_local) pos_url = 3;
+		if      (is_video)  pos_url = 3;
+		else if (is_ftp)    pos_url = 3;
+		else if (is_local)  pos_url = 3;
+		else if (is_rsa)    pos_url = 3;
         int rc = 0;
+
         cryptodata dataout_local;
         cryptodata dataout_other;
+        cryptodata rsa_key_data;
+        std::string embedded_rsa_key;
 
         std::string s(&vurlkey[i].url[pos_url]);
         if (is_video)
@@ -217,6 +251,95 @@ public:
                 r = false;
             }
         }
+        else if (is_rsa)
+        {
+            std::vector<std::string> v = split(s, ";");
+            if (v.size() < 1)
+            {
+                std::cerr << "ERROR rsa url bad format - missing rsa key name: " << s << std::endl;
+                r = false;
+            }
+            else
+            {
+                if (verbose)
+                    std::cout << "rsa key name from URL: " << v[0] << std::endl;
+            }
+
+            if (r)
+            {
+                for (size_t j = 0; j< MIN_KEY_SIZE; j++)
+                {
+                    if (j < v[0].size())
+                    {
+                        vurlkey[i].key[j] = v[0][j];
+                    }
+                }
+                vurlkey[i].key[MIN_KEY_SIZE-1] = 0;
+                std::string rsa_key(vurlkey[i].key);
+
+                // Generate random embedded key
+                if (r)
+                {
+					bool SELF_TEST = self_test;
+					std::string local_rsa_db ;
+
+					if (SELF_TEST)
+					{
+						local_rsa_db = folder_local_rsa + RSA_MY_PRIVATE_DB;
+					}
+					else
+					{
+						local_rsa_db = folder_local_rsa + RSA_OTHER_PUBLIC_DB; // Encoding with a public key of the recipient of the message
+					}
+
+                    rc = getrsa(true, rsa_key, "", file.data(), local_rsa_db, embedded_rsa_key, "", verbose, use_gmp, SELF_TEST);
+
+                    if (rc != 0)
+                    {
+                        std::cerr << "ERROR with getrsa - error code: " << rc << " rsa_key: " << rsa_key <<  " local_rsa_db: " << local_rsa_db << std::endl;
+                        r = false;
+                    }
+                    else
+                    {
+                        size_t fs = (size_t)filesize(file); // [r]data
+                        if (fs+3 >= URL_MAX_SIZE)
+                        {
+                            std::cerr << "ERROR with rsa url cannot copy encrypted key to url - buffer too small for data : " << fs+3 << std::endl;
+                            r = false;
+                        }
+                        else
+                        {
+                            vurlkey[i].url_size = fs+3;
+                            cryptodata d;
+
+                            r = d.read_from_file(file);
+                            if (r)
+                            {
+                                vurlkey[i].url[0] = '[';
+                                vurlkey[i].url[1] = 'r';
+                                vurlkey[i].url[2] = ']';
+                                for (size_t j = 3; j < fs+3; j++)
+                                {
+                                    if (j < URL_MAX_SIZE)
+                                    {
+                                        vurlkey[i].url[j] = d.buffer.getdata()[j-3];
+                                    }
+                                }
+                                for (size_t j = fs+3; j<URL_MAX_SIZE; j++)
+                                {
+                                    vurlkey[i].url[j] = 0;
+                                }
+                                vurlkey[i].url[URL_MAX_SIZE-1]=0;
+                            }
+                            else
+                            {
+                                std::cerr << "ERROR reading : " << file << std::endl;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         else
         {
             rc = wget(s.data(), file.data(), verbose);
@@ -230,7 +353,11 @@ public:
 		if (r)
 		{
 			cryptodata* pointer_datafile;
-			if (is_local == false)
+			if (is_rsa)
+            {
+                pointer_datafile = &rsa_key_data;
+            }
+			else if (is_local == false)
 			{
                 r = dataout_other.read_from_file(file);
                 pointer_datafile = &dataout_other;
@@ -243,7 +370,13 @@ public:
 
 			if (r)
 			{
-                int32_t databuffer_size = (int32_t)d.buffer.size();
+                if (is_rsa)
+                {
+                    // use embedded_rsa_key to encode message
+                    d.buffer.write(embedded_rsa_key.data(), embedded_rsa_key.size());
+                }
+
+                uint32_t databuffer_size = (uint32_t)d.buffer.size();
                 vurlkey[i].key_size = perfect_key_size;
 
 				if (databuffer_size >= perfect_key_size)
@@ -260,45 +393,56 @@ public:
 
                     if (verbose)
                     {
-                        std::cout << "key_fromH=" << vurlkey[i].key_fromH << " ";
-                        std::cout << "key_fromL=" << vurlkey[i].key_fromL << " ";
-                        std::cout << "key_pos="   << t << " ";
-                        std::cout << "key_size="  << vurlkey[i].key_size << " ";
+                        //std::cout << "key_fromH=" << vurlkey[i].key_fromH << " ";
+                        //std::cout << "key_fromL=" << vurlkey[i].key_fromL << " ";
+                        std::cout << "key_pos :"  << t << " ";
+                        std::cout << "key_size:"  << vurlkey[i].key_size << " ";
                         std::cout <<  std::endl;
 					}
 
                     Buffer* b = vurlkey[i].get_buffer(); // allocate
                     b->increase_size(perfect_key_size);
-                    b->write(&d.buffer.getdata()[t], perfect_key_size, -1);
+                    b->write(&d.buffer.getdata()[t], perfect_key_size, 0);
 
                     if (verbose)
                     {
-                        for( int32_t j = 0; j< perfect_key_size; j++)
-                        {
-                            if (j<32) std::cout << (int)(unsigned char)d.buffer.getdata()[t+j] << " ";
-                            else if (j==32) {std::cout << " ... [" << perfect_key_size << "] ... ";}
-                            else if (j>perfect_key_size-32) std::cout << (int)(unsigned char)d.buffer.getdata()[t+j] << " ";
-                        }
-                        std::cout <<  std::endl;
+                        show_summary(b->getdata(), perfect_key_size);
                     }
 				}
 				else
 				{
                     if (verbose)
                     {
-                        std::cout << "WARNING URL file size less than key size (padding remaining) "  << "key_pos=" << (int32_t)0 <<  std::endl;
-                        std::cout << "WARNING Increase number of URL (or use bigger URL file size) for perfect security" <<  std::endl;
+                        if (is_rsa == false)
+                        {
+                            std::cout << "WARNING URL file size less than key size (padding remaining) "  << "key_pos=" << (int32_t)0 <<  std::endl;
+                            std::cout << "WARNING Increase number of URL (or use bigger URL file size) for perfect security" <<  std::endl;
+                        }
                     }
+
+					vurlkey[i].key_fromH = 0;
+					vurlkey[i].key_fromL = 0;
 
                     Buffer* b = vurlkey[i].get_buffer(); // allocate
                     b->increase_size(perfect_key_size);
-                    b->write(&d.buffer.getdata()[0], databuffer_size, -1);
+                    b->write(&d.buffer.getdata()[0], databuffer_size, 0);
 
-                    char c[1];
-					for( int32_t j = databuffer_size; j< perfect_key_size; j++)
+                    if (verbose)
+                    {
+                        std::cout << "PADDING: " << perfect_key_size -  databuffer_size << std::endl;
+                    }
+
+                    char c[1]; uint32_t rotate_pos;
+					for( uint32_t j = databuffer_size; j< perfect_key_size; j++) // padding vurlkey[i].get_buffer() to perfect_key_size
 					{
-						c[0] = (char) ( (unsigned char)(j % 127) );
+                        rotate_pos = j % databuffer_size;
+						c[0] =d.buffer.getdata()[rotate_pos];
                         b->write(&c[0], 1, -1);
+                    }
+
+                    if (verbose)
+                    {
+                        show_summary(b->getdata(), perfect_key_size);
                     }
 				}
 
@@ -310,7 +454,7 @@ public:
 				else              vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_IDEA;
 
 				if (verbose)
-                    std::cout << "crypto_algo=" << vurlkey[i].crypto_algo << std::endl;
+                    std::cout << "crypto_algo: " << vurlkey[i].crypto_algo << std::endl;
 
                 {
                     SHA256 sha;
@@ -320,14 +464,19 @@ public:
                     auto s = SHA256::toString(digest);
                     for( size_t j = 0; j< CHKSUM_SIZE; j++)
                         vurlkey[i].checksum[j] = s[j];
+
+
                     if (verbose)
-                        std::cout << "Encryption checksum " << SHA256::toString(digest) << std::endl;
+                    {
+                        std::cout << "key extracted from data of size: " << d.buffer.size() << std::endl;
+                        std::cout << "data checksum: " << SHA256::toString(digest) << std::endl;
+                    }
                     delete[] digest;
                 }
             }
             else
             {
-                std::cerr << "ERROR reading file " << file << std::endl;
+                std::cerr << "ERROR reading file: " << file << std::endl;
             }
 		}
 
@@ -369,7 +518,7 @@ public:
 		if (data_temp.buffer.size() % 8 != 0)
 		{
             r = false;
-            std::cerr << "ERROR " << "encode_idea data file must be multiple of 8 bytes idea " << data_temp.buffer.size() << std::endl;
+            std::cerr << "ERROR " << "encode_idea data file must be multiple of 8 bytes idea: " << data_temp.buffer.size() << std::endl;
             return r;
 		}
         if (data_temp.buffer.size() == 0)
@@ -382,7 +531,7 @@ public:
 		if (key_size % 16 != 0)
 		{
             r = false;
-            std::cerr << "ERROR " << "encode_idea key must be multiple of 16 bytes " <<  key_size << std::endl;
+            std::cerr << "ERROR " << "encode_idea key must be multiple of 16 bytes: " <<  key_size << std::endl;
             return r;
 		}
         if (key_size == 0)
@@ -424,8 +573,6 @@ public:
 
             if (roundi > 0)
                 data_temp_next.buffer.seek_begin();
-
-            //std::cout << "roundi " << roundi << " key_idx " << key_idx << std::endl;
 
             for(size_t blocki = 0; blocki < nblock; blocki++)
             {
@@ -477,7 +624,7 @@ public:
 		if (data_temp.buffer.size() % 64 != 0)
 		{
             r = false;
-            std::cerr << "ERROR " << "encode_salsa20 data file must be multiple of 64 bytes " << data_temp.buffer.size() << std::endl;
+            std::cerr << "ERROR " << "encode_salsa20 data file must be multiple of 64 bytes: " << data_temp.buffer.size() << std::endl;
             return r;
 		}
         if (data_temp.buffer.size() == 0)
@@ -490,7 +637,7 @@ public:
 		if (key_size % 32 != 0)
 		{
             r = false;
-            std::cerr << "ERROR " << "encode_salsa20 key must be multiple of 32 bytes " <<  key_size << std::endl;
+            std::cerr << "ERROR " << "encode_salsa20 key must be multiple of 32 bytes: " <<  key_size << std::endl;
             return r;
 		}
         if (key_size == 0)
@@ -534,8 +681,6 @@ public:
 
             if (roundi > 0)
                 data_temp_next.buffer.seek_begin();
-
-            //std::cout << "roundi " << roundi << " key_idx " << key_idx << std::endl;
 
             for(size_t blocki = 0; blocki < nblock; blocki++)
             {
@@ -587,7 +732,8 @@ public:
 		if (data_temp.buffer.size() % 16 != 0)
 		{
             r = false;
-            std::cerr << "ERROR " << "encode_twofish encoding file must be multiple of 16 bytes" <<  std::endl;
+            std::cerr << "ERROR " << "encode_twofish encoding file must be multiple of 16 bytes: "  << data_temp.buffer.size() << std::endl;
+			return false;
 		}
 		if (key_size == 0)
 		{
@@ -596,7 +742,7 @@ public:
         }
         if (key_size % 16 != 0)
 		{
-            std::cerr << "ERROR encode_twofish - key_size must be 16x " <<  key_size << std::endl;
+            std::cerr << "ERROR encode_twofish - key_size must be 16x: " <<  key_size << std::endl;
             return false;
         }
         if (data_temp.buffer.size() == 0)
@@ -624,7 +770,7 @@ public:
             rr = Twofish_initialise();
             if (rr < 0)
             {
-                std::cout << "Error with Twofish_initialise " << rr << std::endl;
+                std::cout << "Error with Twofish_initialise: " << rr << std::endl;
                 r = false;
                 return r;
             }
@@ -652,8 +798,6 @@ public:
 
             if (roundi > 0)
                 data_temp_next.buffer.seek_begin();
-
-            //std::cout << "roundi " << roundi << " key_idx " << key_idx << std::endl;
 
             for(size_t blocki = 0; blocki < nblock; blocki++)
             {
@@ -691,7 +835,7 @@ public:
                 rr = Twofish_prepare_key( KEY, 16, &xkey );
                 if (rr < 0)
                 {
-                    std::cerr << "ERROR Twofish_prepare_key " << rr << std::endl;
+                    std::cerr << "ERROR Twofish_prepare_key: " << rr << std::endl;
                     r = false;
                     break;
                 }
@@ -713,7 +857,8 @@ public:
 		if (data_temp.buffer.size() % 16 != 0)
 		{
             r = false;
-            std::cerr << "ERROR encode_binaes16_16 " << "encoding file must be multiple of 16 bytes " <<  std::endl;
+            std::cerr << "ERROR encode_binaes16_16 " << "encoding file must be multiple of 16 bytes: " << data_temp.buffer.size() << std::endl;
+			return false;
 		}
         if (data_temp.buffer.size() == 0)
 		{
@@ -728,7 +873,7 @@ public:
         }
         if (key_size % 16 != 0)
 		{
-            std::cerr << "ERROR encode_binaes16_16 - key_size must be 16x " <<  key_size << std::endl;
+            std::cerr << "ERROR encode_binaes16_16 - key_size must be 16x: " <<  key_size << std::endl;
             return false;
         }
 
@@ -765,8 +910,6 @@ public:
 
             if (roundi > 0)
                 data_temp_next.buffer.seek_begin();
-
-            //std::cout << "roundi " << roundi << " key_idx " << key_idx << std::endl;
 
             for(size_t blocki = 0; blocki < nblock; blocki++)
             {
@@ -853,11 +996,12 @@ public:
 		if (data_temp.buffer.size() % 4 != 0)
 		{
             r = false;
-            std::cerr << "ERROR encode_binaes16_16 -  encoding file must be multiple of 4 bytes" << std::endl;
+            std::cerr << "ERROR binDES -  encoding file must be multiple of 4 bytes: " << data_temp.buffer.size() << std::endl;
+			return false;
 		}
         if (data_temp.buffer.size() == 0)
 		{
-            std::cerr << "ERROR encode_binaes16_16 - data size is 0 " << std::endl;
+            std::cerr << "ERROR binDES - data size is 0 " << std::endl;
             return false;
         }
 
@@ -868,7 +1012,7 @@ public:
         }
         if (key_size % 4 != 0)
 		{
-            std::cerr << "ERROR binDES - key_size must be 4x " <<  key_size << std::endl;
+            std::cerr << "ERROR binDES - key_size must be 4x: " <<  key_size << std::endl;
             return false;
         }
 
@@ -908,6 +1052,12 @@ public:
             DES des(KEY);
             data_encr = des.encrypt_bin(DATA, 4);
             data_temp_next.buffer.write(data_encr.data(), (uint32_t)data_encr.size(), -1); // 8 bytes!
+        }
+
+		if (verbose)
+		{
+            std::cout.flush();
+            std::cout <<    "binDES result file size: " << data_temp_next.buffer.size() << std::endl;
         }
 
 		return r;
@@ -965,9 +1115,9 @@ public:
         bool empty_puzzle = false;
         if (filename_puzzle.size() ==  0)
         {
-            std::cerr << "WARNING empty puzzle filename " <<  std::endl;
+            if (verbose)
+                std::cout << "WARNING empty puzzle (using default puzzle)" <<  std::endl;
             empty_puzzle = true;
-            //return false;
         }
 
         if (filename_msg_data.size() ==  0)
@@ -980,14 +1130,14 @@ public:
         {
             if (fileexists(filename_puzzle) == false)
             {
-                std::cerr << "ERROR missing puzzle file " << filename_puzzle <<  std::endl;
+                std::cerr << "ERROR missing puzzle file: " << filename_puzzle <<  std::endl;
                 return false;
             }
         }
 
         if (fileexists(filename_msg_data) == false)
         {
-            std::cerr << "ERROR missing msg file " << filename_msg_data <<  std::endl;
+            std::cerr << "ERROR missing msg file: " << filename_msg_data <<  std::endl;
             return false;
         }
 
@@ -997,7 +1147,7 @@ public:
             {
                 if (read_file_urls(filename_urls) == false)
                 {
-                    std::cerr << "ERROR " << "reading urls " << filename_urls << std::endl;
+                    std::cerr << "ERROR " << "reading urls: " << filename_urls << std::endl;
                     return false;
                 }
 
@@ -1005,7 +1155,7 @@ public:
                 {
                     if (vurlkey.size() == 0)
                     {
-                        std::cerr << "ERROR " << "url empty in file " << filename_urls << std::endl;
+                        std::cerr << "ERROR " << "url empty in file: " << filename_urls << std::endl;
                         return false;
                     }
                 }
@@ -1017,14 +1167,14 @@ public:
 
         if (empty_puzzle == false)
         {
-            if (puz.read_from_file(filename_puzzle, false) == false)
+            if (puz.read_from_file(filename_puzzle, true) == false)
             {
-                std::cerr << "ERROR " << " reading puzzle file " << filename_puzzle << std::endl;
+                std::cerr << "ERROR " << " reading puzzle file: " << filename_puzzle << std::endl;
                 return false;
             }
             if (puz.puz_data.buffer.size() == 0)
             {
-                std::cerr << "ERROR " << "puzzle file empty " << filename_puzzle << std::endl;
+                std::cerr << "ERROR " << "puzzle file empty: " << filename_puzzle << std::endl;
                 return false;
             }
         }
@@ -1033,14 +1183,6 @@ public:
             puz.read_from_empty_puzzle();
         }
 
-//        else
-//        {
-//            if (verbose)
-//            {
-//                std::cout << "Initial draft puzzle size " << puz.puz_data.buffer.size() << std::endl;
-//                std::cout << "Initial draft_puzzle " << filename_puzzle << std::endl;
-//            }
-//        }
 
 		if (puz.is_all_answered() == false)
         {
@@ -1053,17 +1195,18 @@ public:
         {
             if (puz.save_to_file(filename_full_puzzle) == false)
             {
-                std::cerr << "ERROR " << "saving full puzzle " << filename_full_puzzle << std::endl;
+                std::cerr << "ERROR " << "saving full puzzle: " << filename_full_puzzle << std::endl;
                 return false;
             }
         }
 
         // before removal of answer
-        Buffer puz_key(PUZZLE_SIZE_LIM);
-        puz.make_key(puz_key);
-        if (puz_key.size()== 0)
+        Buffer puz_key_full(10000);
+
+        puz.make_key(puz_key_full);
+        if (puz_key_full.size()== 0)
         {
-            std::cerr << "ERROR " << "reading puzzle key in file " << filename_full_puzzle << std::endl;
+            std::cerr << "ERROR " << "reading puzzle key in file: " << filename_full_puzzle << std::endl;
             return false;
         }
 
@@ -1074,19 +1217,29 @@ public:
             return false;
         }
 
+        // qa puzzle - not the full
+        // after removal of answer
+        Buffer qa_puz_key(puz_key_full.size());
+        puz.make_key(qa_puz_key);
+        if (qa_puz_key.size()== 0)
+        {
+            std::cerr << "ERROR " << "making qa puzzle key" << std::endl;
+            return false;
+        }
+
         // after removal of answer
         if (empty_puzzle == false)
         {
             if (puz.save_to_file(filename_partial_puzzle) == false)
             {
-                std::cerr << "ERROR " << "saving puzzle " << filename_partial_puzzle << std::endl;
+                std::cerr << "ERROR " << "saving puzzle: " << filename_partial_puzzle << std::endl;
                 return false;
             }
         }
 
         if (msg_data.read_from_file(filename_msg_data) == false)
         {
-            std::cerr << "ERROR " << "reading msg file" << filename_msg_data <<std::endl;
+            std::cerr << "ERROR " << "reading msg file: " << filename_msg_data <<std::endl;
             return false;
         }
 
@@ -1108,7 +1261,7 @@ public:
             std::cout << ", number of URL keys = " << NURL_ITERATIONS;
             std::cout << ", key_size_factor = " << key_size_factor;
             std::cout << ", perfect_key_size (* key_size_factor) = " << perfect_key_size <<
-                         ", total keys size: " << NURL_ITERATIONS * perfect_key_size + puz_key.size() << std::endl;
+                         ", total keys size: " << NURL_ITERATIONS * perfect_key_size + puz_key_full.size() << std::endl;
         }
 
         for(size_t i=0; i<vurlkey.size(); i++)
@@ -1116,7 +1269,7 @@ public:
             if (verbose)
             {
                 std::cout.flush();
-                std::cout << "\nEncryptor reading keys - iteration: " << i << std::endl;
+                std::cout << "\nencryptor making keys - iteration: " << i << std::endl;
             }
 
             if (make_urlkey_from_url(i) == false)
@@ -1129,11 +1282,25 @@ public:
                 std::cerr << "ERROR " << "making url info, url index: " << i <<std::endl;
                 return false;
             }
+
+			bool is_rsa = false;
+			if (vurlkey[i].url[0]=='[')
+			{
+				if (vurlkey[i].url[1]=='r')
+				{
+					is_rsa = true;
+				}
+			}
+			if (is_rsa == false)
+			{
+				for(size_t ii=0; ii<MIN_KEY_SIZE; ii++)
+					vurlkey[i].key[ii] = 0;
+			}
         }
 
         if (msg_data.copy_buffer_to(data_temp)== false)
         {
-            std::cerr << "ERROR " << "reading copying msg file" << filename_msg_data <<std::endl;
+            std::cerr << "ERROR " << "reading copying msg file: " << filename_msg_data <<std::endl;
             return false;
         }
 
@@ -1175,9 +1342,7 @@ public:
 
             if (i>0)
             {
-                for(size_t ii=0; ii<MIN_KEY_SIZE; ii++)
-                    vurlkey[i-1].key[ii] = 0;
-
+                // APPEND URLINFO
                 data_temp.append(&vurlkey[i-1].urlinfo_with_padding[0], URLINFO_SIZE);
             }
 
@@ -1192,35 +1357,37 @@ public:
 
         if (vurlkey.size()>0)
         {
-            for(size_t ii=0; ii<MIN_KEY_SIZE; ii++)
-                vurlkey[vurlkey.size()-1].key[ii] = 0;
-
+            // APPEND URLINFO
             data_temp.append(&vurlkey[vurlkey.size()-1].urlinfo_with_padding[0], URLINFO_SIZE);
         }
 
         // Save number of iterations (N web keys + 1 puzzle key) in the last 2 byte! + PADDING_MULTIPLE-2
 
-        CRC32 crc;
-        crc.update(&puz_key.getdata()[0], puz_key.size());
-        auto crc_puz_key = crc.get_hash();
+        uint32_t crc_full_puz_key= 0;
+        {
+            CRC32 crc;
+            crc.update(&puz_key_full.getdata()[0], puz_key_full.size());
+            crc_full_puz_key = crc.get_hash();
+        }
 
         Buffer temp(PADDING_MULTIPLE);
 		temp.init(0);
-		temp.writeUInt32(crc_puz_key, PADDING_MULTIPLE - 8);
+		temp.writeUInt32(crc_full_puz_key, PADDING_MULTIPLE - 8);
         temp.writeUInt16(PADDING, PADDING_MULTIPLE - 4);
 		temp.writeUInt16((uint16_t)vurlkey.size() + 1, PADDING_MULTIPLE - 2);
         data_temp.append(temp.getdata(), PADDING_MULTIPLE);
 
         //encode(DataN+urlkeyN+Niter,     pwd0) => DataFinal
         encode( vurlkey.size(), vurlkey.size(), (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES,
-                data_temp, puz_key.getdata(), puz_key.size(), data_temp_next);
+                data_temp, puz_key_full.getdata(), puz_key_full.size(), data_temp_next);
 
-        // crc_puz_key at end
-        data_temp_next.buffer.writeUInt32(crc_puz_key, -1);
+        data_temp_next.buffer.writeUInt32(crc_full_puz_key, -1);
+
         if (verbose)
         {
-            std::cout << "data size                           "  << data_temp_next.buffer.size() << std::endl;
-            std::cout << "CRC32 of puzzle key when encoded is "  << crc_puz_key << std::endl;
+            std::cout << "data size: "  << data_temp_next.buffer.size() << std::endl;
+            std::cout << "CRC32 of full puzzle key when encoded is: "  << crc_full_puz_key << std::endl;
+            std::cout << "qa_puz_key size: "   << qa_puz_key.size() << std::endl;
         }
 
         data_temp_next.copy_buffer_to(encrypted_data);
@@ -1246,18 +1413,22 @@ public:
     std::string filename_encrypted_data;
     std::string staging;
     std::string folder_local;
+    std::string folder_local_rsa;
     bool verbose;
     bool keeping;
     std::string encryped_ftp_user;
     std::string encryped_ftp_pwd;
     std::string known_ftp_server;
+	bool use_gmp;
+	bool self_test;
     int staging_cnt=0;
 
     size_t msg_input_size = 0;
     int32_t NURL_ITERATIONS = 0;
-	int32_t perfect_key_size = 0;
+	uint32_t perfect_key_size = 0;
 	long    key_size_factor = 1;
 };
 
+}
 
 #endif

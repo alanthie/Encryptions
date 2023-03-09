@@ -14,6 +14,10 @@
 #include "IDEA.hpp"
 #include "crc32a.hpp"
 
+
+namespace cryptoAL
+{
+
 class decryptor
 {
 friend class crypto_package;
@@ -26,22 +30,26 @@ public:
 			 	std::string ifilename_decrypted_data,
 			 	std::string istaging,
 			 	std::string ifolder_local,
+			 	std::string ifolder_local_rsa,
 			 	bool verb = false,
 			 	bool keep = false,
                 std::string iencryped_ftp_user = "",
                 std::string iencryped_ftp_pwd  = "",
-                std::string iknown_ftp_server  = "")
+                std::string iknown_ftp_server  = "",
+                bool iuse_gmp = false)
 	{
         filename_puzzle = ifilename_puzzle;
         filename_encrypted_data = ifilename_encrypted_data;
         filename_decrypted_data = ifilename_decrypted_data;
         staging =istaging;
         folder_local = ifolder_local;
+        folder_local_rsa = ifolder_local_rsa;
         verbose = verb;
         keeping = keep;
         encryped_ftp_user = iencryped_ftp_user;
         encryped_ftp_pwd  = iencryped_ftp_pwd;
         known_ftp_server  = iknown_ftp_server;
+        use_gmp = iuse_gmp;
 
         if (staging.size()==0)
         {
@@ -49,6 +57,7 @@ public:
         }
 
         puz.verbose = verb;
+        use_gmp = iuse_gmp;
 	}
 
     ~decryptor()
@@ -62,24 +71,63 @@ public:
 
         if (verbose)
 		{
-            std::cout << "Reading next URL info " << std::endl;
+            std::cout << "Reading URL info " << std::endl;
         }
 
         out_uk.crypto_algo = temp.readUInt16(pos); pos+=2;
-		out_uk.url_size    = temp.readUInt16(pos); pos+=2;
-		if (verbose)
-		{
-            std::cout << "crypto_algo " << out_uk.crypto_algo << " "<< std::endl;
-            std::cout << "url_size "    << out_uk.url_size << " "<< std::endl;
+
+        if ((out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
+            (out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
+            (out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) &&
+            (out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH) &&
+            (out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_Salsa20) &&
+            (out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_IDEA)
+           )
+        {
+            std::cerr << "ERROR wrong algo in url info "  << out_uk.crypto_algo << std::endl;
+            r = false;
+            return r;
         }
 
-		for( int16_t j = 0; j< out_uk.url_size; j++) out_uk.url[j] = temp.getdata()[pos+j];
-        for( int16_t j = out_uk.url_size; j< URL_MAX_SIZE; j++) out_uk.url[j] = 0;
+		out_uk.url_size = temp.readUInt16(pos); pos+=2;
+		if (out_uk.url_size  > URL_MAX_SIZE)
+		{
+            std::cerr << "ERROR wrong url size in url info "  << out_uk.url_size  << std::endl;
+            r = false;
+            return r;
+		}
+
+		if (verbose)
+		{
+            std::cout << "crypto_algo: " << out_uk.crypto_algo << " "<< std::endl;
+            std::cout << "url_size:    " << out_uk.url_size << " "<< std::endl;
+        }
+
+		for( uint32_t j = 0; j< out_uk.url_size; j++) out_uk.url[j] = temp.getdata()[pos+j];
+		if (out_uk.url_size < URL_MAX_SIZE) out_uk.url[out_uk.url_size] = 0; // rsa??
+		else out_uk.url[URL_MAX_SIZE - 1] = 0;
+
+        if (verbose)
+		{
+            std::string s(out_uk.url);
+            if ((s.size() >= 3) && (s[0]=='[') && (s[1]=='r') && (s[2]==']'))
+                std::cout << "url: [r]" << get_summary_hex(s.data()+3, s.size()-3) << " "<< std::endl;
+            else
+                std::cout << "url: " << s << " "<< std::endl;
+        }
+
+        for( uint32_t j = out_uk.url_size; j< URL_MAX_SIZE; j++) out_uk.url[j] = 0; // padding
         pos += URL_MAX_SIZE;
 
-        for( int16_t j = 0; j< 4; j++)
+        for( uint32_t j = 0; j< 4; j++)
         {
             out_uk.magic[j] = temp.getdata()[pos+j];
+        }
+        if ((out_uk.magic[0]!= 'a') ||(out_uk.magic[1]!= 'b') ||(out_uk.magic[2]!= 'c') ||(out_uk.magic[3]!= 'd') )
+        {
+            std::cerr << "ERROR wrong magic number in url info" << std::endl;
+            r = false;
+            return r;
         }
         pos += 4;
 
@@ -89,22 +137,43 @@ public:
 
         if (verbose)
         {
-            std::cout << "key_fromH " << out_uk.key_fromH << " ";
-            std::cout << "key_fromL " << out_uk.key_fromL << std::endl;
+            //std::cout << "key_fromH " << out_uk.key_fromH << " ";
+            //std::cout << "key_fromL " << out_uk.key_fromL << std::endl;
 		}
 		int32_t v = out_uk.key_fromH * BASE + out_uk.key_fromL;
 
 		if (verbose)
 		{
-            std::cout << "key_from " << v << " ";
-            std::cout << "key_size " << out_uk.key_size << std::endl;
+            std::cout << "key from: " << v << " ";
+            std::cout << "key size: " << out_uk.key_size << std::endl;
         }
 
         // zero
-        for( int16_t j = 0; j< MIN_KEY_SIZE; j++) out_uk.key[j] = 0;
+        bool is_rsa =  false;
+        if (out_uk.url[0]=='[')
+        {
+            if (out_uk.url[1]=='r')
+            {
+                is_rsa = true;
+                if (verbose)
+                {
+                    std::cout << "is_rsa " << std::endl;
+                }
+            }
+        }
+
+        if (is_rsa == false)
+        {
+            for( uint32_t j = 0; j< MIN_KEY_SIZE; j++) out_uk.key[j] = 0;
+        }
+        else
+        {
+            for( uint32_t j = 0; j< MIN_KEY_SIZE; j++) out_uk.key[j] = temp.getdata()[pos+j];
+            out_uk.key[MIN_KEY_SIZE - 1] = 0;
+        }
         pos += MIN_KEY_SIZE;
 
-		for( int16_t j = 0; j< CHKSUM_SIZE; j++)
+		for( uint32_t j = 0; j< CHKSUM_SIZE; j++)
 		{
             out_uk.checksum[j] = temp.getdata()[pos+j];
         }
@@ -138,15 +207,19 @@ public:
 		// DOWNLOAD URL FILE
 		cryptodata dataout_local;
         cryptodata dataout_other;
-		char u[URL_MAX_SIZE+1] = {0};
+        cryptodata rsa_key_data;
+        std::string embedded_rsa_key;
+
+		char u[URL_MAX_SIZE] = {0};
 
         bool is_video =  false;
         bool is_ftp   =  false;
         bool is_local =  false;
+        bool is_rsa =  false;
 
 		if (r)
 		{
-            for( int16_t j = 0; j< URL_MAX_SIZE; j++)
+            for( uint32_t j = 0; j< URL_MAX_SIZE; j++)
                 u[j] = uk.url[j];
 
             if (u[0]=='[')
@@ -155,13 +228,17 @@ public:
                 {
                     is_video = true;
                 }
-                if (u[1]=='f')
+                else if (u[1]=='f')
                 {
                     is_ftp = true;
                 }
-                if (u[1]=='l')
+                else if (u[1]=='l')
                 {
                     is_local = true;
+                }
+                else if (u[1]=='r')
+                {
+                    is_rsa = true;
                 }
             }
 
@@ -169,18 +246,23 @@ public:
             if      (is_video)   pos_url = 3;
             else if (is_ftp)     pos_url = 3;
             else if (is_local)   pos_url = 3;
+            else if (is_rsa)     pos_url = 3;
             int rc = 0;
 
             if (is_video)
             {
                 std::string s(&u[pos_url]);
+                std::cout << "video URL: " << s << std::endl;
+
                 rc = getvideo(s, file.data(), "", verbose);
             }
             else if (is_local)
             {
                 std::string s(&u[pos_url]);
                 std::string local_url = folder_local + s;
+
                 rc = getlocal(local_url.data(), dataout_local, "", verbose);
+
                 if (rc!= 0)
                 {
                     std::cerr << "ERROR with get local file, error code: " << rc << " url: " << local_url <<  " file: " << file << std::endl;
@@ -201,6 +283,26 @@ public:
                     r = false;
                 }
             }
+            else if (is_rsa)
+            {
+                std::string sURL(&u[pos_url]);
+
+                uk.key[MIN_KEY_SIZE-1] = 0;
+                std::string rsa_key(uk.key);
+
+                std::string local_rsa_db = folder_local_rsa + RSA_MY_PRIVATE_DB; // decoding
+
+                // file NOT NEEDED data in sURL.... but needed later when rsa data moved before urlinfo later - TODO
+                rc = getrsa(false, rsa_key, sURL, file.data(), local_rsa_db, embedded_rsa_key, "", verbose, use_gmp);
+                if (rc!= 0)
+                {
+                    std::cerr << "ERROR with getrsa error code: " << rc << " rsa_key: " << rsa_key <<  " local_rsa_db: " << local_rsa_db << std::endl;
+                    r = false;
+                }
+                else
+                {
+                }
+            }
             else
             {
                 rc = wget(u, file.data(), verbose);
@@ -216,7 +318,11 @@ public:
 		if (r)
 		{
 			cryptodata* pointer_datafile;
-			if (is_local == false)
+			if (is_rsa)
+            {
+                pointer_datafile = &rsa_key_data;
+            }
+			else if (is_local == false)
 			{
                 r = dataout_other.read_from_file(file);
                 pointer_datafile = &dataout_other;
@@ -229,13 +335,23 @@ public:
 
 			if (r)
 			{
+			    if (is_rsa)
+                {
+                    // use std::string embedded_rsa_key to encode message
+                    d.buffer.write(embedded_rsa_key.data(), embedded_rsa_key.size());
+                }
+
                 uint32_t pos = (uk.key_fromH * BASE) + uk.key_fromL ;
                 int32_t  key_size = uk.key_size;
+                if (verbose)
+                {
+                    std::cout << "key pos: " << pos << ", key size: " << uk.key_size << ", databuffer containing key - size: " << d.buffer.size() << std::endl;
+                }
 
                 if (pos >= d.buffer.size() - key_size)
                 {
                     std::string su(u);
-                    std::cerr << "ERROR " << "invalid web file key position: " << pos << " url: " << su << std::endl;
+                    std::cerr << "ERROR " << "invalid url file key position: " << pos << " url: " << su << std::endl;
                     r = false;
                 }
 
@@ -247,61 +363,68 @@ public:
                     int32_t databuffer_size = (int32_t)d.buffer.size();
                     if (databuffer_size < key_size)
                     {
-                        b->write(&d.buffer.getdata()[0], databuffer_size, -1);
+                        b->write(&d.buffer.getdata()[0], databuffer_size, 0);
 
                         // PADDING...
-                        char c[1];
+                        if (verbose)
+                        {
+                            std::cout << "rotating (padding) key: " << key_size -  databuffer_size << std::endl;
+                        }
+
+                        char c[1]; uint32_t rotate_pos;
                         for( int32_t j = databuffer_size; j< key_size; j++)
                         {
-                            c[0] = (char) ( (unsigned char)(j % 127) );
+                            rotate_pos = j % databuffer_size;
+                            c[0] = d.buffer.getdata()[rotate_pos];
                             b->write(&c[0], 1, -1);
                         }
                     }
                     else
                     {
-                        b->write(&d.buffer.getdata()[pos], key_size, -1);
+                        b->write(&d.buffer.getdata()[pos], key_size, 0);
                     }
 
                     if (verbose)
                     {
-                        for( int32_t j = 0; j< key_size; j++)
-                        {
-                            if (j<32) std::cout << (int)(unsigned char)b->getdata()[j] << " ";
-                            else if (j==32) {std::cout << " ... [" << key_size << "] ... ";}
-                            else if (j>key_size-32) std::cout << (int)(unsigned char)b->getdata()[j] << " ";
-                        }
-                        std::cout <<  std::endl;
+                        std::cout << "key: ";
+                        show_summary(b->getdata(), key_size);
                     }
 
-                    std::string checksum;
+                    //if (is_rsa == false)
                     {
-                        SHA256 sha;
-                        sha.update(reinterpret_cast<const uint8_t*> (d.buffer.getdata()), d.buffer.size() );
-                        uint8_t* digest = sha.digest();
-                        checksum = SHA256::toString(digest);
-                        if (verbose)
-                            std::cout << "Decryption checksum " << checksum << std::endl;
-                        delete[] digest;
-                    }
-
-                    char c;
-                    for( size_t j = 0; j< CHKSUM_SIZE; j++)
-                    {
-                        c = checksum.at(j);
-                        if (c != uk.checksum[j])
+                        std::string checksum;
                         {
-                            std::cerr << "ERROR " << "invalid web file checksum at " << j << std::endl;
+                            SHA256 sha;
+                            sha.update(reinterpret_cast<const uint8_t*> (d.buffer.getdata()), d.buffer.size() );
+                            uint8_t* digest = sha.digest();
+                            checksum = SHA256::toString(digest);
                             if (verbose)
                             {
-                                std::string su(u);
-                                for( size_t j = 0; j< CHKSUM_SIZE; j++)
-                                {
-                                    std::cout << (int)(unsigned char)uk.checksum[j] << " ";
-                                }
-                                std::cout << "url: " << su << std::endl;
+                                std::cout << "decryption key checksum: " << checksum << std::endl;
                             }
-                            r = false;
-                            break;
+                            delete[] digest;
+                        }
+
+                        char c;
+                        for( size_t j = 0; j< CHKSUM_SIZE; j++)
+                        {
+                            c = checksum.at(j);
+                            if (c != uk.checksum[j])
+                            {
+                                std::cerr << "ERROR " << "invalid key checksum at " << j << std::endl;
+                                if (verbose)
+                                {
+                                    std::string su(u);
+                                    for( size_t j = 0; j< CHKSUM_SIZE; j++)
+                                    {
+                                        std::cout << (int)(unsigned char)uk.checksum[j] << " ";
+                                    }
+                                    if (is_rsa == false)
+                                        std::cout << "url: " << su << std::endl;
+                                }
+                                r = false;
+                                break;
+                            }
                         }
                     }
                 }
@@ -353,7 +476,7 @@ public:
 
 		if (verbose)
 		{
-            std::cout <<    "\nDecryptor decode() binDES - " <<
+            std::cout <<    "decryptor decode() binDES - " <<
                             "number of blocks (8 bytes): " << nblock <<
                             ", number of keys (4 bytes): " << nkeys  << std::endl;
         }
@@ -435,7 +558,7 @@ public:
 
 		if (verbose)
 		{
-            std::cout <<    "\nDecryptor decode() idea 8_16              " <<
+            std::cout <<    "decryptor decode() idea 8_16              " <<
                             ", number of rounds : " << nround <<
                             ", number of blocks (8 bytes): " << nblock <<
                             ", number of keys (16 bytes): "  << nkeys  << std::endl;
@@ -550,7 +673,7 @@ public:
 
 		if (verbose)
 		{
-            std::cout <<    "\nDecryptor decode() salsa20 32_64           " <<
+            std::cout <<    "decryptor decode() salsa20 32_64           " <<
                             ", number of rounds : " << nround <<
                             ", number of blocks (64 bytes): " << nblock <<
                             ", number of keys (32 bytes): "   << nkeys  << std::endl;
@@ -675,7 +798,7 @@ public:
 
 		if (verbose)
 		{
-            std::cout <<    "\nDecryptor decode() twofish                 " <<
+            std::cout <<    "decryptor decode() twofish                 " <<
                             ", number of rounds : " << nround <<
                             ", number of blocks (16 bytes): " << nblock <<
                             ", number of keys (16 bytes): "   << nkeys  << std::endl;
@@ -794,7 +917,7 @@ public:
 
 		if (verbose)
 		{
-            std::cout <<    "\nDecryptor decode() binAES 16_16 - aes_type: " << (int)aes_type <<
+            std::cout <<    "decryptor decode() binAES 16_16 - aes_type: " << (int)aes_type <<
                             ", number of rounds : " << nround <<
                             ", number of blocks (16 bytes): " << nblock <<
                             ", number of keys (16 bytes): "   << nkeys  << std::endl;
@@ -933,7 +1056,8 @@ public:
 
         if (filename_puzzle.size() ==  0)
         {
-            std::cout << "WARNING empty puzzle filename (using default puzzle)" <<  std::endl;
+            if (verbose)
+                std::cout << "WARNING empty puzzle filename (using default puzzle)" <<  std::endl;
             empty_puzzle = true;
         }
         if (filename_encrypted_data.size() ==  0)
@@ -957,13 +1081,13 @@ public:
         }
 
 		bool r = true;
-		Buffer puz_key(PUZZLE_SIZE_LIM);
+		Buffer puz_key(10000);
 
 		if (r)
 		{
             if (empty_puzzle == false)
             {
-                if (puz.read_from_file(filename_puzzle, false) == false)
+                if (puz.read_from_file(filename_puzzle, true) == false)
                 {
                     std::cerr << "ERROR " << "reading puzzle file " << filename_puzzle << std::endl;
                     r = false;
@@ -1002,7 +1126,7 @@ public:
                     r = false;
                 }
 			}
-			else if (false) // no need here - puzzle crc is saved when encoding
+			else if (false) // TODO no need here - puzzle crc is saved when encoding
 			{
                 // Make qa puzzle from default puzzle
                 bool rr = true;
@@ -1068,39 +1192,36 @@ public:
 		auto file_size = encrypted_data.buffer.size();
 		if (file_size < 4)
 		{
+            std::cerr << "ERROR " << "encrypted file too small " << file_size <<  std::endl;
             r = false;
 		}
 
+		uint32_t crc_read_full_puz_key;
+		uint32_t crc_full_puz_key;
 		if (r)
 		{
-            auto crc_read_puz_key = encrypted_data.buffer.readUInt32(file_size - 4);
+            crc_read_full_puz_key = encrypted_data.buffer.readUInt32(file_size - 4);
 
-            CRC32 crc;
-            crc.update(&puz_key.getdata()[0], puz_key.size());
-            auto crc_puz_key = crc.get_hash();
-
-            if (crc_puz_key != crc_read_puz_key)
             {
-                std::cerr << "ERROR " << "Invalid puzzle"  << std::endl;
-                std::cerr << "CRC32 of puzzle key provided is     "  << crc_puz_key << std::endl;
-                std::cerr << "CRC32 of puzzle key when encoded is "  << crc_read_puz_key << std::endl;
+                CRC32 crc;
+                crc.update(&puz_key.getdata()[0], puz_key.size());
+                crc_full_puz_key = crc.get_hash();
+            }
+
+            if (crc_read_full_puz_key != crc_full_puz_key)
+            {
+                std::cerr << "ERROR " << "the provided puzzle dont match the initial one." << std::endl;
                 r = false;
             }
             else if (verbose)
             {
-                std::cout << "data sise                           "  << file_size << std::endl;
-                std::cout << "CRC32 of puzzle key provided is     "  << crc_puz_key << std::endl;
-                std::cout << "CRC32 of puzzle key when encoded is "  << crc_read_puz_key << std::endl;
+                std::cout << "DEBUG " << "the provided puzzle match the initial one: " << crc_full_puz_key << std::endl;
             }
         }
 
         if (r)
 		{
             encrypted_data.buffer.remove_last_n_char(4);
-            if (verbose)
-            {
-                std::cout << "crc of puzzle key removed from data, new size:"  << encrypted_data.buffer.size()  << std::endl;
-            }
 		}
 
 		// decode(DataFinal, pwd0) => DataN+urlkeyN+NITER  urlkeyN=>keyN
@@ -1251,6 +1372,7 @@ public:
                             Buffer temp(URLINFO_SIZE);
                             data_temp_next.get_last(URLINFO_SIZE, temp);
 
+                            std::cout << std::endl;
                             if (read_urlinfo(temp, uk) == false)
                             {
                                 r = false;
@@ -1317,6 +1439,7 @@ public:
 	std::string filename_decrypted_data;
 	std::string staging;
 	std::string folder_local;
+	std::string folder_local_rsa;
 
     cryptodata  data_temp;
     cryptodata  data_temp_next;
@@ -1326,7 +1449,9 @@ public:
     std::string encryped_ftp_pwd;
     std::string known_ftp_server;
     int         staging_cnt=0;
+    bool        use_gmp;
 };
 
+}
 
 #endif

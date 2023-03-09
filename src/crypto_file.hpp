@@ -10,8 +10,25 @@
 #include "Buffer.hpp"
 #include "SHA256.h"
 #include "crypto_const.hpp"
+#include "crypto_parsing.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
+#include "../src/qa/rsa_gen.hpp"
+
+#ifdef _WIN32
+#else
+// LINKER: -lgmp -lgmpxx
+#include "qa/RSA-GMP/RSAGMP.h"
+#include "qa/RSA-GMP/RSAGMPUtils.h"
+#endif
+
+namespace cryptoAL
+{
+std::string get_summary_hex(const char* buffer, uint32_t buf_len);
+
+// Generate RSA key and dump it - max is 16384 bits
+// openssl genrsa -out key.pem 16384
+// openssl rsa -modulus -in key.pem -text -noout
 
 int wget(const char *in, const char *out, bool verbose);
 
@@ -54,6 +71,190 @@ int getvideo(std::string url, std::string outfile, std::string options = "", boo
     return r;
 }
 
+int getrsa( bool to_encode, std::string rsa_key_name, std::string rsa_data, std::string outfile,
+            std::string local_rsa_db, std::string& embedded_rsa_key,
+            std::string options = "", bool verbose=false, bool use_gmp = false, bool SELF_TEST = false)
+{
+    options = options;
+    if (verbose)
+    {
+        std::cout << "getrsa to_encode: "       << to_encode << std::endl;
+        std::cout << "getrsa rsa_key_name: "    << rsa_key_name << std::endl;
+        if (to_encode == false)
+            std::cout << "getrsa rsa_data: "    << get_summary_hex(rsa_data.data(),rsa_data.size())  << " size:" << rsa_data.size()<< std::endl;
+        std::cout << "getrsa outfile: "         << outfile << std::endl;
+        std::cout << "getrsa local_rsa_db: "    << local_rsa_db << std::endl;
+    }
+
+    int r = 0;
+
+    // Read
+    std::map< std::string, generate_rsa::rsa_key > map_rsa;
+
+    if (fileexists(local_rsa_db) == true)
+    {
+        std::ifstream infile;
+        infile.open (local_rsa_db, std::ios_base::in);
+        infile >> bits(map_rsa);
+        infile.close();
+
+        bool found = false;
+        bool ok = true;
+        for(auto& [user, k] : map_rsa)
+        {
+            if (user == rsa_key_name)
+            {
+                found = true;
+                cryptodata temp;
+                uint32_t key_len_in_bytes = k.key_size_in_bits/8;
+
+                if (to_encode)
+                {
+                    if (key_len_in_bytes < RSAKEYLEN_MIN_SIZE)
+                    {
+                        std::cerr << "ERROR rsa key len too small in URL: " << key_len_in_bytes*8 << std::endl;
+                        ok = false;
+                    }
+                    else if (key_len_in_bytes > RSAKEYLEN_MAX_SIZE)
+                    {
+                        std::cerr << "ERROR rsa key len too big in URL: " << key_len_in_bytes*8 << std::endl;
+                        ok = false;
+                    }
+                    else if (key_len_in_bytes > URL_MAX_SIZE - 3)
+                    {
+                        std::cerr << "ERROR rsa key len too big in URL:: " << key_len_in_bytes*8 << std::endl;
+                        ok = false;
+                    }
+
+                    if (ok)
+                    {
+                        embedded_rsa_key = generate_base64_random_string(key_len_in_bytes - 11);
+                        if (verbose)
+                        {
+                            std::cout << "getrsa rsa key_len_in_bytes: " << key_len_in_bytes << std::endl;
+                            std::cout << "getrsa rsa_data: " << get_summary_hex(embedded_rsa_key.data(),embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
+                        }
+
+                        std::string encoded_rsa_key;
+#ifdef _WIN32
+                        {
+                            typeuinteger e = k.encode(embedded_rsa_key);
+                            encoded_rsa_key = k.to_base64(e);
+                        }
+#else
+                        if (use_gmp == true)
+                        {
+                            RSAGMP::Utils::mpzBigInteger modulus(k.base64_to_base10(k.s_n) );
+                            RSAGMP::Utils::mpzBigInteger pub(k.base64_to_base10(k.s_e));
+                            RSAGMP::Utils::mpzBigInteger message(k.base64_to_base10(embedded_rsa_key));
+                            RSAGMP::Utils::mpzBigInteger message1 = RSAGMP::Encrypt(message, pub, modulus);
+                            std::string s_gmp = k.base10_to_base64(message1.get_str());
+                            encoded_rsa_key = s_gmp;
+                            
+                            if (SELF_TEST)
+                            {
+                                RSAGMP::Utils::mpzBigInteger priv(k.base64_to_base10(k.s_d));
+                                RSAGMP::Utils::mpzBigInteger message2 = RSAGMP::Decrypt(message1, priv, modulus);
+                                std::string s_gmp2 = k.base10_to_base64(message2.get_str());
+                                if (s_gmp2 != embedded_rsa_key)
+                                {
+                                    std::cout << "ERROR encryption decryption" << std::endl;
+                                    std::cout << "s_gmp2:           " << get_summary_hex(s_gmp2.data(),s_gmp2.size()) << " size:" << s_gmp2.size() << std::endl;
+                                    std::cout << "embedded_rsa_key: " << get_summary_hex(embedded_rsa_key.data(),embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
+                                    throw "ERROR encryption decryption";
+                                } 
+                                else
+                                {
+                                    std::cout << "OK SELF TEST encryption decryption" << std::endl;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            typeuinteger  e = k.encode(embedded_rsa_key);
+                            encoded_rsa_key = k.to_base64(e);
+                        }
+#endif
+                        if (encoded_rsa_key.size() > URL_MAX_SIZE - 3)
+                        {
+                            std::cout << "ERROR getrsa data encoded value too big for URL_MAX_SIZE " << encoded_rsa_key.size()  << " > " << URL_MAX_SIZE - 3 << std::endl;
+                            ok = false;
+                        }
+                        else
+                        {
+                            temp.buffer.write(encoded_rsa_key.data(), encoded_rsa_key.size());
+                            if (verbose)
+                            {
+                                std::cout << "getrsa data encoded : " << get_summary_hex(encoded_rsa_key.data(), encoded_rsa_key.size())  << " size:" << encoded_rsa_key.size() << std::endl;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+#ifdef _WIN32
+                    {
+                        typeuinteger  v = k.val(rsa_data);
+                        embedded_rsa_key = k.decode(v);
+                    }
+#else
+                    if (use_gmp == true)
+                    {
+                        RSAGMP::Utils::mpzBigInteger modulus(k.base64_to_base10(k.s_n) );
+                        RSAGMP::Utils::mpzBigInteger priv(k.base64_to_base10(k.s_d));
+                        RSAGMP::Utils::mpzBigInteger message(k.base64_to_base10(rsa_data));
+                        RSAGMP::Utils::mpzBigInteger message1 = RSAGMP::Decrypt(message, priv, modulus);
+                        std::string s_gmp = k.base10_to_base64(message1.get_str());
+                        embedded_rsa_key = s_gmp;
+                    }
+                    else
+                    {
+                        typeuinteger  v = k.val(rsa_data);
+                        embedded_rsa_key = k.decode(v);
+                    }
+#endif
+                    temp.buffer.write(embedded_rsa_key.data(), embedded_rsa_key.size());
+                    if (verbose)
+                    {
+                        std::cout << "getrsa rsa key_len_in_bytes: " << key_len_in_bytes << std::endl;
+                        if (use_gmp == false)
+                            std::cout << "getrsa data decoded : " << get_summary_hex(embedded_rsa_key.data(), embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
+                        else
+                           std::cout << "getrsa s_gmp decoded : " << get_summary_hex(embedded_rsa_key.data(), embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
+                    }
+                }
+
+                if (ok)
+                {
+                    ok = temp.save_to_file(outfile);
+                }
+                else
+                {
+                    r = -1;
+                }
+
+                break;
+            }
+        }
+
+        if (found == false)
+        {
+            std::cerr << "ERROR getrsa rsa_key_name not found: " << rsa_key_name << std::endl;
+            r = -1;
+        }
+    }
+    else
+    {
+        std::cerr << "ERROR getrsa no local_rsa_db: " << local_rsa_db << std::endl;
+        r = -1;
+    }
+
+    if (verbose)
+    {
+    }
+    return r;
+}
+
 static std::string s_last_local_file = "";
 static bool s_use_last = false;
 int getlocal(std::string url, cryptodata& dataout, std::string options = "", bool verbose=false)
@@ -61,7 +262,7 @@ int getlocal(std::string url, cryptodata& dataout, std::string options = "", boo
     options=options;
     if (verbose)
     {
-        std::cout << "getlocal in:  " << url << std::endl;
+        std::cout << "getlocal input:  " << url << std::endl;
     }
 
     std::string nfile;
@@ -103,7 +304,17 @@ int getlocal(std::string url, cryptodata& dataout, std::string options = "", boo
     }
 
     bool r = dataout.read_from_file(nfile);
-    if (r) return 0;
+    auto sz = dataout.buffer.size();
+
+    if (verbose)
+    {
+        std::cout << "reading local file: "  << nfile << " " << sz << std::endl;
+    }
+
+    if (r)
+    {
+        return 0;
+    }
 
     return -1;
 }
@@ -294,7 +505,7 @@ std::string HEX(std::string sfile, long long pos, long long keysize)
          keysize = 1;
     }
 
-       cryptodata d;
+    cryptodata d;
     r = d.read_from_file(sfile);
     if (r == false)
     {
@@ -311,7 +522,7 @@ std::string HEX(std::string sfile, long long pos, long long keysize)
 
     Buffer b;
     b.increase_size((uint32_t)keysize);
-    b.write(&d.buffer.getdata()[pos], (uint32_t)keysize, -1);
+    b.write(&d.buffer.getdata()[pos], (uint32_t)keysize, 0);
 
     std::string hex;
     char c;
@@ -322,6 +533,28 @@ std::string HEX(std::string sfile, long long pos, long long keysize)
     }
 
     return hex;
+}
+
+void show_summary(const char* buffer, uint32_t buf_len)
+{
+    for( uint32_t j = 0; j< buf_len; j++)
+    {
+        if (j<16) std::cout << (int)(unsigned char)buffer[j] << " ";
+        else if (j==16) {std::cout << " ... [" << buf_len << "] ... ";}
+        else if (j>buf_len-16) std::cout << (int)(unsigned char)buffer[j] << " ";
+    }
+    std::cout <<  std::endl;
+}
+std::string get_summary_hex(const char* buffer, uint32_t buf_len)
+{
+    std::string s;
+    for( uint32_t j = 0; j< buf_len; j++)
+    {
+        if (j<16) {s+= makehex((char)buffer[j], 2); s+= " ";}
+        else if (j==16) {s+= " ... ["; s+= std::to_string(buf_len); s+= "] ... ";}
+        else if (j>buf_len-16) { s+=  makehex((char)buffer[j], 2); s+=" ";}
+    }
+    return s;
 }
 
 //The following commands will get you the IP address list to find public IP addresses for your machine:
@@ -337,5 +570,6 @@ std::string HEX(std::string sfile, long long pos, long long keysize)
 //    curl bot.whatismyipaddress.com
 //    curl ipecho.net/plain
 
+}
 #endif
 
