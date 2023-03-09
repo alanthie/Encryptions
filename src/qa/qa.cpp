@@ -148,8 +148,8 @@ void  menu()
         {
             qaclass qa;
             std::cout << "Enter folder of qa binary random data: ";
-             std::string sf;
-             std::cin >> sf;
+            std::string sf;
+            std::cin >> sf;
 
             std::cout << "Enter puzzle filename (0 = defaut): ";
             std::string pf;
@@ -163,89 +163,11 @@ void  menu()
 
             qa.resolve_puzzle(pf, opf, sf);
          }
-/*
+
    		else if (choice == 6)
         {
-            qaclass qa;
-            generate_rsa::PRIVATE_KEY key;
+        }
 
-            std::cout << "Enter rsa key length in bits (0 = defaut = 2048): ";
-            std::string snum;
-            std::cin >> snum;
-            long long klen = str_to_ll(snum);
-            if (klen==-1) continue;
-            if (klen == 0) klen = 2048;
-
-            std::cout << "Enter path for rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
-            std::string pathdb;
-            std::cin >> pathdb;
-            if (pathdb == "0") pathdb = "./";
-            std::string fileRSADB = pathdb + RSA_MY_PRIVATE_DB
-
-            bool result = qa.generate_rsa(key, klen);
-            if (result == true)
-            {
-                generate_rsa::rsa_key rkey;
-                key.to_rsa_key(rkey);
-
-                std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
-                if (fileexists(fileRSADB) == true)
-                {
-                    std::ifstream infile;
-                    infile.open (fileRSADB, std::ios_base::in);
-                    infile >> bits(map_rsa_private);
-                    infile.close();
-                }
-
-                // backup
-                {
-                    std::ofstream outfile;
-                    outfile.open(fileRSADB + ".bck", std::ios_base::out);
-                    outfile << bits(map_rsa_private);
-                    outfile.close();
-                }
-
-                map_rsa_private.insert(std::make_pair(std::string("MY_RSAKEY_") + std::to_string(klen) + std::string("_") + get_current_time_and_date(),  rkey));
-
-  // TEST
-
-                 std::cout << "key size: " << k.key_size_in_bits << std:: endl;
-                     std::cout << "key public  n (base 10): " << k.get_n()<< std:: endl;
-                     std::cout << "key public  e (base 10): " << k.get_e() << std:: endl;
-
-
-                   std::cerr << "ERROR encoding/decoding with converted rkey" << std:: endl;
-                }
-                else
-                {
-                    // backup
-                    {
-                        std::ofstream outfile;
-                        outfile.open(fileRSADB + ".bck", std::ios_base::out);
-                        outfile << bits(map_rsa_private);
-                        outfile.close();
-                    }
-
-std::string keyname = std::string("MY_RSAKEY_") + std::to_string(klen) + std::string("_") + get_current_time_and_date();
-                    map_rsa_private.insert(std::make_pair(keyname,  rkey));
-
-                    {
-                        std::ofstream outfile;
-                        outfile.open(fileRSADB, std::ios_base::out);
-                        outfile << bits(map_rsa_private);
-                       outfile.close();
-                    }
-std::cout << "key saved as: "  << keyname << " in " << fileRSADB << std:: endl;
-
-                 }
-             else
-            {
-            std::cerr << "no file: "  << fileRSADB << std:: endl;
-                return ;            }
-
-
-            }
-*/
 		else if (choice == 7)
         {
 			std::cout << "Enter path for rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
