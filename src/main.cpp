@@ -16,6 +16,7 @@
 #include "crypto_test.hpp"
 #include "crypto_batch.hpp"
 #include "crypto_package.hpp"
+#include"crypto_parsing.hpp"
 #include "encrypt.h"
 #include "data.hpp"
 
@@ -39,6 +40,8 @@
 //  crypto decode -i msg2.zip.encrypted -o msg2.zip  -v 1 -l ./AL_SAM/
 // ------------------------------------------------------------------------------------------------------------
 
+namespace cryptoAL
+{
 
 std::string VERSION = "0.5";
 
@@ -297,6 +300,14 @@ int main_crypto(int argc, char **argv)
             encode_command.add_argument("-fp", "--encryped_ftp_pwd")
                 .default_value(std::string(""))
                 .help("specify list of ftp password (encrypted with string_encode)");
+
+            encode_command.add_argument("-g", "--gmp")
+                .default_value(std::string(""))
+                .help("use gmp");
+
+            encode_command.add_argument("-t", "--selftest")
+                .default_value(std::string(""))
+                .help("selftest");
         }
 
         // Decode subcommand
@@ -343,6 +354,11 @@ int main_crypto(int argc, char **argv)
             decode_command.add_argument("-fp", "--encryped_ftp_pwd")
                 .default_value(std::string(""))
                 .help("specify list of ftp password (encrypted with string_encode)");
+
+            decode_command.add_argument("-g", "--gmp")
+                .default_value(std::string(""))
+                .help("use gmp");
+
         }
 
         // Add the subcommands to the main parser
@@ -656,6 +672,8 @@ int main_crypto(int argc, char **argv)
             auto local_path = cmd.get<std::string>("--local");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
+            auto gmp = cmd.get<std::string>("--gmp");
+            auto selftest = cmd.get<std::string>("--selftest");
             auto keyfactor = cmd.get<std::string>("--keyfactor");
             auto known_ftp_server  = cmd.get<std::string>("--known_ftp_server");
             auto encryped_ftp_user = cmd.get<std::string>("--encryped_ftp_user");
@@ -685,6 +703,8 @@ int main_crypto(int argc, char **argv)
 
             bool verbose = verb.size() > 0 ? true : false;
             bool keeping = keep.size() > 0 ? true : false;
+            bool bgmp = gmp.size() > 0 ? true : false;
+            bool bselftest = selftest .size() > 0 ? true : false;
 
             std::cout << "crypto ENCODING..." << std::endl;
             encryptor encr(url_path,
@@ -695,12 +715,15 @@ int main_crypto(int argc, char **argv)
                 output_path,
                 staging_path,
                 local_path,
+                "",
                 verbose,
                 keeping,
                 encryped_ftp_user,
                 encryped_ftp_pwd,
                 known_ftp_server,
-                ikeyfactor);
+                ikeyfactor,
+                bgmp,
+                bselftest);
 
             if (encr.encrypt(false) == true)
             {
@@ -748,6 +771,7 @@ int main_crypto(int argc, char **argv)
                 output_path,
                 staging_path,
                 local_path,
+                "",
                 verbose,
                 keeping,
                 encryped_ftp_user,
@@ -799,6 +823,8 @@ int main_crypto(int argc, char **argv)
     }
     return 0;
 }
+}
+
 
 int main(int argc, char **argv)
 {
@@ -807,7 +833,7 @@ int main(int argc, char **argv)
 
     tstart = std::chrono::steady_clock::now();
 
-    int r = main_crypto(argc, argv);
+    int r = cryptoAL::main_crypto(argc, argv);
 
     tend = std::chrono::steady_clock::now();
     std::cout   << "Elapsed time in seconds: "

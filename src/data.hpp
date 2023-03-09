@@ -7,6 +7,9 @@
 #include <fstream>
 #include <stdio.h>
 
+namespace cryptoAL
+{
+
 class cryptodata
 {
 public:
@@ -181,5 +184,5 @@ bool is_file_same(std::string filename1, std::string filename2)
     return true;
 }
 
-
+}
 #endif

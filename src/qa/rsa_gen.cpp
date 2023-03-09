@@ -22,25 +22,7 @@
 
 namespace generate_rsa
 {
-// uinteger_t is BOGUS modulo dont work for very large number
-#ifdef USING_uinteger_t
-typeuinteger to_uinteger(typebiginteger a)
-{
-    if (a < 0)
-    {
-        a = a.absolute();
-    }
-    typeuinteger r(a.getNumber()); // string
-    return r;
-}
-typebiginteger to_biginteger(typeuinteger a)
-{
-    std::stringstream ss;
-    ss << a;
-    typebiginteger r(ss.str());
-    return r;
-}
-#endif
+#undef USING_uinteger_t
 
 // Avoid any debug-related output including progress
 #define NO_OUTPUT

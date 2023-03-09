@@ -10,7 +10,6 @@ namespace cryptoAL
 
 const std::string BASEDIGIT10 = "0123456789";
 const std::string BASEDIGIT64 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+="; // NOT STANDARD
-//std::map<uint8_t, int> mapDIGIT64;
 
 constexpr static uint32_t MAX_RSA_BITS          = 16384*3;   // 3x openssl safe limit!
 const std::string RSA_MY_PRIVATE_DB             = "rsa_my_private.db";   	// (n,e,d) it includes public (n,e) and private key (n,d)

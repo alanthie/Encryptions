@@ -18,6 +18,9 @@
 #include "decryptor.hpp"
 #include "crypto_test.hpp"
 
+namespace cryptoAL
+{
+
 bool batch(std::string mode, std::string inifile, bool verbose)
 {
     if (fileexists(inifile) == false)
@@ -190,12 +193,15 @@ bool batch(std::string mode, std::string inifile, bool verbose)
                        folder_encoder_output + encoding_output_file_encrypted,
                        folder_staging,
                        folder_local,
+                       "",
                        verbose,
                        (keep_staging == "true") ? true:false,
                        encryped_ftp_user,
                        encryped_ftp_pwd,
                        known_ftp_server,
-                       ikeyfactor);
+                       ikeyfactor,
+                       false,
+                       false);
 
         if (encr.encrypt(true) == true)
         {
@@ -248,6 +254,7 @@ bool batch(std::string mode, std::string inifile, bool verbose)
                        folder_decoder_output + decoding_output_msg_unencrypted,
                        folder_staging,
                        folder_local,
+                       "",
                        verbose,
                        (keep_staging == "true") ? true:false,
                        encryped_ftp_user,
@@ -268,5 +275,7 @@ bool batch(std::string mode, std::string inifile, bool verbose)
     }
 
 	return true;
+}
+
 }
 #endif

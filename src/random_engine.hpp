@@ -5,18 +5,35 @@
 #include "data.hpp"
 #include "rng.h"
 
+namespace cryptoAL
+{
+
+
 class random_engine
 {
   public:
     std::random_device                    rd;
     std::mt19937                          mt;
-    //std::minstd_rand                    mt;
     std::uniform_real_distribution<double>  dist;
 
     random_engine() : rd{}, mt{rd()}, dist{0.0, 1.0}
     {
         seed();
     }
+
+#ifdef _WIN32
+    static uint64_t getTickCount()
+    {
+        return GetTickCount();
+    }
+#else
+    static uint64_t getTickCount() // ms
+    {
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        return (uint64_t)(ts.tv_nsec / 1000000) + ((uint64_t)ts.tv_sec * 1000ull);
+    }
+#endif
 
     double get_rand()
     {
@@ -25,7 +42,7 @@ class random_engine
 
     void seed()
     {
-        srand ((unsigned int)time(NULL));
+        srand ((unsigned int)getTickCount());
         int n = rand() % 100;
         for (int i=0;i<n;i++) get_rand(); // random seed
     }
@@ -178,5 +195,111 @@ bool generate_binary_random_file(std::string filename, long long Nk, long num_fi
     return r;
 }
 
+
+
+std::string generate_base10_random_string(long long N)
+{
+    std::string r;
+    int digit;
+
+#ifdef _WIN32
+    uint32_t LIM = UINT_MAX;
+#else
+    uint32_t LIM = std::numeric_limits<uint32_t>::max();
+#endif
+
+    srand ((unsigned int)random_engine::getTickCount());
+    uint32_t n;
+    random_engine rd;
+    long long t;
+
+    rng::tsc_seed seed;
+    rng::rng128 gen(seed());
+
+    {
+        for(long long i=0;i<N;i++)
+        {
+            if (i%2 == 0)
+                n = (uint32_t)(rd.get_rand() * LIM);
+            else
+                n = gen() % LIM;
+
+            digit = (int)(n % 10);
+            if ((i==0) && (digit==0)) digit = 1;
+            r += (digit +'0');
+
+            t = (long long)(rd.get_rand() * 3);
+            for(long long j=0;j<t;j++)
+            {
+                rd.get_rand();
+                gen();
+            }
+            if (i%20 == 0)
+                srand ((unsigned int)random_engine::getTickCount());
+
+            t = rand() % 5;
+            for(long long j=0;j<t;j++)
+            {
+                rd.get_rand();
+                gen();
+            }
+       }
+    }
+    return r;
+}
+
+
+std::string generate_base64_random_string(long long N)
+{
+    std::string r;
+    int digit;
+
+#ifdef _WIN32
+    uint32_t LIM = UINT_MAX;
+#else
+    uint32_t LIM = std::numeric_limits<uint32_t>::max();
+#endif
+
+    srand ((unsigned int)time(NULL));
+    srand ((unsigned int)random_engine::getTickCount());
+    uint32_t n;
+    random_engine rd;
+    long long t;
+
+    rng::tsc_seed seed;
+    rng::rng128 gen(seed());
+
+    {
+        for(long long i=0;i<N;i++)
+        {
+            if (i%2 == 0)
+                n = (uint32_t)(rd.get_rand() * LIM);
+            else
+                n = gen() % LIM;
+
+            digit = (int)(n % 64);
+            if ((i==0) && (BASEDIGIT64[i]=='0')) digit = 1;
+            r += BASEDIGIT64[digit];
+
+            t = (long long)(rd.get_rand() * 3);
+            for(long long j=0;j<t;j++)
+            {
+                rd.get_rand();
+                gen();
+            }
+            if (i%20 == 0)
+               srand ((unsigned int)random_engine::getTickCount());
+
+            t = rand() % 5;
+           for(long long j=0;j<t;j++)
+            {
+                rd.get_rand();
+                gen();
+            }
+        }
+    }
+    return r;
+}
+}
 #endif
 

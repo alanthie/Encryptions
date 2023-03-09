@@ -2,6 +2,7 @@
 #define _INCLUDES_crypto_test
 
 #include "crypto_const.hpp"
+#include "crypto_file.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
 #include "DES.h"
@@ -10,6 +11,8 @@
 #include "Salsa20.h"
 #include "IDEA.hpp"
 
+namespace cryptoAL
+{
 
 // ./crypto test -i manywebkey
 void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false, bool verb = false, std::string file_msg = "/msg.txt")
@@ -30,7 +33,7 @@ void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false,
         FOLDER = folder;
     }
 
-    if(fs::is_directory(FOLDER)==false)
+    if(std::filesystem::is_directory(FOLDER)==false)
     {
         std::cerr << "ERROR test folder is not a directory " << FOLDER << std::endl;
         return;
@@ -76,6 +79,7 @@ void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false,
                         BASE_FOLDER + file_msg_encrypted,
                         "",
                         "",
+                        "",
                         verb);
 
         if (encr.encrypt(disable_netw) == true)
@@ -83,6 +87,7 @@ void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false,
             decryptor decr( encr.filename_full_puzzle,
                             encr.filename_encrypted_data,
                             FOLDER + TESTCASE + "/" + TEST + file_msg_decrypted,
+                            "",
                             "",
                             "",
                             verb
@@ -677,6 +682,6 @@ void test_core(bool verbose = true)
     }
 }
 
-
+}
 #endif
 

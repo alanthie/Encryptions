@@ -11,6 +11,8 @@
 #include "crypto_file.hpp"
 #include "data.hpp"
 
+namespace cryptoAL
+{
 
 class puzzle
 {
@@ -28,6 +30,11 @@ public:
     };
 
     puzzle(bool verb = false) {verbose = verb;}
+
+    void set_checksum(std::string chk)
+    {
+        chksum_puzzle = chk;
+    }
 
     void remove_partial(std::string& a)
     {
@@ -135,7 +142,7 @@ public:
         }
 
         //auto sztempinitial =  temp.buffer.size();
-        std::string sc = CHKSUM_TOKEN + " puzzle :  ";
+		std::string sc = std::string("\n") + CHKSUM_TOKEN + " puzzle : ";
         auto sz =  temp.buffer.size() + sc.size();
         std::uint32_t sz_padding = 0;
         if (sz % PADDING_MULTIPLE != 0)
@@ -144,7 +151,6 @@ public:
             char c[1] = {' '};
             for(std::uint32_t i=0;i<sz_padding;i++)
             {
-                if (i==sz_padding - 1) c[0] = '\n';
                 temp.buffer.write(&c[0], 1, -1);
             }
 
@@ -162,19 +168,29 @@ public:
 
     std::string checksum()
     {
-        cryptodata temp;
-        make_puzzle_before_checksum(temp);
+		uint8_t* digest = nullptr;
+        std::string s;
 
-        SHA256 sha;
-        sha.update(reinterpret_cast<const uint8_t*> (temp.buffer.getdata()), temp.buffer.size() );
-        uint8_t* digest = sha.digest();
-        std::string s = SHA256::toString(digest);
-//        if (verbose)
-//        {
-//            std::cout << "DEBUG: chksum of puzzle, size puzzle: " << temp.buffer.size() << " chksum digest: " << s << std::endl;
-//        }
-        delete[] digest;
+        try
+        {
+       		cryptodata temp;
+            make_puzzle_before_checksum(temp);
 
+           	SHA256 sha;
+          	sha.update(reinterpret_cast<const uint8_t*> (temp.buffer.getdata()), temp.buffer.size() );
+
+			uint8_t* digest = sha.digest();
+			std::string s = SHA256::toString(digest);
+			delete[] digest;
+		}
+        catch(...)
+        {
+            std::cerr << "checksum exception "<< " \n";
+            {
+                delete[] digest;
+                digest = nullptr;
+            }
+		}
         return s;
     }
 
@@ -255,7 +271,7 @@ public:
         cryptodata temp;
         make_puzzle_before_checksum(temp);
 
-        std::string s = CHKSUM_TOKEN + " puzzle : " + chksum_puzzle + "\n";
+        std::string s = std::string("\n") + CHKSUM_TOKEN + " puzzle : " + chksum_puzzle; // + "\n";
         temp.buffer.write(s.data(), (uint32_t)s.size(), -1);
 
         bool r = temp.save_to_file(filename);
@@ -511,6 +527,6 @@ public:
     bool verbose;
 };
 
-
+}
 
 #endif

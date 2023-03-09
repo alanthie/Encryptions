@@ -12,6 +12,10 @@
 #include "crc32a.hpp"
 #include "puzzle.hpp"
 
+namespace cryptoAL
+{
+
+
 class crypto_package
 {
 public:
@@ -316,7 +320,7 @@ public:
     }
 
     bool pack_internal( cryptodata& input_enc_puzzle, std::string enc_data_file, std::string output_crypto_file,
-                        char* puzzle_enc_key, std::uint32_t puzzle_enc_key_size, uint32_t crc_puz_key,
+                        char* puzzle_enc_key, std::uint32_t puzzle_enc_key_size, std::uint32_t crc_qa_puz_key,
                         std::string hint = "")
     {
         bool r = true;
@@ -336,8 +340,8 @@ public:
             return false;
         }
 
-        cryptodata          input_enc_data;
-        cryptodata          output_data;
+		cryptodata  input_enc_data;
+        cryptodata  output_data;
 
         if (input_enc_data.read_from_file(enc_data_file) == false)
         {
@@ -347,26 +351,26 @@ public:
 
 
         // Read from input_enc_data
-        uint32_t crc_puz_key_in_data = 0;
+        uint32_t crc_qa_puz_key_in_data = 0;
         uint32_t file_size = (uint32_t)input_enc_data.buffer.size();
         if (file_size >= 4)
         {
-            crc_puz_key_in_data = input_enc_data.buffer.readUInt32(file_size - 4);
+            crc_qa_puz_key_in_data = input_enc_data.buffer.readUInt32(file_size - 4);
         }
 
-        if (crc_puz_key != crc_puz_key_in_data)
+        if (crc_qa_puz_key != crc_qa_puz_key_in_data)
         {
-            std::cerr << "ERROR " << "Invalid puzzle"  << std::endl;
-            std::cout << "data size                           "  << file_size << std::endl;
-            std::cerr << "CRC32 of puzzle key provided is     "  << crc_puz_key << std::endl;
-            std::cerr << "CRC32 of puzzle key when encoded is "  << crc_puz_key_in_data << std::endl;
+            std::cerr << "ERROR " << "Invalid qa puzzle"  << std::endl;
+            std::cout << "data size                              "  << file_size << std::endl;
+            std::cerr << "CRC32 of qa puzzle key provided is     "  << crc_qa_puz_key << std::endl;
+            std::cerr << "CRC32 of qa puzzle key when encoded is "  << crc_qa_puz_key_in_data << std::endl;
             return false;
         }
         else if (verbose)
         {
-            std::cout << "data size                           "  << file_size << std::endl;
-            std::cout << "CRC32 of puzzle key provided is     "  << crc_puz_key << std::endl;
-            std::cout << "CRC32 of puzzle key when encoded is "  << crc_puz_key_in_data << std::endl;
+            std::cout << "data size                              "  << file_size << std::endl;
+            std::cout << "CRC32 of qa puzzle key provided is     "  << crc_qa_puz_key << std::endl;
+            std::cout << "CRC32 of qa puzzle key when encoded is "  << crc_qa_puz_key_in_data << std::endl;
         }
 
         std::uint32_t sz_input_enc_puzzle = input_enc_puzzle.buffer.size();
@@ -643,5 +647,5 @@ public:
 
 	bool verbose = false;
 };
-
+}
 #endif
