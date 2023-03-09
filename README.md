@@ -7,6 +7,7 @@ Multiple encryption keys for one message to encrypt.
                      public web files, 
                      public video web files (using youtube-dl), 
                      user/password protected ftp files].
+[Embedded random keys automatically generated and protected by public/private RSA keys].
 </pre>
 
 Multiple encryption algorithms for one message to encrypt.
@@ -26,9 +27,7 @@ the key length must be at least as large as the message and only used once
 Example, encodes a file into an encrypted file
 <pre>
 ./crypto encode -h
-Usage: encode [-h] --input VAR --output VAR --puzzle VAR --qapuzzle VAR --fullpuzzle VAR [--url VAR] 
-              [--staging VAR] [--local VAR] [--keep VAR] [--keyfactor VAR] 
-              [--known_ftp_server VAR] [--encryped_ftp_user VAR] [--encryped_ftp_pwd VAR]
+Usage: encode [-h] --input VAR [--output VAR] [--puzzle VAR] [--qapuzzle VAR] [--fullpuzzle VAR] [--url VAR] [--staging VAR] [--local VAR] [--keep VAR] [--keyfactor VAR] [--known_ftp_server VAR] [--encryped_ftp_user VAR] [--encryped_ftp_pwd VAR] [--gmp VAR] [--selftest VAR]
 
 Encodes a file into an encrypted file
 
@@ -36,10 +35,10 @@ Optional arguments:
   -h, --help              	shows help message and exits 
   -v, --version           	prints version information and exits 
   -i, --input             	specify the input file. [required]
-  -o, --output            	specify the output encrypted file. [required]
-  -p, --puzzle            	specify the input puzzle file. [required]
-  -q, --qapuzzle          	specify the output qa puzzle file. [required]
-  -f, --fullpuzzle        	specify the output full puzzle file. [required]
+  -o, --output            	specify the output encrypted file (default to <input path>.encrypted) [default: ""]
+  -p, --puzzle            	specify the input (optional) puzzle file. [default: ""]
+  -q, --qapuzzle          	specify the output qa puzzle file (default to <puzzle path>.qa) [default: ""]
+  -f, --fullpuzzle        	specify the output (optional) full puzzle file. [default: ""]
   -u, --url               	specify the (optional input) url list file. [default: ""]
   -s, --staging           	specify the staging folder. [default: ""]
   -l, --local             	specify the local folder of known contents. [default: ""]
@@ -49,6 +48,9 @@ Optional arguments:
   -fs, --known_ftp_server 	specify list of ftp protected server [default: ""]
   -fu, --encryped_ftp_user	specify list of ftp username (encrypted with string_encode) [default: ""]
   -fp, --encryped_ftp_pwd 	specify list of ftp password (encrypted with string_encode) [default: ""]
+  -g, --gmp               	use gmp [default: ""]
+  -t, --selftest          	selftest [default: ""]
+
   
 Output:
 Encryptor encode() binDES - number of blocks (4 bytes): 29584, number of keys (4 bytes): 114400
@@ -118,6 +120,7 @@ Overview:
 ![Alt text](/Doc/overview2.png?raw=true "Overview")
 
 Example of urls.txt:
+<pre>
 ;Web files
 https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz
 https://i.postimg.cc/ZKGMV8SP/Screenshot-from-2023-02-23-19-39-28.png
@@ -149,6 +152,28 @@ Local files (like shared USB)
 [r]MY_RSAKEY_4096_2023-03-06_19:13:17
 </pre>
  
+A tool (qa) for various tasks
+<pre>
+====================================
+Program version  : v0.1_2023-03-09
+Select a function: 
+====================================
+0. Quit
+*. Last choice
+1. Custom F(n)
+2. Custom P(n)
+3. HEX(file, position, keysize)
+4. Make random puzzle from shared binary (like USB keys) data
+5. Resolve puzzle
+Obsolete 6. Generate RSA key (slow)
+7. View my private RSA key
+8. View other public RSA key
+9. Extract my public RSA key to file
+10. Generate RSA key with openssl command line (fastest)
+11. Test RSA GMP key generator
+12. Generate RSA key w
+</pre>
+
 License
 <pre>
 Free for personal usage
