@@ -171,6 +171,7 @@ int getrsa( bool to_encode, std::string rsa_key_name, std::string rsa_data, std:
                         }
                         else
                         {
+                            std::cout << "WARNING not using GMP" << std::endl;
                             typeuinteger  e = k.encode(embedded_rsa_key);
                             encoded_rsa_key = k.to_base64(e);
                         }
@@ -209,6 +210,8 @@ int getrsa( bool to_encode, std::string rsa_key_name, std::string rsa_data, std:
                     }
                     else
                     {
+                        std::cout << "WARNING not using GMP" << std::endl;
+                            
                         typeuinteger  v = k.val(rsa_data);
                         embedded_rsa_key = k.decode(v);
                     }

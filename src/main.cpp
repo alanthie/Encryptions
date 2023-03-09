@@ -753,12 +753,14 @@ int main_crypto(int argc, char **argv)
             auto local_path = cmd.get<std::string>("--local");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
+			auto gmp = cmd.get<std::string>("--gmp");
             auto known_ftp_server  = cmd.get<std::string>("--known_ftp_server");
             auto encryped_ftp_user = cmd.get<std::string>("--encryped_ftp_user");
             auto encryped_ftp_pwd  = cmd.get<std::string>("--encryped_ftp_pwd");
 
             bool verbose = verb.size() > 0 ? true : false;
             bool keeping = keep.size() > 0 ? true : false;
+			bool bgmp = gmp.size() > 0 ? true : false;
 
             if (output_path.size() == 0)
             {
@@ -776,7 +778,8 @@ int main_crypto(int argc, char **argv)
                 keeping,
                 encryped_ftp_user,
                 encryped_ftp_pwd,
-                known_ftp_server);
+                known_ftp_server,
+				bgmp);
 
             if (decr.decrypt() == true)
             {
