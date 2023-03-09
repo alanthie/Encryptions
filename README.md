@@ -117,3 +117,40 @@ Current set of encryption algorithms
 Overview:
 ![Alt text](/Doc/overview2.png?raw=true "Overview")
 
+Example of urls.txt:
+;Web files
+https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz
+https://i.postimg.cc/ZKGMV8SP/Screenshot-from-2023-02-23-19-39-28.png
+
+Local files (like shared USB)
+[l]binary.dat.72
+[l]binary.dat.73
+[l]binary.dat.76
+[l]binary.dat.77
+[l]binary.dat.78
+
+;RSA keys
+[r]MY_RSAKEY_16384_2023-03-06_19:32:02
+[r]MY_RSAKEY_512_2023-03-05_18:36:37
+[r]MY_RSAKEY_512_2023-03-06_19:12:49
+[r]MY_RSAKEY_9200_2023-03-06_19:17:31
+[r]MY_RSAKEY_1024_2023-03-05_03:43:04
+[r]MY_RSAKEY_1024_2023-03-05_12:44:43
+[r]MY_RSAKEY_1024_2023-03-05_19:36:04
+[r]MY_RSAKEY_2048_2023-03-05_12:24:38
+[r]MY_RSAKEY_2048_2023-03-06_16:33:58
+[r]MY_RSAKEY_3072_2023-03-05_14:07:52
+[r]MY_RSAKEY_4096_2023-03-06_19:13:17
+[r]MY_RSAKEY_4096_2023-03-06_19:13:17
+[r]MY_RSAKEY_16384_2023-03-06_19:32:02
+[r]MY_RSAKEY_512_2023-03-06_19:12:49
+[r]MY_RSAKEY_4096_2023-03-06_19:13:17
+[r]MY_RSAKEY_512_2023-03-05_18:38:28
+[r]MY_RSAKEY_4096_2023-03-06_19:13:17
+</pre>
+ 
+License
+<pre>
+Free for personal usage
+License required for commercial usage
+</pre>
