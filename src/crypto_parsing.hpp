@@ -160,10 +160,18 @@ std::string remove_hex_delim(std::string s)
     return r;
 }
 
+namespace fs = std::filesystem;
+bool fileexists2(const fs::path& p, fs::file_status s = fs::file_status{})
+{
+    if(fs::status_known(s) ? fs::exists(s) : fs::exists(p))
+        return true;
+    else
+        return false;
+}
 
 std::string get_block_infile(std::string FILE, std::string start, std::string last)
 {
-	//if (fileexists(FILE))
+	if (fileexists2(FILE))
 	{
 		cryptodata d;
 		bool b = d.read_from_file(FILE);
@@ -182,23 +190,12 @@ std::string get_block_infile(std::string FILE, std::string start, std::string la
 			}
 		}
    }
-//   else
-//   	std::cerr << "no file: " << FILE << std::endl;
+   else
+        std::cerr << "no file: " << FILE << std::endl;
 
    return "";
 }
 
-//std::string remove_hex_delim(std::string s)
-//{
-//   std::string r ;
-//   long long n = s.size();
-//   for(long long i=0;i<n;i++)
-//   {
-//       if ( (s[i]!=' ') && (s[i]!=':') && (s[i]!='\n') && (s[i]!='\r') )
-//           r+=s[i];
-//   }
-//   return r;
-//}
 
 }
 #endif

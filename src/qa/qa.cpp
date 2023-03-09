@@ -12,7 +12,7 @@
  #include "../c_plus_plus_serializer.h"
 
 #ifdef _WIN32
-//NOMINMAX
+//add preprocessor directive NOMINMAX
 #pragma warning ( disable : 4146 )
 #include "RSA-GMP/RSAGMPTest.h"
 #else
@@ -36,21 +36,21 @@ void  menu()
     while(choice != 0)
     {
         std::cout << "====================================" << std::endl;
-        std::cout << "Program version  : " << FULLVERSION   << std::endl;
-        std::cout << "Select a function: " << std::endl;
+        std::cout << "QA version   : " << FULLVERSION   << std::endl;
+        std::cout << "Select a task: " << std::endl;
         std::cout << "====================================" << std::endl;
         std::cout << "0. Quit" << std::endl;
         std::cout << "*. Last choice" << std::endl;
-        std::cout << "1. Custom F(n)" << std::endl;
-        std::cout << "2. Custom P(n)" << std::endl;
+        std::cout << "1. Custom secret F(n)" << std::endl;
+        std::cout << "2. Custom secret P(n)" << std::endl;
         std::cout << "3. HEX(file, position, keysize)" << std::endl;
         std::cout << "4. Make random puzzle from shared binary (like USB keys) data" << std::endl;
         std::cout << "5. Resolve puzzle" << std::endl;
-        std::cout << "Obsolete 6. Generate RSA key (slow)" << std::endl;
+        std::cout << "6. <Futur usage>" << std::endl;
         std::cout << "7. View my private RSA key" << std::endl;
         std::cout << "8. View other public RSA key" << std::endl;
         std::cout << "9. Extract my public RSA key to file" << std::endl;
-        std::cout << "10. Generate RSA key with openssl command line (fastest)" << std::endl;
+        std::cout << "10. Generate RSA key with OPENSSL command line (fastest)" << std::endl;
         std::cout << "11. Test RSA GMP key generator" << std::endl;
         std::cout << "12. Generate RSA key with GMP (fast)" << std::endl;
         std::cout << "==> ";
@@ -297,13 +297,13 @@ void  menu()
 
 				for(auto& [keyname, k] : map_rsa_private)
 				{
-				  generate_rsa::rsa_key key_public;
-				  key_public.key_size_in_bits = k.key_size_in_bits ;
-				  key_public.s_n = k.s_n ;
-				  key_public.s_e = k.s_e ;
-				  key_public.s_d = "" ;
+                    generate_rsa::rsa_key key_public;
+                    key_public.key_size_in_bits = k.key_size_in_bits ;
+                    key_public.s_n = k.s_n ;
+                    key_public.s_e = k.s_e ;
+                    key_public.s_d = "" ;
 
-				  map_rsa_public.insert(std::make_pair(keyname,  key_public));
+                    map_rsa_public.insert(std::make_pair(keyname,  key_public));
 				}
 
 				std::cout << "---------------------------" << std::endl;
@@ -351,7 +351,14 @@ void  menu()
 			typeuinteger e;
 			typeuinteger d;
 
+			std::cout << "generating/testing key with gmp..." << std::endl;
+            auto start = std::chrono::high_resolution_clock::now();
+
 			int result = qa.generate_rsa_with_openssl(n, e, d, klen);
+
+			auto finish = std::chrono::high_resolution_clock::now();
+            std::cout << "generation elapsed time: " <<  std::chrono::duration_cast<std::chrono::seconds>(finish - start).count() << " seconds"<< std:: endl;
+
 
 			if (result == 0)
 			{
@@ -367,14 +374,9 @@ void  menu()
 					infile.close();
 				}
 
-				bool test_with_gmp = false;
+				bool test_with_gmp = true;
 				bool ok = true;
-
- #ifdef _WIN32
- #else
-				test_with_gmp = true;
-				std::cout << "Testing key with gmp..." << std:: endl;
-				auto start = std::chrono::high_resolution_clock::now();
+				auto start1 = std::chrono::high_resolution_clock::now();
 
 				int r = RSAGMP::rsa_gmp_test_key(rkey.base64_to_base10(rkey.s_n) , rkey.base64_to_base10(rkey.s_e), rkey.base64_to_base10(rkey.s_d), klen);
 				if (r!=0)
@@ -382,10 +384,10 @@ void  menu()
 					ok = false;
 				}
 
-				auto finish = std::chrono::high_resolution_clock::now();
-				std::chrono::duration<double, std::milli> elapsed = finish - start;
-				std::cout << "Testing Elapsed Time: " << elapsed.count() / 1000 << " sec"<< std:: endl;
-#endif
+				auto finish1 = std::chrono::high_resolution_clock::now();
+
+				std::cout << "generation elapsed time: " <<  std::chrono::duration_cast<std::chrono::seconds>(finish - start).count() << " seconds"<< std:: endl;
+				std::cout << "testing elapsed time:    " <<  std::chrono::duration_cast<std::chrono::milliseconds>(finish1 - start1).count() << " milliseconds"<< std:: endl;
 
 				if (test_with_gmp == false)
 				{
@@ -450,27 +452,18 @@ void  menu()
 
    		else if (choice == 11)
 		{
- //#ifdef _WIN32
-	//		std::cerr << "GMP not implemented for this version on windows"  << std:: endl;
-	//		return;
- //#else
 			int nt = std::thread::hardware_concurrency();
 			std::cout << "using " << nt << " threads - test keys 1024 to 16384" << std::endl;
 			RSAGMP::Utils::TestGenerator generator;
 			RSAGMP::CustomTest(1024, &generator, nt);
-			//RSAGMP::CustomTest(2048, &generator, nt);
-			//RSAGMP::CustomTest(4096, &generator, nt);
-			//RSAGMP::CustomTest(4096*2, &generator, nt);
-			//RSAGMP::CustomTest(4096*4, &generator, nt);
-//#endif
+			RSAGMP::CustomTest(2048, &generator, nt);
+			RSAGMP::CustomTest(4096, &generator, nt);
+			RSAGMP::CustomTest(4096*2, &generator, nt);
+			RSAGMP::CustomTest(4096*4, &generator, nt);
 		}
 
 		else if (choice == 12)
       	{
-//#ifdef _WIN32
-//			std::cerr << "GMP not implemented for this version on windows"  << std:: endl;
-//			return;
-//#else
 			qaclass qa;
 			generate_rsa::PRIVATE_KEY key;
 
@@ -550,7 +543,6 @@ void  menu()
 				}
 				std::cout << "key saved as: "  << keyname << " in " << fileRSADB << std:: endl;
 			}
- //#endif
         }
 
     }

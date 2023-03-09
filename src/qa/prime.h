@@ -2,8 +2,6 @@
 #define PRIME_H_INCLUDED
 
 #include "mathcommon.h"
-//#include "matrix.hpp"
-
 #include "atomic_bitvector.hpp"
 
 namespace PRIME

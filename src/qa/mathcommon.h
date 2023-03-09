@@ -6,11 +6,13 @@
 //https://github.com/ckormanyos/wide-integer
 #define WIDE_INTEGER_NAMESPACE WIDE_INTEGER_NS
 #include <math\wide_integer\uintwide_t.h>
+// TODO what size top use for RSA big prime [2x biggest prime = 2xMaxRSAbits/8] ==> using GMP and BigUnsigned lib
 //Width2 must be 2^n times 1...63 (with n >= 3), while being 16, 24, 32 or larger, and exactly divisible by limb count'
 using uint2048_t = WIDE_INTEGER_NS::math::wide_integer::uintwide_t<2048U, std::uint32_t>;
 using uinteger_t = uint2048_t;
 #else
-//https://github.com/Kronuz/uinteger_t
+// BUG in modulo for big number
+// https://github.com/Kronuz/uinteger_t
 #include "uinteger_t.hh"
 #endif
 
