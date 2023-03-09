@@ -111,6 +111,7 @@ Current set of encryption algorithms
     TWOFISH
     Salsa20
     IDEA
+    RSA
 </pre>
 
 Overview:
