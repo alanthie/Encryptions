@@ -157,20 +157,55 @@ namespace generate_rsa
         typeuinteger get_e() { return val(s_e);}
         typeuinteger get_d() { return val(s_d);}
 
-        typeuinteger power_modulo(typeuinteger a, typeuinteger power, typeuinteger mod)
+        typeuinteger mod_pow(typeuinteger base, typeuinteger exp, const typeuinteger& mod)
         {
-            // (a ⋅ b) mod m = [(a mod m) ⋅ (b mod m)] mod m
-            if (power==0) return 1;
-            if (power%2 == 1) return ((a % mod) * power_modulo(a, power-1, mod)) % mod;
-            typeuinteger b = power_modulo(a, power/2, mod) % mod;
-            return (b*b) % mod;
+            typeuinteger resoult = 1;
+
+            while (exp > 0)
+            {
+                if (typeuinteger(exp & 1) == 1)
+                    resoult = (base * resoult) % mod;
+                base = (base * base) % mod;
+                exp >>= 1;
+            }
+
+            return resoult;
+        }
+
+        typeuinteger power_modulo(const typeuinteger& a, const typeuinteger& power, const typeuinteger& mod)
+        {
+            try
+            {
+                // windows stack overflow....
+                // Visual Studio uses 4KB for the stack but reserved 1MB by default. You can change this in "Configuration Properties"->Linker->System->"Stack Reserve Size" to 10MB for example.
+                // (a ⋅ b) mod m = [(a mod m) ⋅ (b mod m)] mod m
+                if (power == 0) return 1;
+                if (power % 2 == 1)
+                {
+                    return ((a % mod) * power_modulo(a, power - 1, mod)) % mod;
+                }
+
+                typeuinteger b = power_modulo(a, power / 2, mod) % mod;
+                return (b * b) % mod;
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << "ERROR exception thrown in power_modulo " << e.what() << std::endl;
+                throw e;
+            }
+            catch (...)
+            {
+                std::cerr << "ERROR exception thrown in power_modulo " << std::endl;
+                throw std::string("ERROR exception thrown in power_modulo ");
+            }
         }
 
         typeuinteger encode(const std::string& s)
         {
             typeuinteger n = get_n();
             typeuinteger m = val(s);
-            typeuinteger r = power_modulo(m, get_e(), n);
+            typeuinteger r = mod_pow(m, get_e(), n);
+            //typeuinteger r = power_modulo(m, get_e(), n);
             return r;
         }
 
@@ -178,7 +213,8 @@ namespace generate_rsa
         {
             typeuinteger n = get_n();
             typeuinteger m = v;
-            typeuinteger r = power_modulo(m, get_d(), n);
+            typeuinteger r = mod_pow(m, get_d(), n);
+            //typeuinteger r = power_modulo(m, get_d(), n);
 
             std::string s = to_base64(r);
             return s;

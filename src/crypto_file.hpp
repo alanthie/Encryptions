@@ -17,6 +17,10 @@
 #include "../src/qa/rsa_gen.hpp"
 
 #ifdef _WIN32
+//add preprocessor directive NOMINMAX
+#pragma warning ( disable : 4146 )
+#include "qa/RSA-GMP/RSAGMP.h"
+#include "qa/RSA-GMP/RSAGMPUtils.h"
 #else
 // LINKER: -lgmp -lgmpxx
 #include "qa/RSA-GMP/RSAGMP.h"
@@ -85,6 +89,7 @@ int getrsa( bool to_encode, std::string rsa_key_name, std::string rsa_data, std:
             std::cout << "getrsa rsa_data: "    << get_summary_hex(rsa_data.data(),rsa_data.size())  << " size:" << rsa_data.size()<< std::endl;
         std::cout << "getrsa outfile: "         << outfile << std::endl;
         std::cout << "getrsa local_rsa_db: "    << local_rsa_db << std::endl;
+        std::cout << "use_gmp: " << use_gmp << std::endl;
     }
 
     int r = 0;
@@ -137,12 +142,7 @@ int getrsa( bool to_encode, std::string rsa_key_name, std::string rsa_data, std:
                         }
 
                         std::string encoded_rsa_key;
-#ifdef _WIN32
-                        {
-                            typeuinteger e = k.encode(embedded_rsa_key);
-                            encoded_rsa_key = k.to_base64(e);
-                        }
-#else
+
                         if (use_gmp == true)
                         {
                             RSAGMP::Utils::mpzBigInteger modulus(k.base64_to_base10(k.s_n) );
@@ -176,7 +176,7 @@ int getrsa( bool to_encode, std::string rsa_key_name, std::string rsa_data, std:
                             typeuinteger  e = k.encode(embedded_rsa_key);
                             encoded_rsa_key = k.to_base64(e);
                         }
-#endif
+
                         if (encoded_rsa_key.size() > URL_MAX_SIZE - 3)
                         {
                             std::cout << "ERROR getrsa data encoded value too big for URL_MAX_SIZE " << encoded_rsa_key.size()  << " > " << URL_MAX_SIZE - 3 << std::endl;
@@ -194,12 +194,6 @@ int getrsa( bool to_encode, std::string rsa_key_name, std::string rsa_data, std:
                 }
                 else
                 {
-#ifdef _WIN32
-                    {
-                        typeuinteger  v = k.val(rsa_data);
-                        embedded_rsa_key = k.decode(v);
-                    }
-#else
                     if (use_gmp == true)
                     {
                         RSAGMP::Utils::mpzBigInteger modulus(k.base64_to_base10(k.s_n) );
@@ -216,7 +210,7 @@ int getrsa( bool to_encode, std::string rsa_key_name, std::string rsa_data, std:
                         typeuinteger  v = k.val(rsa_data);
                         embedded_rsa_key = k.decode(v);
                     }
-#endif
+
                     temp.buffer.write(embedded_rsa_key.data(), embedded_rsa_key.size());
                     if (verbose)
                     {

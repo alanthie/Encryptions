@@ -26,6 +26,15 @@ using namespace cryptoAL;
 std::string VERSION = "v0.1";
 std::string FULLVERSION = VERSION + "_" + cryptoAL::get_current_date();
 
+long long keybits8x(long long bits)
+{
+	if (bits % 8 != 0)
+	{
+		bits += ( 8 - (bits % 8) );
+	}
+	return bits;
+}
+
 void  menu()
 {
     long long choice = 1;
@@ -340,6 +349,7 @@ void  menu()
 			long long klen = cryptoAL::str_to_ll(snum);
 			if (klen==-1) continue;
 			if (klen == 0) klen = 16384;
+			klen = keybits8x(klen);
 
 			std::cout << "Enter path for rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
 			std::string pathdb;
@@ -473,6 +483,7 @@ void  menu()
 			long long klen = cryptoAL::str_to_ll(snum);
 			if (klen==-1) continue;
 			if (klen == 0) klen = 2048;
+			klen = keybits8x(klen);
 
 			std::cout << "Enter path for rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
 			std::string pathdb;
