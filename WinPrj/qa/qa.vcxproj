@@ -43,14 +43,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -102,13 +102,20 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\000DEV\Encryptions\src\qa\ExternalLib\wide-decimal\wide-decimal-main;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-integer\wide-integer-master;D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>copy ..\crypto\x64\Release\qa.exe ..\..\Exec_Windows\*</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -116,18 +123,50 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\000DEV\Encryptions\src\qa\ExternalLib\wide-decimal\wide-decimal-main;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-integer\wide-integer-master;D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>copy ..\crypto\x64\Release\qa.exe ..\..\Exec_Windows\*</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="qa.cpp" />
+    <ClCompile Include="..\..\src\Base64.cpp" />
+    <ClCompile Include="..\..\src\qa\qa.cpp" />
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigInteger.cc" />
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigIntegerAlgorithms.cc" />
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigIntegerUtils.cc" />
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigUnsigned.cc" />
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigUnsignedInABase.cc" />
+    <ClCompile Include="..\..\src\SHA256.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Base64.h" />
+    <ClInclude Include="..\..\src\base_const.hpp" />
+    <ClInclude Include="..\..\src\qa\atomic_bitvector.hpp" />
+    <ClInclude Include="..\..\src\qa\iterator_tpl.h" />
+    <ClInclude Include="..\..\src\qa\mathcommon.h" />
+    <ClInclude Include="..\..\src\qa\prime.h" />
+    <ClInclude Include="..\..\src\qa\qa_internal_empty.hpp" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigInteger.hh" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigIntegerAlgorithms.hh" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigIntegerLibrary.hh" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigIntegerUtils.hh" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigUnsigned.hh" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigUnsignedInABase.hh" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\NumberlikeArray.hh" />
+    <ClInclude Include="..\..\src\qa\uinteger_t.hh" />
+    <ClInclude Include="..\..\src\SHA256.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

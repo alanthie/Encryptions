@@ -25,6 +25,11 @@
     <ClCompile Include="..\..\src\crc32a.cpp" />
     <ClCompile Include="..\..\src\DES.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigInteger.cc" />
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigIntegerAlgorithms.cc" />
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigIntegerUtils.cc" />
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigUnsigned.cc" />
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigUnsignedInABase.cc" />
     <ClCompile Include="..\..\src\SHA256.cpp" />
     <ClCompile Include="..\..\src\SymAlg.cpp" />
     <ClCompile Include="..\..\src\twofish.c" />
@@ -52,6 +57,13 @@
     <ClInclude Include="..\..\src\IDEA.hpp" />
     <ClInclude Include="..\..\src\ini_parser.hpp" />
     <ClInclude Include="..\..\src\puzzle.hpp" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigInteger.hh" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigIntegerAlgorithms.hh" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigIntegerLibrary.hh" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigIntegerUtils.hh" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigUnsigned.hh" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigUnsignedInABase.hh" />
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\NumberlikeArray.hh" />
     <ClInclude Include="..\..\src\random_engine.hpp" />
     <ClInclude Include="..\..\src\rng.h" />
     <ClInclude Include="..\..\src\Salsa20.h" />
@@ -151,7 +163,7 @@
       <PreprocessorDefinitions>CURL_STATICLIB;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-integer\wide-integer-master;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-decimal\wide-decimal-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -172,7 +184,7 @@
       <PreprocessorDefinitions>CURL_STATICLIB;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-integer\wide-integer-master;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-decimal\wide-decimal-main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

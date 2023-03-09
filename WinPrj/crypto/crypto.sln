@@ -5,6 +5,8 @@ VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crypto", "crypto.vcxproj", "{AB6A08A2-5870-41E0-B885-F1CD7411BF7F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qa", "..\qa\qa.vcxproj", "{3841B9B6-B149-4BED-ACC0-CCE985F99207}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{AB6A08A2-5870-41E0-B885-F1CD7411BF7F}.Release|x64.Build.0 = Release|x64
 		{AB6A08A2-5870-41E0-B885-F1CD7411BF7F}.Release|x86.ActiveCfg = Release|Win32
 		{AB6A08A2-5870-41E0-B885-F1CD7411BF7F}.Release|x86.Build.0 = Release|Win32
+		{3841B9B6-B149-4BED-ACC0-CCE985F99207}.Debug|x64.ActiveCfg = Debug|x64
+		{3841B9B6-B149-4BED-ACC0-CCE985F99207}.Debug|x64.Build.0 = Debug|x64
+		{3841B9B6-B149-4BED-ACC0-CCE985F99207}.Debug|x86.ActiveCfg = Debug|Win32
+		{3841B9B6-B149-4BED-ACC0-CCE985F99207}.Debug|x86.Build.0 = Debug|Win32
+		{3841B9B6-B149-4BED-ACC0-CCE985F99207}.Release|x64.ActiveCfg = Release|x64
+		{3841B9B6-B149-4BED-ACC0-CCE985F99207}.Release|x64.Build.0 = Release|x64
+		{3841B9B6-B149-4BED-ACC0-CCE985F99207}.Release|x86.ActiveCfg = Release|Win32
+		{3841B9B6-B149-4BED-ACC0-CCE985F99207}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,6 +6,7 @@
 #include "encrypt.h"
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include "DES.h"
 #include "Buffer.hpp"
 #include "SHA256.h"

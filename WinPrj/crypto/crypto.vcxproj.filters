@@ -45,6 +45,21 @@
     <ClCompile Include="..\..\src\common\includes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigInteger.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigIntegerAlgorithms.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigIntegerUtils.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigUnsigned.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigUnsignedInABase.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\AESa.h">
@@ -129,6 +144,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\common\includes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigInteger.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigIntegerAlgorithms.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigIntegerLibrary.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigIntegerUtils.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigUnsigned.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigUnsignedInABase.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\RSA_generate\bigint\NumberlikeArray.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
