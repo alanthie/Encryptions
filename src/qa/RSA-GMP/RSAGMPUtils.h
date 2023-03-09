@@ -1,6 +1,9 @@
 
 #ifndef __RSA__Utils__
 #define __RSA__Utils__
+#ifdef _WIN32
+#pragma warning ( disable : 4146 )
+#endif
 #include <gmpxx.h>
 #include <stdlib.h>
 #include <random>

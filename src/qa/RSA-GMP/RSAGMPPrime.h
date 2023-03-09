@@ -1,5 +1,9 @@
 #ifndef __RSA__Prime__
 #define __RSA__Prime__
+
+#ifdef _WIN32
+#pragma warning ( disable : 4146 )
+#endif
 #include <gmpxx.h>
 #include "RSAGMPUtils.h"
 #include <thread>

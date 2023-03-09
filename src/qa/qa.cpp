@@ -11,9 +11,12 @@
 #include <thread>
  #include "../c_plus_plus_serializer.h"
 
-//LINKER LIB: -lgmp -lgmpxx
 #ifdef _WIN32
+//NOMINMAX
+#pragma warning ( disable : 4146 )
+#include "RSA-GMP/RSAGMPTest.h"
 #else
+//LINKER LIB: -lgmp -lgmpxx
 #include "RSA-GMP/RSAGMPTest.h"
 #endif
 
@@ -200,7 +203,7 @@ void  menu()
 			else
 			{
 				std::cerr << "no file: "  << fileRSADB << std:: endl;
-				return;
+				continue;
 			}
 
 			std::cout << "---------------------------" << std::endl;
@@ -264,7 +267,7 @@ void  menu()
             else
             {
                 std::cerr << "no file: "  << fileRSADB << std:: endl;
-                return;
+				continue;
             }
 		}
 
@@ -322,6 +325,7 @@ void  menu()
 			else
 			{
 			  	std::cerr << "no file: " << fileRSADB << std:: endl;
+				continue;
 			}
 		}
 
@@ -434,37 +438,39 @@ void  menu()
 						outfile.close();
          			}
                   	std::cout << "key saved as: "  << keyname << " in " << fileRSADB << std:: endl;
+					continue;
 				}
 			}
           	else
 			{
 			  	std::cerr << "FAILED to generate key - retry" << std:: endl;
+				continue;
 			}
 		}
 
    		else if (choice == 11)
 		{
- #ifdef _WIN32
-			std::cerr << "GMP not implemented for this version on windows"  << std:: endl;
-			return;
- #else
+ //#ifdef _WIN32
+	//		std::cerr << "GMP not implemented for this version on windows"  << std:: endl;
+	//		return;
+ //#else
 			int nt = std::thread::hardware_concurrency();
 			std::cout << "using " << nt << " threads - test keys 1024 to 16384" << std::endl;
 			RSAGMP::Utils::TestGenerator generator;
 			RSAGMP::CustomTest(1024, &generator, nt);
-			RSAGMP::CustomTest(2048, &generator, nt);
-			RSAGMP::CustomTest(4096, &generator, nt);
-			RSAGMP::CustomTest(4096*2, &generator, nt);
-			RSAGMP::CustomTest(4096*4, &generator, nt);
-#endif
+			//RSAGMP::CustomTest(2048, &generator, nt);
+			//RSAGMP::CustomTest(4096, &generator, nt);
+			//RSAGMP::CustomTest(4096*2, &generator, nt);
+			//RSAGMP::CustomTest(4096*4, &generator, nt);
+//#endif
 		}
 
 		else if (choice == 12)
       	{
-#ifdef _WIN32
-			std::cerr << "GMP not implemented for this version on windows"  << std:: endl;
-			return;
-#else
+//#ifdef _WIN32
+//			std::cerr << "GMP not implemented for this version on windows"  << std:: endl;
+//			return;
+//#else
 			qaclass qa;
 			generate_rsa::PRIVATE_KEY key;
 
@@ -504,6 +510,14 @@ void  menu()
 
 				// READ
 				std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
+
+				if (cryptoAL::fileexists(fileRSADB) == false)
+				{
+					std::ofstream outfile;
+					outfile.open(fileRSADB, std::ios_base::out);
+					outfile.close();
+				}
+
 				if (cryptoAL::fileexists(fileRSADB) == true)
 				{
 					std::ifstream infile;
@@ -514,7 +528,7 @@ void  menu()
 				else
 				{
 					std::cerr << "no file: "  << fileRSADB << std:: endl;
-					return;
+					continue;
 				}
 
 				// backup
@@ -536,7 +550,7 @@ void  menu()
 				}
 				std::cout << "key saved as: "  << keyname << " in " << fileRSADB << std:: endl;
 			}
- #endif
+ //#endif
         }
 
     }

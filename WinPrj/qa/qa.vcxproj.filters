@@ -39,6 +39,21 @@
     <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigUnsignedInABase.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPmainTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPPrime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\qa\atomic_bitvector.hpp">
@@ -87,6 +102,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\qa\RSA_generate\bigint\NumberlikeArray.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMPPrime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMPTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMPUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
