@@ -67,12 +67,10 @@
 		<Unit filename="../src/qa/RSA_generate/bigint/BigUnsignedInABase.hh" />
 		<Unit filename="../src/qa/RSA_generate/bigint/Makefile" />
 		<Unit filename="../src/qa/RSA_generate/bigint/NumberlikeArray.hh" />
-		<Unit filename="../src/qa/matrix.hpp" />
 		<Unit filename="../src/qa/prime.h" />
 		<Unit filename="../src/qa/qa.cpp" />
 		<Unit filename="../src/qa/qa_internal.hpp" />
 		<Unit filename="../src/qa/qa_internal_empty.hpp" />
-		<Unit filename="../src/qa/rational.h" />
 		<Unit filename="../src/qa/uinteger_t.hh" />
 		<Extensions>
 			<code_completion />
