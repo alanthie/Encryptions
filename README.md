@@ -85,16 +85,6 @@ Example of msg.crypto:
 //  crypto unpack -q puzzle_qa.txt -o msg.zip.encrypted -i msg.crypto -k alain
 //  crypto decode -i msg.zip.encrypted -o msg.zip -p puzzle_qa.txt -v 1 -l ./AL_SAM/
 // ------------------------------------------------------------------------------------------------------------
-
-urls.txt:
-https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz
-[l]binary.dat.71
-[l]binary.dat.81
-[l]binary.dat.91
-[l]binary.dat.57
-[l]binary.dat.48
-[l]binary.dat.29
-[l]binary.dat.37
 </pre>
 
 Videos describing the project:
@@ -171,7 +161,7 @@ Obsolete 6. Generate RSA key (slow)
 9. Extract my public RSA key to file
 10. Generate RSA key with openssl command line (fastest)
 11. Test RSA GMP key generator
-12. Generate RSA key w
+12. Generate RSA key with GMP
 </pre>
 
 License
