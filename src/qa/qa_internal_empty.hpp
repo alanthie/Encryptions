@@ -95,12 +95,23 @@ public:
         return r;
 	}
 
-	virtual int generate_rsa_with_openssl(typeuinteger& n, typeuinteger& e, typeuinteger& d, uint32_t klen_inbits)
+	virtual int generate_rsa_with_openssl(typeuinteger& n, typeuinteger& e, typeuinteger& d, uint32_t klen_inbits, std::string pathopenssl)
      {
         // TODO more check
         std::string FILE = "staging_tmp_openssl_out.txt";
-        std::string cmd1  = std::string("openssl genrsa -out key.pem ") + std::to_string(klen_inbits);
-        std::string cmd2  = std::string("openssl rsa -in key.pem -text -out ") + FILE;
+        std::string p = pathopenssl;
+        std::string cmd1;
+        std::string cmd2;
+        if (p.size() > 0)
+        {
+            cmd1 = p + std::string("openssl.exe") + std::string(" genrsa -verbose -out key.pem ") + std::to_string(klen_inbits);
+            cmd2 = p + std::string("openssl.exe") + std::string(" rsa -in key.pem -text -out ") + FILE;
+        }
+        else
+        {
+            cmd1 = std::string("openssl genrsa -out key.pem ") + std::to_string(klen_inbits);
+            cmd2 = std::string("openssl rsa -in key.pem -text -out ") + FILE;
+        }
 
         std::cout << "Will run these 2 commands on your OS, then parse and test the result keys: "<< std::endl;
         std::cout << cmd1 << std::endl;

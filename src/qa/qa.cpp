@@ -357,6 +357,12 @@ void  menu()
 			if (pathdb == "0") pathdb = "./";
 			std::string fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
 
+			std::cout << "Enter path for OPENSSL "<< " (0 = not needed, 1 = D:\\000DEV\\Encryptions\\Exec_Windows\\binOpenSSL\\ for openssl.exe) : ";
+			std::string pathopenssl;
+			std::cin >> pathopenssl;
+			if (pathopenssl == "0") pathopenssl = "";
+			if (pathopenssl == "1") pathopenssl = "D:\\000DEV\\Encryptions\\Exec_Windows\\binOpenSSL\\";
+
 			typeuinteger n;
 			typeuinteger e;
 			typeuinteger d;
@@ -364,7 +370,7 @@ void  menu()
 			std::cout << "generating/testing key with gmp..." << std::endl;
             auto start = std::chrono::high_resolution_clock::now();
 
-			int result = qa.generate_rsa_with_openssl(n, e, d, klen);
+			int result = qa.generate_rsa_with_openssl(n, e, d, klen, pathopenssl);
 
 			auto finish = std::chrono::high_resolution_clock::now();
             std::cout << "generation elapsed time: " <<  std::chrono::duration_cast<std::chrono::seconds>(finish - start).count() << " seconds"<< std:: endl;
