@@ -85,6 +85,28 @@ public:
         std::swap( alloc_size, r.alloc_size);
     }
 
+    void replace_at(uint32_t n, char c)
+    {
+        if (n < length)
+        {
+            data[n] = c;
+        }
+        else{
+            std::cerr << "ERROR replace_at " <<  n << " length " << length << std::endl;
+        throw "ERROR replace_at " ;
+        }
+    }
+
+    char get_at(uint32_t n)
+    {
+        if (n < length)
+        {
+            return data[n];
+        }
+        std::cerr << "ERROR get_at " <<  n << " length " << length << std::endl;
+        throw "ERROR get_at " ;
+    }
+
     void increase_size(uint32_t n) // bug
     {
         if(n==0)

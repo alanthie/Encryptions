@@ -12,11 +12,15 @@
 #include "base_const.hpp"
 
 
-// LINKER -lcurl
-// Post builds
-//cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto
-//copy x64\Release\crypto.exe ..\..\Exec_Windows\*
+// 	LINKER -lcurl
+// 	Post builds
+//	cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto
+//	copy x64\Release\crypto.exe ..\..\Exec_Windows\*
 
+#define RSA_IN_DATA_FEATURE 1
+#define SHUFFLE_FEATURE 1
+constexpr static double SHUFFLE_PERCENT= 0.1000;
+#define VERIFY_CHKSUM_DATA 1
 
 namespace cryptoAL
 {
@@ -44,26 +48,50 @@ constexpr static int16_t KEYPOS_ENCODESIZE  = 8;
 constexpr static int16_t URL_LEN_ENCODESIZE = 2;
 constexpr static int16_t CRYPTO_ALGO_ENCODESIZE = 2;
 constexpr static uint32_t URL_MIN_SIZE      = 4;
+#ifdef RSA_IN_DATA_FEATURE
+constexpr static uint32_t URL_MAX_SIZE      = 256;
+#else
 constexpr static uint32_t URL_MAX_SIZE_GUESS = 4 * (64 + MAX_RSA_BITS/8) / 3; // add base64 lost space 2 bits/8
 constexpr static uint32_t URL_MAX_SIZE      = URL_MAX_SIZE_GUESS + (64 - (URL_MAX_SIZE_GUESS % 64)); // multiple 64x
+#endif
 constexpr static uint32_t MIN_KEY_SIZE      = 64;    // RSA KEY_NAME
 constexpr static int16_t CHKSUM_SIZE        = 64;
 constexpr static int16_t PADDING_LEN_ENCODESIZE = 2;
+constexpr static uint32_t RSA_LEN_ENCODESIZE = 4;
+constexpr static uint32_t RSA_POS_ENCODESIZE = 4;
+constexpr static uint32_t RSA_PAD_ENCODESIZE = 4;
+
+#ifdef SHUFFLE_FEATURE
+constexpr static uint32_t CRYPTO_FLAGS_ENCODESIZE = 4;
+#endif
+
 constexpr static uint32_t URLINFO_SIZE      =   URL_LEN_ENCODESIZE + URL_MAX_SIZE +
                                                 MAGIC_SIZE +
                                                 KEYPOS_ENCODESIZE  +
-                                                CHKSUM_SIZE +
+                                                CHKSUM_SIZE +	// key
+												CHKSUM_SIZE +	// data
                                                 MIN_KEY_SIZE +
                                                 CRYPTO_ALGO_ENCODESIZE +
-                                                PADDING_LEN_ENCODESIZE + 14 + 32; // padding 64
+												RSA_LEN_ENCODESIZE +
+												RSA_POS_ENCODESIZE +
+												RSA_PAD_ENCODESIZE +
+#ifdef SHUFFLE_FEATURE
+												CRYPTO_FLAGS_ENCODESIZE +
+												PADDING_LEN_ENCODESIZE + 30; // padding 64
+#else											
+                                                PADDING_LEN_ENCODESIZE + 2 + 32; // padding 64
+#endif												
 
-constexpr static int16_t PADDING_MULTIPLE       = 64; // should be at least 64x with Salsa20 requirement
-constexpr static int16_t PADDING_KEY_MULTIPLE   = 32; // should be at least 32x with Salsa20 requirement
+constexpr static int16_t PADDING_MULTIPLE       = 64; // data should be at least 64x with Salsa20 requirement
+constexpr static int16_t PADDING_KEY_MULTIPLE   = 32; //  key should be at least 32x with Salsa20 requirement
 constexpr static int16_t NITER_LIM              = 128;
 constexpr static uint32_t FILE_SIZE_LIM         = 128*1024*1024; // 128MB
 
+#ifdef RSA_IN_DATA_FEATURE
+#else
 constexpr static uint32_t RSAKEYLEN_MIN_SIZE    = 64;               // 64 bytes = 512 bits
 constexpr static uint32_t RSAKEYLEN_MAX_SIZE    = 64 + (MAX_RSA_BITS/8);   // 16k bits - TODO More since using base64
+#endif
 
 const std::string QA_TOKEN              = "QA";
 const std::string REM_TOKEN             = "REM";
@@ -74,7 +102,7 @@ const std::string CHKSUM_TOKEN          = "CHKSUM";
 constexpr static uint32_t CRYPTO_HEADER_SIZE = 64+64;
 constexpr static int16_t HINT_SIZE           = 32+64-4;
 struct CRYPTO_HEADER {
-    char sig[6];                               // File Signature (CRYPTO)
+    char sig[6];                                // File Signature (CRYPTO)
     std::uint16_t version;                      // Format Version
     std::uint32_t enc_puzzle_size;              // Size of encrypted puzzle
     std::uint32_t enc_puzzle_padding_size;      // Size of encrypted puzzle before padding

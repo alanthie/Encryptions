@@ -67,7 +67,7 @@
 	"encrypt.h"
 	"data.hpp"
 
-1678320419 /home/server/dev/Encryptions/src/Buffer.hpp
+1678478097 /home/server/dev/Encryptions/src/Buffer.hpp
 	<stdint.h>
 	<string.h>
 	<algorithm>
@@ -129,7 +129,7 @@
 	<fstream>
 	<stdio.h>
 
-1678323305 /home/server/dev/Encryptions/src/crypto_const.hpp
+1678489397 /home/server/dev/Encryptions/src/crypto_const.hpp
 	<filesystem>
 	<curl/curl.h>
 	"encrypt.h"
@@ -176,7 +176,7 @@
 	"crypto_file.hpp"
 	"data.hpp"
 
-1678379729 /home/server/dev/Encryptions/src/crypto_file.hpp
+1678455260 /home/server/dev/Encryptions/src/crypto_file.hpp
 	<filesystem>
 	<curl/curl.h>
 	"encrypt.h"
@@ -193,8 +193,10 @@
 	"../src/qa/rsa_gen.hpp"
 	"qa/RSA-GMP/RSAGMP.h"
 	"qa/RSA-GMP/RSAGMPUtils.h"
+	"qa/RSA-GMP/RSAGMP.h"
+	"qa/RSA-GMP/RSAGMPUtils.h"
 
-1678379719 /home/server/dev/Encryptions/src/encryptor.hpp
+1678489920 /home/server/dev/Encryptions/src/encryptor.hpp
 	<iostream>
 	<fstream>
 	"DES.h"
@@ -209,6 +211,7 @@
 	"Salsa20.h"
 	"IDEA.hpp"
 	"crc32a.hpp"
+	"crypto_shuffle.hpp"
 
 1590687588 /home/server/dev/Encryptions/src/twofish.h
 
@@ -226,7 +229,7 @@
 	<stdio.h>
 	<string.h>
 
-1678379711 /home/server/dev/Encryptions/src/decryptor.hpp
+1678488496 /home/server/dev/Encryptions/src/decryptor.hpp
 	<iostream>
 	<fstream>
 	"DES.h"
@@ -239,6 +242,7 @@
 	"puzzle.hpp"
 	"IDEA.hpp"
 	"crc32a.hpp"
+	"crypto_shuffle.hpp"
 
 1678332948 /home/server/dev/Encryptions/src/crypto_test.hpp
 	"crypto_const.hpp"
@@ -307,7 +311,7 @@
 	"crc32a.hpp"
 	"puzzle.hpp"
 
-1678347918 /home/server/dev/Encryptions/src/base_const.hpp
+1678467161 /home/server/dev/Encryptions/src/base_const.hpp
 	<cstddef>
 	<map>
 	<string>
@@ -324,7 +328,7 @@
 	"base_const.hpp"
 	"crypto_file.hpp"
 
-1678347439 /home/server/dev/Encryptions/src/qa/rsa_gen.hpp
+1678464157 /home/server/dev/Encryptions/src/qa/rsa_gen.hpp
 	"mathcommon.h"
 	"../base_const.hpp"
 	"BigInteger.h"
@@ -434,7 +438,7 @@
 	<stdlib.h>
 	<random>
 
-1678331219 /home/server/dev/Encryptions/src/crypto_urlkey.hpp
+1678481204 /home/server/dev/Encryptions/src/crypto_urlkey.hpp
 	<filesystem>
 	<curl/curl.h>
 	"encrypt.h"
@@ -492,4 +496,21 @@
 
 1678333762 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPUtils.cpp
 	"RSAGMPUtils.h"
+
+1678489406 /home/server/dev/Encryptions/src/crypto_shuffle.hpp
+	<iostream>
+	"Buffer.hpp"
+	<fstream>
+	<stdio.h>
+	"qa/atomic_bitvector.hpp"
+
+1677438075 /home/server/dev/Encryptions/src/qa/atomic_bitvector.hpp
+	<vector>
+	<atomic>
+	<cassert>
+	<cstddef>
+	<limits>
+	"iterator_tpl.h"
+
+1589882733 /home/server/dev/Encryptions/src/qa/iterator_tpl.h
 

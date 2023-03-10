@@ -13,6 +13,7 @@
 #include "puzzle.hpp"
 #include "IDEA.hpp"
 #include "crc32a.hpp"
+#include "crypto_shuffle.hpp"
 
 
 namespace cryptoAL
@@ -179,6 +180,29 @@ public:
         }
         pos += CHKSUM_SIZE;
 
+		for( uint32_t j = 0; j< CHKSUM_SIZE; j++)
+		{
+            out_uk.checksum_data[j] = temp.getdata()[pos+j];
+        }
+        pos += CHKSUM_SIZE;
+
+		if (is_rsa == true)
+		{
+			out_uk.rsa_encoded_data_pad = temp.readUInt32(pos); pos+=4;
+			out_uk.rsa_encoded_data_len = temp.readUInt32(pos); pos+=4;
+			out_uk.rsa_encoded_data_pos = temp.readUInt32(pos); pos+=4;
+		}
+		else
+		{
+			out_uk.rsa_encoded_data_pad = 0; pos+=4;
+			out_uk.rsa_encoded_data_len = 0; pos+=4;
+			out_uk.rsa_encoded_data_pos = 0; pos+=4;
+		}
+
+#ifdef SHUFFLE_FEATURE
+		out_uk.crypto_flags = temp.readUInt32(pos); pos+=4;
+#endif
+
 		return r;
 	}
 
@@ -285,23 +309,57 @@ public:
             }
             else if (is_rsa)
             {
-                std::string sURL(&u[pos_url]);
-
-                uk.key[MIN_KEY_SIZE-1] = 0;
+				std::string local_rsa_db = folder_local_rsa + RSA_MY_PRIVATE_DB; // decoding
+				uk.key[MIN_KEY_SIZE-1] = 0;
                 std::string rsa_key(uk.key);
 
-                std::string local_rsa_db = folder_local_rsa + RSA_MY_PRIVATE_DB; // decoding
+#ifdef RSA_IN_DATA_FEATURE
+				// uk.url ==> rsa_key
 
-                // file NOT NEEDED data in sURL.... but needed later when rsa data moved before urlinfo later - TODO
-                rc = getrsa(false, rsa_key, sURL, file.data(), local_rsa_db, embedded_rsa_key, "", verbose, use_gmp);
+//std::cout << "uk.rsa_encoded_data_pos : " <<uk.rsa_encoded_data_pos  << std::endl;
+//std::cout << "uk.rsa_encoded_data_len : " <<uk.rsa_encoded_data_len  << std::endl;
+//std::cout << "uk.rsa_encoded_data_pad : " <<uk.rsa_encoded_data_pad  << std::endl;
+
+				if (uk.rsa_encoded_data_pad + uk.rsa_encoded_data_pos + uk.rsa_encoded_data_len > data_temp.buffer.size())
+				{
+					std::cerr << "ERROR invalid data file (too small): " << file << std::endl;
+					r = false;
+				}
+				else
+				{
+					char c;
+					for(size_t j=0;j<uk.rsa_encoded_data_len;j++)
+					{
+						c = data_temp.buffer.getdata()[uk.rsa_encoded_data_pos + uk.rsa_encoded_data_pad + j];
+						uk.sRSA_ENCODED_DATA += c;
+					}
+
+					if(uk.rsa_encoded_data_len != uk.sRSA_ENCODED_DATA.size())
+					{
+						std::cerr << "ERROR inconsistency reading rsa data: " << uk.sRSA_ENCODED_DATA.size() << std::endl;
+						r = false;
+					}
+				}
+
+				if (r)
+				{
+					rc = getrsa(false, rsa_key, uk.sRSA_ENCODED_DATA, file.data(), local_rsa_db, embedded_rsa_key, "", verbose, use_gmp);
+					if (rc!= 0)
+					{
+						std::cerr << "ERROR with getrsa error code: " << rc << " rsa_key: " << rsa_key <<  " local_rsa_db: " << local_rsa_db << std::endl;
+						r = false;
+					}
+				}
+
+#else
+                std::string sRSA_ENCODED_DATA(&u[pos_url]);
+                rc = getrsa(false, rsa_key, sRSA_ENCODED_DATA, file.data(), local_rsa_db, embedded_rsa_key, "", verbose, use_gmp);
                 if (rc!= 0)
                 {
                     std::cerr << "ERROR with getrsa error code: " << rc << " rsa_key: " << rsa_key <<  " local_rsa_db: " << local_rsa_db << std::endl;
                     r = false;
                 }
-                else
-                {
-                }
+#endif
             }
             else
             {
@@ -337,7 +395,6 @@ public:
 			{
 			    if (is_rsa)
                 {
-                    // use std::string embedded_rsa_key to encode message
                     d.buffer.write(embedded_rsa_key.data(), embedded_rsa_key.size());
                 }
 
@@ -695,7 +752,6 @@ public:
             {
                 key_idx = ((nround - roundi - 1) *  nblock) % nkeys;
             }
-            //std::cout << "roundi " << roundi << " key_idx " << key_idx << std::endl;
 
             if (r == false)
                 break;
@@ -1020,24 +1076,30 @@ public:
         return r;
 	}
 
-	bool decode(size_t iter, size_t NITER, uint16_t crypto_algo,
+	bool decode(size_t iter, size_t NITER, uint16_t crypto_algo, uint32_t crypto_flags,
                 cryptodata& data_encrypted, const char* key, uint32_t key_size, cryptodata& data_decrypted)
 	{
+	   	if (verbose)
+	   	{
+            std::cout << "decode crypto_flags " <<  crypto_flags <<  std::endl;
+		}
+
+		bool r = true;
         if ((iter==0) || (iter==NITER-1))
         {
-            return decode_binDES(data_encrypted, key, key_size, data_decrypted);
+            r = decode_binDES(data_encrypted, key, key_size, data_decrypted);
         }
         else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_TWOFISH)
         {
-            return decode_twofish(data_encrypted, key, key_size, data_decrypted);
+            r = decode_twofish(data_encrypted, key, key_size, data_decrypted);
         }
         else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_IDEA)
         {
-            return decode_idea(data_encrypted, key, key_size, data_decrypted);
+            r = decode_idea(data_encrypted, key, key_size, data_decrypted);
         }
         else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_Salsa20)
         {
-            return decode_salsa20(data_encrypted, key, key_size, data_decrypted);
+            r = decode_salsa20(data_encrypted, key, key_size, data_decrypted);
         }
 		else
 		{
@@ -1045,8 +1107,25 @@ public:
             if      (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) aes_type = CRYPTO_ALGO_AES::CBC;
             else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) aes_type = CRYPTO_ALGO_AES::CFB;
 
-            return decode_binaes16_16(data_encrypted, key, key_size, data_decrypted, aes_type);
+            r = decode_binaes16_16(data_encrypted, key, key_size, data_decrypted, aes_type);
         }
+
+#ifdef SHUFFLE_FEATURE
+		if (r)
+		{
+            if (crypto_flags & 1)
+            {
+                cryptoshuffle sh(verbose);
+                r = sh.shuffle(data_decrypted.buffer, key, key_size);
+            }
+		}
+		else
+		{
+            std::cout << "decode error?" <<  std::endl;
+		}
+#endif
+
+		return r;
 	}
 
 
@@ -1228,7 +1307,7 @@ public:
         if (r)
 		{
             data_temp_next.clear_data();
-            if (decode( 0, 1, (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES,
+            if (decode( 0, 1, (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES, 0,
                         encrypted_data, puz_key.getdata(), puz_key.size(), data_temp_next) == false)
             {
                 std::cerr << "ERROR " << "decoding with next key" << std::endl;
@@ -1277,7 +1356,6 @@ public:
 
 		if (NITER == 0)
         {
-            // remove last PADDING_MULTIPLE char
             data_temp_next.buffer.remove_last_n_char(PADDING_MULTIPLE);
 
             data_temp.buffer.swap_with(data_temp_next.buffer);
@@ -1328,10 +1406,12 @@ public:
                 // ...
                 // decode(Data2, key2) => Data1+urlkey1             urlkey1=>key1
                 // decode(Data1, key1) => Data
+
                 for(int16_t iter=0; iter<NITER; iter++)
                 {
-                    // Get KeyN from uk info read from the web
+                    // Get KeyN from uk info read from URL
                     uk.erase_buffer();
+					uk.sRSA_ENCODED_DATA.clear();
 
                     r = get_key(uk);
                     if (r == false)
@@ -1339,7 +1419,74 @@ public:
                         break;
                     }
 
-                    // uk.crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16
+#ifdef RSA_IN_DATA_FEATURE
+					if (uk.rsa_encoded_data_len > 0)
+					{
+						if (data_temp.buffer.size() < uk.rsa_encoded_data_len)
+						{
+							std::cerr << "ERROR " << "encrypted_data can not be decoded  - invalid data size" << std::endl;
+							r = false;
+						}
+						else
+						{
+							data_temp.buffer.remove_last_n_char(uk.rsa_encoded_data_len);
+						}
+
+						if (r)
+						{
+							if (uk.rsa_encoded_data_pad > 0)
+							{
+								if (data_temp.buffer.size() < uk.rsa_encoded_data_pad)
+								{
+									std::cerr << "ERROR " << "encrypted_data can not be decoded pad - invalid data size" << std::endl;
+									r = false;
+								}
+								else
+								{
+									data_temp.buffer.remove_last_n_char(uk.rsa_encoded_data_pad);
+								}
+							}
+							
+							// all extra removed from data
+						}
+					}
+#endif
+
+#ifdef VERIFY_CHKSUM_DATA		
+					char compute_checksum_data[CHKSUM_SIZE+1] = {0};
+					if (r)
+					{
+						SHA256 sha;
+						sha.update(reinterpret_cast<const uint8_t*> (data_temp.buffer.getdata()), data_temp.buffer.size() );
+						uint8_t* digest = sha.digest();
+						auto s = SHA256::toString(digest);
+						for( size_t j = 0; j< CHKSUM_SIZE; j++)
+							compute_checksum_data[j] = s[j];
+						compute_checksum_data[CHKSUM_SIZE] = 0;
+
+						if (verbose)
+						{
+							std::cout << "compute data checksum: " << SHA256::toString(digest) << " size: "<< data_temp.buffer.size() << std::endl;
+						}
+
+						char c;
+						for( size_t j = 0; j< CHKSUM_SIZE; j++)
+						{
+							c = compute_checksum_data[j];
+							if (c != uk.checksum_data[j])
+							{
+								char display_checksum_data[CHKSUM_SIZE+1] = {0};
+								for( size_t j = 0; j< CHKSUM_SIZE; j++)
+									display_checksum_data[j] = uk.checksum_data[j];
+
+								std::cerr << "ERROR " << "invalid data checksum at " << j << " " << std::string(display_checksum_data) <<  std::endl;
+								r = false;
+								break;
+							}
+						}
+					}
+#endif
+
                     if ((uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) &&
@@ -1352,7 +1499,13 @@ public:
                     }
 
                     // decode(DataN, keyN) => DataN-1+urlkeyN-1     urlkeyN-1=>keyN-1
-                    if (decode( iter+1, NITER+1, uk.crypto_algo, data_temp,
+                    if (decode( iter+1, NITER+1, uk.crypto_algo,
+#ifdef SHUFFLE_FEATURE
+								uk.crypto_flags,
+#else
+								0,
+#endif
+                                data_temp,
                                 &uk.get_buffer()->getdata()[0], uk.key_size,
                                 data_temp_next) == false)
                     {
@@ -1395,7 +1548,8 @@ public:
 
                     data_temp.buffer.swap_with(data_temp_next.buffer);
                     data_temp_next.erase();
-                }
+					
+                } //for(int16_t iter=0; iter<NITER; iter++)
             }
 		}
 
@@ -1411,7 +1565,7 @@ public:
 
 		if (r)
 		{
-            // data_temp_next => decrypted_data
+            // data_temp => decrypted_data
             r = data_temp.copy_buffer_to(decrypted_data);
             if (r)
             {

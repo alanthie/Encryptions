@@ -85,7 +85,7 @@ namespace generate_rsa
             // throw if invalid...
         }
 
-        uint32_t key_size_in_bits = 2048; // TODO...
+        uint32_t key_size_in_bits = 2048; 
         std::string s_n; // base 64
         std::string s_e; // base 64
         std::string s_d; // base 64 empty if public key

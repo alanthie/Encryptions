@@ -13,8 +13,6 @@
 #include "crypto_const.hpp"
 #include "crypto_parsing.hpp"
 
-//using namespace cryptoAL;
-
 namespace cryptoAL
 {
 
@@ -48,6 +46,7 @@ public:
         }
     }
 
+
     uint16_t crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES; // 2
     uint16_t url_size = 0;              // 2
     char url[URL_MAX_SIZE]= {0};        // 256x also buffer for rsa data embedded a key
@@ -56,10 +55,19 @@ public:
     uint16_t key_fromL = 0;             // 2
     uint32_t key_size = MIN_KEY_SIZE;   // 4 bytes
     char key[MIN_KEY_SIZE] = {0};       // RSA KEY_NAME
-    char checksum[CHKSUM_SIZE] = {0};   // 64
+    char checksum[CHKSUM_SIZE] = {0};   // 64 key
+	char checksum_data[CHKSUM_SIZE] = {0};   // 64 data
+	uint32_t rsa_encoded_data_pad = 0;	// 4 bytes
+	uint32_t rsa_encoded_data_len = 0;	// 4 bytes
+	uint32_t rsa_encoded_data_pos = 0;	// 4 bytes
 
+#ifdef SHUFFLE_FEATURE
+	uint32_t crypto_flags = 1;			// 4 bytes
+#endif
+		
     char urlinfo_with_padding[URLINFO_SIZE] = {0};
-
+	std::string sRSA_ENCODED_DATA; 		// Base64 string of rsa_encoded_data_len // TODO on heap
+	
 protected:
     Buffer* buff_key = nullptr;
 };

@@ -15,6 +15,7 @@
 #include "Salsa20.h"
 #include "IDEA.hpp"
 #include "crc32a.hpp"
+#include "crypto_shuffle.hpp"
 
 namespace cryptoAL
 {
@@ -267,6 +268,11 @@ public:
 
             if (r)
             {
+#ifdef RSA_IN_DATA_FEATURE
+				//--------------------------------------------------------
+				// urlkey[i].key no more use, url = [r]rsa key name
+				//--------------------------------------------------------
+#endif
                 for (size_t j = 0; j< MIN_KEY_SIZE; j++)
                 {
                     if (j < v[0].size())
@@ -292,6 +298,7 @@ public:
 						local_rsa_db = folder_local_rsa + RSA_OTHER_PUBLIC_DB; // Encoding with a public key of the recipient of the message
 					}
 
+					// rsa_key encoding (random) embedded_rsa_key ==> encoded rsa data ==> file
                     rc = getrsa(true, rsa_key, "", file.data(), local_rsa_db, embedded_rsa_key, "", verbose, use_gmp, SELF_TEST);
 
                     if (rc != 0)
@@ -301,6 +308,32 @@ public:
                     }
                     else
                     {
+#ifdef RSA_IN_DATA_FEATURE
+						vurlkey[i].rsa_encoded_data_len = filesize(file);
+						vurlkey[i].rsa_encoded_data_pos = 0; // set later
+
+						cryptodata frsa;
+						r = frsa.read_from_file(file);
+						if (r)
+						{
+							char c;
+						    for(size_t j=0;j<frsa.buffer.size();j++)
+							{
+								c = frsa.buffer.getdata()[j];
+								vurlkey[i].sRSA_ENCODED_DATA += c;
+							}
+
+							if(vurlkey[i].rsa_encoded_data_len != vurlkey[i].sRSA_ENCODED_DATA.size())
+							{
+								std::cerr << "ERROR inconsistency reading rsa data file: " << file << std::endl;
+								r = false;
+							}
+						}
+						else
+						{
+							std::cerr << "ERROR reading rsa data file: " << file << std::endl;
+						}
+#else
                         size_t fs = (size_t)filesize(file); // [r]data
                         if (fs+3 >= URL_MAX_SIZE)
                         {
@@ -336,6 +369,7 @@ public:
                                 std::cerr << "ERROR reading : " << file << std::endl;
                             }
                         }
+#endif
                     }
                 }
             }
@@ -469,7 +503,7 @@ public:
                     if (verbose)
                     {
                         std::cout << "key extracted from data of size: " << d.buffer.size() << std::endl;
-                        std::cout << "data checksum: " << SHA256::toString(digest) << std::endl;
+                        std::cout << "key checksum: " << SHA256::toString(digest) << std::endl;
                     }
                     delete[] digest;
                 }
@@ -503,6 +537,17 @@ public:
 		temp.writeUInt32(vurlkey[i].key_size, -1);
 		temp.write(&vurlkey[i].key[0], MIN_KEY_SIZE, -1);
 		temp.write(&vurlkey[i].checksum[0], CHKSUM_SIZE, -1);
+		temp.write(&vurlkey[i].checksum_data[0], CHKSUM_SIZE, -1);
+
+#ifdef RSA_IN_DATA_FEATURE
+		temp.writeUInt32(vurlkey[i].rsa_encoded_data_pad, -1);
+		temp.writeUInt32(vurlkey[i].rsa_encoded_data_len, -1);
+		temp.writeUInt32(vurlkey[i].rsa_encoded_data_pos, -1);
+#endif
+
+#ifdef SHUFFLE_FEATURE
+		temp.writeUInt32(vurlkey[i].crypto_flags, -1);
+#endif
 
 		for( size_t j = 0; j< URLINFO_SIZE; j++)
             vurlkey[i].urlinfo_with_padding[j] = temp.getdata()[j];
@@ -1054,27 +1099,39 @@ public:
             data_temp_next.buffer.write(data_encr.data(), (uint32_t)data_encr.size(), -1); // 8 bytes!
         }
 
-		if (verbose)
-		{
-            std::cout.flush();
-            std::cout <<    "binDES result file size: " << data_temp_next.buffer.size() << std::endl;
-        }
-
 		return r;
 	}
 
     // select various encoding algos based on iter, ...
-    bool encode(size_t iter, size_t NITER, uint16_t crypto_algo,
-                cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
+    bool encode( size_t iter, size_t NITER, uint16_t crypto_algo, uint32_t crypto_flags,
+                 cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
 	{
+		bool r  = true;
+
+#ifdef SHUFFLE_FEATURE
+		if (crypto_flags & 1)
+		{
+			cryptoshuffle sh(verbose);
+			r = sh.shuffle(data_temp.buffer, key, key_size);
+
+			if (r == false)
+			{
+				std::cerr << "ERROR with shuffle of data " <<  iter << std::endl;
+				return false;
+			}
+		}
+#endif
+
 		if ((iter==0) || (iter==NITER))
+		{
             return encode_binDES(data_temp, key, key_size, data_temp_next);
+		}
 		else
 		{
-            //vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16
             if (iter-1 >= vurlkey.size())
             {
-                std::cerr << "WARNING mismatch iter out of range " <<  iter-1 << std::endl;
+                std::cerr << "ERROR mismatch iter out of range " <<  iter-1 << std::endl;
+				return false;
             }
             else if ((crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
                      (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
@@ -1084,7 +1141,7 @@ public:
                      (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_IDEA)
                      )
             {
-                std::cerr << "WARNING mismatch algo at iter " <<  iter-1 << std::endl;
+                std::cerr << "WARNING mismatch algo at iter (using default) " <<  iter-1 << std::endl;
             }
 
             if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH)
@@ -1108,6 +1165,8 @@ public:
                 return encode_binaes16_16(data_temp, key, key_size, data_temp_next, aes_type);
             }
         }
+
+		return r;
 	}
 
     bool encrypt(bool allow_empty_url = false)
@@ -1115,8 +1174,6 @@ public:
         bool empty_puzzle = false;
         if (filename_puzzle.size() ==  0)
         {
-            if (verbose)
-                std::cout << "WARNING empty puzzle (using default puzzle)" <<  std::endl;
             empty_puzzle = true;
         }
 
@@ -1342,21 +1399,146 @@ public:
 
             if (i>0)
             {
+			     {
+                    SHA256 sha;
+                    sha.update(reinterpret_cast<const uint8_t*> (data_temp.buffer.getdata()), data_temp.buffer.size() );
+                    uint8_t* digest = sha.digest();
+                    auto s = SHA256::toString(digest);
+                    for( size_t j = 0; j< CHKSUM_SIZE; j++)
+                        vurlkey[i-1].checksum_data[j] = s[j];
+
+                    if (verbose)
+                    {
+                        std::cout << "data checksum: " << SHA256::toString(digest) << " size: "<< data_temp.buffer.size()  << std::endl;
+                    }
+                    delete[] digest;
+
+                    // Update
+					if (make_urlinfo_with_padding(i-1) == false)
+					{
+						std::cerr << "ERROR " << "making url info - url index: " << i-1 <<std::endl;
+						return false;
+					}
+                }
+
+
+#ifdef RSA_IN_DATA_FEATURE
+				//vurlkey[i-1].rsa_encoded_data_len = vurlkey[i-1].sRSA_ENCODED_DATA.size();
+				if (vurlkey[i-1].rsa_encoded_data_len > 0)
+				{
+					// APPEND RSA_ENCODED_DATA
+					vurlkey[i-1].rsa_encoded_data_pos = data_temp.buffer.size();
+
+					if (vurlkey[i-1].rsa_encoded_data_len % PADDING_MULTIPLE != 0)
+					{
+						auto p = PADDING_MULTIPLE - (vurlkey[i-1].rsa_encoded_data_len % PADDING_MULTIPLE);
+						char c[1] = {0};
+						vurlkey[i-1].rsa_encoded_data_pad = p;
+						for(size_t j=0; j<p; j++)
+						{
+							data_temp.append(&c[0], 1);
+						}
+                    }
+					else
+					{
+						vurlkey[i-1].rsa_encoded_data_pad = 0;
+					}
+
+					// Update
+					if (make_urlinfo_with_padding(i-1) == false)
+					{
+						std::cerr << "ERROR " << "making url info - url index: " << i-1 <<std::endl;
+						return false;
+					}
+
+//std::cout << "vurlkey[i-1].rsa_encoded_data_pos : " <<vurlkey[i-1].rsa_encoded_data_pos  << std::endl;
+//std::cout << "vurlkey[i-1].rsa_encoded_data_len : " <<vurlkey[i-1].rsa_encoded_data_len  << std::endl;
+//std::cout << "vurlkey[i-1].rsa_encoded_data_pad : " <<vurlkey[i-1].rsa_encoded_data_pad  << std::endl;
+
+                    data_temp.append(vurlkey[i-1].sRSA_ENCODED_DATA.data(), vurlkey[i-1].rsa_encoded_data_len);
+				}
+#endif
                 // APPEND URLINFO
                 data_temp.append(&vurlkey[i-1].urlinfo_with_padding[0], URLINFO_SIZE);
             }
 
             data_temp_next.clear_data();
-            encode( i, vurlkey.size(), vurlkey[i].crypto_algo, data_temp,
+            encode( i, vurlkey.size(), vurlkey[i].crypto_algo,
+#ifdef SHUFFLE_FEATURE
+					vurlkey[i].crypto_flags,
+#else
+					0,
+#endif
+                    data_temp,
                     &vurlkey[i].get_buffer()->getdata()[0], vurlkey[i].key_size,
                     data_temp_next);
 
             data_temp.buffer.swap_with(data_temp_next.buffer);
             data_temp_next.erase();
-        }
+			
+        } //for(size_t i=0; i<vurlkey.size(); i++)
 
         if (vurlkey.size()>0)
         {
+			{
+				SHA256 sha;
+				sha.update(reinterpret_cast<const
+				uint8_t*> (data_temp.buffer.getdata()), data_temp.buffer.size() );
+				uint8_t* digest = sha.digest();
+				auto s = SHA256::toString(digest);
+				for( size_t j = 0; j< CHKSUM_SIZE; j++)
+					vurlkey[vurlkey.size()-1].checksum_data[j] = s[j];
+
+				if (verbose)
+				{
+					std::cout << "data checksum: " << SHA256::toString(digest) << " size: "<< data_temp.buffer.size() << std::endl;
+				}
+				delete[] digest;
+				
+				// Update
+				if (make_urlinfo_with_padding(vurlkey.size()-1) == false)
+				{
+					std::cerr << "ERROR " << "making url info - url index: " << vurlkey.size()-1 <<std::endl;
+					return false;
+				}
+      		}
+
+#ifdef RSA_IN_DATA_FEATURE
+			// APPEND RSA_ENCODED_DATA
+			vurlkey[vurlkey.size()-1].rsa_encoded_data_pos = data_temp.buffer.size();
+
+			if (vurlkey[vurlkey.size()-1].rsa_encoded_data_len > 0)
+			{
+				// multiple PADDING_MULTIPLE
+				if (vurlkey[vurlkey.size()-1].rsa_encoded_data_len % PADDING_MULTIPLE != 0)
+				{
+                    auto p = PADDING_MULTIPLE - (vurlkey[vurlkey.size()-1].rsa_encoded_data_len % PADDING_MULTIPLE);
+                    char c[1] = {0};
+                    vurlkey[vurlkey.size()-1].rsa_encoded_data_pad = p;
+                    for(size_t j=0; j<p; j++)
+                    {
+                        data_temp.append(&c[0], 1);
+                    }
+				}
+				else
+				{
+					vurlkey[vurlkey.size()-1].rsa_encoded_data_pad = 0;
+				}
+				
+				// Update
+				if (make_urlinfo_with_padding(vurlkey.size()-1) == false)
+				{
+					std::cerr << "ERROR " << "making url info - url index: " << vurlkey.size()-1 <<std::endl;
+					return false;
+				}
+
+//std::cout << "vurlkey[vurlkey.size()-1].rsa_encoded_data_pos : " <<vurlkey[vurlkey.size()-1].rsa_encoded_data_pos  << std::endl;
+//std::cout << "vurlkey[vurlkey.size()-1].rsa_encoded_data_len : " <<vurlkey[vurlkey.size()-1].rsa_encoded_data_len  << std::endl;
+//std::cout << "vurlkey[vurlkey.size()-1].rsa_encoded_data_pad : " <<vurlkey[vurlkey.size()-1].rsa_encoded_data_pad  << std::endl;
+
+				data_temp.append(vurlkey[vurlkey.size()-1].sRSA_ENCODED_DATA.data(), vurlkey[vurlkey.size()-1].rsa_encoded_data_len);
+			}
+#endif
             // APPEND URLINFO
             data_temp.append(&vurlkey[vurlkey.size()-1].urlinfo_with_padding[0], URLINFO_SIZE);
         }
@@ -1370,7 +1552,7 @@ public:
             crc_full_puz_key = crc.get_hash();
         }
 
-        Buffer temp(PADDING_MULTIPLE);
+        Buffer temp(PADDING_MULTIPLE); // 64
 		temp.init(0);
 		temp.writeUInt32(crc_full_puz_key, PADDING_MULTIPLE - 8);
         temp.writeUInt16(PADDING, PADDING_MULTIPLE - 4);
@@ -1378,7 +1560,7 @@ public:
         data_temp.append(temp.getdata(), PADDING_MULTIPLE);
 
         //encode(DataN+urlkeyN+Niter,     pwd0) => DataFinal
-        encode( vurlkey.size(), vurlkey.size(), (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES,
+        encode( vurlkey.size(), vurlkey.size(), (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES, 0,
                 data_temp, puz_key_full.getdata(), puz_key_full.size(), data_temp_next);
 
         data_temp_next.buffer.writeUInt32(crc_full_puz_key, -1);
