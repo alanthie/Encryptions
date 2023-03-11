@@ -56,7 +56,7 @@ public:
             return "";
         }
 
-        Buffer b;
+        cryptoAL::Buffer b;
         b.increase_size(keysize);
         b.write(&d.buffer.getdata()[pos], keysize, -1);
 

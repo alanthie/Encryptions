@@ -23,6 +23,11 @@
 #include "../../src/crypto_const.hpp"
 using namespace cryptoAL;
 
+#include "ec_gmp/ec_gmp_p_mul.hpp"
+
+//extern int cryptoSimpleECC::test_simple_ecc();
+#include "SimpleECC/src/test_simple_ecc.hpp"
+
 std::string VERSION = "v0.1";
 std::string FULLVERSION = VERSION + "_" + cryptoAL::get_current_date();
 
@@ -62,6 +67,7 @@ void  menu()
         std::cout << "10. Generate RSA key with OPENSSL command line (fastest)" << std::endl;
         std::cout << "11. Test RSA GMP key generator" << std::endl;
         std::cout << "12. Generate RSA key with GMP (fast)" << std::endl;
+        std::cout << "13. Elliptic Curve test with GMP" << std::endl;
         std::cout << "==> ";
         std::cin >> schoice;
 
@@ -560,6 +566,16 @@ void  menu()
 				}
 				std::cout << "key saved as: "  << keyname << " in " << fileRSADB << std:: endl;
 			}
+        }
+
+        else if (choice == 13)
+      	{
+			qaclass qa;
+
+			cryptoECC::test_ecc(0);
+            cryptoECC::test_ecc(1);
+
+            cryptoSimpleECC::test_simple_ecc();
         }
 
     }
