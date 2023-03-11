@@ -201,7 +201,6 @@ public:
 
 		out_uk.crypto_flags = temp.readUInt32(pos); pos+=4;
 		out_uk.shuffle_perc = temp.readUInt32(pos); pos+=4;
-		std::cout << "out_uk.shuffle_perc  " << out_uk.shuffle_perc << "\n";
 
 		return r;
 	}

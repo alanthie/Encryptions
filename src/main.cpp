@@ -277,6 +277,10 @@ int main_crypto(int argc, char **argv)
                 .default_value(std::string(""))
                 .help("specify the local folder of known contents.");
 
+            encode_command.add_argument("-r", "--rsa")
+                .default_value(std::string(""))
+                .help("specify the local folder for rsa*.db");
+
             encode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
                 .help("specify the verbose");
@@ -338,6 +342,10 @@ int main_crypto(int argc, char **argv)
             decode_command.add_argument("-l", "--local")
                 .default_value(std::string(""))
                 .help("specify the local folder of known contents.");
+
+            decode_command.add_argument("-r", "--rsa")
+                .default_value(std::string(""))
+                .help("specify the local folder for rsa*.db");
 
             decode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
@@ -674,6 +682,7 @@ int main_crypto(int argc, char **argv)
             auto url_path = cmd.get<std::string>("--url");
             auto staging_path = cmd.get<std::string>("--staging");
             auto local_path = cmd.get<std::string>("--local");
+            auto local_rsa_path = cmd.get<std::string>("--rsa");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
             auto gmp = cmd.get<std::string>("--gmp");
@@ -720,7 +729,7 @@ int main_crypto(int argc, char **argv)
             }
 			if (ishufflePerc < 0) ishufflePerc = 0;
 			if (ishufflePerc > 100) ishufflePerc = 100;
-			
+
 
             bool verbose = verb.size() > 0 ? true : false;
             bool keeping = keep.size() > 0 ? true : false;
@@ -736,7 +745,7 @@ int main_crypto(int argc, char **argv)
                 output_path,
                 staging_path,
                 local_path,
-                "",
+                local_rsa_path,
                 verbose,
                 keeping,
                 encryped_ftp_user,
@@ -773,6 +782,7 @@ int main_crypto(int argc, char **argv)
             auto puzzle_path = cmd.get<std::string>("--puzzle");
             auto staging_path = cmd.get<std::string>("--staging");
             auto local_path = cmd.get<std::string>("--local");
+            auto local_rsa_path = cmd.get<std::string>("--rsa");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
 			auto gmp = cmd.get<std::string>("--gmp");
@@ -795,7 +805,7 @@ int main_crypto(int argc, char **argv)
                 output_path,
                 staging_path,
                 local_path,
-                "",
+                local_rsa_path,
                 verbose,
                 keeping,
                 encryped_ftp_user,
