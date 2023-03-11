@@ -12,7 +12,6 @@
 #include "base_const.hpp"
 
 #define RSA_IN_DATA_FEATURE 1
-#define VERIFY_CHKSUM_DATA 1
 
 namespace cryptoAL
 {

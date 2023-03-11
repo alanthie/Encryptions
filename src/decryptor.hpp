@@ -1451,7 +1451,7 @@ public:
 					}
 #endif
 
-#ifdef VERIFY_CHKSUM_DATA
+					// VERIFY_CHKSUM_DATA
 					char compute_checksum_data[CHKSUM_SIZE+1] = {0};
 					if (r)
 					{
@@ -1484,7 +1484,6 @@ public:
 							}
 						}
 					}
-#endif
 
                     if ((uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
