@@ -307,7 +307,11 @@ int main_crypto(int argc, char **argv)
 
             encode_command.add_argument("-t", "--selftest")
                 .default_value(std::string(""))
-                .help("selftest");
+                .help("encryption selftest");
+
+            encode_command.add_argument("-sh", "--shuffle")
+                .default_value(std::string("0"))
+                .help("specify pre encryption shuffling percentage of data 0-100");
         }
 
         // Decode subcommand
@@ -678,6 +682,7 @@ int main_crypto(int argc, char **argv)
             auto known_ftp_server  = cmd.get<std::string>("--known_ftp_server");
             auto encryped_ftp_user = cmd.get<std::string>("--encryped_ftp_user");
             auto encryped_ftp_pwd  = cmd.get<std::string>("--encryped_ftp_pwd");
+            auto shuffle  = cmd.get<std::string>("--shuffle");
 
             if (qa_puzzle_path.size() == 0)
             {
@@ -690,9 +695,10 @@ int main_crypto(int argc, char **argv)
                     output_path = input_path + ".encrypted";
             }
 
-            size_t sz = 0;long ikeyfactor = 1;
+            long ikeyfactor = 1;
             try
             {
+                size_t sz = 0;
                 ikeyfactor = std::stol (keyfactor, &sz);
             }
             catch(...)
@@ -700,6 +706,21 @@ int main_crypto(int argc, char **argv)
                 std::cout << "Warning invalid keyfactor value, keyfactor reset to 1" << std::endl;
                 ikeyfactor = 1;
             }
+
+            long ishufflePerc = 0;
+            try
+            {
+                size_t sz = 0;
+                ishufflePerc = std::stol(shuffle, &sz);
+            }
+            catch(...)
+            {
+                std::cout << "Warning invalid shuffle percent value, shuffle percent  reset to 0" << std::endl;
+                ishufflePerc = 0;
+            }
+			if (ishufflePerc < 0) ishufflePerc = 0;
+			if (ishufflePerc > 100) ishufflePerc = 100;
+			
 
             bool verbose = verb.size() > 0 ? true : false;
             bool keeping = keep.size() > 0 ? true : false;
@@ -723,7 +744,8 @@ int main_crypto(int argc, char **argv)
                 known_ftp_server,
                 ikeyfactor,
                 bgmp,
-                bselftest);
+                bselftest,
+                ishufflePerc);
 
             if (encr.encrypt(false) == true)
             {

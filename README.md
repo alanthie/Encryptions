@@ -104,6 +104,9 @@ Current set of encryption algorithms
     Salsa20
     IDEA
     RSA
+    Shuffling
+    Future: Multi primes RSA
+    Future: Elliptic Curve
 </pre>
 
 Overview:

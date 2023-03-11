@@ -67,6 +67,17 @@
 		<Unit filename="../src/qa/RSA_generate/bigint/BigUnsignedInABase.hh" />
 		<Unit filename="../src/qa/RSA_generate/bigint/Makefile" />
 		<Unit filename="../src/qa/RSA_generate/bigint/NumberlikeArray.hh" />
+		<Unit filename="../src/qa/SimpleECC/src/boolean.hpp" />
+		<Unit filename="../src/qa/SimpleECC/src/ecc.cpp" />
+		<Unit filename="../src/qa/SimpleECC/src/ecc.hpp" />
+		<Unit filename="../src/qa/SimpleECC/src/helper.cpp" />
+		<Unit filename="../src/qa/SimpleECC/src/helper.hpp" />
+		<Unit filename="../src/qa/SimpleECC/src/j_point.cpp" />
+		<Unit filename="../src/qa/SimpleECC/src/j_point.hpp" />
+		<Unit filename="../src/qa/SimpleECC/src/point.cpp" />
+		<Unit filename="../src/qa/SimpleECC/src/point.hpp" />
+		<Unit filename="../src/qa/SimpleECC/src/simple_ecc_test.cpp" />
+		<Unit filename="../src/qa/SimpleECC/src/test_simple_ecc.hpp" />
 		<Unit filename="../src/qa/prime.h" />
 		<Unit filename="../src/qa/qa.cpp" />
 		<Unit filename="../src/qa/qa_internal.hpp" />

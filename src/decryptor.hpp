@@ -200,6 +200,8 @@ public:
 		}
 
 		out_uk.crypto_flags = temp.readUInt32(pos); pos+=4;
+		out_uk.shuffle_perc = temp.readUInt32(pos); pos+=4;
+		std::cout << "out_uk.shuffle_perc  " << out_uk.shuffle_perc << "\n";
 
 		return r;
 	}
@@ -1074,12 +1076,13 @@ public:
         return r;
 	}
 
-	bool decode(size_t iter, size_t NITER, uint16_t crypto_algo, uint32_t crypto_flags,
+	bool decode(size_t iter, size_t NITER, uint16_t crypto_algo, uint32_t crypto_flags, uint32_t shuffle_perc,
                 cryptodata& data_encrypted, const char* key, uint32_t key_size, cryptodata& data_decrypted)
 	{
 	   	if (verbose)
 	   	{
             std::cout << "decode crypto_flags " <<  crypto_flags <<  std::endl;
+			std::cout << "decode shuffle_perc " <<  shuffle_perc <<  std::endl;
 		}
 
 		bool r = true;
@@ -1113,7 +1116,7 @@ public:
             if (crypto_flags & 1)
             {
                 cryptoshuffle sh(verbose);
-                r = sh.shuffle(data_decrypted.buffer, key, key_size);
+                r = sh.shuffle(data_decrypted.buffer, key, key_size, shuffle_perc);
             }
 		}
 		else
@@ -1303,7 +1306,7 @@ public:
         if (r)
 		{
             data_temp_next.clear_data();
-            if (decode( 0, 1, (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES, 0,
+            if (decode( 0, 1, (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES, 0, 0,
                         encrypted_data, puz_key.getdata(), puz_key.size(), data_temp_next) == false)
             {
                 std::cerr << "ERROR " << "decoding with next key" << std::endl;
@@ -1442,13 +1445,13 @@ public:
 									data_temp.buffer.remove_last_n_char(uk.rsa_encoded_data_pad);
 								}
 							}
-							
+
 							// all extra removed from data
 						}
 					}
 #endif
 
-#ifdef VERIFY_CHKSUM_DATA		
+#ifdef VERIFY_CHKSUM_DATA
 					char compute_checksum_data[CHKSUM_SIZE+1] = {0};
 					if (r)
 					{
@@ -1496,7 +1499,7 @@ public:
 
                     // decode(DataN, keyN) => DataN-1+urlkeyN-1     urlkeyN-1=>keyN-1
                     if (decode( iter+1, NITER+1, uk.crypto_algo,
-								uk.crypto_flags,
+								uk.crypto_flags, uk.shuffle_perc,
                                 data_temp,
                                 &uk.get_buffer()->getdata()[0], uk.key_size,
                                 data_temp_next) == false)
@@ -1540,7 +1543,7 @@ public:
 
                     data_temp.buffer.swap_with(data_temp_next.buffer);
                     data_temp_next.erase();
-					
+
                 } //for(int16_t iter=0; iter<NITER; iter++)
             }
 		}

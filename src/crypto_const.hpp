@@ -12,7 +12,6 @@
 #include "base_const.hpp"
 
 #define RSA_IN_DATA_FEATURE 1
-#define SHUFFLE_FEATURE 1
 #define VERIFY_CHKSUM_DATA 1
 
 namespace cryptoAL
@@ -54,12 +53,7 @@ constexpr static uint32_t RSA_LEN_ENCODESIZE = 4;
 constexpr static uint32_t RSA_POS_ENCODESIZE = 4;
 constexpr static uint32_t RSA_PAD_ENCODESIZE = 4;
 constexpr static uint32_t CRYPTO_FLAGS_ENCODESIZE = 4;
-
-#ifdef SHUFFLE_FEATURE
-constexpr static double SHUFFLE_PERCENT = 0.1000;
-#else
-constexpr static double SHUFFLE_PERCENT = 0.0000;
-#endif
+constexpr static uint32_t CRYPTO_SHUFFLE_ENCODESIZE = 4;
 
 constexpr static uint32_t URLINFO_SIZE      =   URL_LEN_ENCODESIZE + URL_MAX_SIZE +
                                                 MAGIC_SIZE +
@@ -72,7 +66,8 @@ constexpr static uint32_t URLINFO_SIZE      =   URL_LEN_ENCODESIZE + URL_MAX_SIZ
 												RSA_POS_ENCODESIZE +
 												RSA_PAD_ENCODESIZE +
 												CRYPTO_FLAGS_ENCODESIZE +
-												PADDING_LEN_ENCODESIZE + 30; // padding 64
+												CRYPTO_SHUFFLE_ENCODESIZE +
+												PADDING_LEN_ENCODESIZE + 26; // padding 64
 											
 constexpr static int16_t PADDING_MULTIPLE       = 64; // data should be at least 64x with Salsa20 requirement
 constexpr static int16_t PADDING_KEY_MULTIPLE   = 32; //  key should be at least 32x with Salsa20 requirement

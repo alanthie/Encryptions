@@ -61,6 +61,7 @@ public:
 	uint32_t rsa_encoded_data_len = 0;	// 4 bytes
 	uint32_t rsa_encoded_data_pos = 0;	// 4 bytes
 	uint32_t crypto_flags = 1;			// 4 bytes
+	uint32_t shuffle_perc = 0;			// 4 bytes
 		
     char urlinfo_with_padding[URLINFO_SIZE] = {0};
 	std::string sRSA_ENCODED_DATA; 		// Base64 string of rsa_encoded_data_len // string's implementation uses memory on the heap.

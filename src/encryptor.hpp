@@ -46,7 +46,8 @@ public:
                 std::string iknown_ftp_server  = "",
                 long ikey_size_factor = 1,
 				bool iuse_gmp = false,
-				bool iself_test = false)
+				bool iself_test = false,
+				long ishufflePerc = 0)
     {
         filename_urls = ifilename_urls;
         filename_msg_data = ifilename_msg_data;
@@ -65,6 +66,7 @@ public:
         key_size_factor = ikey_size_factor;
 		use_gmp = iuse_gmp;
 		self_test = iself_test;
+		shufflePerc = ishufflePerc;
 
         if (key_size_factor < 1) key_size_factor = 1;
 
@@ -544,7 +546,18 @@ public:
 		temp.writeUInt32(vurlkey[i].rsa_encoded_data_len, -1);
 		temp.writeUInt32(vurlkey[i].rsa_encoded_data_pos, -1);
 #endif
+        if (shufflePerc > 0)
+        {
+            vurlkey[i].crypto_flags = 1;
+            vurlkey[i].shuffle_perc = shufflePerc;
+        }
+        else
+        {
+            vurlkey[i].crypto_flags = 0;
+            vurlkey[i].shuffle_perc = 0;
+        }
 		temp.writeUInt32(vurlkey[i].crypto_flags, -1);
+		temp.writeUInt32(vurlkey[i].shuffle_perc, -1);
 
 		for( size_t j = 0; j< URLINFO_SIZE; j++)
             vurlkey[i].urlinfo_with_padding[j] = temp.getdata()[j];
@@ -601,7 +614,7 @@ public:
             std::cout <<    "Encryptor encode() idea 8_16                 " <<
                             ", number of rounds : " << nround <<
                             ", number of blocks (8 bytes): " << nblock <<
-                            ", number of keys (16 bytes): "  << nkeys  << std::endl;
+                            ", number of keys (16 bytes): "  << nkeys  << ", shuffling: " << shufflePerc <<  "%" << std::endl;
         }
 
 		uint8_t KEY[16+1];
@@ -707,7 +720,7 @@ public:
             std::cout <<    "Encryptor encode() salsa20 32_64             " <<
                             ", number of rounds : " << nround <<
                             ", number of blocks (64 bytes): " << nblock <<
-                            ", number of keys (32 bytes): "   << nkeys  << std::endl;
+                            ", number of keys (32 bytes): "   << nkeys  << ", shuffling: " << shufflePerc <<  "%" << std::endl;
         }
 
 		uint8_t KEY[32+1];
@@ -825,7 +838,7 @@ public:
             std::cout <<    "Encryptor encode() twofish 16_16             " <<
                             ", number of rounds : " << nround <<
                             ", number of blocks (16 bytes): " << nblock <<
-                            ", number of keys (16 bytes): "   << nkeys  << std::endl;
+                            ", number of keys (16 bytes): "   << nkeys  << ", shuffling: " << shufflePerc <<  "%" << std::endl;
         }
 
 		Twofish_Byte KEY[16+1];
@@ -938,7 +951,7 @@ public:
             std::cout <<    "Encryptor encode() binAES 16_16 - aes_type: " << (int)aes_type <<
                             ", number of rounds : " << nround <<
                             ", number of blocks (16 bytes): " << nblock <<
-                            ", number of keys (16 bytes): "   << nkeys  << std::endl;
+                            ", number of keys (16 bytes): "   << nkeys  << ", shuffling: " << shufflePerc <<  "%" << std::endl;
         }
 
 		unsigned char KEY[16+1];
@@ -1067,7 +1080,7 @@ public:
             std::cout.flush();
             std::cout <<    "Encryptor encode() binDES - " <<
                             "number of blocks (4 bytes): " << nblock <<
-                            ", number of keys (4 bytes): " << nkeys  << std::endl;
+                            ", number of keys (4 bytes): " << nkeys  << ", shuffling: " << shufflePerc <<  "%" << std::endl;
         }
 
 		char KEY[4];
@@ -1100,7 +1113,7 @@ public:
 	}
 
     // select various encoding algos based on iter, ...
-    bool encode( size_t iter, size_t NITER, uint16_t crypto_algo, uint32_t crypto_flags,
+    bool encode( size_t iter, size_t NITER, uint16_t crypto_algo, uint32_t crypto_flags, uint32_t shufflePerc,
                  cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
 	{
 		bool r  = true;
@@ -1108,7 +1121,7 @@ public:
 		if (crypto_flags & 1)
 		{
 			cryptoshuffle sh(verbose);
-			r = sh.shuffle(data_temp.buffer, key, key_size);
+			r = sh.shuffle(data_temp.buffer, key, key_size, shufflePerc);
 
 			if (r == false)
 			{
@@ -1402,10 +1415,10 @@ public:
                     for( size_t j = 0; j< CHKSUM_SIZE; j++)
                         vurlkey[i-1].checksum_data[j] = s[j];
 
-                    if (verbose)
-                    {
-                        std::cout << "data checksum: " << SHA256::toString(digest) << " size: "<< data_temp.buffer.size()  << std::endl;
-                    }
+//                    if (verbose)
+//                    {
+//                        std::cout << "data checksum: " << SHA256::toString(digest) << " size: "<< data_temp.buffer.size()  << std::endl;
+//                    }
                     delete[] digest;
 
                     // Update
@@ -1459,7 +1472,7 @@ public:
 
             data_temp_next.clear_data();
             encode( i, vurlkey.size(), vurlkey[i].crypto_algo,
-					vurlkey[i].crypto_flags,
+					vurlkey[i].crypto_flags, vurlkey[i].shuffle_perc,
                     data_temp,
                     &vurlkey[i].get_buffer()->getdata()[0], vurlkey[i].key_size,
                     data_temp_next);
@@ -1551,7 +1564,7 @@ public:
         data_temp.append(temp.getdata(), PADDING_MULTIPLE);
 
         //encode(DataN+urlkeyN+Niter,     pwd0) => DataFinal
-        encode( vurlkey.size(), vurlkey.size(), (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES, 0,
+        encode( vurlkey.size(), vurlkey.size(), (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES, 0, 0,
                 data_temp, puz_key_full.getdata(), puz_key_full.size(), data_temp_next);
 
         data_temp_next.buffer.writeUInt32(crc_full_puz_key, -1);
@@ -1596,10 +1609,11 @@ public:
 	bool self_test;
     int staging_cnt=0;
 
-    size_t msg_input_size = 0;
+    size_t  msg_input_size = 0;
     int32_t NURL_ITERATIONS = 0;
 	uint32_t perfect_key_size = 0;
-	long    key_size_factor = 1;
+	long key_size_factor = 1;
+	uint32_t shufflePerc = 0;
 };
 
 }

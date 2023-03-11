@@ -51,7 +51,7 @@ public:
         }
 	}
 
-    virtual bool shuffle(Buffer& buffer, const char* key, uint32_t key_len, double perc = SHUFFLE_PERCENT)
+    virtual bool shuffle(Buffer& buffer, const char* key, uint32_t key_len, uint32_t perc)
     {
 		uint32_t remain_len = buffer.size() ;
 		uint32_t idx_key = 0;
@@ -63,11 +63,12 @@ public:
 		uint32_t  cnt = 0;
         bool r = true;
 
-        uint32_t NPERC = buffer.size() * perc;
+		if (perc > 100) perc = 100;
+        uint32_t NPERC = buffer.size() * perc / 100.0;;
 
 		if (key_len < 16) return r;
 		if (buffer.size() < 16) return r;
-		if (perc < 0.000001) return r;
+		if (perc < 1) return r;
 
 		atomicbitvector::atomic_bv_t bitarray(buffer.size());
 
@@ -124,8 +125,8 @@ public:
         std::string s("erfew0-wert9wu098t74etjgto5ituy");
         std::string k("4657456756756757-wert9wu098t74etjgto5ituy");
         b.write(s.data(), s.size(), 0);
-        shuffle(b, k.data(), k.size());
-        shuffle(b, k.data(), k.size());
+        shuffle(b, k.data(), k.size(), 100);
+        shuffle(b, k.data(), k.size(), 100);
         for(size_t i = 0; i< s.size(); i++)
 		{
 			if (s[i] != b.getdata()[i])
