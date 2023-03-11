@@ -76,8 +76,8 @@ constexpr static uint32_t URLINFO_SIZE      =   URL_LEN_ENCODESIZE + URL_MAX_SIZ
 											
 constexpr static int16_t PADDING_MULTIPLE       = 64; // data should be at least 64x with Salsa20 requirement
 constexpr static int16_t PADDING_KEY_MULTIPLE   = 32; //  key should be at least 32x with Salsa20 requirement
-constexpr static int16_t NITER_LIM              = 128;
-constexpr static uint32_t FILE_SIZE_LIM         = 128*1024*1024; // 128MB
+constexpr static int16_t NITER_LIM              = 256;
+constexpr static uint32_t FILE_SIZE_LIM         = 256*1024*1024;
 
 #ifdef RSA_IN_DATA_FEATURE
 #else

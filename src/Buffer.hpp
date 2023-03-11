@@ -7,11 +7,15 @@
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
+#include "crypto_const.hpp"
 
 class data;
 
-constexpr static uint32_t BUFFER_SIZE_INIT  = 10*1000;
-constexpr static uint32_t BUFFER_SIZE_LIM   = 10*1000*1000;
+namespace cryptoAL
+{
+
+constexpr static uint32_t BUFFER_SIZE_INIT  = 8*1024;
+constexpr static uint32_t BUFFER_SIZE_LIM   = FILE_SIZE_LIM;
 
 class bad_buffer_operation
 {
@@ -116,6 +120,7 @@ public:
 
         if (n > BUFFER_SIZE_LIM)
         {
+			std::cerr << "ERROR buffer too big " <<  n << " BUFFER_SIZE_LIM " << BUFFER_SIZE_LIM << std::endl;
             throw bad_buffer_operation(alloc_size);
         }
 
@@ -372,6 +377,8 @@ void swap(Buffer&& l, Buffer&& r)
     std::swap( l.data, r.data );
     std::swap( l.length, r.length);
     std::swap( l.alloc_size, r.alloc_size);
+}
+
 }
 
 #endif

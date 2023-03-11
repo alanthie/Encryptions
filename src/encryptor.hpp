@@ -427,8 +427,8 @@ public:
 
                     if (verbose)
                     {
-                        //std::cout << "key_fromH=" << vurlkey[i].key_fromH << " ";
-                        //std::cout << "key_fromL=" << vurlkey[i].key_fromL << " ";
+                        std::cout << "key_fromH=" << vurlkey[i].key_fromH << " ";
+                        std::cout << "key_fromL=" << vurlkey[i].key_fromL << " ";
                         std::cout << "key_pos :"  << t << " ";
                         std::cout << "key_size:"  << vurlkey[i].key_size << " ";
                         std::cout <<  std::endl;
