@@ -25,7 +25,7 @@ using namespace cryptoAL;
 
 #include "ec_gmp/ec_gmp_p_mul.hpp"
 
-//extern int cryptoSimpleECC::test_simple_ecc();
+//#define TEST_ENCRYPT_DECRYPT true
 #include "SimpleECC/src/test_simple_ecc.hpp"
 
 std::string VERSION = "v0.1";
@@ -575,6 +575,7 @@ void  menu()
 			cryptoECC::test_ecc(0);
             cryptoECC::test_ecc(1);
 
+            //#define TEST_ENCRYPT_DECRYPT true
             cryptoSimpleECC::test_simple_ecc();
         }
 
