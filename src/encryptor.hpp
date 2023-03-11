@@ -270,11 +270,11 @@ public:
 
             if (r)
             {
-#ifdef RSA_IN_DATA_FEATURE
+
 				//--------------------------------------------------------
-				// urlkey[i].key no more use, url = [r]rsa key name
+				// urlkey[i].key no more use, url = [r]rsa key name TODO
 				//--------------------------------------------------------
-#endif
+
                 for (size_t j = 0; j< MIN_KEY_SIZE; j++)
                 {
                     if (j < v[0].size())
@@ -310,7 +310,6 @@ public:
                     }
                     else
                     {
-#ifdef RSA_IN_DATA_FEATURE
 						vurlkey[i].rsa_encoded_data_len = filesize(file);
 						vurlkey[i].rsa_encoded_data_pos = 0; // set later
 
@@ -335,43 +334,6 @@ public:
 						{
 							std::cerr << "ERROR reading rsa data file: " << file << std::endl;
 						}
-#else
-                        size_t fs = (size_t)filesize(file); // [r]data
-                        if (fs+3 >= URL_MAX_SIZE)
-                        {
-                            std::cerr << "ERROR with rsa url cannot copy encrypted key to url - buffer too small for data : " << fs+3 << std::endl;
-                            r = false;
-                        }
-                        else
-                        {
-                            vurlkey[i].url_size = fs+3;
-                            cryptodata d;
-
-                            r = d.read_from_file(file);
-                            if (r)
-                            {
-                                vurlkey[i].url[0] = '[';
-                                vurlkey[i].url[1] = 'r';
-                                vurlkey[i].url[2] = ']';
-                                for (size_t j = 3; j < fs+3; j++)
-                                {
-                                    if (j < URL_MAX_SIZE)
-                                    {
-                                        vurlkey[i].url[j] = d.buffer.getdata()[j-3];
-                                    }
-                                }
-                                for (size_t j = fs+3; j<URL_MAX_SIZE; j++)
-                                {
-                                    vurlkey[i].url[j] = 0;
-                                }
-                                vurlkey[i].url[URL_MAX_SIZE-1]=0;
-                            }
-                            else
-                            {
-                                std::cerr << "ERROR reading : " << file << std::endl;
-                            }
-                        }
-#endif
                     }
                 }
             }
@@ -540,12 +502,10 @@ public:
 		temp.write(&vurlkey[i].key[0], MIN_KEY_SIZE, -1);
 		temp.write(&vurlkey[i].checksum[0], CHKSUM_SIZE, -1);
 		temp.write(&vurlkey[i].checksum_data[0], CHKSUM_SIZE, -1);
-
-#ifdef RSA_IN_DATA_FEATURE
 		temp.writeUInt32(vurlkey[i].rsa_encoded_data_pad, -1);
 		temp.writeUInt32(vurlkey[i].rsa_encoded_data_len, -1);
 		temp.writeUInt32(vurlkey[i].rsa_encoded_data_pos, -1);
-#endif
+
         if (shufflePerc > 0)
         {
             vurlkey[i].crypto_flags = 1;
@@ -1415,10 +1375,6 @@ public:
                     for( size_t j = 0; j< CHKSUM_SIZE; j++)
                         vurlkey[i-1].checksum_data[j] = s[j];
 
-//                    if (verbose)
-//                    {
-//                        std::cout << "data checksum: " << SHA256::toString(digest) << " size: "<< data_temp.buffer.size()  << std::endl;
-//                    }
                     delete[] digest;
 
                     // Update
@@ -1430,7 +1386,6 @@ public:
                 }
 
 
-#ifdef RSA_IN_DATA_FEATURE
 				//vurlkey[i-1].rsa_encoded_data_len = vurlkey[i-1].sRSA_ENCODED_DATA.size();
 				if (vurlkey[i-1].rsa_encoded_data_len > 0)
 				{
@@ -1465,7 +1420,7 @@ public:
 
                     data_temp.append(vurlkey[i-1].sRSA_ENCODED_DATA.data(), vurlkey[i-1].rsa_encoded_data_len);
 				}
-#endif
+
                 // APPEND URLINFO
                 data_temp.append(&vurlkey[i-1].urlinfo_with_padding[0], URLINFO_SIZE);
             }
@@ -1493,10 +1448,6 @@ public:
 				for( size_t j = 0; j< CHKSUM_SIZE; j++)
 					vurlkey[vurlkey.size()-1].checksum_data[j] = s[j];
 
-				if (verbose)
-				{
-					std::cout << "data checksum: " << SHA256::toString(digest) << " size: "<< data_temp.buffer.size() << std::endl;
-				}
 				delete[] digest;
 
 				// Update
@@ -1507,7 +1458,7 @@ public:
 				}
       		}
 
-#ifdef RSA_IN_DATA_FEATURE
+
 			// APPEND RSA_ENCODED_DATA
 			vurlkey[vurlkey.size()-1].rsa_encoded_data_pos = data_temp.buffer.size();
 
@@ -1542,7 +1493,7 @@ public:
 
 				data_temp.append(vurlkey[vurlkey.size()-1].sRSA_ENCODED_DATA.data(), vurlkey[vurlkey.size()-1].rsa_encoded_data_len);
 			}
-#endif
+
             // APPEND URLINFO
             data_temp.append(&vurlkey[vurlkey.size()-1].urlinfo_with_padding[0], URLINFO_SIZE);
         }

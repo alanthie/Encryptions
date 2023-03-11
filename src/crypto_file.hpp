@@ -113,24 +113,6 @@ namespace cryptoAL
 
 					if (to_encode)
 					{
-#ifdef RSA_IN_DATA_FEATURE
-#else
-						if (key_len_in_bytes < RSAKEYLEN_MIN_SIZE)
-						{
-							std::cerr << "ERROR rsa key len too small in URL: " << key_len_in_bytes*8 << std::endl;
-							ok = false;
-						}
-						else if (key_len_in_bytes > RSAKEYLEN_MAX_SIZE)
-						{
-							std::cerr << "ERROR rsa key len too big in URL: " << key_len_in_bytes*8 << std::endl;
-							ok = false;
-						}
-						else if (key_len_in_bytes > URL_MAX_SIZE - 3)
-						{
-							std::cerr << "ERROR rsa key len too big in URL:: " << key_len_in_bytes*8 << std::endl;
-							ok = false;
-						}
-#endif
 						if (ok)
 						{
 							embedded_rsa_key = generate_base64_random_string(key_len_in_bytes - 11);
@@ -175,15 +157,7 @@ namespace cryptoAL
 								typeuinteger  e = k.encode(embedded_rsa_key);
 								encoded_rsa_key = k.to_base64(e);
 							}
-#ifdef RSA_IN_DATA_FEATURE
-#else
-							if (encoded_rsa_key.size() > URL_MAX_SIZE - 3)
-							{
-								std::cout << "ERROR getrsa data encoded value too big for URL_MAX_SIZE " << encoded_rsa_key.size()  << " > " << URL_MAX_SIZE - 3 << std::endl;
-								ok = false;
-							}
-							else
-#endif
+
 							{
 								temp.buffer.write(encoded_rsa_key.data(), encoded_rsa_key.size());
 								if (verbose)

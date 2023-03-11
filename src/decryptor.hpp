@@ -313,7 +313,6 @@ public:
 				uk.key[MIN_KEY_SIZE-1] = 0;
                 std::string rsa_key(uk.key);
 
-#ifdef RSA_IN_DATA_FEATURE
 				// uk.url ==> rsa_key
 
 //std::cout << "uk.rsa_encoded_data_pos : " <<uk.rsa_encoded_data_pos  << std::endl;
@@ -350,16 +349,6 @@ public:
 						r = false;
 					}
 				}
-
-#else
-                std::string sRSA_ENCODED_DATA(&u[pos_url]);
-                rc = getrsa(false, rsa_key, sRSA_ENCODED_DATA, file.data(), local_rsa_db, embedded_rsa_key, "", verbose, use_gmp);
-                if (rc!= 0)
-                {
-                    std::cerr << "ERROR with getrsa error code: " << rc << " rsa_key: " << rsa_key <<  " local_rsa_db: " << local_rsa_db << std::endl;
-                    r = false;
-                }
-#endif
             }
             else
             {
@@ -1418,7 +1407,7 @@ public:
                         break;
                     }
 
-#ifdef RSA_IN_DATA_FEATURE
+
 					if (uk.rsa_encoded_data_len > 0)
 					{
 						if (data_temp.buffer.size() < uk.rsa_encoded_data_len)
@@ -1449,7 +1438,6 @@ public:
 							// all extra removed from data
 						}
 					}
-#endif
 
 					// VERIFY_CHKSUM_DATA
 					char compute_checksum_data[CHKSUM_SIZE+1] = {0};

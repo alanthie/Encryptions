@@ -11,8 +11,6 @@
 #include <string>
 #include "base_const.hpp"
 
-#define RSA_IN_DATA_FEATURE 1
-
 namespace cryptoAL
 {
 
@@ -39,12 +37,8 @@ constexpr static int16_t KEYPOS_ENCODESIZE  = 8;
 constexpr static int16_t URL_LEN_ENCODESIZE = 2;
 constexpr static int16_t CRYPTO_ALGO_ENCODESIZE = 2;
 constexpr static uint32_t URL_MIN_SIZE      = 4;
-#ifdef RSA_IN_DATA_FEATURE
 constexpr static uint32_t URL_MAX_SIZE      = 256;
-#else
-constexpr static uint32_t URL_MAX_SIZE_GUESS = 4 * (64 + MAX_RSA_BITS/8) / 3; // add base64 lost space 2 bits/8
-constexpr static uint32_t URL_MAX_SIZE      = URL_MAX_SIZE_GUESS + (64 - (URL_MAX_SIZE_GUESS % 64)); // multiple 64x
-#endif
+
 constexpr static uint32_t MIN_KEY_SIZE      = 64;    // RSA KEY_NAME
 constexpr static int16_t CHKSUM_SIZE        = 64;
 constexpr static int16_t PADDING_LEN_ENCODESIZE = 2;
@@ -72,12 +66,6 @@ constexpr static int16_t PADDING_MULTIPLE       = 64; // data should be at least
 constexpr static int16_t PADDING_KEY_MULTIPLE   = 32; //  key should be at least 32x with Salsa20 requirement
 constexpr static int16_t NITER_LIM              = 256;
 constexpr static uint32_t FILE_SIZE_LIM         = 256*1024*1024;
-
-#ifdef RSA_IN_DATA_FEATURE
-#else
-constexpr static uint32_t RSAKEYLEN_MIN_SIZE    = 64;               // 64 bytes = 512 bits
-constexpr static uint32_t RSAKEYLEN_MAX_SIZE    = 64 + (MAX_RSA_BITS/8);   // 16k bits - TODO More since using base64
-#endif
 
 const std::string QA_TOKEN              = "QA";
 const std::string REM_TOKEN             = "REM";
