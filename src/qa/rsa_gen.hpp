@@ -31,7 +31,7 @@ namespace generate_rsa
         {
         };
 
-        void test()
+        void TEST()
         {
             std::string serr;
 
@@ -75,14 +75,12 @@ namespace generate_rsa
         };
 
 
-        rsa_key(int key_size__bits, std::string  a, std::string  b, std::string  c)
+        rsa_key(int key_size__bits, const std::string& a, const std::string& b, const std::string& c)
         {
             key_size_in_bits = key_size__bits;
             s_n = a;
             s_e = b;
             s_d = c;
-
-            // throw if invalid...
         }
 
         uint32_t key_size_in_bits = 2048; 
@@ -205,7 +203,6 @@ namespace generate_rsa
             typeuinteger n = get_n();
             typeuinteger m = val(s);
             typeuinteger r = mod_pow(m, get_e(), n);
-            //typeuinteger r = power_modulo(m, get_e(), n);
             return r;
         }
 
@@ -214,8 +211,6 @@ namespace generate_rsa
             typeuinteger n = get_n();
             typeuinteger m = v;
             typeuinteger r = mod_pow(m, get_d(), n);
-            //typeuinteger r = power_modulo(m, get_d(), n);
-
             std::string s = to_base64(r);
             return s;
         }
@@ -231,7 +226,7 @@ namespace generate_rsa
             return to_base10(m);
         }
 
-        std::string to_base64(typeuinteger v)
+        std::string to_base64(const typeuinteger& v)
         {
             typeuinteger r = v;
             typeuinteger b64 = 64;
@@ -252,7 +247,7 @@ namespace generate_rsa
             return s;
         }
 
-        std::string to_base10(typeuinteger v)
+        std::string to_base10(const typeuinteger& v)
         {
             typeuinteger r = v;
             int digit;
@@ -282,11 +277,13 @@ namespace generate_rsa
     // Encryption M = pow(C,d) % n
     struct PRIVATE_KEY
     {
-        int         version;
-        uint32_t    key_size_in_bits = 2048;
-        typeuinteger modulus;            // n = key.modulus = key.prime1 * key.prime2;
-        typeuinteger publicExponent;     // e = key.publicExponent  = FindPublicKeyExponent(totient, 8);
-        typeuinteger privateExponent;    // d = key.privateExponent = ModInverse(key.publicExponent, totient); // decryption exponent
+        int         	version;
+        uint32_t    	key_size_in_bits = 2048;
+        typeuinteger 	modulus;            // n = key.modulus = key.prime1 * key.prime2;
+        typeuinteger 	publicExponent;     // e = key.publicExponent  = FindPublicKeyExponent(totient, 8);
+        typeuinteger 	privateExponent;    // d = key.privateExponent = ModInverse(key.publicExponent, totient); // decryption exponent
+		
+		// Not use:
         typeuinteger prime1;             // p
         typeuinteger prime2;             // q
         typeuinteger exponent1;          // key.exponent1 = key.privateExponent % (key.prime1 - 1);
@@ -313,13 +310,14 @@ namespace generate_rsa
                 ss << d ;
                 rkey.s_d = rkey.base10_to_base64(ss.str());
             }
-
+/*
             std::cout << "-----------------------------" << std::endl;
             std::cout << "key_size_in_bits " << rkey.key_size_in_bits<< std::endl;
             std::cout << "modulus "         << rkey.s_n << std::endl;
             std::cout << "publicExponent "  << rkey.s_e << std::endl;
             std::cout << "privateExponent " << rkey.s_d << std::endl;
             std::cout << "-----------------------------" << std::endl;
+*/
         }
 
         void to_rsa_key(rsa_key& rkey)
@@ -343,13 +341,6 @@ namespace generate_rsa
                 ss << privateExponent ;
                 rkey.s_d = rkey.base10_to_base64(ss.str());
             }
-
-            std::cout << "-----------------------------" << std::endl;
-            std::cout << "key_size_in_bits " << rkey.key_size_in_bits<< std::endl;
-            std::cout << "modulus "         << rkey.s_n << std::endl;
-            std::cout << "publicExponent "  << rkey.s_e << std::endl;
-            std::cout << "privateExponent " << rkey.s_d << std::endl;
-            std::cout << "-----------------------------" << std::endl;
         }
     };
 

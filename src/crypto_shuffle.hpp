@@ -67,10 +67,7 @@ public:
 
 		if (key_len < 16) return r;
 		if (buffer.size() < 16) return r;
-
-//		std::cout << "shuffle... key_len " <<  key_len << std::endl;
-//		std::cout << "shuffle... buffer size " <<  buffer.size() << std::endl;
-//		std::cout << "shuffle... swap count " <<  NPERC << std::endl;
+		if (perc < 0.000001) return r;
 
 		atomicbitvector::atomic_bv_t bitarray(buffer.size());
 
@@ -94,9 +91,12 @@ public:
 
 			next_pos_undone = get_next_free_pos(next_pos, bitarray);
 
-			if (next_pos_undone >= key_len)
+			if (next_pos_undone >=  buffer.size())
 			{
-                std::cerr << "ERROR shuffle out of range " <<  next_pos_undone << std::endl;
+                std::cerr << "ERROR shuffle out of range next_pos_undone: " <<  next_pos_undone << std::endl;
+				std::cout << "shuffle key_len " <<  key_len << std::endl;
+				std::cout << "shuffle buffer size " <<  buffer.size() << std::endl;
+				std::cout << "shuffle swap count " <<  NPERC << std::endl;
                 throw "shuffle out of range";
 			}
 

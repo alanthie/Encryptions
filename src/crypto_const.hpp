@@ -11,15 +11,8 @@
 #include <string>
 #include "base_const.hpp"
 
-
-// 	LINKER -lcurl
-// 	Post builds
-//	cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto
-//	copy x64\Release\crypto.exe ..\..\Exec_Windows\*
-
 #define RSA_IN_DATA_FEATURE 1
 #define SHUFFLE_FEATURE 1
-constexpr static double SHUFFLE_PERCENT= 0.1000;
 #define VERIFY_CHKSUM_DATA 1
 
 namespace cryptoAL
@@ -60,9 +53,12 @@ constexpr static int16_t PADDING_LEN_ENCODESIZE = 2;
 constexpr static uint32_t RSA_LEN_ENCODESIZE = 4;
 constexpr static uint32_t RSA_POS_ENCODESIZE = 4;
 constexpr static uint32_t RSA_PAD_ENCODESIZE = 4;
+constexpr static uint32_t CRYPTO_FLAGS_ENCODESIZE = 4;
 
 #ifdef SHUFFLE_FEATURE
-constexpr static uint32_t CRYPTO_FLAGS_ENCODESIZE = 4;
+constexpr static double SHUFFLE_PERCENT = 0.1000;
+#else
+constexpr static double SHUFFLE_PERCENT = 0.0000;
 #endif
 
 constexpr static uint32_t URLINFO_SIZE      =   URL_LEN_ENCODESIZE + URL_MAX_SIZE +
@@ -75,13 +71,9 @@ constexpr static uint32_t URLINFO_SIZE      =   URL_LEN_ENCODESIZE + URL_MAX_SIZ
 												RSA_LEN_ENCODESIZE +
 												RSA_POS_ENCODESIZE +
 												RSA_PAD_ENCODESIZE +
-#ifdef SHUFFLE_FEATURE
 												CRYPTO_FLAGS_ENCODESIZE +
 												PADDING_LEN_ENCODESIZE + 30; // padding 64
-#else											
-                                                PADDING_LEN_ENCODESIZE + 2 + 32; // padding 64
-#endif												
-
+											
 constexpr static int16_t PADDING_MULTIPLE       = 64; // data should be at least 64x with Salsa20 requirement
 constexpr static int16_t PADDING_KEY_MULTIPLE   = 32; //  key should be at least 32x with Salsa20 requirement
 constexpr static int16_t NITER_LIM              = 128;

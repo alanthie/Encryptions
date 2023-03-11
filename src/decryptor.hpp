@@ -199,9 +199,7 @@ public:
 			out_uk.rsa_encoded_data_pos = 0; pos+=4;
 		}
 
-#ifdef SHUFFLE_FEATURE
 		out_uk.crypto_flags = temp.readUInt32(pos); pos+=4;
-#endif
 
 		return r;
 	}
@@ -1110,7 +1108,6 @@ public:
             r = decode_binaes16_16(data_encrypted, key, key_size, data_decrypted, aes_type);
         }
 
-#ifdef SHUFFLE_FEATURE
 		if (r)
 		{
             if (crypto_flags & 1)
@@ -1123,7 +1120,6 @@ public:
 		{
             std::cout << "decode error?" <<  std::endl;
 		}
-#endif
 
 		return r;
 	}
@@ -1500,11 +1496,7 @@ public:
 
                     // decode(DataN, keyN) => DataN-1+urlkeyN-1     urlkeyN-1=>keyN-1
                     if (decode( iter+1, NITER+1, uk.crypto_algo,
-#ifdef SHUFFLE_FEATURE
 								uk.crypto_flags,
-#else
-								0,
-#endif
                                 data_temp,
                                 &uk.get_buffer()->getdata()[0], uk.key_size,
                                 data_temp_next) == false)

@@ -5,7 +5,6 @@
 #include <map>
 #include <string>
 
-// Git restore tool: gitk --all --date-order $(git log -g --pretty=%H)
 
 namespace cryptoAL
 {

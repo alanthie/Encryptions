@@ -1,0 +1,7 @@
+// 	LINKER -lcurl
+// 	Post builds
+//		cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto
+//		copy x64\Release\crypto.exe ..\..\Exec_Windows\*
+
+
+// Git restore tool: gitk --all --date-order $(git log -g --pretty=%H)

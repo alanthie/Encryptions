@@ -544,10 +544,7 @@ public:
 		temp.writeUInt32(vurlkey[i].rsa_encoded_data_len, -1);
 		temp.writeUInt32(vurlkey[i].rsa_encoded_data_pos, -1);
 #endif
-
-#ifdef SHUFFLE_FEATURE
 		temp.writeUInt32(vurlkey[i].crypto_flags, -1);
-#endif
 
 		for( size_t j = 0; j< URLINFO_SIZE; j++)
             vurlkey[i].urlinfo_with_padding[j] = temp.getdata()[j];
@@ -1108,7 +1105,6 @@ public:
 	{
 		bool r  = true;
 
-#ifdef SHUFFLE_FEATURE
 		if (crypto_flags & 1)
 		{
 			cryptoshuffle sh(verbose);
@@ -1120,7 +1116,6 @@ public:
 				return false;
 			}
 		}
-#endif
 
 		if ((iter==0) || (iter==NITER))
 		{
@@ -1464,18 +1459,14 @@ public:
 
             data_temp_next.clear_data();
             encode( i, vurlkey.size(), vurlkey[i].crypto_algo,
-#ifdef SHUFFLE_FEATURE
 					vurlkey[i].crypto_flags,
-#else
-					0,
-#endif
                     data_temp,
                     &vurlkey[i].get_buffer()->getdata()[0], vurlkey[i].key_size,
                     data_temp_next);
 
             data_temp.buffer.swap_with(data_temp_next.buffer);
             data_temp_next.erase();
-			
+
         } //for(size_t i=0; i<vurlkey.size(); i++)
 
         if (vurlkey.size()>0)
@@ -1494,7 +1485,7 @@ public:
 					std::cout << "data checksum: " << SHA256::toString(digest) << " size: "<< data_temp.buffer.size() << std::endl;
 				}
 				delete[] digest;
-				
+
 				// Update
 				if (make_urlinfo_with_padding(vurlkey.size()-1) == false)
 				{
@@ -1524,7 +1515,7 @@ public:
 				{
 					vurlkey[vurlkey.size()-1].rsa_encoded_data_pad = 0;
 				}
-				
+
 				// Update
 				if (make_urlinfo_with_padding(vurlkey.size()-1) == false)
 				{
