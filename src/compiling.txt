@@ -3,8 +3,121 @@
 //		cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto
 //		copy x64\Release\crypto.exe ..\..\Exec_Windows\*
 
-
+//----------------------------------
+Lost git commit:
+//----------------------------------
 // Git restore tool: gitk --all --date-order $(git log -g --pretty=%H)
+
+//----------------------------------
+//E-521  https://neuromancer.sk/std/other/E-521
+https://safecurves.cr.yp.to/
+//----------------------------------
+
+//----------------------------------
+// pari
+http://pari.math.u-bordeaux.fr/
+//----------------------------------
+./Configure
+make all
+sudo make install
+mkdir build && cd build && cmake .. && make
+
+//----------------------------------
+// ecgen
+https://github.com/J08nY/ecgen
+
+git clone https://github.com/J08nY/ecgen.git
+cd ecgen
+git submodule update --init
+mkdir build && cd build && cmake .. && make
+//----------------------------------
+~/dev/ecgen/build
+./ecgen
+gmp shared libraries not found
+It would appear /usr/local/lib is not in /etc/ld.so.conf or /etc/ld.so.conf.d/*.
+=>If it is simply run sudo ldconfig (or ldconfig as root) and try again.
+
+./ecgen --fp -u -p -r 192
+seadata not found, this will probably take quite some time.
+[
+{
+    "field": {
+        "p": "0xbd84e667cb5258eea1652096e69f5076a3ee1cadc98c95f1"
+    },
+    "a": "0x53bdec33a4b3b4da63e37b5d268065e84bfa8fde3649f3bb",
+    "b": "0x49f862f58c217d910e41ce5a9a92a3ad3ec58396ceed46a0",
+    "order": "0xbd84e667cb5258eea1652097cd0d24d93bf69122cba4c0b9",
+    "subgroups": [
+        {
+            "x": "0x0d4886469f823989590bb15cbb4f40f5e3daa850d3c8965f",
+            "y": "0x733f610eef6dcb5d8346724700e1f77cd2ca68dd3ab427ff",
+            "order": "0xbd84e667cb5258eea1652097cd0d24d93bf69122cba4c0b9",
+            "cofactor": "0x1",
+            "points": [
+                {
+                    "x": "0x0d4886469f823989590bb15cbb4f40f5e3daa850d3c8965f",
+                    "y": "0x733f610eef6dcb5d8346724700e1f77cd2ca68dd3ab427ff",
+                    "order": "0xbd84e667cb5258eea1652097cd0d24d93bf69122cba4c0b9"
+                }
+            ]
+        }
+    ]
+}]
+
+ ./ecgen --fp -u -p -r 360
+seadata not found, this will probably take quite some time.
+[
+{
+    "field": {
+        "p": "0x9820c35e0231f5b018ed72ed9638dc7a24c9029c8b8643b51cf56eec031bc14bf79aaccec2a05f4eed8e390eb3"
+    },
+    "a": "0x72da776d0e8f40e9532ab9d08965d036c267ea8669b52a4694836bd9a31fec80b1cdd288e45b4a5bcb868a2dda",
+    "b": "0x6b38092b876a24bc7ed410b7e5e3bfc5a3f3f653e222c76123d46846d9d7626565182dca9f16c810861c319273",
+    "order": "0x9820c35e0231f5b018ed72ed9638dc7a24c9029c8b8644fcbf5e6a13a550e23ec8a97872da147611b35f516035",
+    "subgroups": [
+        {
+            "x": "0x056d7c02872877ec76b4442f4d2160fc1040b843347a6b73409b8dd3ea5d06a140e3fb7a18925d1a9940e0c416",
+            "y": "0x3ac33da375ea34e52e0f15445fd5859f762ce55f669bff59d19d35b050d95b46be9ac2a231c038acaa85142812",
+            "order": "0x9820c35e0231f5b018ed72ed9638dc7a24c9029c8b8644fcbf5e6a13a550e23ec8a97872da147611b35f516035",
+            "cofactor": "0x1",
+            "points": [
+                {
+                    "x": "0x056d7c02872877ec76b4442f4d2160fc1040b843347a6b73409b8dd3ea5d06a140e3fb7a18925d1a9940e0c416",
+                    "y": "0x3ac33da375ea34e52e0f15445fd5859f762ce55f669bff59d19d35b050d95b46be9ac2a231c038acaa85142812",
+                    "order": "0x9820c35e0231f5b018ed72ed9638dc7a24c9029c8b8644fcbf5e6a13a550e23ec8a97872da147611b35f516035"
+                }
+            ]
+        }
+    ]
+}]
+
+./ecgen --fp -u -p -r 512
+seadata not found, this will probably take quite some time.
+[
+{
+    "field": {
+        "p": "0xc9cdee7e4ea7ef3e783d815bd4dfd4aa8b79b8ae1bd579caff63d242c74ce9594a746160a2324d46a153f90b6243765e94e5665c3232b399cae903467666b36b"
+    },
+    "a": "0xc3d9feb9f365c7d229e36235f97465169c60a318730bdc6ca82d325cd13b350d1a46627a20941ff4f430a60a642ae6ce9cd679d683334db1081141e612210998",
+    "b": "0x0d9b8939d7a74bda9fbe7a95ccaaba267165e01c2948d4262189ca76be7cf8b5002eb5d3f4ea038b1866c9369a2a1fa6073748b558d9700065000cf293489ab1",
+    "order": "0xc9cdee7e4ea7ef3e783d815bd4dfd4aa8b79b8ae1bd579caff63d242c74ce959328374095009301a71de5422df55cf8dac46483867329a0a1ad5b3069ed486db",
+    "subgroups": [
+        {
+            "x": "0xa6e4181760db300b5477b8afa57152ac14ccd43330642df501b4e962e8222199aa4a04464eefbb951a537a02caf65ad46039a3645b23d61970db847a640724c1",
+            "y": "0x1fe1d7b2842a18846923a0dd13096b5dd51b277027ee3368f7b59615d5a797caf9ebe36fc0f1254c4ae7d5e18074bb0316fe19c2aa4865ef37d1285899ad46cc",
+            "order": "0xc9cdee7e4ea7ef3e783d815bd4dfd4aa8b79b8ae1bd579caff63d242c74ce959328374095009301a71de5422df55cf8dac46483867329a0a1ad5b3069ed486db",
+            "cofactor": "0x1",
+            "points": [
+                {
+                    "x": "0xa6e4181760db300b5477b8afa57152ac14ccd43330642df501b4e962e8222199aa4a04464eefbb951a537a02caf65ad46039a3645b23d61970db847a640724c1",
+                    "y": "0x1fe1d7b2842a18846923a0dd13096b5dd51b277027ee3368f7b59615d5a797caf9ebe36fc0f1254c4ae7d5e18074bb0316fe19c2aa4865ef37d1285899ad46cc",
+                    "order": "0xc9cdee7e4ea7ef3e783d815bd4dfd4aa8b79b8ae1bd579caff63d242c74ce959328374095009301a71de5422df55cf8dac46483867329a0a1ad5b3069ed486db"
+                }
+            ]
+        }
+    ]
+}]
+
 
 ecc
 https://www.youtube.com/watch?v=wpLQZhqdPaA
@@ -31,3 +144,28 @@ Pm+kG*Nb-kG*Nb = Pm
 Pm = Cm[y]-Cm[x]*Nb
 
 file:///home/server/Downloads/SE-Enc_A_Secure_and_Efficient_Encoding_Scheme_Usin.pdf
+
+
+//----------------------------------
+Multi-prime RSA
+//----------------------------------
+The security of Multi-prime RSA is analyzed in Jason Hinek's PhD Thesis which can be accessed at
+
+    On the Security of Some Variants of RSA, Jason Hinek, 2007
+
+In this thesis, Hinek writes
+
+...Considering all of the known attacks on multi-prime RSA (with or without CRT decryption), the evidence suggests that multi-prime RSA with a safe number of primes is no less secure than RSA...
+https://uwspace.uwaterloo.ca/bitstream/handle/10012/2988/mjhinek_PhD_thesis_2007.pdf?sequence=1
+The public key is simply (e, N ) and the private key is (d, p1, . . . , pr)
+For multi-prime RSA the key gener-
+ation algorithm needs to generate r random primes each of size N 1/r
+ulti-prime RSA key generation will be more efficient than the RSA key
+generation algorithm
+
+//----------------------------------
+7.2 Dual RSA
+n particular, Dual RSA is insecure when public exponents
+smaller than (roughly) N 1/4 are used
+//----------------------------------
+

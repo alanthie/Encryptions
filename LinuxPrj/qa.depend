@@ -78,7 +78,7 @@
 	"mathcommon.h"
 	"BigInteger.h"
 
-1678504512 source:/home/server/dev/Encryptions/src/qa/qa.cpp
+1678507300 source:/home/server/dev/Encryptions/src/qa/qa.cpp
 	"mathcommon.h"
 	"qa_internal_empty.hpp"
 	"qa_internal.hpp"
@@ -88,6 +88,7 @@
 	"RSA-GMP/RSAGMPTest.h"
 	"../../src/crypto_const.hpp"
 	"ec_gmp/ec_gmp_p_mul.hpp"
+	"SimpleECC/src/test_simple_ecc.hpp"
 
 1678380169 /home/server/dev/Encryptions/src/qa/prime.h
 	"mathcommon.h"
@@ -668,7 +669,27 @@
 	<string.h>
 	<gmpxx.h>
 
-1678506280 source:/home/server/dev/Encryptions/src/qa/SimpleECC/src/simple_ecc_test.cpp
+1678507251 source:/home/server/dev/Encryptions/src/qa/SimpleECC/src/simple_ecc_test.cpp
+	"boolean.hpp"
+	"helper.hpp"
+	"point.hpp"
+	"j_point.hpp"
+	"ecc.hpp"
+	<Windows.h>
+	<unistd.h>
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+	<assert.h>
+	<math.h>
+	<fcntl.h>
+	<time.h>
+	<dirent.h>
+	<ctype.h>
+	<string.h>
+	<gmpxx.h>
+
+1678506689 /home/server/dev/Encryptions/src/qa/SimpleECC/src/test_simple_ecc.hpp
 	"boolean.hpp"
 	"helper.hpp"
 	"point.hpp"

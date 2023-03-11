@@ -574,6 +574,7 @@ void  menu()
 
 			cryptoECC::test_ecc(0);
             cryptoECC::test_ecc(1);
+            std::cout << std:: endl;
 
             //#define TEST_ENCRYPT_DECRYPT true
             cryptoSimpleECC::test_simple_ecc();
