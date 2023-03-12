@@ -24,30 +24,32 @@ static bool s_Twofish_initialise = false;
 
 class encryptor
 {
+// main use is: bool encrypt(bool allow_empty_url = false)
+
 friend class crypto_package;
 private:
     encryptor() {}
 
 public:
 
-    encryptor(  std::string ifilename_urls,
-                std::string ifilename_msg_data,
-                std::string ifilename_puzzle,
-                std::string ifilename_partial_puzzle,
-                std::string ifilename_full_puzzle,
-                std::string ifilename_encrypted_data,
-                std::string istaging,
-                std::string ifolder_local,
-                std::string ifolder_local_rsa,
-                bool verb = false,
-                bool keep = false,
+    encryptor(  std::string ifilename_urls,             // INPUT  (optional) FILE - URL for making KEYS
+                std::string ifilename_msg_data,         // INPUT  (required) FILE - PLAINTEXT DATA to encrypt
+                std::string ifilename_puzzle,           // INPUT  (optional) FILE - fully resolved puzzle - first key
+                std::string ifilename_partial_puzzle,   // OUTPUT (optional) FILE - unresolved formatted qa puzzle with checksum
+                std::string ifilename_full_puzzle,      // OUTPUT (optional) FILE - fullt resolved formatted puzzle with checksum
+                std::string ifilename_encrypted_data,   // OUTPUT (required) FILE - ENCRYPTED DATA
+                std::string istaging,                   // Environment - staging path
+                std::string ifolder_local,              // Environment - local data keys file path
+                std::string ifolder_local_rsa,          // Environment - RSA database *.db path
+                bool verb = false,                      // Flag - verbose
+                bool keep = false,                      // Flag - keep staging files
                 std::string iencryped_ftp_user = "",
                 std::string iencryped_ftp_pwd  = "",
                 std::string iknown_ftp_server  = "",
-                long ikey_size_factor = 1,
-				bool iuse_gmp = false,
-				bool iself_test = false,
-				long ishufflePerc = 0)
+                long ikey_size_factor = 1,              // Parameter - keys size multiplier
+				bool iuse_gmp = false,                  // Flag - use gmp for big computation
+				bool iself_test = false,                // Flag - verify encryption
+				long ishufflePerc = 0)                  // Parameter - shuffling percentage
     {
         filename_urls = ifilename_urls;
         filename_msg_data = ifilename_msg_data;
@@ -1092,7 +1094,9 @@ public:
 
 		if ((iter==0) || (iter==NITER))
 		{
-            return encode_binDES(data_temp, key, key_size, data_temp_next);
+            // TODO - Not using DES for big data- it double size
+            //return encode_binDES( data_temp, key, key_size, data_temp_next);
+            return encode_salsa20(data_temp, key, key_size, data_temp_next);
 		}
 		else
 		{
@@ -1166,6 +1170,7 @@ public:
             return false;
         }
 
+        // URLS  read
         if (filename_urls.size() > 0)
         {
             if (fileexists(filename_urls))
@@ -1262,6 +1267,7 @@ public:
             }
         }
 
+        // DATA  read
         if (msg_data.read_from_file(filename_msg_data) == false)
         {
             std::cerr << "ERROR " << "reading msg file: " << filename_msg_data <<std::endl;
@@ -1278,8 +1284,10 @@ public:
                 perfect_key_size += MIN_KEY_SIZE - (perfect_key_size % MIN_KEY_SIZE);
             }
 		}
+
 		if (perfect_key_size < MIN_KEY_SIZE) perfect_key_size = MIN_KEY_SIZE;
 		perfect_key_size = perfect_key_size * key_size_factor;
+
         if (verbose)
         {
             std::cout << "msg_input_size = " << msg_input_size;
@@ -1289,6 +1297,7 @@ public:
                          ", total keys size: " << NURL_ITERATIONS * perfect_key_size + puz_key_full.size() << std::endl;
         }
 
+        // GET URL KEYS INFO
         for(size_t i=0; i<vurlkey.size(); i++)
         {
             if (verbose)
@@ -1323,6 +1332,9 @@ public:
 			}
         }
 
+        //--------------------------------
+        // Data to encrypt data_temp
+        //--------------------------------
         if (msg_data.copy_buffer_to(data_temp)== false)
         {
             std::cerr << "ERROR " << "reading copying msg file: " << filename_msg_data <<std::endl;
@@ -1351,13 +1363,14 @@ public:
                 data_temp.buffer.write(&c[0], 1, -1);
         }
 
+        //--------------------------------
+        // URL KEYS iterations: 0 to N-1
+        //--------------------------------
 		// encode(Data,          key1) => Data1 // urlkey1=>key1
         // encode(Data1+urlkey1, key2) => Data2
         // encode(Data2+urlkey2, key3) => Data3
         // ...
         // encode(DataN-1+urlkeyN-1, keyN) => DataN
-        // encode(DataN+urlkeyN+Niter,     pwd0) => DataFinal
-        //
         for(size_t i=0; i<vurlkey.size(); i++)
         {
             if (i==0)
@@ -1367,7 +1380,8 @@ public:
 
             if (i>0)
             {
-			     {
+                // checksum_data
+                {
                     SHA256 sha;
                     sha.update(reinterpret_cast<const uint8_t*> (data_temp.buffer.getdata()), data_temp.buffer.size() );
                     uint8_t* digest = sha.digest();
@@ -1377,7 +1391,7 @@ public:
 
                     delete[] digest;
 
-                    // Update
+                    // Update urlinfo
 					if (make_urlinfo_with_padding(i-1) == false)
 					{
 						std::cerr << "ERROR " << "making url info - url index: " << i-1 <<std::endl;
@@ -1385,11 +1399,9 @@ public:
 					}
                 }
 
-
-				//vurlkey[i-1].rsa_encoded_data_len = vurlkey[i-1].sRSA_ENCODED_DATA.size();
+                // RSA data
 				if (vurlkey[i-1].rsa_encoded_data_len > 0)
 				{
-					// APPEND RSA_ENCODED_DATA
 					vurlkey[i-1].rsa_encoded_data_pos = data_temp.buffer.size();
 
 					if (vurlkey[i-1].rsa_encoded_data_len % PADDING_MULTIPLE != 0)
@@ -1407,17 +1419,14 @@ public:
 						vurlkey[i-1].rsa_encoded_data_pad = 0;
 					}
 
-					// Update
+					// Update urlinfo
 					if (make_urlinfo_with_padding(i-1) == false)
 					{
 						std::cerr << "ERROR " << "making url info - url index: " << i-1 <<std::endl;
 						return false;
 					}
 
-//std::cout << "vurlkey[i-1].rsa_encoded_data_pos : " <<vurlkey[i-1].rsa_encoded_data_pos  << std::endl;
-//std::cout << "vurlkey[i-1].rsa_encoded_data_len : " <<vurlkey[i-1].rsa_encoded_data_len  << std::endl;
-//std::cout << "vurlkey[i-1].rsa_encoded_data_pad : " <<vurlkey[i-1].rsa_encoded_data_pad  << std::endl;
-
+					// APPEND RSA_ENCODED_DATA
                     data_temp.append(vurlkey[i-1].sRSA_ENCODED_DATA.data(), vurlkey[i-1].rsa_encoded_data_len);
 				}
 
@@ -1426,6 +1435,10 @@ public:
             }
 
             data_temp_next.clear_data();
+
+            //--------------------------------------------------------
+            // encode() data_temp => data_temp_next
+            //--------------------------------------------------------
             encode( i, vurlkey.size(), vurlkey[i].crypto_algo,
 					vurlkey[i].crypto_flags, vurlkey[i].shuffle_perc,
                     data_temp,
@@ -1437,8 +1450,12 @@ public:
 
         } //for(size_t i=0; i<vurlkey.size(); i++)
 
+        //--------------------------------
+        // LAST ITER: encode(DataN+urlkeyN+Niter, puz_key) => DataFinal
+        //--------------------------------
         if (vurlkey.size()>0)
         {
+            // checksum_data
 			{
 				SHA256 sha;
 				sha.update(reinterpret_cast<const
@@ -1450,7 +1467,7 @@ public:
 
 				delete[] digest;
 
-				// Update
+				// Update urlinfo
 				if (make_urlinfo_with_padding(vurlkey.size()-1) == false)
 				{
 					std::cerr << "ERROR " << "making url info - url index: " << vurlkey.size()-1 <<std::endl;
@@ -1458,10 +1475,8 @@ public:
 				}
       		}
 
-
-			// APPEND RSA_ENCODED_DATA
+			// RSA DATA
 			vurlkey[vurlkey.size()-1].rsa_encoded_data_pos = data_temp.buffer.size();
-
 			if (vurlkey[vurlkey.size()-1].rsa_encoded_data_len > 0)
 			{
 				// multiple PADDING_MULTIPLE
@@ -1487,18 +1502,13 @@ public:
 					return false;
 				}
 
-//std::cout << "vurlkey[vurlkey.size()-1].rsa_encoded_data_pos : " <<vurlkey[vurlkey.size()-1].rsa_encoded_data_pos  << std::endl;
-//std::cout << "vurlkey[vurlkey.size()-1].rsa_encoded_data_len : " <<vurlkey[vurlkey.size()-1].rsa_encoded_data_len  << std::endl;
-//std::cout << "vurlkey[vurlkey.size()-1].rsa_encoded_data_pad : " <<vurlkey[vurlkey.size()-1].rsa_encoded_data_pad  << std::endl;
-
+				// APPEND RSA_ENCODED_DATA
 				data_temp.append(vurlkey[vurlkey.size()-1].sRSA_ENCODED_DATA.data(), vurlkey[vurlkey.size()-1].rsa_encoded_data_len);
 			}
 
             // APPEND URLINFO
             data_temp.append(&vurlkey[vurlkey.size()-1].urlinfo_with_padding[0], URLINFO_SIZE);
         }
-
-        // Save number of iterations (N web keys + 1 puzzle key) in the last 2 byte! + PADDING_MULTIPLE-2
 
         uint32_t crc_full_puz_key= 0;
         {
@@ -1507,28 +1517,29 @@ public:
             crc_full_puz_key = crc.get_hash();
         }
 
-        Buffer temp(PADDING_MULTIPLE); // 64
+        Buffer temp(PADDING_MULTIPLE); // 64x
 		temp.init(0);
 		temp.writeUInt32(crc_full_puz_key, PADDING_MULTIPLE - 8);
         temp.writeUInt16(PADDING, PADDING_MULTIPLE - 4);
-		temp.writeUInt16((uint16_t)vurlkey.size() + 1, PADDING_MULTIPLE - 2);
+		temp.writeUInt16((uint16_t)vurlkey.size() + 1, PADDING_MULTIPLE - 2); // Save number of iterations
         data_temp.append(temp.getdata(), PADDING_MULTIPLE);
 
-        //encode(DataN+urlkeyN+Niter,     pwd0) => DataFinal
+        //--------------------------------------------------------
+        // encode() data_temp => data_temp_next
+        //--------------------------------------------------------
         encode( vurlkey.size(), vurlkey.size(), (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES, 0, 0,
                 data_temp, puz_key_full.getdata(), puz_key_full.size(), data_temp_next);
 
-        data_temp_next.buffer.writeUInt32(crc_full_puz_key, -1);
+        data_temp_next.buffer.writeUInt32(crc_full_puz_key, -1);    // PLAIN
 
         if (verbose)
         {
-            std::cout << "data size: "  << data_temp_next.buffer.size() << std::endl;
-            std::cout << "CRC32 of full puzzle key when encoded is: "  << crc_full_puz_key << std::endl;
-            std::cout << "qa_puz_key size: "   << qa_puz_key.size() << std::endl;
+            std::cout << "data encrypted size: "  << data_temp_next.buffer.size() << std::endl;
+            std::cout << "qa_puz_key size:     "  << qa_puz_key.size() << std::endl;
         }
 
         data_temp_next.copy_buffer_to(encrypted_data);
-        encrypted_data.save_to_file(filename_encrypted_data);
+        encrypted_data.save_to_file(filename_encrypted_data);   // SAVE
 
 		return true;
     }

@@ -1076,7 +1076,8 @@ public:
 		bool r = true;
         if ((iter==0) || (iter==NITER-1))
         {
-            r = decode_binDES(data_encrypted, key, key_size, data_decrypted);
+            //r = decode_binDES( data_encrypted, key, key_size, data_decrypted);
+			r = decode_salsa20(data_encrypted, key, key_size, data_decrypted);
         }
         else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_TWOFISH)
         {
