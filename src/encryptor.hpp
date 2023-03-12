@@ -1074,11 +1074,13 @@ public:
 		return r;
 	}
 
-    // select various encoding algos based on iter, ...
+	//------------------------------------------
+	// encode() data_temp => data_temp_next
+	//------------------------------------------
     bool encode( size_t iter, size_t NITER, uint16_t crypto_algo, uint32_t crypto_flags, uint32_t shufflePerc,
                  cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
 	{
-		bool r  = true;
+		bool r = true;
 
 		if (crypto_flags & 1)
 		{
@@ -1094,8 +1096,8 @@ public:
 
 		if ((iter==0) || (iter==NITER))
 		{
-            // TODO - Not using DES for big data- it double size
-            //return encode_binDES( data_temp, key, key_size, data_temp_next);
+            // DES double data size
+            // return encode_binDES( data_temp, key, key_size, data_temp_next);
             return encode_salsa20(data_temp, key, key_size, data_temp_next);
 		}
 		else

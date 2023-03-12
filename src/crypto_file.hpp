@@ -72,10 +72,18 @@ namespace cryptoAL
 		return r;
 	}
 
-	// rsa_data is base64 a string
+	//--------------------------------------------------------------------------------------
+	// Encoding (to_encode == true)
+	// 		embedded_rsa_key (random) => rsa_data [base64 is a string] ==> outfile
+	// 		TODO - (multiple recursive) rsa_key_name as a vector of keys
+	//
+	// Decoding (to_encode == false)
+	//		rsa_data ==> embedded_rsa_key ==> outfile
+	//		TODO - (multiple recursive) rsa_key_name as a vector of keys
+	//--------------------------------------------------------------------------------------
 	int getrsa( bool to_encode, const std::string& rsa_key_name, const std::string& rsa_data, std::string outfile,
 				std::string local_rsa_db, std::string& embedded_rsa_key,
-				std::string options = "", bool verbose=false, bool use_gmp = false, bool SELF_TEST = false)
+				std::string options = "", bool verbose = false, bool use_gmp = false, bool SELF_TEST = false)
 	{
 		options = options;
 		if (verbose)
@@ -111,6 +119,9 @@ namespace cryptoAL
 					cryptodata temp;
 					uint32_t key_len_in_bytes = k.key_size_in_bits/8;
 
+					//-------------------------------------------
+					// Encoding 
+					//-------------------------------------------
 					if (to_encode)
 					{
 						if (ok)
@@ -167,6 +178,10 @@ namespace cryptoAL
 							}
 						}
 					}
+					
+					//-------------------------------------------
+					// Decoding 
+					//-------------------------------------------
 					else
 					{
 						// decoding from rsa_data
