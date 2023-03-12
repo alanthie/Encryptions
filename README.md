@@ -103,9 +103,10 @@ Current set of encryption algorithms
     TWOFISH
     Salsa20
     IDEA
-    RSA
+    RSA (2 primes)
     Shuffling
-    Future: Multi primes RSA
+    Future: Recursive multiple RSA
+    Future: Multiple primes (3+) RSA
     Future: Elliptic Curve
 </pre>
 
