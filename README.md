@@ -173,9 +173,7 @@ Select a task:
 </pre>
 
 Man-In-The-Middle Attack
-<pre>
-![Alt text](/Doc/ManInTheMiddleAttack.png?raw=true "Man-In-The-Middle Attack")
-</pre>
+![Alt text](/Doc/ManInTheMiddleAttack.png?raw=true "ManInTheMiddleAttack")
 
 License
 <pre>
