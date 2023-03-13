@@ -27,7 +27,7 @@ the key length must be at least as large as the message and only used once
 Example, encodes a file into an encrypted file
 <pre>
 ./crypto encode -h
-Usage: encode [-h] --input VAR [--output VAR] [--puzzle VAR] [--qapuzzle VAR] [--fullpuzzle VAR] [--url VAR] [--staging VAR] [--local VAR] [--keep VAR] [--keyfactor VAR] [--known_ftp_server VAR] [--encryped_ftp_user VAR] [--encryped_ftp_pwd VAR] [--gmp VAR] [--selftest VAR]
+Usage: encode [-h] --input VAR [--output VAR] [--puzzle VAR] [--qapuzzle VAR] [--fullpuzzle VAR] [--url VAR] [--staging VAR] [--local VAR] [--rsa VAR] [--keep VAR] [--keyfactor VAR] [--known_ftp_server VAR] [--encryped_ftp_user VAR] [--encryped_ftp_pwd VAR] [--gmp VAR] [--selftest VAR] [--shuffle VAR]
 
 Encodes a file into an encrypted file
 
@@ -42,6 +42,7 @@ Optional arguments:
   -u, --url               	specify the (optional input) url list file. [default: ""]
   -s, --staging           	specify the staging folder. [default: ""]
   -l, --local             	specify the local folder of known contents. [default: ""]
+  -r, --rsa               	specify the local folder for rsa*.db [default: ""]
   -v, --verbose           	specify the verbose [default: ""]
   -k, --keep              	specify if keeping staging file [default: ""]
   -x, --keyfactor         	specify a key_size_factor, this multiply the key size by the factor [default: "1"]
@@ -49,8 +50,8 @@ Optional arguments:
   -fu, --encryped_ftp_user	specify list of ftp username (encrypted with string_encode) [default: ""]
   -fp, --encryped_ftp_pwd 	specify list of ftp password (encrypted with string_encode) [default: ""]
   -g, --gmp               	use gmp [default: ""]
-  -t, --selftest          	selftest [default: ""]
-
+  -t, --selftest          	encryption selftest [default: ""]
+  -sh, --shuffle          	specify pre encryption shuffling percentage of data 0-100 [default: "0"]
   
 Output example:
 MESSAGE is 117169 bytes
@@ -70,7 +71,7 @@ data encrypted size: 141636
 qa_puz_key size:     128
 crypto ENCODING SUCCESS
 Encrypted file: msg.zip.encrypted
-Puzzle file   : <default>
+Puzzle file   : (default)
 Elapsed time in seconds: 38 sec
 
 </pre>
@@ -157,7 +158,7 @@ Select a task:
 3. HEX(file, position, keysize)
 4. Make random puzzle from shared binary (like USB keys) data
 5. Resolve puzzle
-6. <Futur usage>
+6. (Futur usage)
 7. View my private RSA key
 8. View other public RSA key
 9. Extract my public RSA key to file
