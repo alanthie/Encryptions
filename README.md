@@ -146,23 +146,25 @@ Local files (like shared USB)
 A tool (qa) for various tasks
 <pre>
 ====================================
-Program version  : v0.1_2023-03-09
-Select a function: 
+QA version   : v0.1_2023-03-12
+Select a task: 
 ====================================
 0. Quit
 *. Last choice
-1. Custom F(n)
-2. Custom P(n)
+1. Custom secret F(n)
+2. Custom secret P(n)
 3. HEX(file, position, keysize)
 4. Make random puzzle from shared binary (like USB keys) data
 5. Resolve puzzle
-Obsolete 6. Generate RSA key (slow)
+6. <Futur usage>
 7. View my private RSA key
 8. View other public RSA key
 9. Extract my public RSA key to file
-10. Generate RSA key with openssl command line (fastest)
+10. Generate RSA key with OPENSSL command line (fastest)
 11. Test RSA GMP key generator
-12. Generate RSA key with GMP
+12. Generate RSA key with GMP (fast)
+13. Elliptic Curve test with GMP
+==> 
 </pre>
 
 License

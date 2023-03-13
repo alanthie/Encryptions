@@ -563,16 +563,6 @@ public:
                             if (c != uk.checksum[j])
                             {
                                 std::cerr << "ERROR " << "invalid key checksum at " << j << std::endl;
-//                                if (verbose)
-//                                {
-//                                    std::string su(u);
-//                                    for( size_t j = 0; j< CHKSUM_SIZE; j++)
-//                                    {
-//                                        std::cout << (int)(unsigned char)uk.checksum[j] << " ";
-//                                    }
-//                                    if (is_rsa == false)
-//                                        std::cout << "url: " << su << std::endl;
-//                                }
                                 r = false;
                                 break;
                             }
@@ -1427,7 +1417,7 @@ public:
                     std::cerr << "WARNING " << "unmanaged padding encoding size " << PADDING_LEN_ENCODESIZE  <<std::endl;
                 }
 
-                NITER   = data_temp_next.buffer.readUInt16(file_size - 2);
+                NITER = data_temp_next.buffer.readUInt16(file_size - 2);
                 NITER = NITER - 1;
 
                 if (NITER < 0)
@@ -1545,8 +1535,6 @@ public:
 
 					// VERIFY_CHKSUM_DATA
 					char compute_checksum_data[CHKSUM_SIZE+1] = {0};
-					//std::cout << " VERIFY_CHKSUM_DATA - data_temp.buffer.size()"<< data_temp.buffer.size()  << std::endl;
-
 					if (r)
 					{
 						SHA256 sha;
@@ -1556,11 +1544,6 @@ public:
 						for( size_t j = 0; j< CHKSUM_SIZE; j++)
 							compute_checksum_data[j] = s[j];
 						compute_checksum_data[CHKSUM_SIZE] = 0;
-
-//						if (verbose)
-//						{
-//							std::cout << "compute data checksum: " << SHA256::toString(digest) << " size: "<< data_temp.buffer.size() << std::endl;
-//						}
 
 						char c;
 						for( size_t j = 0; j< CHKSUM_SIZE; j++)
@@ -1577,7 +1560,6 @@ public:
 								break;
 							}
 						}
-						//std::cout << "data checksum OK "<<  std::endl;
 					}
 
                     if ((uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
@@ -1614,7 +1596,7 @@ public:
                             Buffer temp(URLINFO_SIZE);
                             data_temp_next.get_last(URLINFO_SIZE, temp);
 
-                            //std::cout << std::endl;
+                            if (verbose) std::cout << std::endl;
                             if (read_urlinfo(temp, uk) == false)
                             {
                                 r = false;

@@ -349,9 +349,7 @@ public:
                                     else
                                         v_encoded_size.push_back(vurlkey[i].sRSA_ENCODED_DATA.size() );
                                 }
-
                                 //std::cout << "RSA ITER: " << riter << " " << rsa_key_at_iter << " from " << embedded_rsa_key.size() << " to " << vurlkey[i].sRSA_ENCODED_DATA.size() << std::endl;
-
                             }
                         }
                         else
@@ -368,7 +366,6 @@ public:
                                 vurlkey[i].sRSA_ENCODED_DATA = t;
 
                                 //std::cout 	<< "RSA ITER: " << riter << " " << rsa_key_at_iter << " from " << msg_input_size_used << " to " << msg_size_produced << " total left " << 												//				vurlkey[i].sRSA_ENCODED_DATA.size() << std::endl;
-
                                 if (r)
                                 {
                                     vurlkey[i].rsa_encoded_data_pos = 0; // set later
@@ -522,21 +519,11 @@ public:
                     std::cout << "crypto_algo: " << vurlkey[i].crypto_algo << std::endl;
 
                 {
-                    SHA256 sha;
-                    sha.update(reinterpret_cast<const
-                    uint8_t*> (d.buffer.getdata()), d.buffer.size() );
-                    uint8_t* digest = sha.digest();
-                    auto s = SHA256::toString(digest);
-                    for( size_t j = 0; j< CHKSUM_SIZE; j++)
-                        vurlkey[i].checksum[j] = s[j];
-
-
+                    vurlkey[i].do_checksum_key(d);
                     if (verbose)
                     {
                         std::cout << "key extracted from data of size: " << d.buffer.size() << std::endl;
-                        std::cout << "key checksum: " << SHA256::toString(digest) << std::endl;
                     }
-                    delete[] digest;
                 }
             }
             else
@@ -1459,23 +1446,13 @@ public:
 
             if (i>0)
             {
-                // checksum_data
+                vurlkey[i-1].do_checksum_data(data_temp);
+
+                // Update urlinfo
+                if (make_urlinfo_with_padding(i-1) == false)
                 {
-                    SHA256 sha;
-                    sha.update(reinterpret_cast<const uint8_t*> (data_temp.buffer.getdata()), data_temp.buffer.size() );
-                    uint8_t* digest = sha.digest();
-                    auto s = SHA256::toString(digest);
-                    for( size_t j = 0; j< CHKSUM_SIZE; j++)
-                        vurlkey[i-1].checksum_data[j] = s[j];
-
-                    delete[] digest;
-
-                    // Update urlinfo
-					if (make_urlinfo_with_padding(i-1) == false)
-					{
-						std::cerr << "ERROR " << "making url info - url index: " << i-1 <<std::endl;
-						return false;
-					}
+                    std::cerr << "ERROR " << "making url info - url index: " << i-1 <<std::endl;
+                    return false;
                 }
 
                 // RSA data
@@ -1534,25 +1511,15 @@ public:
         //--------------------------------
         if (vurlkey.size()>0)
         {
-            // checksum_data
-			{
-				SHA256 sha;
-				sha.update(reinterpret_cast<const
-				uint8_t*> (data_temp.buffer.getdata()), data_temp.buffer.size() );
-				uint8_t* digest = sha.digest();
-				auto s = SHA256::toString(digest);
-				for( size_t j = 0; j< CHKSUM_SIZE; j++)
-					vurlkey[vurlkey.size()-1].checksum_data[j] = s[j];
+            vurlkey[vurlkey.size()-1].do_checksum_data(data_temp);
 
-				delete[] digest;
+            // Update urlinfo
+            if (make_urlinfo_with_padding(vurlkey.size()-1) == false)
+            {
+                std::cerr << "ERROR " << "making url info - url index: " << vurlkey.size()-1 <<std::endl;
+                return false;
+            }
 
-				// Update urlinfo
-				if (make_urlinfo_with_padding(vurlkey.size()-1) == false)
-				{
-					std::cerr << "ERROR " << "making url info - url index: " << vurlkey.size()-1 <<std::endl;
-					return false;
-				}
-      		}
 
 			// RSA DATA
 			vurlkey[vurlkey.size()-1].rsa_encoded_data_pos = data_temp.buffer.size();

@@ -94,6 +94,29 @@ public:
 		url[URL_MAX_SIZE-1] = 0;
 	}
 
+	void do_checksum_data(cryptodata& data_temp)
+    {
+        SHA256 sha;
+        sha.update(reinterpret_cast<const uint8_t*> (data_temp.buffer.getdata()), data_temp.buffer.size() );
+        uint8_t* digest = sha.digest();
+        auto s = SHA256::toString(digest);
+        for( size_t j = 0; j< CHKSUM_SIZE; j++)
+            checksum_data[j] = s[j];
+
+        delete[] digest;
+    }
+    void do_checksum_key(cryptodata& data_temp)
+    {
+        SHA256 sha;
+        sha.update(reinterpret_cast<const uint8_t*> (data_temp.buffer.getdata()), data_temp.buffer.size() );
+        uint8_t* digest = sha.digest();
+        auto s = SHA256::toString(digest);
+        for( size_t j = 0; j< CHKSUM_SIZE; j++)
+            checksum[j] = s[j];
+
+        delete[] digest;
+    }
+
 
     uint16_t crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES; // 2
     uint16_t url_size = 0;              // 2
