@@ -11,10 +11,15 @@
 #include "ecc.hpp"
 
 #ifdef _WIN32
-#include <Windows.h>
+//#include <Windows.h>
+#include <chrono>
+#include <thread>
+#define __x86_64__ 1
+#pragma warning ( disable : 4146 )
 #else
-#include <unistd.h>
+#include <dirent.h>
 #endif
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,7 +28,11 @@
 #include <math.h>
 #include <fcntl.h>
 #include <time.h>
+#ifdef _WIN32
+  //...
+#else
 #include <dirent.h>
+#endif
 #include <ctype.h>
 #include <string.h>
 #include <gmpxx.h>
@@ -44,14 +53,14 @@ namespace cryptoSimpleECC
 long long max_iteration;
 
 // ECC Parameters (P-256 NIST)
-char*a_v="-3";
-char*b_v="5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b";
-char*p_v="115792089210356248762697446949407573530086143415290314195533631308867097853951";
-char*r_v="115792089210356248762697446949407573529996955224135760342422259061068512044369";
-char*gx_v="6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296";
-char*gy_v="4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5";
-char*s_v="c49d360886e704936a6678e1139d26b7819f7e90";
-char*c_v="7efba1662985be9403cb055c75d4f7e0ce8d84a9c5114abcaf3177680104fa0d";
+const char*a_v="-3";
+const char*b_v="5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b";
+const char*p_v="115792089210356248762697446949407573530086143415290314195533631308867097853951";
+const char*r_v="115792089210356248762697446949407573529996955224135760342422259061068512044369";
+const char*gx_v="6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296";
+const char*gy_v="4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5";
+const char*s_v="c49d360886e704936a6678e1139d26b7819f7e90";
+const char*c_v="7efba1662985be9403cb055c75d4f7e0ce8d84a9c5114abcaf3177680104fa0d";
 
 /** This benchmarking code is adapted from https://idea.popcount.org/2013-01-28-counting-cycles---rdtsc/ */
 #ifdef __i386__
@@ -62,6 +71,10 @@ char*c_v="7efba1662985be9403cb055c75d4f7e0ce8d84a9c5114abcaf3177680104fa0d";
 # error unknown platform
 #endif
 
+#ifdef _WIN32
+	#define RDTSC_START(cycles)  
+	#define RDTSC_STOP(cycles)  
+#else
 #define RDTSC_START(cycles)                                \
     do {                                                   \
         register unsigned cyc_high, cyc_low;               \
@@ -85,6 +98,7 @@ char*c_v="7efba1662985be9403cb055c75d4f7e0ce8d84a9c5114abcaf3177680104fa0d";
                      :: RDTSC_DIRTY);                      \
         (cycles) = ((uint64_t)cyc_high << 32) | cyc_low;   \
     } while(0)
+#endif
 
 uint64_t t1, t2;
 // Constants, the minimum number of cycles required for calling RDTSC_START and RDTSC_STOP
@@ -122,11 +136,22 @@ int test_simple_ecc() {
 	mpz_init(zero_value);
 	mpz_init(k2);
 
+#ifdef _WIN32
+#else
 	RDTSC_START(t1);
+#endif
 
+#ifdef _WIN32
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+#else
 	sleep(1); // sleep for 1 second
+#endif
 
-	RDTSC_STOP(t2);
+#ifdef _WIN32
+#else
+	RDTSC_START(t1);
+#endif
+
 	uint64_t one_second = t2 - t1 - rdtscp_cycle;
 	printf("Approximate number of cycles in 1 second: %lld\n\n", one_second);
 	uint64_t one_us = one_second / 1e6;
@@ -469,7 +494,7 @@ int test_simple_ecc() {
 	/** -------------------------------------------------------------------------*/
 	if (TEST_SIMPLIFIED_ECIES) {
 		// Simplified ECIES (Ref: Page 256 Cryptography Theory & Practice 2nd Ed. - Douglas)
-		char* message_string = "hello"; // 0..9, a..z (base 36)
+		const char* message_string = "hello"; // 0..9, a..z (base 36)
 		mpz_t encrypted_message;
 		mpz_init(encrypted_message);
 

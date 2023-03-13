@@ -16,7 +16,11 @@
 #include <math.h>
 #include <fcntl.h>
 #include <time.h>
+#ifdef _WIN32
+#pragma warning ( disable : 4146 )
+#else
 #include <dirent.h>
+#endif
 #include <ctype.h>
 #include <string.h>
 #include <gmpxx.h>
@@ -29,7 +33,8 @@ namespace cryptoSimpleECC
 typedef struct {
 	mpz_t x;
 	mpz_t y;
-	boolean isInf;
+	//boolean isInf;
+	bool isInf;
 } Point;
 
 /** Constructor & Destructor */

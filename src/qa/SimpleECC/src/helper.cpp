@@ -13,7 +13,10 @@
 #include <math.h>
 #include <fcntl.h>
 #include <time.h>
+#ifdef _WIN32
+#else
 #include <dirent.h>
+#endif
 #include <ctype.h>
 #include <string.h>
 #include <gmpxx.h>
@@ -23,10 +26,27 @@
 namespace cryptoSimpleECC
 {
 
-void get_random(mpz_t results, int num_bytes) { // multiple of 8
+void get_random(mpz_t results, int num_bytes) 
+{ 
+	// multiple of 8
 	unsigned long long *data = (unsigned long long*) malloc((num_bytes / 8) * sizeof(long long));
+
+#ifdef _WIN32
+	unsigned long long L;
+	srand(time(NULL));
+	unsigned char c[4]; //[8]...
+	for (long i = 0; i < num_bytes/8; i++)
+	{
+		c[0] = rand() % 256;
+		c[1] = rand() % 256;
+		c[2] = rand() % 256;
+		c[3] = rand() % 256;
+		L =  (c[0]*256*256*256) + (c[1] * 256 * 256) + (c[2] * 256) + (c[3]);
+		data[i] = L;
+	}
+#else
 	int ret_val;
-	FILE *fp;
+	FILE* fp;
 	fp = fopen("/dev/urandom", "r");
 	if (fp == NULL) {
 		fprintf(stderr, "cannot open random number device!");
@@ -34,6 +54,7 @@ void get_random(mpz_t results, int num_bytes) { // multiple of 8
 	}
 	ret_val = fread(data, 8, num_bytes / 8, fp);
 	fclose(fp);
+#endif
 
 	mpz_init(results);
 	mpz_import(results, (num_bytes / 8), 1, sizeof(data[0]), 0, 0, data);

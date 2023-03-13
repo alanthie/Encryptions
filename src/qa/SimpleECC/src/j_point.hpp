@@ -18,7 +18,8 @@ typedef struct {
 	mpz_t X;
 	mpz_t Y;
 	mpz_t Z;
-	boolean isInf;
+	//boolean isInf;
+	bool isInf;
 } J_Point; // Jacobian Coordinates
 
 /** Constructor & Destructor */
