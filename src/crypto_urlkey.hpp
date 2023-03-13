@@ -29,6 +29,12 @@ public:
         }
     }
 
+	void clear_dynamic_data()
+	{
+		erase_buffer();
+		sRSA_ENCODED_DATA.clear();
+	}
+
     Buffer* get_buffer()
     {
         if (buff_key == nullptr)
@@ -46,6 +52,48 @@ public:
         }
     }
 
+	std::string without_header_token()
+	{
+		if (url_size >= 3)
+		{
+			if ((url[0]=='[') &&  (url[1]=='r')&&  (url[2]==']'))
+			{
+				std::string s(url);
+				return s.substr(3);
+			}
+		}
+		else if (url_size > 0)
+			return std::string(url);
+
+		return "";
+	}
+
+	void set_url(const std::string& s)
+	{
+		for (size_t i=0; i < s.size(); i++)
+		{
+			if (i < URL_MAX_SIZE)
+			{
+				url[i] = s[i];
+			}
+			else
+			{
+                std::cerr << "ERROR url too big " << s << std::endl;
+				throw "ERROR url too big ";
+			}
+		}
+		if (s.size() < URL_MAX_SIZE)
+		{
+			url[s.size()] = 0;
+			url_size = s.size();
+		}
+		else
+		{
+            url_size = URL_MAX_SIZE-1;
+		}
+		url[URL_MAX_SIZE-1] = 0;
+	}
+
 
     uint16_t crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES; // 2
     uint16_t url_size = 0;              // 2
@@ -62,10 +110,10 @@ public:
 	uint32_t rsa_encoded_data_pos = 0;	// 4 bytes
 	uint32_t crypto_flags = 1;			// 4 bytes
 	uint32_t shuffle_perc = 0;			// 4 bytes
-		
+
     char urlinfo_with_padding[URLINFO_SIZE] = {0};
 	std::string sRSA_ENCODED_DATA; 		// Base64 string of rsa_encoded_data_len // string's implementation uses memory on the heap.
-	
+
 protected:
     Buffer* buff_key = nullptr;
 };

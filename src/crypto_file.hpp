@@ -72,169 +72,238 @@ namespace cryptoAL
 		return r;
 	}
 
-	//--------------------------------------------------------------------------------------
-	// Encoding (to_encode == true)
-	// 		embedded_rsa_key (random) => rsa_data [base64 is a string] ==> outfile
-	// 		TODO - (multiple recursive) rsa_key_name as a vector of keys
-	//
-	// Decoding (to_encode == false)
-	//		rsa_data ==> embedded_rsa_key ==> outfile
-	//		TODO - (multiple recursive) rsa_key_name as a vector of keys
-	//--------------------------------------------------------------------------------------
-	int getrsa( bool to_encode, const std::string& rsa_key_name, const std::string& rsa_data, std::string outfile,
-				std::string local_rsa_db, std::string& embedded_rsa_key,
-				std::string options = "", bool verbose = false, bool use_gmp = false, bool SELF_TEST = false)
+	bool get_rsa_key(const std::string& rsa_key_name, const std::string& local_rsa_db, generate_rsa::rsa_key& kout)
 	{
-		options = options;
-		if (verbose)
-		{
-			std::cout << "getrsa to_encode: "       << to_encode << std::endl;
-			std::cout << "getrsa rsa_key_name: "    << rsa_key_name << std::endl;
-			if (to_encode == false)
-				std::cout << "getrsa rsa_data: "    << get_summary_hex(rsa_data.data(),rsa_data.size())  << " size:" << rsa_data.size()<< std::endl;
-			std::cout << "getrsa outfile: "         << outfile << std::endl;
-			std::cout << "getrsa local_rsa_db: "    << local_rsa_db << std::endl;
-			std::cout << "use_gmp: " << use_gmp << std::endl;
-		}
-
-		int r = 0;
-
-		// Read rsa keys
-		std::map< std::string, generate_rsa::rsa_key > map_rsa;
+		bool found = false;
 
 		if (fileexists(local_rsa_db) == true)
 		{
+			std::map<std::string, generate_rsa::rsa_key> map_rsa;
+
 			std::ifstream infile;
 			infile.open (local_rsa_db, std::ios_base::in);
 			infile >> bits(map_rsa);
 			infile.close();
 
-			bool found = false;
-			bool ok = true;
-			for(auto& [user, k] : map_rsa)
+			for(auto& [userkey, k] : map_rsa)
 			{
-				if (user == rsa_key_name)
+				if (userkey == rsa_key_name)
 				{
 					found = true;
-					cryptodata temp;
-					uint32_t key_len_in_bytes = k.key_size_in_bits/8;
-
-					//-------------------------------------------
-					// Encoding 
-					//-------------------------------------------
-					if (to_encode)
-					{
-						if (ok)
-						{
-							embedded_rsa_key = generate_base64_random_string(key_len_in_bytes - 11);
-							if (verbose)
-							{
-								std::cout << "getrsa rsa key_len_in_bytes: " << key_len_in_bytes << std::endl;
-								std::cout << "getrsa rsa_data: " << get_summary_hex(embedded_rsa_key.data(),embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
-							}
-
-							std::string encoded_rsa_key;
-
-							if (use_gmp == true)
-							{
-								RSAGMP::Utils::mpzBigInteger modulus(k.base64_to_base10(k.s_n) );
-								RSAGMP::Utils::mpzBigInteger pub(k.base64_to_base10(k.s_e));
-								RSAGMP::Utils::mpzBigInteger message(k.base64_to_base10(embedded_rsa_key));
-								RSAGMP::Utils::mpzBigInteger message1 = RSAGMP::Encrypt(message, pub, modulus);
-								std::string s_gmp = k.base10_to_base64(message1.get_str());
-								encoded_rsa_key = s_gmp;
-
-								if (SELF_TEST)
-								{
-									RSAGMP::Utils::mpzBigInteger priv(k.base64_to_base10(k.s_d));
-									RSAGMP::Utils::mpzBigInteger message2 = RSAGMP::Decrypt(message1, priv, modulus);
-									std::string s_gmp2 = k.base10_to_base64(message2.get_str());
-									if (s_gmp2 != embedded_rsa_key)
-									{
-										std::cout << "ERROR encryption decryption" << std::endl;
-										std::cout << "s_gmp2:           " << get_summary_hex(s_gmp2.data(),s_gmp2.size()) << " size:" << s_gmp2.size() << std::endl;
-										std::cout << "embedded_rsa_key: " << get_summary_hex(embedded_rsa_key.data(),embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
-										throw "ERROR encryption decryption";
-									} 
-									else
-									{
-										std::cout << "SELF TEST OK encryption decryption" << std::endl;
-									}
-								}
-							}
-							else
-							{
-								std::cout << "WARNING not using GMP" << std::endl;
-								typeuinteger  e = k.encode(embedded_rsa_key);
-								encoded_rsa_key = k.to_base64(e);
-							}
-
-							{
-								temp.buffer.write(encoded_rsa_key.data(), encoded_rsa_key.size());
-								if (verbose)
-								{
-									std::cout << "getrsa data encoded : " << get_summary_hex(encoded_rsa_key.data(), encoded_rsa_key.size())  << " size:" << encoded_rsa_key.size() << std::endl;
-								}
-							}
-						}
-					}
-					
-					//-------------------------------------------
-					// Decoding 
-					//-------------------------------------------
-					else
-					{
-						// decoding from rsa_data
-						if (use_gmp == true)
-						{
-							RSAGMP::Utils::mpzBigInteger modulus(k.base64_to_base10(k.s_n) );
-							RSAGMP::Utils::mpzBigInteger priv(k.base64_to_base10(k.s_d));
-							RSAGMP::Utils::mpzBigInteger message(k.base64_to_base10(rsa_data));
-							RSAGMP::Utils::mpzBigInteger message1 = RSAGMP::Decrypt(message, priv, modulus);
-							std::string s_gmp = k.base10_to_base64(message1.get_str());
-							embedded_rsa_key = s_gmp;
-						}
-						else
-						{
-							std::cout << "WARNING not using GMP" << std::endl;
-
-							typeuinteger  v = k.val(rsa_data);
-							embedded_rsa_key = k.decode(v);
-						}
-
-						temp.buffer.write(embedded_rsa_key.data(), embedded_rsa_key.size());
-						if (verbose)
-						{
-							std::cout << "getrsa rsa key_len_in_bytes: " << key_len_in_bytes << std::endl;
-							if (use_gmp == false)
-								std::cout << "getrsa data decoded: " << get_summary_hex(embedded_rsa_key.data(), embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
-							else
-							   std::cout << "getrsa gmp decoded: " << get_summary_hex(embedded_rsa_key.data(), embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
-						}
-					}
-
-					if (ok)
-					{
-						ok = temp.save_to_file(outfile);
-					}
-					else
-					{
-						r = -1;
-					}
-
+					kout = k;
 					break;
 				}
-			}
-
-			if (found == false)
-			{
-				std::cerr << "ERROR getrsa rsa_key_name not found: " << rsa_key_name << std::endl;
-				r = -1;
 			}
 		}
 		else
 		{
-			std::cerr << "ERROR getrsa no local_rsa_db: " << local_rsa_db << std::endl;
+			std::cout << "ERROR no rsa file: " << local_rsa_db << std::endl;
+		}
+
+		return found;
+	}
+
+
+	std::string rsa_decode_string(const std::string& smsg, generate_rsa::rsa_key& k,
+        uint32_t msg_input_size_touse, uint32_t& msg_size_produced, bool use_gmp)
+	{
+		std::string decoded_rsa_data;
+		std::string msg;
+
+		if (smsg.size() == msg_input_size_touse)
+		{
+            msg = smsg;
+		}
+		else if (msg_input_size_touse < smsg.size() )
+		{
+            msg = smsg.substr(0, msg_input_size_touse);
+		}
+		else
+		{
+            std::cout << "ERROR string to decode too big " << smsg.size() << " " << msg_input_size_touse << std::endl;
+            throw "ERROR string to decode too big";
+		}
+
+		if (use_gmp == true)
+		{
+			RSAGMP::Utils::mpzBigInteger modulus(k.base64_to_base10(k.s_n) );
+			RSAGMP::Utils::mpzBigInteger priv(k.base64_to_base10(k.s_d));
+			RSAGMP::Utils::mpzBigInteger message(k.base64_to_base10(msg));
+			RSAGMP::Utils::mpzBigInteger message1 = RSAGMP::Decrypt(message, priv, modulus);
+			decoded_rsa_data = k.base10_to_base64(message1.get_str());
+		}
+		else
+		{
+			std::cout << "WARNING not using GMP" << std::endl;
+			typeuinteger  v = k.val(msg);
+			decoded_rsa_data = k.decode(v);
+		}
+        msg_size_produced = decoded_rsa_data.size();
+
+		if (msg_input_size_touse < smsg.size() )
+            decoded_rsa_data += smsg.substr(msg_input_size_touse);
+
+		return decoded_rsa_data;
+	}
+
+	std::string rsa_encode_string(  const std::string& smsg, generate_rsa::rsa_key& k,
+                                    uint32_t& msg_input_size_used, uint32_t& msg_size_produced,
+                                    bool use_gmp, bool SELF_TEST)
+	{
+		std::string encoded_rsa_data;
+
+		// smsg maybe less or bigger than rsa capacity
+		bool over_capacity = false;
+		std::string msg_to_encrypt;
+
+		uint32_t key_len_bytes = k.key_size_in_bits / 8;
+
+		if (key_len_bytes < smsg.size())
+		{
+			over_capacity = true;
+			msg_to_encrypt = smsg.substr(0, key_len_bytes);
+			//std::cout << "RSA over capacity, partial encoding " << key_len_bytes << " of " << smsg.size() << std::endl;
+		}
+		else
+		{
+			msg_to_encrypt = smsg;
+		}
+		msg_input_size_used = msg_to_encrypt.size();
+
+		if (use_gmp == true)
+		{
+			RSAGMP::Utils::mpzBigInteger modulus(k.base64_to_base10(k.s_n) );
+			RSAGMP::Utils::mpzBigInteger pub(k.base64_to_base10(k.s_e));
+			RSAGMP::Utils::mpzBigInteger message(k.base64_to_base10(msg_to_encrypt));
+			RSAGMP::Utils::mpzBigInteger message1 = RSAGMP::Encrypt(message, pub, modulus);
+			std::string s_gmp = k.base10_to_base64(message1.get_str());
+			encoded_rsa_data = s_gmp;
+
+			if (SELF_TEST)
+			{
+				RSAGMP::Utils::mpzBigInteger priv(k.base64_to_base10(k.s_d));
+				RSAGMP::Utils::mpzBigInteger message2 = RSAGMP::Decrypt(message1, priv, modulus);
+				std::string s_gmp2 = k.base10_to_base64(message2.get_str());
+				if (s_gmp2 != msg_to_encrypt)
+				{
+					std::cout << "ERROR encryption decryption" << std::endl;
+					std::cout << "s_gmp2:           " << get_summary_hex(s_gmp2.data(),s_gmp2.size()) << " size:" << s_gmp2.size() << std::endl;
+					std::cout << "msg_to_encrypt: " << get_summary_hex(msg_to_encrypt.data(),msg_to_encrypt.size()) << " size:" << msg_to_encrypt.size() << std::endl;
+					throw "ERROR encryption decryption";
+				}
+				else
+				{
+					//std::cout << "SELF TEST OK encryption decryption" << std::endl;
+				}
+			}
+		}
+		else
+		{
+			std::cout << "WARNING not using GMP" << std::endl;
+			typeuinteger  e = k.encode(msg_to_encrypt);
+			encoded_rsa_data = k.to_base64(e);
+		}
+
+		msg_size_produced = encoded_rsa_data.size() ;
+		//std::cout << "RSA encoding " << msg_to_encrypt.size() << " to " << encoded_rsa_data.size() << std::endl;
+
+		if (msg_to_encrypt.size() < smsg.size())
+		{
+			encoded_rsa_data += smsg.substr(msg_to_encrypt.size());
+		}
+
+		//std::cout << "RSA encoding total size " << encoded_rsa_data.size() << std::endl;
+		return encoded_rsa_data;
+	}
+
+	//--------------------------------------------------------------------------------------
+	// Encoding (to_encode == true)
+	// 		embedded_rsa_key (random) => rsa_data [base64 is a string] ==> outfile
+	//
+	// Decoding (to_encode == false)
+	//		rsa_data ==> embedded_rsa_key ==> outfile
+	//--------------------------------------------------------------------------------------
+	int getrsa( bool to_encode, const std::string& rsa_key_name, const std::string& rsa_data, std::string outfile,
+				std::string local_rsa_db, std::string& embedded_rsa_key,
+				std::string options = "", bool verbose = false, bool use_gmp = false, bool SELF_TEST = false)
+	{
+		int r = 0;
+		options = options;
+		if (verbose)
+		{
+			std::cout << "rsa to_encode: "       << to_encode << std::endl;
+			std::cout << "rsa rsa_key_name: "    << rsa_key_name << std::endl;
+			if (to_encode == false)
+				std::cout << "rsa rsa_data: "    << get_summary_hex(rsa_data.data(),rsa_data.size())  << " size:" << rsa_data.size()<< std::endl;
+			std::cout << "rsa outfile: "         << outfile << std::endl;
+			std::cout << "rsa local_rsa_db: "    << local_rsa_db << std::endl;
+			std::cout << "rsa use_gmp: " << use_gmp << std::endl;
+		}
+
+		if (fileexists(local_rsa_db) == true)
+		{
+			generate_rsa::rsa_key k;
+			bool found = get_rsa_key(rsa_key_name, local_rsa_db, k);
+
+			if (found)
+			{
+				cryptodata temp;
+				uint32_t key_len_in_bytes = k.key_size_in_bits/8;
+
+				//-------------------------------------------
+				// Encoding
+				//-------------------------------------------
+				if (to_encode)
+				{
+					embedded_rsa_key = generate_base64_random_string(key_len_in_bytes - 11);
+					if (verbose)
+					{
+						std::cout << "rsa key_len_in_bytes: " << key_len_in_bytes << std::endl;
+						std::cout << "rsa_data: " << get_summary_hex(embedded_rsa_key.data(),embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
+					}
+
+					uint32_t msg_input_size_used;
+					uint32_t msg_size_produced;
+					std::string encoded_rsa_key = rsa_encode_string(embedded_rsa_key, k, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
+
+					temp.buffer.write(encoded_rsa_key.data(), encoded_rsa_key.size());
+					if (verbose)
+					{
+						std::cout << "rsa data encoded : " << get_summary_hex(encoded_rsa_key.data(), encoded_rsa_key.size())  << " size:" << encoded_rsa_key.size() << std::endl;
+					}
+				}
+
+				//-------------------------------------------
+				// Decoding
+				//-------------------------------------------
+				else
+				{
+                    uint32_t msg_size_produced;
+					embedded_rsa_key = rsa_decode_string(rsa_data, k, rsa_data.size(), msg_size_produced, use_gmp);
+
+					temp.buffer.write(embedded_rsa_key.data(), embedded_rsa_key.size());
+					if (verbose)
+					{
+						std::cout << "rsa key_len_in_bytes: " << k.key_size_in_bits / 8 << std::endl;
+						if (use_gmp == false)	std::cout << "rsa data decoded: ";
+						else			   		std::cout << "rsa gmp decoded: ";
+						std::cout << get_summary_hex(embedded_rsa_key.data(), embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
+					}
+				}
+
+				bool ok = temp.save_to_file(outfile);
+				if (ok == false) r = -1;
+			}
+			else
+			{
+				std::cerr << "ERROR rsa key not found: " << rsa_key_name << std::endl;
+				r = -1;
+			}
+
+		}
+		else
+		{
+			std::cerr << "ERROR  no local_rsa_db: " << local_rsa_db << std::endl;
 			r = -1;
 		}
 

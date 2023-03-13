@@ -188,6 +188,7 @@ public:
 
 		if (is_rsa == true)
 		{
+            //std::cout << "read_urlinfo URL  is_rsa" << std::endl;
 			out_uk.rsa_encoded_data_pad = temp.readUInt32(pos); pos+=4;
 			out_uk.rsa_encoded_data_len = temp.readUInt32(pos); pos+=4;
 			out_uk.rsa_encoded_data_pos = temp.readUInt32(pos); pos+=4;
@@ -201,6 +202,12 @@ public:
 
 		out_uk.crypto_flags = temp.readUInt32(pos); pos+=4;
 		out_uk.shuffle_perc = temp.readUInt32(pos); pos+=4;
+
+//        std::string s(out_uk.url);
+//		std::cout << "read_urlinfo URL" <<" " << s << " " << s.size() << std::endl;
+//		std::cout << "read_urlinfo URL rsa_encoded_data_pad "  <<" " << out_uk.rsa_encoded_data_pad << " " << std::endl;
+//		std::cout << "read_urlinfo URL rsa_encoded_data_len "  <<" " << out_uk.rsa_encoded_data_len << " "  << std::endl;
+//		std::cout << "read_urlinfo URL rsa_encoded_data_pos "  <<" " << out_uk.rsa_encoded_data_pos << " "  << std::endl;
 
 		return r;
 	}
@@ -309,14 +316,9 @@ public:
             else if (is_rsa)
             {
 				std::string local_rsa_db = folder_local_rsa + RSA_MY_PRIVATE_DB; // decoding
-				uk.key[MIN_KEY_SIZE-1] = 0;
-                std::string rsa_key(uk.key);
 
-				// uk.url ==> rsa_key
-
-//std::cout << "uk.rsa_encoded_data_pos : " <<uk.rsa_encoded_data_pos  << std::endl;
-//std::cout << "uk.rsa_encoded_data_len : " <<uk.rsa_encoded_data_len  << std::endl;
-//std::cout << "uk.rsa_encoded_data_pad : " <<uk.rsa_encoded_data_pad  << std::endl;
+				uk.url[URL_MAX_SIZE-1] = 0;
+				std::string rsa_key = uk.without_header_token();
 
 				if (uk.rsa_encoded_data_pad + uk.rsa_encoded_data_pos + uk.rsa_encoded_data_len > data_temp.buffer.size())
 				{
@@ -341,11 +343,115 @@ public:
 
 				if (r)
 				{
-					rc = getrsa(false, rsa_key, uk.sRSA_ENCODED_DATA, file.data(), local_rsa_db, embedded_rsa_key, "", verbose, use_gmp);
-					if (rc!= 0)
+					int pos_url = 3;
+        			std::string sURL(&uk.url[pos_url]);
+
+				 	std::vector<std::string> v ;
+				 	std::vector<uint32_t> v_encoded_size;
+
+				 	std::vector<std::string> vv = split(sURL, ";");
+					if (vv.size() < 1)
 					{
-						std::cerr << "ERROR with getrsa error code: " << rc << " rsa_key: " << rsa_key <<  " local_rsa_db: " << local_rsa_db << std::endl;
+						std::cerr << "ERROR rsa url bad format - missing rsa key name: " << sURL << std::endl;
 						r = false;
+					}
+					else if (vv.size() == 1)
+					{
+                        v = vv;
+					}
+					else
+					{
+                        if (vv.size() % 2 != 0)
+                        {
+                            std::cerr << "ERROR parsing url with muiltiple rsa - uneven " << sURL << " " << sURL.size()<< std::endl;
+                            r = false;
+                        }
+
+                        if (r)
+                        {
+                            long long N = (long long) vv.size() / 2;
+                            for (long long riter = 0; riter< N; riter++)
+                            {
+                                std::string vt0 = vv[2*riter];
+                                std::string vt1 = vv[2*riter + 1];
+
+                                {
+                                    v.push_back(vt0);
+                                    long long n = str_to_ll(vt1);
+                                    if (n >= 0)
+                                    {
+                                        v_encoded_size.push_back(n);
+                                        //std::cout << "rsa key and encoded data len " << vt0 << " is " << vt1 << std::endl;
+                                    }
+                                    else
+                                    {
+                                        std::cerr << "ERROR parsing url with muiltiple rsa -  encoded data len invalid " << vt1 << std::endl;
+                                        r = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+					}
+
+					if (r)
+					{
+						if (verbose)
+						{
+							if (v.size() == 1)
+								std::cout << "unique rsa key name in URL: " << v[0] << std::endl;
+							else
+								std::cout << "multiple rsa key in URL: " << v[0] << " " << v[1] << " ..." << std::endl;
+						}
+					}
+
+					// ITER
+					long long N = (long long)v.size();
+					for (long long riter = N - 1; riter >= 0; riter--)
+					{
+                        std::string rsa_key_at_iter = v[riter];
+//						if (N > 1)
+//                        	std::cout << "RSA ITER: " << riter << " " << rsa_key_at_iter << " : " << v_encoded_size[riter] << std::endl;
+//						else
+//							std::cout << "RSA ITER: " << riter << " " << rsa_key_at_iter << std::endl;
+
+						if (riter != 0)
+						{
+							generate_rsa::rsa_key kout;
+							bool r = get_rsa_key(rsa_key_at_iter, local_rsa_db, kout);
+							if (r)
+							{
+                                uint32_t msg_size_produced;
+								std::string d = uk.sRSA_ENCODED_DATA.substr(0, v_encoded_size[riter]);
+								std::string t = rsa_decode_string(d, kout, d.size(), msg_size_produced, use_gmp);
+
+								// may reduce size
+								uk.sRSA_ENCODED_DATA = t + uk.sRSA_ENCODED_DATA.substr(d.size());
+
+								//std::cout << "RSA ITER: " << riter << " " << rsa_key_at_iter << " from " << d.size() << " to " << t.size() << " total left " << uk.sRSA_ENCODED_DATA .size() << std::endl;
+							}
+							else
+							{
+								std::cerr << "ERROR rsa_key not found: " << rsa_key_at_iter << std::endl;
+							}
+						}
+						else // Last iter
+						{
+							if (N > 1)
+							{
+							}
+							else
+							{
+							}
+
+							//std::string d = uk.sRSA_ENCODED_DATA.substr(0, v_encoded_size[0]);
+							rc = getrsa(false, rsa_key_at_iter, uk.sRSA_ENCODED_DATA, file.data(), local_rsa_db, embedded_rsa_key, "", verbose, use_gmp);
+							if (rc!= 0)
+							{
+								std::cerr << "ERROR with getting rsa - error code: " << rc << " rsa_key: " << rsa_key_at_iter <<  " local_rsa_db: " << local_rsa_db << std::endl;
+								r = false;
+							}
+						}
 					}
 				}
             }
@@ -413,7 +519,7 @@ public:
                         // PADDING...
                         if (verbose)
                         {
-                            std::cout << "rotating (padding) key: " << key_size -  databuffer_size << std::endl;
+                            //std::cout << "rotating (padding) key: " << key_size -  databuffer_size << std::endl;
                         }
 
                         char c[1]; uint32_t rotate_pos;
@@ -445,7 +551,7 @@ public:
                             checksum = SHA256::toString(digest);
                             if (verbose)
                             {
-                                std::cout << "decryption key checksum: " << checksum << std::endl;
+                                std::cout << "decryption key checksum: " << checksum << " " << d.buffer.size() << std::endl;
                             }
                             delete[] digest;
                         }
@@ -457,16 +563,16 @@ public:
                             if (c != uk.checksum[j])
                             {
                                 std::cerr << "ERROR " << "invalid key checksum at " << j << std::endl;
-                                if (verbose)
-                                {
-                                    std::string su(u);
-                                    for( size_t j = 0; j< CHKSUM_SIZE; j++)
-                                    {
-                                        std::cout << (int)(unsigned char)uk.checksum[j] << " ";
-                                    }
-                                    if (is_rsa == false)
-                                        std::cout << "url: " << su << std::endl;
-                                }
+//                                if (verbose)
+//                                {
+//                                    std::string su(u);
+//                                    for( size_t j = 0; j< CHKSUM_SIZE; j++)
+//                                    {
+//                                        std::cout << (int)(unsigned char)uk.checksum[j] << " ";
+//                                    }
+//                                    if (is_rsa == false)
+//                                        std::cout << "url: " << su << std::endl;
+//                                }
                                 r = false;
                                 break;
                             }
@@ -1291,11 +1397,11 @@ public:
             encrypted_data.buffer.remove_last_n_char(4);
 		}
 
-		// decode(DataFinal, pwd0) => DataN+urlkeyN+NITER  urlkeyN=>keyN
+		// decode(DataFinal, puz_key) => DataN+urlkeyN+NITER  urlkeyN=>keyN
         if (r)
 		{
             data_temp_next.clear_data();
-            if (decode( 0, 1, (uint16_t)CRYPTO_ALGO::ALGO_BIN_DES, 0, 0,
+            if (decode( 0, 1, (uint16_t)CRYPTO_ALGO::ALGO_Salsa20, 0, 0,
                         encrypted_data, puz_key.getdata(), puz_key.size(), data_temp_next) == false)
             {
                 std::cerr << "ERROR " << "decoding with next key" << std::endl;
@@ -1398,15 +1504,13 @@ public:
                 for(int16_t iter=0; iter<NITER; iter++)
                 {
                     // Get KeyN from uk info read from URL
-                    uk.erase_buffer();
-					uk.sRSA_ENCODED_DATA.clear();
+                    uk.clear_dynamic_data();
 
                     r = get_key(uk);
                     if (r == false)
                     {
                         break;
                     }
-
 
 					if (uk.rsa_encoded_data_len > 0)
 					{
@@ -1441,6 +1545,8 @@ public:
 
 					// VERIFY_CHKSUM_DATA
 					char compute_checksum_data[CHKSUM_SIZE+1] = {0};
+					//std::cout << " VERIFY_CHKSUM_DATA - data_temp.buffer.size()"<< data_temp.buffer.size()  << std::endl;
+
 					if (r)
 					{
 						SHA256 sha;
@@ -1451,10 +1557,10 @@ public:
 							compute_checksum_data[j] = s[j];
 						compute_checksum_data[CHKSUM_SIZE] = 0;
 
-						if (verbose)
-						{
-							std::cout << "compute data checksum: " << SHA256::toString(digest) << " size: "<< data_temp.buffer.size() << std::endl;
-						}
+//						if (verbose)
+//						{
+//							std::cout << "compute data checksum: " << SHA256::toString(digest) << " size: "<< data_temp.buffer.size() << std::endl;
+//						}
 
 						char c;
 						for( size_t j = 0; j< CHKSUM_SIZE; j++)
@@ -1471,6 +1577,7 @@ public:
 								break;
 							}
 						}
+						//std::cout << "data checksum OK "<<  std::endl;
 					}
 
                     if ((uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
@@ -1507,7 +1614,7 @@ public:
                             Buffer temp(URLINFO_SIZE);
                             data_temp_next.get_last(URLINFO_SIZE, temp);
 
-                            std::cout << std::endl;
+                            //std::cout << std::endl;
                             if (read_urlinfo(temp, uk) == false)
                             {
                                 r = false;

@@ -11,6 +11,8 @@
 #include <string>
 #include "base_const.hpp"
 
+#define CRYUPTO_DEBUG 1
+
 namespace cryptoAL
 {
 
@@ -37,9 +39,9 @@ constexpr static int16_t KEYPOS_ENCODESIZE  = 8;
 constexpr static int16_t URL_LEN_ENCODESIZE = 2;
 constexpr static int16_t CRYPTO_ALGO_ENCODESIZE = 2;
 constexpr static uint32_t URL_MIN_SIZE      = 4;
-constexpr static uint32_t URL_MAX_SIZE      = 256;
+constexpr static uint32_t URL_MAX_SIZE      = 256*4; // Multiple RSA keys
 
-constexpr static uint32_t MIN_KEY_SIZE      = 64;    // RSA KEY_NAME
+constexpr static uint32_t MIN_KEY_SIZE      = 64; 
 constexpr static int16_t CHKSUM_SIZE        = 64;
 constexpr static int16_t PADDING_LEN_ENCODESIZE = 2;
 constexpr static uint32_t RSA_LEN_ENCODESIZE = 4;
