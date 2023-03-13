@@ -52,26 +52,27 @@ Optional arguments:
   -t, --selftest          	selftest [default: ""]
 
   
-Output:
-Encryptor encode() binDES - number of blocks (4 bytes): 29584, number of keys (4 bytes): 114400
-Encryptor encode() binAES 16_16 - aes_type: 0, number of rounds : 2, number of blocks (16 bytes): 14820, number of keys (16 bytes): 28600
-Encryptor encode() binAES 16_16 - aes_type: 2, number of rounds : 2, number of blocks (16 bytes): 14848, number of keys (16 bytes): 28600
-Encryptor encode() twofish 16_16             , number of rounds : 2, number of blocks (16 bytes): 14876, number of keys (16 bytes): 28600
-Encryptor encode() salsa20 32_64             , number of rounds : 2, number of blocks (64 bytes): 3726, number of keys (32 bytes): 14300
-Encryptor encode() idea 8_16                 , number of rounds : 2, number of blocks (8 bytes): 29864, number of keys (16 bytes): 28600
-Encryptor encode() binAES 16_16 - aes_type: 1, number of rounds : 2, number of blocks (16 bytes): 14960, number of keys (16 bytes): 28600
-Encryptor encode() binAES 16_16 - aes_type: 0, number of rounds : 2, number of blocks (16 bytes): 14988, number of keys (16 bytes): 28600
-Encryptor encode() binAES 16_16 - aes_type: 2, number of rounds : 2, number of blocks (16 bytes): 15016, number of keys (16 bytes): 28600
-Encryptor encode() twofish 16_16             , number of rounds : 2, number of blocks (16 bytes): 15044, number of keys (16 bytes): 28600
-Encryptor encode() salsa20 32_64             , number of rounds : 2, number of blocks (64 bytes): 3768, number of keys (32 bytes): 14300
-Encryptor encode() idea 8_16                 , number of rounds : 2, number of blocks (8 bytes): 30200, number of keys (16 bytes): 28600
-Encryptor encode() binAES 16_16 - aes_type: 1, number of rounds : 2, number of blocks (16 bytes): 15128, number of keys (16 bytes): 28600
-Encryptor encode() binDES - number of blocks (4 bytes): 60640, number of keys (4 bytes): 128
+Output example:
+MESSAGE is 117169 bytes
+Padding msg with bytes: 15
+Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 1831, number of keys (32 bytes): 1104, shuffling: 0%
+Encryptor encode() binAES 16_16 - aes_type: 0, number of rounds : 1, number of blocks (16 bytes): 7404, number of keys (16 bytes): 2208, shuffling: 0%
+Encryptor encode() binAES 16_16 - aes_type: 2, number of rounds : 1, number of blocks (16 bytes): 7484, number of keys (16 bytes): 2208, shuffling: 0%
+Encryptor encode() twofish 16_16             , number of rounds : 1, number of blocks (16 bytes): 7564, number of keys (16 bytes): 2208, shuffling: 0%
+Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 1933, number of keys (32 bytes): 1104, shuffling: 0%
+Encryptor encode() idea 8_16                 , number of rounds : 1, number of blocks (8 bytes): 15808, number of keys (16 bytes): 2208, shuffling: 0%
+Encryptor encode() binAES 16_16 - aes_type: 1, number of rounds : 1, number of blocks (16 bytes): 8076, number of keys (16 bytes): 2208, shuffling: 0%
+Encryptor encode() binAES 16_16 - aes_type: 0, number of rounds : 1, number of blocks (16 bytes): 8248, number of keys (16 bytes): 2208, shuffling: 0%
+Encryptor encode() binAES 16_16 - aes_type: 2, number of rounds : 1, number of blocks (16 bytes): 8340, number of keys (16 bytes): 2208, shuffling: 0%
+Encryptor encode() twofish 16_16             , number of rounds : 1, number of blocks (16 bytes): 8756, number of keys (16 bytes): 2208, shuffling: 0%
+Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 2213, number of keys (32 bytes): 4, shuffling: 0%
+data encrypted size: 141636
+qa_puz_key size:     128
 crypto ENCODING SUCCESS
-Encrypted file  : /home/server/dev/Encryptions/testcase/manual/encoder_output/test.zip.encrypted
-Puzzle qa file  : /home/server/dev/Encryptions/testcase/manual/encoder_output/puzzle_qa.txt
-Puzzle full file: /home/server/dev/Encryptions/testcase/manual/encoder_output/puzzle.txt.full
-Elapsed time in seconds: 11 sec
+Encrypted file: msg.zip.encrypted
+Puzzle file   : <default>
+Elapsed time in seconds: 38 sec
+
 </pre>
 
 Example of msg.crypto:
