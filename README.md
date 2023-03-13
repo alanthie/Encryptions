@@ -115,6 +115,9 @@ Current set of encryption algorithms
 Overview:
 ![Alt text](/Doc/overview2.png?raw=true "Overview")
 
+Recursive RSA:
+![Alt text](/Doc/RecursiveRSA.png?raw=true "Recursive RSA")
+
 Example of urls.txt:
 <pre>
 ;Web files
