@@ -9,15 +9,15 @@
 #include "point.hpp"
 #include "j_point.hpp"
 #include "ecc.hpp"
-
-#ifdef _WIN32
-//#include <Windows.h>
 #include <chrono>
 #include <thread>
+
+#ifdef _WIN32
 #define __x86_64__ 1
 #pragma warning ( disable : 4146 )
 #else
 #include <dirent.h>
+#include <unistd.h>
 #endif
 
 
@@ -72,8 +72,8 @@ const char*c_v="7efba1662985be9403cb055c75d4f7e0ce8d84a9c5114abcaf3177680104fa0d
 #endif
 
 #ifdef _WIN32
-	#define RDTSC_START(cycles)  
-	#define RDTSC_STOP(cycles)  
+	#define RDTSC_START(cycles)
+	#define RDTSC_STOP(cycles)
 #else
 #define RDTSC_START(cycles)                                \
     do {                                                   \
@@ -144,12 +144,13 @@ int test_simple_ecc() {
 #ifdef _WIN32
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 #else
-	sleep(1); // sleep for 1 second
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	//sleep(1); // sleep for 1 second
 #endif
 
 #ifdef _WIN32
 #else
-	RDTSC_START(t1);
+	RDTSC_START(t2);
 #endif
 
 	uint64_t one_second = t2 - t1 - rdtscp_cycle;
