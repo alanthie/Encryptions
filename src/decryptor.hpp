@@ -14,7 +14,7 @@
 #include "IDEA.hpp"
 #include "crc32a.hpp"
 #include "crypto_shuffle.hpp"
-
+#include "crypto_history.hpp"
 
 namespace cryptoAL
 {
@@ -381,7 +381,6 @@ public:
                                     if (n >= 0)
                                     {
                                         v_encoded_size.push_back(n);
-                                        //std::cout << "rsa key and encoded data len " << vt0 << " is " << vt1 << std::endl;
                                     }
                                     else
                                     {
@@ -410,18 +409,13 @@ public:
 					for (long long riter = N - 1; riter >= 0; riter--)
 					{
                         std::string rsa_key_at_iter = v[riter];
-//						if (N > 1)
-//                        	std::cout << "RSA ITER: " << riter << " " << rsa_key_at_iter << " : " << v_encoded_size[riter] << std::endl;
-//						else
-//							std::cout << "RSA ITER: " << riter << " " << rsa_key_at_iter << std::endl;
-
-						if (riter != 0)
+						generate_rsa::rsa_key kout;
+						bool r = get_rsa_key(rsa_key_at_iter, local_rsa_db, kout);
+						if (r)
 						{
-							generate_rsa::rsa_key kout;
-							bool r = get_rsa_key(rsa_key_at_iter, local_rsa_db, kout);
-							if (r)
+							if (riter != 0)
 							{
-                                uint32_t msg_size_produced;
+								uint32_t msg_size_produced;
 								std::string d = uk.sRSA_ENCODED_DATA.substr(0, v_encoded_size[riter]);
 								std::string t = rsa_decode_string(d, kout, d.size(), msg_size_produced, use_gmp);
 
@@ -432,25 +426,13 @@ public:
 							}
 							else
 							{
-								std::cerr << "ERROR rsa_key not found: " << rsa_key_at_iter << std::endl;
+								uint32_t msg_size_produced;
+								embedded_rsa_key = rsa_decode_string(uk.sRSA_ENCODED_DATA, kout, uk.sRSA_ENCODED_DATA.size(), msg_size_produced, use_gmp);
 							}
 						}
-						else // Last iter
+						else
 						{
-							if (N > 1)
-							{
-							}
-							else
-							{
-							}
-
-							//std::string d = uk.sRSA_ENCODED_DATA.substr(0, v_encoded_size[0]);
-							rc = getrsa(false, rsa_key_at_iter, uk.sRSA_ENCODED_DATA, file.data(), local_rsa_db, embedded_rsa_key, "", verbose, use_gmp);
-							if (rc!= 0)
-							{
-								std::cerr << "ERROR with getting rsa - error code: " << rc << " rsa_key: " << rsa_key_at_iter <<  " local_rsa_db: " << local_rsa_db << std::endl;
-								r = false;
-							}
+							std::cerr << "ERROR rsa_key not found: " << rsa_key_at_iter << std::endl;
 						}
 					}
 				}
@@ -458,12 +440,11 @@ public:
             else
             {
                 rc = wget(u, file.data(), verbose);
-            }
-
-            if (rc != 0)
-            {
-                std::cerr << "ERROR " << "unable to read web url contents " << "URL " << u << std::endl;
-                r = false;
+				if (rc != 0)
+				{
+					std::cerr << "ERROR " << "unable to read web url contents " << "URL " << u << std::endl;
+					r = false;
+				}
             }
 		}
 
@@ -1675,6 +1656,8 @@ public:
     std::string known_ftp_server;
     int         staging_cnt=0;
     bool        use_gmp;
+
+    history_key hkey;
 };
 
 }

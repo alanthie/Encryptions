@@ -16,6 +16,7 @@
 #include "IDEA.hpp"
 #include "crc32a.hpp"
 #include "crypto_shuffle.hpp"
+#include "crypto_history.hpp"
 
 namespace cryptoAL
 {
@@ -294,92 +295,55 @@ public:
 				// ITER
 				for (size_t riter=0; riter < v.size(); riter++)
 				{
+				 	std::string rsa_key_at_iter = v[riter];
+
+					generate_rsa::rsa_key kout;
+					r = get_rsa_key(rsa_key_at_iter, local_rsa_db, kout);
+
                     if (r)
                     {
                         std::string rsa_key_at_iter = v[riter];
-                        //std::cout << "RSA ITER: " << riter << " " << rsa_key_at_iter << std::endl;
-
-                        // Generate random embedded_rsa_key
                         if (riter == 0)
                         {
-                            // embedded_rsa_key (random) ==> encoded rsa data ==> file
-                            rc = getrsa(true, rsa_key_at_iter, "", file.data(), local_rsa_db, embedded_rsa_key, "", verbose, use_gmp, SELF_TEST);
+							// generate random embedded_rsa_key
+							uint32_t key_len_in_bytes = kout.key_size_in_bits/8;
+							embedded_rsa_key = generate_base64_random_string(key_len_in_bytes - 11);
+							vurlkey[i].sRSA_ENCODED_DATA = embedded_rsa_key;
+							if (verbose)
+							{
+								std::cout << "rsa key_len_in_bytes: " << key_len_in_bytes << std::endl;
+								std::cout << "rsa_data: " << get_summary_hex(embedded_rsa_key.data(),embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
+							}
+						}
 
-                            if (rc != 0)
-                            {
-                                std::cerr << "ERROR with geting rsa key - error code: " << rc << " rsa_key: " << rsa_key_at_iter <<  " local_rsa_db: " << local_rsa_db << std::endl;
-                                r = false;
-                            }
-                            else
-                            {
+						uint32_t msg_input_size_used = 0;
+						uint32_t msg_size_produced = 0;
+						std::string t = rsa_encode_string(vurlkey[i].sRSA_ENCODED_DATA, kout, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
 
-                                {
-                                    vurlkey[i].rsa_encoded_data_len = filesize(file);
-                                    vurlkey[i].rsa_encoded_data_pos = 0; // set later
+						// t may grow
+						vurlkey[i].sRSA_ENCODED_DATA = t;
 
-                                    cryptodata frsa;
-                                    r = frsa.read_from_file(file);
-                                    if (r)
-                                    {
-                                        char c;
-                                        vurlkey[i].sRSA_ENCODED_DATA.clear();
-                                        for(size_t j=0;j<frsa.buffer.size();j++)
-                                        {
-                                            c = frsa.buffer.getdata()[j];
-                                            vurlkey[i].sRSA_ENCODED_DATA += c;
-                                        }
-                                        vurlkey[i].sRSA_ENCODED_DATA[frsa.buffer.size()] = 0;
+						if (riter == 0)
+						{
+							if (v_encoded_size.size() > 0)
+								v_encoded_size[0] = vurlkey[i].sRSA_ENCODED_DATA.size();
+							else
+								v_encoded_size.push_back(vurlkey[i].sRSA_ENCODED_DATA.size() );
+						}
+						else
+						{
+							v_encoded_size[riter] = msg_size_produced;
+						}
 
-                                        if(vurlkey[i].rsa_encoded_data_len != vurlkey[i].sRSA_ENCODED_DATA.size())
-                                        {
-                                            std::cerr << "ERROR inconsistency reading rsa encoded data file: " << file << std::endl;
-                                            r = false;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        std::cerr << "ERROR reading rsa data file: " << file << std::endl;
-                                    }
-                                }
+						vurlkey[i].rsa_encoded_data_pos = 0; // set later
+						vurlkey[i].rsa_encoded_data_len = vurlkey[i].sRSA_ENCODED_DATA.size();
+               		}
+					else
+					{
+						std::cerr << "ERROR rsa_key not found: " << rsa_key_at_iter << "  in " << local_rsa_db << std::endl;
+						break;
+					}
 
-                                if (r)
-                                {
-                                    if (v_encoded_size.size() > 0)
-                                        v_encoded_size[0] = vurlkey[i].sRSA_ENCODED_DATA.size();
-                                    else
-                                        v_encoded_size.push_back(vurlkey[i].sRSA_ENCODED_DATA.size() );
-                                }
-                                //std::cout << "RSA ITER: " << riter << " " << rsa_key_at_iter << " from " << embedded_rsa_key.size() << " to " << vurlkey[i].sRSA_ENCODED_DATA.size() << std::endl;
-                            }
-                        }
-                        else
-                        {
-                            generate_rsa::rsa_key kout;
-                            r = get_rsa_key(rsa_key_at_iter, local_rsa_db, kout);
-                            if (r)
-                            {
-								uint32_t msg_input_size_used = 0;
-								uint32_t msg_size_produced = 0;
-                                std::string t = rsa_encode_string(vurlkey[i].sRSA_ENCODED_DATA, kout, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
-
-                                // t may grow
-                                vurlkey[i].sRSA_ENCODED_DATA = t;
-
-                                //std::cout 	<< "RSA ITER: " << riter << " " << rsa_key_at_iter << " from " << msg_input_size_used << " to " << msg_size_produced << " total left " << 												//				vurlkey[i].sRSA_ENCODED_DATA.size() << std::endl;
-                                if (r)
-                                {
-                                    vurlkey[i].rsa_encoded_data_pos = 0; // set later
-                                    vurlkey[i].rsa_encoded_data_len = vurlkey[i].sRSA_ENCODED_DATA.size();
-                                    v_encoded_size[riter] = msg_size_produced;
-                                }
-                            }
-                            else
-                            {
-                                std::cerr << "ERROR rsa_key not found: " << rsa_key_at_iter << std::endl;
-                                break;
-                            }
-                        }
-                    }
 				} // for (size_t riter=0; riter < v.size; riter++)
 
 				if (r)
@@ -1622,6 +1586,8 @@ public:
 	uint32_t perfect_key_size = 0;
 	long key_size_factor = 1;
 	uint32_t shufflePerc = 0;
+
+	history_key hkey;
 };
 
 }
