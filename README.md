@@ -165,18 +165,20 @@ Select a task:
 1. Custom secret F(n)
 2. Custom secret P(n)
 3. HEX(file, position, keysize)
-4. Make random puzzle from shared binary (like USB keys) data
-5. Resolve puzzle
-6. (Futur usage)
-7. View my private RSA key
-8. View other public RSA key
-9. Extract my public RSA key to file
-10. Generate RSA key with OPENSSL command line (fastest)
-11. Test RSA GMP key generator
-12. Generate RSA key with GMP (fast)
-13. Elliptic Curve test with GMP
-14. View my encode history hashes
-15. View my decode history hashes
+4. Puzzle: Make random puzzle from shared binary (like USB keys) data
+5. Puzzle: Resolve puzzle
+6. <Futur usage>
+7.  RSA: View my private RSA key
+8.  RSA: View other public RSA key
+9.  RSA: Extract my public RSA key to file
+10. RSA: Generate RSA key with OPENSSL command line (fastest)
+11. RSA: Test RSA GMP key generator
+12. RSA: Generate RSA key with GMP (fast)
+13. ECC: Elliptic Curve test with GMP
+14. Histo: View my encode history hashes
+15. Histo: View my decode history hashes
+16. Histo: Export public decode history hashes
+17. Histo: Confirm public history hashes
 ==> 
 </pre>
 
