@@ -44,6 +44,7 @@ Optional arguments:
   -s, --staging           	specify the staging folder. [default: ""]
   -l, --local             	specify the local folder of known contents. [default: ""]
   -r, --rsa               	specify the local folder for rsa*.db [default: ""]
+  -hh, --histo            	specify the local folder for historical hashes crypto_history_encode.db [default: ""]
   -v, --verbose           	specify the verbose [default: ""]
   -k, --keep              	specify if keeping staging file [default: ""]
   -x, --keyfactor         	specify a key_size_factor, this multiply the key size by the factor [default: "1"]
