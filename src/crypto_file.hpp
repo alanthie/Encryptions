@@ -153,16 +153,12 @@ namespace cryptoAL
 		std::string encoded_rsa_data;
 
 		// smsg maybe less or bigger than rsa capacity
-		bool over_capacity = false;
 		std::string msg_to_encrypt;
-
 		uint32_t key_len_bytes = k.key_size_in_bits / 8;
 
 		if (key_len_bytes < smsg.size())
 		{
-			over_capacity = true;
 			msg_to_encrypt = smsg.substr(0, key_len_bytes);
-			//std::cout << "RSA over capacity, partial encoding " << key_len_bytes << " of " << smsg.size() << std::endl;
 		}
 		else
 		{
@@ -190,10 +186,6 @@ namespace cryptoAL
 					std::cout << "s_gmp2:           " << get_summary_hex(s_gmp2.data(),s_gmp2.size()) << " size:" << s_gmp2.size() << std::endl;
 					std::cout << "msg_to_encrypt: " << get_summary_hex(msg_to_encrypt.data(),msg_to_encrypt.size()) << " size:" << msg_to_encrypt.size() << std::endl;
 					throw "ERROR encryption decryption";
-				}
-				else
-				{
-					//std::cout << "SELF TEST OK encryption decryption" << std::endl;
 				}
 			}
 		}

@@ -120,9 +120,8 @@ public:
 		if (cryptoAL::fileexists(FILE))
             std::remove(FILE.data());
 
-        int r;
-       	r = system_cmd(cmd1);
-        r = system_cmd(cmd2);
+       	system_cmd(cmd1);
+        system_cmd(cmd2);
 
 		std::string s = cryptoAL::get_block_infile(FILE, "modulus:" , "publicExponent:");
 		s = cryptoAL::remove_hex_delim(s);

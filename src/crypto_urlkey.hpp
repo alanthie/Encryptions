@@ -56,7 +56,7 @@ public:
 	{
 		if (url_size >= 3)
 		{
-			if ((url[0]=='[') &&  (url[1]=='r')&&  (url[2]==']'))
+			if ((url[0]=='[') &&  (url[2]==']'))
 			{
 				std::string s(url);
 				return s.substr(3);

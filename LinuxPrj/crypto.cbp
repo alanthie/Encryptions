@@ -66,6 +66,7 @@
 		<Unit filename="../src/crypto_batch.ini" />
 		<Unit filename="../src/crypto_const.hpp" />
 		<Unit filename="../src/crypto_file.hpp" />
+		<Unit filename="../src/crypto_history.hpp" />
 		<Unit filename="../src/crypto_package.hpp" />
 		<Unit filename="../src/crypto_shuffle.hpp" />
 		<Unit filename="../src/crypto_test.hpp" />

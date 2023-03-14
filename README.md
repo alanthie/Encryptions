@@ -146,6 +146,10 @@ Local files (like shared USB)
 
 ;RECURSIVE RSA
 [r]MY_RSAKEY_2048_2023-03-09_15:28:31;MY_RSAKEY_8100_2023-03-08_11:35:16;MY_RSAKEY_1024_2023-03-05_19:36:04;MY_RSAKEY_512_2023-03-09_12:14:49
+
+;Historical hashes
+;Hash index to a historical key [h]4 ==> 889895c4aaabba7566797c4e8c09d417442168b7878ed38bb05ef28606711fee ... 2023-03-13_22:15:07  datasize: 143044
+[h]4
 </pre>
  
 A tool (qa) for various tasks
@@ -172,7 +176,7 @@ Select a task:
 ==> 
 </pre>
 
-Man-In-The-Middle Attack
+Man-In-The-Middle Attack now implemented
 ![Alt text](/Doc/ManInTheMiddleAttack.png?raw=true "ManInTheMiddleAttack")
 
 License

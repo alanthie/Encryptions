@@ -21,6 +21,7 @@
 #endif
 
 #include "../../src/crypto_const.hpp"
+#include "../../src/crypto_history.hpp"
 using namespace cryptoAL;
 
 #include "ec_gmp/ec_gmp_p_mul.hpp"
@@ -68,6 +69,8 @@ void  menu()
         std::cout << "11. Test RSA GMP key generator" << std::endl;
         std::cout << "12. Generate RSA key with GMP (fast)" << std::endl;
         std::cout << "13. Elliptic Curve test with GMP" << std::endl;
+		std::cout << "14. View my encode history hashes" << std::endl;
+		std::cout << "15. View my decode history hashes" << std::endl;
         std::cout << "==> ";
         std::cin >> schoice;
 
@@ -580,6 +583,43 @@ void  menu()
             cryptoSimpleECC::test_simple_ecc();
         }
 
+        else if (choice == 14)
+      	{
+			std::cout << "Enter path for encode history database " << CRYPTO_HISTORY_ENCODE_DB << " (0 = current directory) : ";
+			std::string pathdb;
+			std::cin >> pathdb;
+			if (pathdb == "0") pathdb = "./";
+			std::string fileHistoDB = pathdb + CRYPTO_HISTORY_ENCODE_DB;
+
+			if (cryptoAL::fileexists(fileHistoDB) == true)
+			{
+				cryptoAL::show_history_key(fileHistoDB);
+			}
+			else
+			{
+				std::cerr << "no file: " << fileHistoDB << std:: endl;
+				continue;
+			}
+        }
+
+        else if (choice == 15)
+      	{
+			std::cout << "Enter path for decode history database " << CRYPTO_HISTORY_DECODE_DB << " (0 = current directory) : ";
+			std::string pathdb;
+			std::cin >> pathdb;
+			if (pathdb == "0") pathdb = "./";
+			std::string fileHistoDB = pathdb + CRYPTO_HISTORY_DECODE_DB;
+
+			if (cryptoAL::fileexists(fileHistoDB) == true)
+			{
+				cryptoAL::show_history_key(fileHistoDB);
+			}
+			else
+			{
+				std::cerr << "no file: " << fileHistoDB << std:: endl;
+				continue;
+			}
+        }
     }
 }
 

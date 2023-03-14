@@ -238,14 +238,18 @@ public:
 		cryptodata dataout_local;
         cryptodata dataout_other;
         cryptodata rsa_key_data;
+        cryptodata histo_key_data;
+
         std::string embedded_rsa_key;
+        std::string histo_key;
 
 		char u[URL_MAX_SIZE] = {0};
 
         bool is_video =  false;
         bool is_ftp   =  false;
         bool is_local =  false;
-        bool is_rsa =  false;
+        bool is_rsa   =  false;
+        bool is_histo =  false;
 
 		if (r)
 		{
@@ -270,6 +274,10 @@ public:
                 {
                     is_rsa = true;
                 }
+                else if (u[1]=='h')
+                {
+                    is_histo = true;
+                }
             }
 
             int pos_url = 0;
@@ -277,6 +285,7 @@ public:
             else if (is_ftp)     pos_url = 3;
             else if (is_local)   pos_url = 3;
             else if (is_rsa)     pos_url = 3;
+            else if (is_histo)   pos_url = 3;
             int rc = 0;
 
             if (is_video)
@@ -311,6 +320,46 @@ public:
                 {
                     std::cerr << "ERROR with getftp, error code: " << rc << " url: " << s <<  " file: " << file << std::endl;
                     r = false;
+                }
+            }
+            else if (is_histo)
+            {
+                history_key kout;
+                std::string local_histo_db = folder_histo_db + CRYPTO_HISTORY_DECODE_DB;
+
+                std::string s(&u[pos_url]);
+                std::vector<std::string> v = split(s, ";");
+                if (v.size() < 1)
+                {
+                    std::cerr << "ERROR histo url bad format - missing histo key name: " << s << std::endl;
+                    r = false;
+                }
+                else
+                {
+                    if (verbose)
+                    {
+                        if (v.size() == 1)
+                            std::cout << "unique histo key name in URL: " << v[0] << std::endl;
+                        else
+                            std::cout << "multiple histo key in URL: " << v[0] << " " << v[1] << " ..." << std::endl;
+                    }
+                }
+                if (r)
+                {
+                    r = find_history_key_by_sha(v[0], local_histo_db, kout);
+                    if (r)
+                    {
+                        histo_key = kout.data_sha[0]+kout.data_sha[1]+kout.data_sha[2];
+                        if (verbose)
+                        {
+                            std::cout << "histo key: " << histo_key << " size:" << histo_key.size() << std::endl;
+                            std::cout << "histo key: " << get_summary_hex(histo_key.data(),histo_key.size()) << " size:" << histo_key.size() << std::endl;
+                        }
+                    }
+                    else
+                    {
+                        std::cerr << "ERROR no histo key: " << v[0] << std::endl;
+                    }
                 }
             }
             else if (is_rsa)
@@ -455,6 +504,10 @@ public:
             {
                 pointer_datafile = &rsa_key_data;
             }
+            else if (is_histo)
+            {
+                pointer_datafile = &histo_key_data;
+            }
 			else if (is_local == false)
 			{
                 r = dataout_other.read_from_file(file);
@@ -471,6 +524,10 @@ public:
 			    if (is_rsa)
                 {
                     d.buffer.write(embedded_rsa_key.data(), embedded_rsa_key.size());
+                }
+                else if (is_histo)
+                {
+                    d.buffer.write(histo_key.data(), histo_key.size());
                 }
 
                 uint32_t pos = (uk.key_fromH * BASE) + uk.key_fromL ;
@@ -1340,6 +1397,25 @@ public:
             r = false;
 		}
 
+		history_key hkey;
+		bool hkey_ok = true;
+		uint32_t hist_out_seq = 0;
+
+		if(r)
+		{
+			if (folder_histo_db.size() > 0)
+			{
+				std::string local_histo_db = folder_histo_db + CRYPTO_HISTORY_DECODE_DB;
+				hkey.make_from_file(encrypted_data, local_histo_db, hkey_ok);
+
+                hkey_ok = get_next_seq(hist_out_seq, local_histo_db);
+                if (hkey_ok)
+                {
+                    hkey.update_seq(hist_out_seq);
+                }
+			}
+		}
+
 		uint32_t crc_read_full_puz_key;
 		uint32_t crc_full_puz_key;
 		if (r)
@@ -1633,6 +1709,16 @@ public:
             }
 		}
 
+		if(r)
+		{
+			if (hkey_ok)
+			{
+				std::string local_histo_db = folder_histo_db + CRYPTO_HISTORY_DECODE_DB;
+                save_histo_key(hkey, local_histo_db);
+                if (verbose)
+                    std::cout << "history sequence saved: "  << hist_out_seq << std::endl;
+			}
+		}
 		return r;
 	}
 
@@ -1657,7 +1743,7 @@ public:
     int         staging_cnt=0;
     bool        use_gmp;
 
-    history_key hkey;
+	std::string folder_histo_db = "./";
 };
 
 }
