@@ -59,18 +59,20 @@ void  menu()
         std::cout << "1. Custom secret F(n)" << std::endl;
         std::cout << "2. Custom secret P(n)" << std::endl;
         std::cout << "3. HEX(file, position, keysize)" << std::endl;
-        std::cout << "4. Make random puzzle from shared binary (like USB keys) data" << std::endl;
-        std::cout << "5. Resolve puzzle" << std::endl;
+        std::cout << "4. Puzzle: Make random puzzle from shared binary (like USB keys) data" << std::endl;
+        std::cout << "5. Puzzle: Resolve puzzle" << std::endl;
         std::cout << "6. <Futur usage>" << std::endl;
-        std::cout << "7. View my private RSA key" << std::endl;
-        std::cout << "8. View other public RSA key" << std::endl;
-        std::cout << "9. Extract my public RSA key to file" << std::endl;
-        std::cout << "10. Generate RSA key with OPENSSL command line (fastest)" << std::endl;
-        std::cout << "11. Test RSA GMP key generator" << std::endl;
-        std::cout << "12. Generate RSA key with GMP (fast)" << std::endl;
-        std::cout << "13. Elliptic Curve test with GMP" << std::endl;
-		std::cout << "14. View my encode history hashes" << std::endl;
-		std::cout << "15. View my decode history hashes" << std::endl;
+        std::cout << "7.  RSA: View my private RSA key" << std::endl;
+        std::cout << "8.  RSA: View other public RSA key" << std::endl;
+        std::cout << "9.  RSA: Extract my public RSA key to file" << std::endl;
+        std::cout << "10. RSA: Generate RSA key with OPENSSL command line (fastest)" << std::endl;
+        std::cout << "11. RSA: Test RSA GMP key generator" << std::endl;
+        std::cout << "12. RSA: Generate RSA key with GMP (fast)" << std::endl;
+        std::cout << "13. ECC: Elliptic Curve test with GMP" << std::endl;
+		std::cout << "14. Histo: View my encode history hashes" << std::endl;
+		std::cout << "15. Histo: View my decode history hashes" << std::endl;
+		std::cout << "16. Histo: Export public decode history hashes" << std::endl;
+		std::cout << "17. Histo: Confirm public history hashes" << std::endl;
         std::cout << "==> ";
         std::cin >> schoice;
 
@@ -197,6 +199,12 @@ void  menu()
 			if (pathdb == "0") pathdb = "./";
 			std::string fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
 
+			std::cout << "Only show summary (0 = true): ";
+            std::string osummary;
+            std::cin >> osummary;
+            bool onlysummary=false;
+            if (osummary == "0") onlysummary = true;
+
 			qaclass qa;
 			std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
 
@@ -208,14 +216,17 @@ void  menu()
 				infile >> bits(map_rsa_private);
 				infile.close();
 
-				for(auto& [user, k] : map_rsa_private)
-				{
-					std::cout << "key name: " << user << std:: endl;
-					std::cout << "key size: " << k.key_size_in_bits << std:: endl;
-					std::cout << "key public  n (base 10): " << k.get_n()<< std:: endl;
-					std::cout << "key public  e (base 10): " << k.get_e() << std:: endl;
-					std::cout << "key private d (base 10): " << k.get_d() << std:: endl;
-					std::cout << std:: endl;
+                if (onlysummary == false)
+                {
+                    for(auto& [user, k] : map_rsa_private)
+                    {
+                        std::cout << "key name: " << user << std:: endl;
+                        std::cout << "key size: " << k.key_size_in_bits << std:: endl;
+                        std::cout << "key public  n (base 10): " << k.get_n()<< std:: endl;
+                        std::cout << "key public  e (base 10): " << k.get_e() << std:: endl;
+                        std::cout << "key private d (base 10): " << k.get_d() << std:: endl;
+                        std::cout << std:: endl;
+                    }
 				}
 			}
 			else
@@ -242,6 +253,12 @@ void  menu()
 			if (pathdb == "0") pathdb = "./";
 			std::string fileRSADB = pathdb + RSA_OTHER_PUBLIC_DB;
 
+            std::cout << "Only show summary (0 = true): ";
+            std::string osummary;
+            std::cin >> osummary;
+            bool onlysummary=false;
+            if (osummary == "0") onlysummary = true;
+
 			qaclass qa;
 			std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
 
@@ -253,16 +270,18 @@ void  menu()
           		infile >> bits(map_rsa_private);
              	infile.close();
 
-                for(auto& [user, k] : map_rsa_private)
-             	{
-					std::cout << "key name: " << user << std:: endl;
-					std::cout << "key size: " << k.key_size_in_bits << std:: endl;
-					std::cout << "key public  n (base 10): " << k.get_n()<< std:: endl;
-					std::cout << "key public  e (base 10): " << k.get_e() << std:: endl;
-					std::cout << "key private d (base 10): <should be zero> " << k.get_d() << std:: endl;
-					std::cout << std:: endl;
-          		}
-
+             	if (onlysummary == false)
+                {
+                    for(auto& [user, k] : map_rsa_private)
+                    {
+                        std::cout << "key name: " << user << std:: endl;
+                        std::cout << "key size: " << k.key_size_in_bits << std:: endl;
+                        std::cout << "key public  n (base 10): " << k.get_n()<< std:: endl;
+                        std::cout << "key public  e (base 10): " << k.get_e() << std:: endl;
+                        std::cout << "key private d (base 10): <should be zero> " << k.get_d() << std:: endl;
+                        std::cout << std:: endl;
+                    }
+                }
 
  				if (cryptoAL::fileexists(fileRSADB) == true)
 				{
@@ -614,6 +633,78 @@ void  menu()
 			{
 				cryptoAL::show_history_key(fileHistoDB);
 			}
+			else
+			{
+				std::cerr << "no file: " << fileHistoDB << std:: endl;
+				continue;
+			}
+        }
+
+		else if (choice == 16)
+      	{
+		//std::cout << "16. Histo: Export public decode history hashes" << std::endl;
+		//std::cout << "17. Histo: Confirm public history hashes" << std::endl;
+
+			std::cout << "Enter path for local decode history database " << CRYPTO_HISTORY_DECODE_DB << " (0 = current directory) : ";
+			std::string pathdb;
+			std::cin >> pathdb;
+			if (pathdb == "0") pathdb = "./";
+			std::string fileHistoDB = pathdb + CRYPTO_HISTORY_DECODE_DB;
+
+			if (cryptoAL::fileexists(fileHistoDB) == true)
+			{
+				bool r = cryptoAL::export_public_history_key(fileHistoDB);
+				if (r==false)
+				{
+                    std::cerr << "export FAILED" << std:: endl;
+				}
+				else
+				{
+                    std::cout << "export OK " << fileHistoDB + ".public" <<  std:: endl;
+				}
+			}
+			else
+			{
+				std::cerr << "no file: " << fileHistoDB << std:: endl;
+				continue;
+			}
+        }
+		else if (choice == 17)
+      	{
+			std::cout << "Enter path of encode history database " << CRYPTO_HISTORY_ENCODE_DB << " (0 = current directory) : ";
+			std::string pathdb;
+			std::cin >> pathdb;
+			if (pathdb == "0") pathdb = "./";
+			std::string fileHistoDB = pathdb + CRYPTO_HISTORY_ENCODE_DB;
+
+			std::cout << "Enter path to read (" + CRYPTO_HISTORY_DECODE_DB + ".public" + ")" +  " from " << " (0 = current directory) : ";
+			std::string pathreaddb;
+			std::cin >> pathreaddb;
+			if (pathreaddb == "0") pathreaddb = "./";
+			std::string importfile = pathreaddb + CRYPTO_HISTORY_DECODE_DB + ".public";
+
+			if (cryptoAL::fileexists(fileHistoDB) == true)
+			{
+				if (cryptoAL::fileexists(importfile) == true)
+				{
+					uint32_t cnt;
+					uint32_t n;
+					bool r = confirm_history_key(fileHistoDB, importfile, cnt, n);
+					if (r==false)
+					{
+						std::cerr << "confirm FAILED" << std:: endl;
+					}
+					else
+					{
+						std::cerr << "number of new confirm: " << cnt << ", number of hashes: " << n << std:: endl;
+					}
+				}
+				else
+				{
+					std::cerr << "no file: " << importfile << std:: endl;
+
+				}
+            }
 			else
 			{
 				std::cerr << "no file: " << fileHistoDB << std:: endl;
