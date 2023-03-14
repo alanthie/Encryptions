@@ -42,6 +42,7 @@ public:
                 std::string istaging,                   // Environment - staging path
                 std::string ifolder_local,              // Environment - local data keys file path
                 std::string ifolder_local_rsa,          // Environment - RSA database *.db path
+                std::string ilocal_histo_path,
                 bool verb = false,                      // Flag - verbose
                 bool keep = false,                      // Flag - keep staging files
                 std::string iencryped_ftp_user = "",
@@ -61,6 +62,7 @@ public:
         staging = istaging;
         folder_local = ifolder_local;
         folder_local_rsa = ifolder_local_rsa;
+        local_histo_path = ilocal_histo_path;
         verbose = verb;
         keeping = keep;
         encryped_ftp_user = iencryped_ftp_user;
@@ -270,7 +272,7 @@ public:
         }
         else if (is_histo)
         {
-            std::string local_histo_db = folder_histo_db + CRYPTO_HISTORY_ENCODE_DB;
+            std::string local_histo_db = local_histo_path + CRYPTO_HISTORY_ENCODE_DB;
             std::vector<std::string> v = split(s, ";");
             if (v.size() < 1)
             {
@@ -1610,9 +1612,9 @@ public:
         data_temp_next.copy_buffer_to(encrypted_data);
         encrypted_data.save_to_file(filename_encrypted_data);   // SAVE
 
-		if (folder_histo_db.size() > 0)
+		if (local_histo_path.size() > 0)
 		{
-			std::string local_histo_db = folder_histo_db + CRYPTO_HISTORY_ENCODE_DB;
+			std::string local_histo_db = local_histo_path + CRYPTO_HISTORY_ENCODE_DB;
 			bool result;
 			history_key hkey(encrypted_data, local_histo_db, result);
             if (result)
@@ -1650,6 +1652,7 @@ public:
     std::string staging;
     std::string folder_local;
     std::string folder_local_rsa;
+    std::string local_histo_path;
     bool verbose;
     bool keeping;
     std::string encryped_ftp_user;
@@ -1664,8 +1667,6 @@ public:
 	uint32_t perfect_key_size = 0;
 	long key_size_factor = 1;
 	uint32_t shufflePerc = 0;
-
-	std::string folder_histo_db = "./";
 };
 
 }

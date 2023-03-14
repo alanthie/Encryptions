@@ -281,6 +281,10 @@ int main_crypto(int argc, char **argv)
                 .default_value(std::string(""))
                 .help("specify the local folder for rsa*.db");
 
+            encode_command.add_argument("-hh", "--histo")
+                .default_value(std::string(""))
+                .help("specify the local folder for historical hashes crypto_history_encode.db");
+
             encode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
                 .help("specify the verbose");
@@ -346,6 +350,10 @@ int main_crypto(int argc, char **argv)
             decode_command.add_argument("-r", "--rsa")
                 .default_value(std::string(""))
                 .help("specify the local folder for rsa*.db");
+
+            decode_command.add_argument("-hh", "--histo")
+                .default_value(std::string(""))
+                .help("specify the local folder for historical hashes crypto_history_decode.db");
 
             decode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
@@ -683,6 +691,7 @@ int main_crypto(int argc, char **argv)
             auto staging_path = cmd.get<std::string>("--staging");
             auto local_path = cmd.get<std::string>("--local");
             auto local_rsa_path = cmd.get<std::string>("--rsa");
+            auto local_histo_path = cmd.get<std::string>("--histo");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
             auto gmp = cmd.get<std::string>("--gmp");
@@ -746,6 +755,7 @@ int main_crypto(int argc, char **argv)
                 staging_path,
                 local_path,
                 local_rsa_path,
+                local_histo_path,
                 verbose,
                 keeping,
                 encryped_ftp_user,
@@ -783,6 +793,7 @@ int main_crypto(int argc, char **argv)
             auto staging_path = cmd.get<std::string>("--staging");
             auto local_path = cmd.get<std::string>("--local");
             auto local_rsa_path = cmd.get<std::string>("--rsa");
+            auto local_histo_path = cmd.get<std::string>("--histo");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
 			auto gmp = cmd.get<std::string>("--gmp");
@@ -806,6 +817,7 @@ int main_crypto(int argc, char **argv)
                 staging_path,
                 local_path,
                 local_rsa_path,
+                local_histo_path,
                 verbose,
                 keeping,
                 encryped_ftp_user,

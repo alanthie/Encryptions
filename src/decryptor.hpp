@@ -32,6 +32,7 @@ public:
 			 	std::string istaging,
 			 	std::string ifolder_local,
 			 	std::string ifolder_local_rsa,
+			 	std::string ilocal_histo_path,
 			 	bool verb = false,
 			 	bool keep = false,
                 std::string iencryped_ftp_user = "",
@@ -45,6 +46,7 @@ public:
         staging =istaging;
         folder_local = ifolder_local;
         folder_local_rsa = ifolder_local_rsa;
+        local_histo_path = ilocal_histo_path;
         verbose = verb;
         keeping = keep;
         encryped_ftp_user = iencryped_ftp_user;
@@ -325,7 +327,7 @@ public:
             else if (is_histo)
             {
                 history_key kout;
-                std::string local_histo_db = folder_histo_db + CRYPTO_HISTORY_DECODE_DB;
+                std::string local_histo_db = local_histo_path + CRYPTO_HISTORY_DECODE_DB;
 
                 std::string s(&u[pos_url]);
                 std::vector<std::string> v = split(s, ";");
@@ -1403,9 +1405,9 @@ public:
 
 		if(r)
 		{
-			if (folder_histo_db.size() > 0)
+			if (local_histo_path.size() > 0)
 			{
-				std::string local_histo_db = folder_histo_db + CRYPTO_HISTORY_DECODE_DB;
+				std::string local_histo_db = local_histo_path + CRYPTO_HISTORY_DECODE_DB;
 				hkey.make_from_file(encrypted_data, local_histo_db, hkey_ok);
 
                 hkey_ok = get_next_seq(hist_out_seq, local_histo_db);
@@ -1713,7 +1715,7 @@ public:
 		{
 			if (hkey_ok)
 			{
-				std::string local_histo_db = folder_histo_db + CRYPTO_HISTORY_DECODE_DB;
+				std::string local_histo_db = local_histo_path + CRYPTO_HISTORY_DECODE_DB;
                 save_histo_key(hkey, local_histo_db);
                 if (verbose)
                     std::cout << "history sequence saved: "  << hist_out_seq << std::endl;
@@ -1732,6 +1734,7 @@ public:
 	std::string staging;
 	std::string folder_local;
 	std::string folder_local_rsa;
+	std::string local_histo_path;
 
     cryptodata  data_temp;
     cryptodata  data_temp_next;
@@ -1742,8 +1745,6 @@ public:
     std::string known_ftp_server;
     int         staging_cnt=0;
     bool        use_gmp;
-
-	std::string folder_histo_db = "./";
 };
 
 }
