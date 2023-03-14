@@ -180,7 +180,7 @@ Select a task:
 ==> 
 </pre>
 
-Man-In-The-Middle Attack now implemented
+Man-In-The-Middle Attack prevention now implemented
 ![Alt text](/Doc/ManInTheMiddleAttack.png?raw=true "ManInTheMiddleAttack")
 
 License
