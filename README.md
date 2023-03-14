@@ -173,6 +173,8 @@ Select a task:
 11. Test RSA GMP key generator
 12. Generate RSA key with GMP (fast)
 13. Elliptic Curve test with GMP
+14. View my encode history hashes
+15. View my decode history hashes
 ==> 
 </pre>
 
