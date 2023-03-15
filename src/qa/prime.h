@@ -1077,8 +1077,8 @@ namespace PRIME
         if (n <= 1) return 1;
         if (is_prime(n)) return 1;
 
-        long double d = n;
-        long long sqn = (long long)std::sqrt(d);
+        long double d = (long double)n;
+        long long sqn = (long long)std::sqrt((long double)d);
         if (sqn == 0) return 1;
 
         for (long long i = sqn; i >= 1; i--)

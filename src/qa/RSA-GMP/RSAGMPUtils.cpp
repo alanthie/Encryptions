@@ -10,7 +10,7 @@ Utils::TestGenerator::TestGenerator()
    std::random_device rd;
    seed = rd();
    gmp_randinit_mt(rstate);
-   gmp_randseed_ui(rstate, seed);
+   gmp_randseed_ui(rstate, (unsigned long)seed);
 }
 
 //random number generator, only for test
@@ -19,7 +19,7 @@ Utils::TestGenerator::TestGenerator(unsigned long long seed)
    mpz_init(rand);
    this->seed = seed;
    gmp_randinit_mt(rstate);
-   gmp_randseed_ui(rstate, this->seed);
+   gmp_randseed_ui(rstate, (unsigned long)this->seed);
 }
 
 Utils::TestGenerator::~TestGenerator()

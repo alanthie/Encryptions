@@ -32,14 +32,14 @@ public:
 	uint32_t get_next_free_pos(uint32_t next_pos, atomicbitvector::atomic_bv_t& bitarray)
 	{
 		uint32_t cnt = 0;
-		uint32_t n = bitarray.size();
+		uint32_t n = (uint32_t)bitarray.size();
 		for(size_t i = 0; i< n; i++)
 		{
 			if (bitarray.test(i) == false)
 			{
 				if (cnt == next_pos)
 				{
-					return i;
+					return (uint32_t)i;
 				}
 				cnt++;
 			}
@@ -64,7 +64,7 @@ public:
         bool r = true;
 
 		if (perc > 100) perc = 100;
-        uint32_t NPERC = buffer.size() * perc / 100.0;;
+        uint32_t NPERC = (uint32_t) (buffer.size() * perc / 100.0);
 
 		if (key_len < 16) return r;
 		if (buffer.size() < 16) return r;
@@ -124,9 +124,9 @@ public:
         Buffer b(100);
         std::string s("erfew0-wert9wu098t74etjgto5ituy");
         std::string k("4657456756756757-wert9wu098t74etjgto5ituy");
-        b.write(s.data(), s.size(), 0);
-        shuffle(b, k.data(), k.size(), 100);
-        shuffle(b, k.data(), k.size(), 100);
+        b.write(s.data(), (uint32_t)s.size(), 0);
+        shuffle(b, k.data(), (uint32_t)k.size(), 100);
+        shuffle(b, k.data(), (uint32_t)k.size(), 100);
         for(size_t i = 0; i< s.size(); i++)
 		{
 			if (s[i] != b.getdata()[i])

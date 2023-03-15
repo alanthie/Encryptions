@@ -303,7 +303,7 @@ public:
                         if (verbose)
                         {
                             std::cout << "histo key: " << histo_key << " size:" << histo_key.size() << std::endl;
-                            std::cout << "histo key: " << get_summary_hex(histo_key.data(),histo_key.size()) << " size:" << histo_key.size() << std::endl;
+                            std::cout << "histo key: " << get_summary_hex(histo_key.data(), (uint32_t)histo_key.size()) << " size:" << histo_key.size() << std::endl;
                         }
                     }
                     else
@@ -372,7 +372,7 @@ public:
 							if (verbose)
 							{
 								std::cout << "rsa key_len_in_bytes: " << key_len_in_bytes << std::endl;
-								std::cout << "rsa_data: " << get_summary_hex(embedded_rsa_key.data(),embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
+								std::cout << "rsa_data: " << get_summary_hex(embedded_rsa_key.data(), (uint32_t)embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
 							}
 						}
 
@@ -386,17 +386,17 @@ public:
 						if (riter == 0)
 						{
 							if (v_encoded_size.size() > 0)
-								v_encoded_size[0] = vurlkey[i].sRSA_ENCODED_DATA.size();
+								v_encoded_size[0] = (uint32_t)vurlkey[i].sRSA_ENCODED_DATA.size();
 							else
-								v_encoded_size.push_back(vurlkey[i].sRSA_ENCODED_DATA.size() );
+								v_encoded_size.push_back((uint32_t)vurlkey[i].sRSA_ENCODED_DATA.size() );
 						}
 						else
 						{
-							v_encoded_size[riter] = msg_size_produced;
+							v_encoded_size[riter] = (uint32_t)msg_size_produced;
 						}
 
 						vurlkey[i].rsa_encoded_data_pos = 0; // set later
-						vurlkey[i].rsa_encoded_data_len = vurlkey[i].sRSA_ENCODED_DATA.size();
+						vurlkey[i].rsa_encoded_data_len = (uint32_t)vurlkey[i].sRSA_ENCODED_DATA.size();
                		}
 					else
 					{
@@ -462,11 +462,11 @@ public:
 			{
                 if (is_rsa)
                 {
-                    d.buffer.write(embedded_rsa_key.data(), embedded_rsa_key.size());
+                    d.buffer.write(embedded_rsa_key.data(), (uint32_t)embedded_rsa_key.size());
                 }
                 else if (is_histo)
                 {
-                    d.buffer.write(histo_key.data(), histo_key.size());
+                    d.buffer.write(histo_key.data(), (uint32_t)histo_key.size());
 
                     // key change to known index to the decryptor
                     vurlkey[i].set_url(std::string("[h]") + kout.data_sha[0]);

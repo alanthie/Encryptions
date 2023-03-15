@@ -106,7 +106,7 @@ namespace generate_rsa
             {
                 if (c == cryptoAL::BASEDIGIT64[i])
                 {
-                    return i;
+                    return (int)i;
                 }
             }
             std::cerr << "ERROR pos64 invalid base 64 char " << (int)(unsigned char)c << std::endl;
@@ -120,7 +120,7 @@ namespace generate_rsa
             {
                 if (c == cryptoAL::BASEDIGIT10[i])
                 {
-                    return i;
+                    return (int)i;
                 }
             }
             std::cerr << "ERROR invalid base 10 char " << (int)c << std::endl;

@@ -57,8 +57,8 @@ public:
         }
 
         cryptoAL::Buffer b;
-        b.increase_size(keysize);
-        b.write(&d.buffer.getdata()[pos], keysize, -1);
+        b.increase_size((uint32_t)keysize);
+        b.write(&d.buffer.getdata()[pos], (uint32_t)keysize, -1);
 
         std::string hex;
         char c;

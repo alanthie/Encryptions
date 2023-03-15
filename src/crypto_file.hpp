@@ -138,7 +138,7 @@ namespace cryptoAL
 			typeuinteger  v = k.val(msg);
 			decoded_rsa_data = k.decode(v);
 		}
-        msg_size_produced = decoded_rsa_data.size();
+        msg_size_produced = (uint32_t)decoded_rsa_data.size();
 
 		if (msg_input_size_touse < smsg.size() )
             decoded_rsa_data += smsg.substr(msg_input_size_touse);
@@ -164,7 +164,7 @@ namespace cryptoAL
 		{
 			msg_to_encrypt = smsg;
 		}
-		msg_input_size_used = msg_to_encrypt.size();
+		msg_input_size_used = (uint32_t)msg_to_encrypt.size();
 
 		if (use_gmp == true)
 		{
@@ -183,8 +183,8 @@ namespace cryptoAL
 				if (s_gmp2 != msg_to_encrypt)
 				{
 					std::cout << "ERROR encryption decryption" << std::endl;
-					std::cout << "s_gmp2:           " << get_summary_hex(s_gmp2.data(),s_gmp2.size()) << " size:" << s_gmp2.size() << std::endl;
-					std::cout << "msg_to_encrypt: " << get_summary_hex(msg_to_encrypt.data(),msg_to_encrypt.size()) << " size:" << msg_to_encrypt.size() << std::endl;
+					std::cout << "s_gmp2:           " << get_summary_hex(s_gmp2.data(), (uint32_t)s_gmp2.size()) << " size:" << s_gmp2.size() << std::endl;
+					std::cout << "msg_to_encrypt: " << get_summary_hex(msg_to_encrypt.data(), (uint32_t)msg_to_encrypt.size()) << " size:" << msg_to_encrypt.size() << std::endl;
 					throw "ERROR encryption decryption";
 				}
 			}
@@ -196,7 +196,7 @@ namespace cryptoAL
 			encoded_rsa_data = k.to_base64(e);
 		}
 
-		msg_size_produced = encoded_rsa_data.size() ;
+		msg_size_produced = (uint32_t)encoded_rsa_data.size() ;
 		//std::cout << "RSA encoding " << msg_to_encrypt.size() << " to " << encoded_rsa_data.size() << std::endl;
 
 		if (msg_to_encrypt.size() < smsg.size())

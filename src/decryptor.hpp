@@ -114,7 +114,7 @@ public:
 		{
             std::string s(out_uk.url);
             if ((s.size() >= 3) && (s[0]=='[') && (s[1]=='r') && (s[2]==']'))
-                std::cout << "url: [r]" << get_summary_hex(s.data()+3, s.size()-3) << " "<< std::endl;
+                std::cout << "url: [r]" << get_summary_hex(s.data()+3, (uint32_t) s.size()-3) << " "<< std::endl;
             else
                 std::cout << "url: " << s << " "<< std::endl;
         }
@@ -355,7 +355,7 @@ public:
                         if (verbose)
                         {
                             std::cout << "histo key: " << histo_key << " size:" << histo_key.size() << std::endl;
-                            std::cout << "histo key: " << get_summary_hex(histo_key.data(),histo_key.size()) << " size:" << histo_key.size() << std::endl;
+                            std::cout << "histo key: " << get_summary_hex(histo_key.data(), (uint32_t)histo_key.size()) << " size:" << histo_key.size() << std::endl;
                         }
                     }
                     else
@@ -431,7 +431,7 @@ public:
                                     long long n = str_to_ll(vt1);
                                     if (n >= 0)
                                     {
-                                        v_encoded_size.push_back(n);
+                                        v_encoded_size.push_back((uint32_t)n);
                                     }
                                     else
                                     {
@@ -468,7 +468,7 @@ public:
 							{
 								uint32_t msg_size_produced;
 								std::string d = uk.sRSA_ENCODED_DATA.substr(0, v_encoded_size[riter]);
-								std::string t = rsa_decode_string(d, kout, d.size(), msg_size_produced, use_gmp);
+								std::string t = rsa_decode_string(d, kout, (uint32_t)d.size(), msg_size_produced, use_gmp);
 
 								// may reduce size
 								uk.sRSA_ENCODED_DATA = t + uk.sRSA_ENCODED_DATA.substr(d.size());
@@ -478,7 +478,7 @@ public:
 							else
 							{
 								uint32_t msg_size_produced;
-								embedded_rsa_key = rsa_decode_string(uk.sRSA_ENCODED_DATA, kout, uk.sRSA_ENCODED_DATA.size(), msg_size_produced, use_gmp);
+								embedded_rsa_key = rsa_decode_string(uk.sRSA_ENCODED_DATA, kout, (uint32_t)uk.sRSA_ENCODED_DATA.size(), msg_size_produced, use_gmp);
 							}
 						}
 						else
@@ -525,11 +525,11 @@ public:
 			{
 			    if (is_rsa)
                 {
-                    d.buffer.write(embedded_rsa_key.data(), embedded_rsa_key.size());
+                    d.buffer.write(embedded_rsa_key.data(), (uint32_t)embedded_rsa_key.size());
                 }
                 else if (is_histo)
                 {
-                    d.buffer.write(histo_key.data(), histo_key.size());
+                    d.buffer.write(histo_key.data(), (uint32_t)histo_key.size());
                 }
 
                 uint32_t pos = (uk.key_fromH * BASE) + uk.key_fromL ;

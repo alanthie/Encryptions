@@ -398,7 +398,7 @@ void  menu()
 			std::cout << "generating/testing key with gmp..." << std::endl;
             auto start = std::chrono::high_resolution_clock::now();
 
-			int result = qa.generate_rsa_with_openssl(n, e, d, klen, pathopenssl);
+			int result = qa.generate_rsa_with_openssl(n, e, d, (uint32_t)klen, pathopenssl);
 
 			auto finish = std::chrono::high_resolution_clock::now();
             std::cout << "generation elapsed time: " <<  std::chrono::duration_cast<std::chrono::seconds>(finish - start).count() << " seconds"<< std:: endl;
@@ -407,7 +407,7 @@ void  menu()
 			if (result == 0)
 			{
 				generate_rsa::rsa_key rkey;
-				key.to_rsa_key(rkey, n, e, d, klen);
+				key.to_rsa_key(rkey, n, e, d, (uint32_t)klen);
 
 				std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
 				if (cryptoAL::fileexists(fileRSADB) == true)
@@ -422,7 +422,7 @@ void  menu()
 				bool ok = true;
 				auto start1 = std::chrono::high_resolution_clock::now();
 
-				int r = RSAGMP::rsa_gmp_test_key(rkey.base64_to_base10(rkey.s_n) , rkey.base64_to_base10(rkey.s_e), rkey.base64_to_base10(rkey.s_d), klen);
+				int r = RSAGMP::rsa_gmp_test_key(rkey.base64_to_base10(rkey.s_n) , rkey.base64_to_base10(rkey.s_e), rkey.base64_to_base10(rkey.s_d), (uint32_t)klen);
 				if (r!=0)
 				{
 					ok = false;
@@ -533,7 +533,7 @@ void  menu()
 			RSAGMP::Utils::mpzBigInteger pub;
 			RSAGMP::Utils::mpzBigInteger priv;
 			RSAGMP::Utils::mpzBigInteger modulus;
-			bool r = RSAGMP::get_keys(klen, &generator, nt, 20, pub, priv, modulus);
+			bool r = RSAGMP::get_keys((unsigned int)klen, &generator, nt, 20, pub, priv, modulus);
 			if (r)
 			{
 				std::string s_n(modulus.get_str());
@@ -541,7 +541,7 @@ void  menu()
 				std::string s_d(priv.get_str());
 
 				generate_rsa::rsa_key k;
-				generate_rsa::rsa_key rkey( klen,
+				generate_rsa::rsa_key rkey( (int)klen,
 										  k.base10_to_base64(s_n),
 										  k.base10_to_base64(s_e),
 										  k.base10_to_base64(s_d));

@@ -141,7 +141,7 @@ void Scalar_Multiplication(struct Point P, struct Point *R, mpz_t m)
 	mpz_init(T.x); mpz_init(T.y);
 	long no_of_bits, loop;
 
-	no_of_bits = mpz_sizeinbase(m, 2);
+	no_of_bits = (long)mpz_sizeinbase(m, 2);
 	mpz_set_ui(R->x, 0);
 	mpz_set_ui(R->y, 0);
 	if(mpz_cmp_ui(m, 0) == 0)

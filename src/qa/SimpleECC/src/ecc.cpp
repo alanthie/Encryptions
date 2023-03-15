@@ -145,7 +145,7 @@ J_Point jacobian_affine_sliding_NAF(J_Point p, Point q, mpz_t a, mpz_t k, mpz_t 
 	J_Point results;
 	results = init_j_point(results);
 
-	int i, j; // loop variable
+	int i; // loop variable
 	char * binary;
 	int binary_size = 0;
 

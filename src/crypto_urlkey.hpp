@@ -85,7 +85,7 @@ public:
 		if (s.size() < URL_MAX_SIZE)
 		{
 			url[s.size()] = 0;
-			url_size = s.size();
+			url_size = (uint16_t)s.size();
 		}
 		else
 		{

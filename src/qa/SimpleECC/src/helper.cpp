@@ -33,7 +33,7 @@ void get_random(mpz_t results, int num_bytes)
 
 #ifdef _WIN32
 	unsigned long long L;
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 	unsigned char c[4]; //[8]...
 	for (long i = 0; i < num_bytes/8; i++)
 	{

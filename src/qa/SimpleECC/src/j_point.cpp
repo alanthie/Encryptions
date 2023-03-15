@@ -350,7 +350,7 @@ Point jacobian_to_affine(J_Point p, mpz_t modulo) {
 	Point results;
 	results = init_point(results);
 
-	mpz_t Z, one;
+	mpz_t Z;
 	mpz_init(Z);
 	mpz_set(Z, p.Z);
 
