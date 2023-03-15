@@ -155,7 +155,7 @@ int test_simple_ecc() {
 
 	uint64_t one_second = t2 - t1 - rdtscp_cycle;
 	printf("Approximate number of cycles in 1 second: %lld\n\n", one_second);
-	uint64_t one_us = one_second / 1e6;
+	uint64_t one_us = (uint64_t) (one_second / 1e6);
 
 	while (mpz_cmp(k, zero_value) == 0) {
 		get_random(k, 32); // generate random test (256 bits)
@@ -499,7 +499,7 @@ int test_simple_ecc() {
 		mpz_t encrypted_message;
 		mpz_init(encrypted_message);
 
-		int partition = strlen(message_string) / 24;
+		int partition = (int) strlen(message_string) / 24;
 		int partition_modulo = strlen(message_string) % 24;
 		if (partition_modulo != 0) partition++;
 

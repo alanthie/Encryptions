@@ -399,7 +399,7 @@ std::vector<unsigned char> binAES::EncryptECB(std::vector<unsigned char> in,
                                            std::vector<unsigned char> key) {
   unsigned char *out = EncryptECB(VectorToArray(in), (unsigned int)in.size(),
                                   VectorToArray(key));
-  std::vector<unsigned char> v = ArrayToVector(out, in.size());
+  std::vector<unsigned char> v = ArrayToVector(out, (unsigned int)in.size());
   delete[] out;
   return v;
 }
@@ -418,7 +418,7 @@ std::vector<unsigned char> binAES::EncryptCBC(std::vector<unsigned char> in,
                                            std::vector<unsigned char> iv) {
   unsigned char *out = EncryptCBC(VectorToArray(in), (unsigned int)in.size(),
                                   VectorToArray(key), VectorToArray(iv));
-  std::vector<unsigned char> v = ArrayToVector(out, in.size());
+  std::vector<unsigned char> v = ArrayToVector(out, (unsigned int)in.size());
   delete[] out;
   return v;
 }
@@ -438,7 +438,7 @@ std::vector<unsigned char> binAES::EncryptCFB(std::vector<unsigned char> in,
                                            std::vector<unsigned char> iv) {
   unsigned char *out = EncryptCFB(VectorToArray(in), (unsigned int)in.size(),
                                   VectorToArray(key), VectorToArray(iv));
-  std::vector<unsigned char> v = ArrayToVector(out, in.size());
+  std::vector<unsigned char> v = ArrayToVector(out, (unsigned int)in.size());
   delete[] out;
   return v;
 }
