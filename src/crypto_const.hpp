@@ -39,7 +39,7 @@ constexpr static int16_t KEYPOS_ENCODESIZE  = 8;
 constexpr static int16_t URL_LEN_ENCODESIZE = 2;
 constexpr static int16_t CRYPTO_ALGO_ENCODESIZE = 2;
 constexpr static uint32_t URL_MIN_SIZE      = 4;
-constexpr static uint32_t URL_MAX_SIZE      = 256*4; // Multiple RSA keys
+constexpr static uint32_t URL_MAX_SIZE      = 64*16; // Multiple RSA keys name;size
 
 constexpr static uint32_t MIN_KEY_SIZE      = 64; 
 constexpr static int16_t CHKSUM_SIZE        = 64;

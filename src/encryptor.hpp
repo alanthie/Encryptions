@@ -419,9 +419,17 @@ public:
 							new_URL += std::to_string(v_encoded_size[riter]);
 							new_URL += std::string(";");
 						}
-						vurlkey[i].set_url(new_URL);
-						if (verbose)
-                            std::cout << "RSA Recursive NEW URL: " << new_URL << " " << new_URL.size() << std::endl;
+						if (new_URL.size() > URL_MAX_SIZE)
+						{
+							std::cerr << "ERROR resursive rsa too long: " << new_URL << std::endl;
+							r = false;
+						}
+						else
+						{
+							vurlkey[i].set_url(new_URL);
+							if (verbose)
+                            	std::cout << "RSA Recursive NEW URL: " << new_URL << " " << new_URL.size() << std::endl;
+						}
 					}
 				}
 			}
