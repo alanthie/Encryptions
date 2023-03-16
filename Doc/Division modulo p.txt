@@ -1,0 +1,96 @@
+Division modulo p
+https://andrea.corbellini.name/2015/05/23/elliptic-curve-cryptography-finite-fields-and-discrete-logarithms/
+
+
+
+https://stackoverflow.com/questions/38155864/understanding-mpz-invert
+https://en.wikipedia.org/wiki/Modular_multiplicative_inverse
+
+public:
+static int mpz_invert(
+	mpz_t^ rop, 
+	mpz_t^ op1, 
+	mpz_t^ op2
+)
+mpz_invert is used to calculate a very specific value which is the modular multiplicative inverse of a mod b.
+If the inverse exists, the return value is non-zero and rop will satisfy 0 ≤ rop < | op2 | (with rop = 0 possible only when | op2 | = 1, i.e., in the somewhat degenerate zero ring). If an inverse doesn’t exist the return value is zero and rop is undefined. The behaviour of this function is undefined when op2 is zero. 
+ 
+Basically rop is an integer such that op1*rop ≡ 1 (mod op2) which implies that (op1*rop - 1) mod op2 = 0.
+
+Indeed that's the case, with
+
+op1 = 12682271391376756984
+op2 = 3527
+rop = 2288
+
+op1 * rop = 29017036943470019979392
+(op1 * rop - 1) mod op2 = 29017036943470019979391 % 3527 = 0
+
+
+
+mpz_invert() is a modular arithmetic function. 
+It calculates the modular multiplicative inverse of an integer (i.e., the value that you have to multiply it by to obtain a value that is congruent to 1 in the given modulus). The value of this inverse (and even its very existence) depends on the value of the modulus you choose.
+
+If you just want to calculate the value of 1 divided by some number, then you shouldn't be using integers. Use rational (type mpq_t) or floating point (type mpf_t) values instead.
+
+
+
+
+Function: void mpz_gcd (mpz_t rop, const mpz_t op1, const mpz_t op2)
+Set rop to the greatest common divisor of op1 and op2. The result is always positive even if one or both input operands are negative. Except if both inputs are zero; then this function defines gcd(0,0) = 0. 
+    
+//----------------------------------------
+https://github.com/rfsbarreto/ECC 
+//----------------------------------------
+int init_curve(char* a1, char* b1,char* prime1, char* order1,int cofactor1,ecc_point g1){
+int quadratic_residue(mpz_t x,mpz_t q,mpz_t n) // Tonelli-Shanks
+int existPoint1(mpz_t x, mpz_t  y){
+ecc_point* sum(ecc_point p1,ecc_point p2){
+ecc_point* double_p(ecc_point p){
+ecc_point* mult(ecc_point p, mpz_t value){
+ecc_point* existPoint(mpz_t  p){
+message_point* getECCPointFromMessage(char* message){ 
+char* getMessageFromPoint(message_point* msg){
+//int MSG_BYTES_MAX=18;
+typedef struct ecc_point{
+	mpz_t x,y;
+} ecc_point;
+mpz_t a,b,prime,order;
+int cofactor; 
+ecc_point generator_point;
+int isPoint(ecc_point p);
+
+ https://cpp.hotexamples.com/examples/-/-/mpz_invert/cpp-mpz_invert-function-examples.html#0x1f69716d5493c4ad576a01f0f6a362b01e5596af43572d7511cde71f164e8a3b-163,,195,
+ ecc_point* double_p(ecc_point p){
+	ecc_point* result;
+	result= malloc(sizeof(ecc_point));
+	mpz_init((*result).x);
+	mpz_init((*result).y);
+	printf("DP ");
+	if (mpz_cmp_ui(p.y,0)!=0){
+		mpz_t s,d_y,d_x,y;
+		mpz_init(d_y);
+		mpz_init(s);
+		mpz_init(y);
+		mpz_init(d_x);
+		mpz_pow_ui(s,p.x,2);
+		mpz_mul_si(s,s,3);
+		mpz_add(s,s,a);
+		mpz_mul_si(d_y,p.y,2);
+		mpz_mod(d_y,d_y,prime);
+		mpz_invert(d_y,d_y,prime); // <=============
+		mpz_mul(s,s,d_y);
+		mpz_mod(s,s,prime);	
+		mpz_mul_ui(d_x,p.x,2);
+		mpz_pow_ui((*result).x,s,2);
+		mpz_sub((*result).x,(*result).x,d_x);
+		mpz_mod((*result).x,(*result).x,prime);
+		mpz_neg((*result).y,p.y);
+		mpz_sub(d_x,p.x,(*result).x);
+		mpz_mul(s,s,d_x);
+		mpz_add((*result).y,(*result).y,s);
+		mpz_mod((*result).y,(*result).y,prime);
+	}else
+		result=INFINITY_POINT;
+	return result;
+}
