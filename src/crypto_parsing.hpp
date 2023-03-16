@@ -149,13 +149,45 @@ std::string get_block(std::string s, std::string start, std::string last)
    return "";
 }
 
-std::string remove_hex_delim(std::string s)
+std::string remove_hex_delim(const std::string& s)
 {
     std::string r ;
     long long n = s.size();
     for(long long i=0;i<n;i++)
     {
         if ( (s[i]!=' ') && (s[i]!=':') && (s[i]!='\n') && (s[i]!='\r') )
+            r+=s[i];
+    }
+    return r;
+}
+
+std::string remove_hex2_delim(const std::string& s)
+{
+    std::string r ;
+    long long n = s.size();
+    for(long long i=0;i<n;i++)
+    {
+        if ( (s[i]!=' ') && (s[i]!=':') && (s[i]!='\n') && (s[i]!='\r') && (s[i]!='\"') && (s[i]!='}') )
+            r+=s[i];
+    }
+	
+	if (r.size() >= 2)
+	{
+		if ((r[0]=='0') && (r[1]=='x'))
+		{
+			r = r.substr(2);
+		}
+	}
+    return r;
+}
+
+std::string remove_delim(const std::string& s, char delim)
+{
+    std::string r ;
+    long long n = s.size();
+    for(long long i=0;i<n;i++)
+    {
+        if (s[i]!=delim)
             r+=s[i];
     }
     return r;
@@ -183,17 +215,31 @@ std::string get_block_infile(std::string FILE, std::string start, std::string la
 			size_t pos_end;
 			if ((pos_start = s.find(start, 0)) != std::string::npos)
 			{
-			   if ((pos_end = s.find(last, pos_start)) != std::string::npos)
-			   {
-				   if (pos_end  > (pos_start + start.size())  )
-					   return s.substr(pos_start+start.size(), pos_end - (pos_start+start.size()) );
-			   }
+				std::cerr << "start: " << pos_start << std::endl;
+			   	if ((pos_end = s.find(last, pos_start)) != std::string::npos)
+			   	{
+			   		std::cerr << "end: " << pos_start << std::endl;
+				   	if (pos_end  > (pos_start + start.size())  )
+					   	return s.substr(pos_start+start.size(), pos_end - (pos_start+start.size()) );
+					else
+						std::cerr << "end overflow: " <<  last << std::endl;
+				
+			   	}
+			   	else
+					std::cerr << "start failed: " << start << std::endl;
 			}
+			else
+					std::cerr << "end failed: " << last << std::endl;
+		}
+		else
+		{
+			std::cerr << "ERROR reading file: " << FILE << std::endl;
 		}
    }
    else
-        std::cerr << "no file: " << FILE << std::endl;
+        std::cerr << "ERROR no file: " << FILE << std::endl;
 
+	std::cerr << "get_block_infile failed" << std::endl;
    return "";
 }
 

@@ -126,16 +126,16 @@ namespace cryptoAL
 
 		if (use_gmp == true)
 		{
-			RSAGMP::Utils::mpzBigInteger modulus(k.base64_to_base10(k.s_n) );
-			RSAGMP::Utils::mpzBigInteger priv(k.base64_to_base10(k.s_d));
-			RSAGMP::Utils::mpzBigInteger message(k.base64_to_base10(msg));
+			RSAGMP::Utils::mpzBigInteger modulus(cryptoAL::key_util::base64_to_base10(k.s_n) );
+			RSAGMP::Utils::mpzBigInteger priv(cryptoAL::key_util::base64_to_base10(k.s_d));
+			RSAGMP::Utils::mpzBigInteger message(cryptoAL::key_util::base64_to_base10(msg));
 			RSAGMP::Utils::mpzBigInteger message1 = RSAGMP::Decrypt(message, priv, modulus);
-			decoded_rsa_data = k.base10_to_base64(message1.get_str());
+			decoded_rsa_data = cryptoAL::key_util::base10_to_base64(message1.get_str());
 		}
 		else
 		{
 			std::cout << "WARNING not using GMP" << std::endl;
-			typeuinteger  v = k.val(msg);
+			typeuinteger  v = cryptoAL::key_util::val(msg);
 			decoded_rsa_data = k.decode(v);
 		}
         msg_size_produced = (uint32_t)decoded_rsa_data.size();
@@ -168,22 +168,22 @@ namespace cryptoAL
 
 		if (use_gmp == true)
 		{
-			RSAGMP::Utils::mpzBigInteger modulus(k.base64_to_base10(k.s_n) );
-			RSAGMP::Utils::mpzBigInteger pub(k.base64_to_base10(k.s_e));
-			RSAGMP::Utils::mpzBigInteger message(k.base64_to_base10(msg_to_encrypt));
+			RSAGMP::Utils::mpzBigInteger modulus(cryptoAL::key_util::base64_to_base10(k.s_n) );
+			RSAGMP::Utils::mpzBigInteger pub(cryptoAL::key_util::base64_to_base10(k.s_e));
+			RSAGMP::Utils::mpzBigInteger message(cryptoAL::key_util::base64_to_base10(msg_to_encrypt));
 			RSAGMP::Utils::mpzBigInteger message1 = RSAGMP::Encrypt(message, pub, modulus);
-			std::string s_gmp = k.base10_to_base64(message1.get_str());
+			std::string s_gmp = cryptoAL::key_util::base10_to_base64(message1.get_str());
 			encoded_rsa_data = s_gmp;
 
 			if (SELF_TEST)
 			{
-				RSAGMP::Utils::mpzBigInteger priv(k.base64_to_base10(k.s_d));
+				RSAGMP::Utils::mpzBigInteger priv(cryptoAL::key_util::base64_to_base10(k.s_d));
 				RSAGMP::Utils::mpzBigInteger message2 = RSAGMP::Decrypt(message1, priv, modulus);
-				std::string s_gmp2 = k.base10_to_base64(message2.get_str());
+				std::string s_gmp2 = cryptoAL::key_util::base10_to_base64(message2.get_str());
 				if (s_gmp2 != msg_to_encrypt)
 				{
 					std::cout << "ERROR encryption decryption" << std::endl;
-					std::cout << "s_gmp2:           " << get_summary_hex(s_gmp2.data(), (uint32_t)s_gmp2.size()) << " size:" << s_gmp2.size() << std::endl;
+					std::cout << "s_gmp2:         " << get_summary_hex(s_gmp2.data(), (uint32_t)s_gmp2.size()) << " size:" << s_gmp2.size() << std::endl;
 					std::cout << "msg_to_encrypt: " << get_summary_hex(msg_to_encrypt.data(), (uint32_t)msg_to_encrypt.size()) << " size:" << msg_to_encrypt.size() << std::endl;
 					throw "ERROR encryption decryption";
 				}
@@ -193,7 +193,7 @@ namespace cryptoAL
 		{
 			std::cout << "WARNING not using GMP" << std::endl;
 			typeuinteger  e = k.encode(msg_to_encrypt);
-			encoded_rsa_data = k.to_base64(e);
+			encoded_rsa_data = cryptoAL::key_util::to_base64(e);
 		}
 
 		msg_size_produced = (uint32_t)encoded_rsa_data.size() ;

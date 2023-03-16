@@ -9,7 +9,7 @@
     #include "qa_internal.hpp" // NOT SHARED ON GITHUB
 #endif
 #include <thread>
- #include "../c_plus_plus_serializer.h"
+#include "../c_plus_plus_serializer.h"
 
 #ifdef _WIN32
 //add preprocessor directive NOMINMAX
@@ -22,6 +22,8 @@
 
 #include "../../src/crypto_const.hpp"
 #include "../../src/crypto_history.hpp"
+#include "../../src/crypto_key_util.hpp"
+#include "../../src/crypto_ecckey.hpp"
 using namespace cryptoAL;
 
 #include "ec_gmp/ec_gmp_p_mul.hpp"
@@ -29,7 +31,7 @@ using namespace cryptoAL;
 //#define TEST_ENCRYPT_DECRYPT true
 #include "SimpleECC/src/test_simple_ecc.hpp"
 
-std::string VERSION = "v0.1";
+std::string VERSION = "v0.2";
 std::string FULLVERSION = VERSION + "_" + cryptoAL::get_current_date();
 
 long long keybits8x(long long bits)
@@ -62,17 +64,24 @@ void  menu()
         std::cout << "4. Puzzle: Make random puzzle from shared binary (like USB keys) data" << std::endl;
         std::cout << "5. Puzzle: Resolve puzzle" << std::endl;
         std::cout << "6. <Futur usage>" << std::endl;
-        std::cout << "7.  RSA: View my private RSA key" << std::endl;
-        std::cout << "8.  RSA: View other public RSA key" << std::endl;
-        std::cout << "9.  RSA: Extract my public RSA key to file" << std::endl;
-        std::cout << "10. RSA: Generate RSA key with OPENSSL command line (fastest)" << std::endl;
-        std::cout << "11. RSA: Test RSA GMP key generator" << std::endl;
-        std::cout << "12. RSA: Generate RSA key with GMP (fast)" << std::endl;
+        std::cout << "7.  RSA Key: View my private RSA key" << std::endl;
+        std::cout << "8.  RSA Key: View other public RSA key" << std::endl;
+        std::cout << "9.  RSA Key: Extract my public RSA key to file" << std::endl;
+        std::cout << "10. RSA Key: Generate RSA key with OPENSSL command line (fastest)" << std::endl;
+        std::cout << "11. RSA Key: Test RSA GMP key generator" << std::endl;
+        std::cout << "12. RSA Key: Generate RSA key with GMP (fast)" << std::endl;
         std::cout << "13. ECC: Elliptic Curve test with GMP" << std::endl;
-		std::cout << "14. Histo: View my encode history hashes" << std::endl;
-		std::cout << "15. Histo: View my decode history hashes" << std::endl;
-		std::cout << "16. Histo: Export public decode history hashes" << std::endl;
-		std::cout << "17. Histo: Confirm public history hashes" << std::endl;
+		std::cout << "14. Historical Hashes: View my private encode history hashes" << std::endl;
+		std::cout << "15. Historical Hashes: View my public decode history hashes" << std::endl;
+		std::cout << "16. Historical Hashes: Export public decode history hashes for confirmation" << std::endl;
+		std::cout << "17. Historical Hashes: Confirm other public decode history hashes" << std::endl;
+		std::cout << "18. EC Domain: Import an elliptic curve domain generated from ecgen (output manually saved in a file)" << std::endl;
+		std::cout << "19. EC Domain: Generate an elliptic curve domain with ecgen" << std::endl;
+		std::cout << "20. EC Domain: View my elliptic curve domains" << std::endl;
+        std::cout << "21. EC Domain: Import the elliptic curve domains of other" << std::endl;
+		std::cout << "22. EC Key: Generate an elliptic curve key" << std::endl;
+		std::cout << "23. EC Key: Export one of my public elliptic curve key" << std::endl;
+		std::cout << "24. EC Key: Import other public elliptic curve keys" << std::endl;
         std::cout << "==> ";
         std::cin >> schoice;
 
@@ -422,7 +431,8 @@ void  menu()
 				bool ok = true;
 				auto start1 = std::chrono::high_resolution_clock::now();
 
-				int r = RSAGMP::rsa_gmp_test_key(rkey.base64_to_base10(rkey.s_n) , rkey.base64_to_base10(rkey.s_e), rkey.base64_to_base10(rkey.s_d), (uint32_t)klen);
+				int r = RSAGMP::rsa_gmp_test_key(   cryptoAL::key_util::base64_to_base10(rkey.s_n) , cryptoAL::key_util::base64_to_base10(rkey.s_e),
+                                                    cryptoAL::key_util::base64_to_base10(rkey.s_d), (uint32_t)klen);
 				if (r!=0)
 				{
 					ok = false;
@@ -542,9 +552,9 @@ void  menu()
 
 				generate_rsa::rsa_key k;
 				generate_rsa::rsa_key rkey( (int)klen,
-										  k.base10_to_base64(s_n),
-										  k.base10_to_base64(s_e),
-										  k.base10_to_base64(s_d));
+										  cryptoAL::key_util::base10_to_base64(s_n),
+										  cryptoAL::key_util::base10_to_base64(s_e),
+										  cryptoAL::key_util::base10_to_base64(s_d));
 
 				// READ
 				std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
@@ -711,7 +721,163 @@ void  menu()
 				continue;
 			}
         }
+
+		else if (choice == 18)
+      	{
+            qaclass qa;
+
+			std::cout << "Enter ecc text file (ecgen output) to parse: ";
+			std::string eccfile;
+			std::cin >> eccfile;
+
+			std::cout << "Enter path for ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+			std::string pathdb;
+			std::cin >> pathdb;
+			if (pathdb == "0") pathdb = "./";
+			std::string fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+
+			if (cryptoAL::fileexists(eccfile) == true)
+			{
+                int klen = 0;
+				typeuinteger a; typeuinteger b; typeuinteger p;
+				typeuinteger n; typeuinteger gx; typeuinteger gy;
+				typeuinteger h;
+
+				bool r = cryptoAL::key_util::parse_ecc_domain(eccfile, klen, a, b, p, n, gx, gy, h);
+				if (r)
+				{
+                    cryptoAL::ecc_domain dom;
+                    cryptoAL::ecc_domain::to_ecc_domain(dom, klen, a, b, p, n, gx, gy, h);
+
+					// READ
+					std::map< std::string, cryptoAL::ecc_domain > map_ecc_domain;
+
+					if (cryptoAL::fileexists(fileECCDOMDB) == false)
+					{
+						std::ofstream outfile;
+						outfile.open(fileECCDOMDB, std::ios_base::out);
+						outfile.close();
+					}
+
+					if (cryptoAL::fileexists(fileECCDOMDB) == true)
+					{
+						std::ifstream infile;
+						infile.open (fileECCDOMDB, std::ios_base::in);
+						infile >> bits(map_ecc_domain);
+						infile.close();
+					}
+					else
+					{
+						std::cerr << "no file: "  << fileECCDOMDB << std:: endl;
+						continue;
+					}
+
+					// backup
+					{
+						std::ofstream outfile;
+						outfile.open(fileECCDOMDB + ".bck", std::ios_base::out);
+						outfile << bits(map_ecc_domain);
+						outfile.close();
+					}
+
+					//std::string keyname = std::string("MY_RSAKEY_") + std::to_string(klen) + std::string("_") + cryptoAL::get_current_time_and_date();
+					map_ecc_domain.insert(std::make_pair(dom.name(), dom) );
+
+					{
+						std::ofstream outfile;
+						outfile.open(fileECCDOMDB, std::ios_base::out);
+						outfile << bits(map_ecc_domain);
+						outfile.close();
+					}
+
+					std::cout << "elliptic curve domain save as: " << dom.name() << std:: endl;
+				}
+				else
+                {
+                    std::cerr << "parse error" << std:: endl;
+                    continue;
+                }
+			}
+			else
+			{
+				std::cerr << "no file: " << eccfile << std:: endl;
+				continue;
+			}
+        }
+
+        else if (choice == 19)
+        {
+            std::cout << "Example: launch this command in Linux for  512 ECC bits key: ./ecgen --fp -v -m 2g -u -p -r 512" << std::endl;
+            std::cout << "Example: launch this command in Linux for 1024 ECC bits key: ./ecgen --fp -v -m 8g -u -p -r 1024" << std::endl;
+            std::cout << "Save the output in a text file then do [Import an elliptic curve domain from text file]" << std::endl;
+            std::cout << "Enter 0 to continue" << std::endl;
+            std::string pathdb;
+            std::cin >> pathdb;
+            if (pathdb == "0") pathdb = "./";
+            std::string fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+        }
+
+        else if (choice == 20)
+        {
+			std::cout << "Enter path for ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+			std::string pathdb;
+			std::cin >> pathdb;
+			if (pathdb == "0") pathdb = "./";
+			std::string fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+
+			std::cout << "Only show summary (0 = true): ";
+            std::string osummary;
+            std::cin >> osummary;
+            bool onlysummary=false;
+            if (osummary == "0") onlysummary = true;
+
+			qaclass qa;
+			std::map< std::string, cryptoAL::ecc_domain > map_ecc_domain;
+
+			// View
+			if (cryptoAL::fileexists(fileECCDOMDB) == true)
+			{
+				std::ifstream infile;
+				infile.open (fileECCDOMDB, std::ios_base::in);
+				infile >> bits(map_ecc_domain);
+				infile.close();
+
+                if (onlysummary == false)
+                {
+                    for(auto& [eccname, k] : map_ecc_domain)
+                    {
+                        std::cout << "ecc name: " << eccname << std:: endl;
+                        std::cout << "ecc size: " << k.key_size_bits << std:: endl;
+                        std::cout << "ecc a : " << k.s_a << std:: endl;
+                        std::cout << "ecc b : " << k.s_b << std:: endl;
+                        std::cout << "ecc p : " << k.s_p << std:: endl;
+                        std::cout << "ecc n : " << k.s_n<< std:: endl;
+                        std::cout << "ecc gx : " << k.s_gx << std:: endl;
+                        std::cout << "ecc gy : " << k.s_gy << std:: endl;
+                        std::cout << "ecc h : " << k.s_h << std:: endl;
+                        std::cout << std:: endl;
+                    }
+				}
+			}
+			else
+			{
+				std::cerr << "no file: "  << fileECCDOMDB << std:: endl;
+				continue;
+			}
+
+			std::cout << "---------------------------" << std::endl;
+          	std::cout << "Summary of " << fileECCDOMDB << std::endl;
+         	std::cout << "---------------------------" << std::endl;
+          	for(auto& [eccname, k] : map_ecc_domain)
+          	{
+              	std::cout << eccname << std:: endl;
+          	}
+          	std::cout << std:: endl;
+		}
+
+
     }
+
 }
 
 
