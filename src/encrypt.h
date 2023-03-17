@@ -2,7 +2,7 @@
 #define _INCLUDES_encrypt_H
 
 #include "Base64.h"
-#include "vigenere.h"
+#include "vigenere.hpp"
 #include <iostream>
 #include <string>
 
@@ -13,13 +13,13 @@ std::string encrypt_simple_string(std::string& msg, std::string& key)
     {
         std::vector<char> msg2(msg.begin(), msg.end());
         std::string b64_str = Base64::encode(msg2);
-        std::string vigenere_msg = encrypt_vigenere(b64_str, key);
+        std::string vigenere_msg = cryptoAL_vigenere::encrypt_vigenere(b64_str, key);
         s = vigenere_msg;
     }
 
     std::vector<char> msg2b(s.begin(), s.end());
     std::string b64_str = Base64::encode(msg2b);
-    std::string vigenere_msg2 = encrypt_vigenere(b64_str, key);
+    std::string vigenere_msg2 = cryptoAL_vigenere::encrypt_vigenere(b64_str, key);
     return vigenere_msg2;
 }
 
@@ -115,15 +115,15 @@ std::string decrypt_simple_string(std::string& encrypted_msg, std::string& key)
 {
     std::string s;
     {
-        std::string newKey = extend_key(encrypted_msg, key);
-        std::string b64_encoded_str = decrypt_vigenere(encrypted_msg, newKey);
+        std::string newKey = cryptoAL_vigenere::extend_key(encrypted_msg, key);
+        std::string b64_encoded_str = cryptoAL_vigenere::decrypt_vigenere(encrypted_msg, newKey);
         std::vector<char> b64_decode_vec = Base64::decode(b64_encoded_str);
         std::string b64_decode_str(b64_decode_vec.begin(), b64_decode_vec.end());
         s = sanitize_utf8(b64_decode_str);
     }
 
-    std::string newKey = extend_key(s, key);
-    std::string b64_encoded_str = decrypt_vigenere(s, newKey);
+    std::string newKey = cryptoAL_vigenere::extend_key(s, key);
+    std::string b64_encoded_str = cryptoAL_vigenere::decrypt_vigenere(s, newKey);
     std::vector<char> b64_decode_vec = Base64::decode(b64_encoded_str);
     std::string b64_decode_str(b64_decode_vec.begin(), b64_decode_vec.end());
     s = sanitize_utf8(b64_decode_str);

@@ -8,12 +8,9 @@ int ecc_curve::random_in_range (unsigned int min, unsigned int max)
     int base_random = rand(); /* in [0, RAND_MAX] */
     if (RAND_MAX == base_random) return random_in_range(min, max);
 
-    /* now guaranteed to be in [0, RAND_MAX) */
     int range       = max - min,
     remainder   = RAND_MAX % range,
     bucket      = RAND_MAX / range;
-    /* There are range buckets, plus one smaller interval
-     within remainder of RAND_MAX */
     if (base_random < RAND_MAX - remainder)
     {
         return min + base_random/bucket;
@@ -21,6 +18,71 @@ int ecc_curve::random_in_range (unsigned int min, unsigned int max)
     else
     {
         return random_in_range (min, max);
+    }
+}
+
+// inital msg = x = "FFzaa234fsdf" 0xff 0x00 0x00 ---- 0x00 FULL
+message_point ecc_curve::getECCPointFromMessage(cryptoAL::Buffer& message_buffer)
+{
+    const char* message = message_buffer.getdata();
+
+    mpz_t x;
+	mpz_init(x);
+
+    message_point rm;
+    ecc_point r;
+
+	printf("%s\n", message);
+
+	// msg = x = "FFzaa234fsdf"    0xff 0x00 0x00-- 0x05
+	// msg = x = "FFzaa234fsdf..." 0xff 0x03
+//	unsigned int N = 0;
+//	for(unsigned int j = 0; j< message_buffer.size();j++)
+//	{
+//        if (message_buffer.get_at(j) == 0xff)
+//        {
+//            N++; // include delimiter
+//            break;
+//        }
+//        else
+//        {
+//            N++;
+//        }
+//	}
+//	N++; // include last byte delta
+
+	for (int i = message_buffer.size();i>=0;i--)
+    {
+		mpz_t temp;
+		mpz_init_set_str(temp,pow256string(i).data(),BASE_16);
+		mpz_addmul_ui(x,temp,(*message));
+		++message;
+	}
+
+    // check x, x+1, ... x+255 50%, 75%, ...99.9999...%
+	int i=0;
+	do{
+		printf("i-> %d",i);
+		gmp_printf(" x=%Zd\n",x);
+
+		r = existPoint(x);
+		i++;
+		mpz_add_ui(x,x,1); // x++;
+	}
+    while( (r.is_valid==false) && i<255);
+
+	mpz_mod(r.x,r.x,prime);
+
+	if (r.is_valid)
+    {
+		rm.p = r;
+		rm.qtd_adicoes = i-1;
+		return rm;
+	}
+    else
+    {
+        rm.p.is_valid = false;
+		return rm;
     }
 }
 
@@ -37,8 +99,8 @@ message_point ecc_curve::getECCPointFromMessage(char* message)
 
 	printf("%s\n", message);
 
-	int i=MSG_BYTES_MAX-1;
-	// add empty byte
+	int i = MSG_BYTES_MAX-1;
+	// adding an empty byte
 	i++;
 
 	for (i;i>=0;i--)
@@ -79,6 +141,66 @@ message_point ecc_curve::getECCPointFromMessage(char* message)
 		return rm;
     }
 }
+
+void ecc_curve::getMessageFromPoint(message_point& msg, cryptoAL::Buffer& out_message)
+{
+    out_message.clear();
+    out_message.increase_size(MSG_BYTES_MAX+2);
+    out_message.init(0);
+
+   	char* message = (char*)out_message.getdata();
+
+    message_point rm;
+
+	mpz_init_set(rm.p.x, msg.p.x);
+	mpz_init_set(rm.p.y, msg.p.y);
+	//rm.qtd_adicoes = msg.qtd_adicoes; // ???  // to recompute if needed...
+	//mpz_sub_ui(rm.p.x,rm.p.x,rm.qtd_adicoes); // Drop last byte
+
+    // msg = x = "FFzaa234fsdf"    0xff 0x00 0x00-- 0x05
+	// msg = x = "FFzaa234fsdf..." 0xff 0x03
+
+	bool delimiter = false;
+	unsigned int c;
+    unsigned int K = 2;
+    unsigned int cnt = 0;
+	for (unsigned int i=0;i<MSG_BYTES_MAX+K;i++)
+    {
+		mpz_t pot;
+		mpz_init_set_str(pot,pow256string(MSG_BYTES_MAX+K-i).data(),BASE_16);
+
+		mpz_sub_ui(pot,pot,1);
+		mpz_and(rm.p.x,rm.p.x,pot);
+		mpz_t aux;
+		mpz_init(aux);
+
+		mpz_set_str(pot,pow256string(MSG_BYTES_MAX+K-1-i).data(),BASE_16);
+		mpz_fdiv_q(aux,rm.p.x,pot); // digit extract
+
+        c = mpz_get_ui(aux);
+
+        if (delimiter == false)
+        {
+            if (c == 0xff)
+            {
+                delimiter = true;
+                break; // no more digits
+            }
+        }
+        message[i] = c; // digit
+        cnt++;
+
+		//message[i] = (mpz_get_ui(aux)>=32 && mpz_get_ui(aux)<127)?mpz_get_ui(aux):'\0';
+	}
+
+	for (unsigned int i=cnt;i<MSG_BYTES_MAX+K;i++)
+	{
+        message[i] = 0;
+	}
+
+	//message[MSG_BYTES_MAX]='\0';
+}
+
 
 char* ecc_curve::getMessageFromPoint(message_point& msg)
 {

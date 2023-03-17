@@ -1,5 +1,5 @@
-#ifndef FDR_BUFFER_HPP
-#define FDR_BUFFER_HPP
+#ifndef CRYPTO_BUFFER_HPP
+#define CRYPTO_BUFFER_HPP
 
 #include <stdint.h>
 #include <string.h>
@@ -360,7 +360,12 @@ public:
         alloc_size = sz;
     }
 
-    friend void swap(Buffer&& l, Buffer&& r);
+    static void swap_buffer(Buffer&& l, Buffer&& r)
+    {
+        std::swap( l.data, r.data );
+        std::swap( l.length, r.length);
+        std::swap( l.alloc_size, r.alloc_size);
+    }
 
     uint32_t size()         { return length; }
     uint32_t allocsize()    { return alloc_size; }
@@ -372,12 +377,6 @@ protected:
     uint32_t alloc_size = 0;
 };
 
-void swap(Buffer&& l, Buffer&& r)
-{
-    std::swap( l.data, r.data );
-    std::swap( l.length, r.length);
-    std::swap( l.alloc_size, r.alloc_size);
-}
 
 }
 

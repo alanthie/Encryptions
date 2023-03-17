@@ -3,7 +3,6 @@
 
 #include <filesystem>
 #include <curl/curl.h>
-#include "encrypt.h"
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -15,6 +14,7 @@
 #include "data.hpp"
 #include "puzzle.hpp"
 #include "../src/qa/rsa_gen.hpp"
+#include "encrypt.h"
 
 #ifdef _WIN32
 //add preprocessor directive NOMINMAX

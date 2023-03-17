@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <gmpxx.h>
+#include "../../Buffer.hpp"
 
 // Point of an elliptic curve
 typedef struct ecc_point
@@ -32,7 +33,7 @@ struct ecc_curve
     mpz_t order;
     int cofactor;
     ecc_point generator_point;
-    unsigned int MSG_BYTES_MAX; // ONE BYTE LESS
+    unsigned int MSG_BYTES_MAX; // ONE BYTE for counter , one for delimiter 0xff
 
     int init_curve(char* a, char* b, char* prime, char* order, int cofactor, ecc_point g);
 
@@ -47,14 +48,18 @@ struct ecc_curve
     int quadratic_residue(mpz_t x, mpz_t q,mpz_t n);
     int random_in_range (unsigned int min, unsigned int max);
 
+	// TODO use Buffer allowing any char for padding
     message_point  getECCPointFromMessage(char* message);
     char*          getMessageFromPoint(message_point& msg);
+
+	message_point  	getECCPointFromMessage(cryptoAL::Buffer& message);
+    void 			getMessageFromPoint(message_point& msg_point, cryptoAL::Buffer& message);
 
     int test();
     int test_functions();
 
 
-//  const char* pot_256[21] = {  "1", "100", "10000", "1000000", "100000000", "10000000000", "1000000000000", "100000000000000",
+	//  const char* pot_256[21] = {  "1", "100", "10000", "1000000", "100000000", "10000000000", "1000000000000", "100000000000000",
     std::string pow256string(long n)
     {
         std::string s = "1";

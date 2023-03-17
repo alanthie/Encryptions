@@ -3,7 +3,7 @@
 
 #include <filesystem>
 #include <curl/curl.h>
-#include "encrypt.h"
+//#include "encrypt.h"
 #include <chrono>
 #include <ctime>
 #include <sstream>
@@ -170,7 +170,7 @@ std::string remove_hex2_delim(const std::string& s)
         if ( (s[i]!=' ') && (s[i]!=':') && (s[i]!='\n') && (s[i]!='\r') && (s[i]!='\"') && (s[i]!='}') )
             r+=s[i];
     }
-	
+
 	if (r.size() >= 2)
 	{
 		if ((r[0]=='0') && (r[1]=='x'))
@@ -223,7 +223,7 @@ std::string get_block_infile(std::string FILE, std::string start, std::string la
 					   	return s.substr(pos_start+start.size(), pos_end - (pos_start+start.size()) );
 					else
 						std::cerr << "end overflow: " <<  last << std::endl;
-				
+
 			   	}
 			   	else
 					std::cerr << "start failed: " << start << std::endl;
@@ -235,9 +235,11 @@ std::string get_block_infile(std::string FILE, std::string start, std::string la
 		{
 			std::cerr << "ERROR reading file: " << FILE << std::endl;
 		}
-   }
-   else
+    }
+    else
+    {
         std::cerr << "ERROR no file: " << FILE << std::endl;
+    }
 
 	std::cerr << "get_block_infile failed" << std::endl;
    return "";

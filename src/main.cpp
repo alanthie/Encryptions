@@ -17,7 +17,7 @@
 #include "crypto_batch.hpp"
 #include "crypto_package.hpp"
 #include"crypto_parsing.hpp"
-#include "encrypt.h"
+#include "vigenere.hpp"
 #include "data.hpp"
 
 // ------------------------------------------------------------------------------------------------------------
@@ -574,7 +574,7 @@ int main_crypto(int argc, char **argv)
             auto k = cmd.get<std::string>("--key");
 
             auto se = encrypt_simple_string(s, k);
-            bool ok = is_valid_string(se);
+            bool ok = cryptoAL_vigenere::is_valid_string(se);
             if (ok == false)
             {
                 std::cout << "The encrypted string is not a printable string, please use another key " << std::endl;
@@ -593,7 +593,7 @@ int main_crypto(int argc, char **argv)
             auto k = cmd.get<std::string>("--key");
 
             auto se = decrypt_simple_string(s, k);
-            bool ok = is_valid_string(se);
+            bool ok = cryptoAL_vigenere::is_valid_string(se);
             if (ok == false)
             {
                 std::cout << "The decrypted string is not a printable string, please use another key " << std::endl;

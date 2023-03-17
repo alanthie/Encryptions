@@ -1,6 +1,3 @@
-#ifndef vigenere_H
-#define vigenere_H
-
 #include <stdio.h>
 #include <string.h>
 #include <string>
@@ -8,9 +5,11 @@
 #include <stdio.h>
 #include <ctype.h>
 
-//using namespace std;
+#include "vigenere.hpp"
 
-std::string AVAILABLE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
+
+namespace cryptoAL_vigenere
+{
 
 int index(char c)
 {
@@ -119,5 +118,7 @@ std::string decrypt_vigenere(std::string& encryptedMsg, std::string& newKey)
     decryptedMsg[i] = '\0';
 	return decryptedMsg;
 }
-#endif // vigenere_H
+
+}
+
 

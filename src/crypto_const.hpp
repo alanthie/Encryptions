@@ -3,7 +3,7 @@
 
 #include <filesystem>
 #include <curl/curl.h>
-#include "encrypt.h"
+//#include "encrypt.h"
 #include <chrono>
 #include <ctime>
 #include <sstream>
@@ -41,7 +41,7 @@ constexpr static int16_t CRYPTO_ALGO_ENCODESIZE = 2;
 constexpr static uint32_t URL_MIN_SIZE      = 4;
 constexpr static uint32_t URL_MAX_SIZE      = 64*16; // Multiple RSA keys name;size
 
-constexpr static uint32_t MIN_KEY_SIZE      = 64; 
+constexpr static uint32_t MIN_KEY_SIZE      = 64;
 constexpr static int16_t CHKSUM_SIZE        = 64;
 constexpr static int16_t PADDING_LEN_ENCODESIZE = 2;
 constexpr static uint32_t RSA_LEN_ENCODESIZE = 4;
@@ -63,7 +63,7 @@ constexpr static uint32_t URLINFO_SIZE      =   URL_LEN_ENCODESIZE + URL_MAX_SIZ
 												CRYPTO_FLAGS_ENCODESIZE +
 												CRYPTO_SHUFFLE_ENCODESIZE +
 												PADDING_LEN_ENCODESIZE + 26; // padding 64
-											
+
 constexpr static int16_t PADDING_MULTIPLE       = 64; // data should be at least 64x with Salsa20 requirement
 constexpr static int16_t PADDING_KEY_MULTIPLE   = 32; //  key should be at least 32x with Salsa20 requirement
 constexpr static int16_t NITER_LIM              = 256;

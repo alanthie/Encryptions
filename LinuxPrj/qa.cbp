@@ -78,11 +78,15 @@
 		<Unit filename="../src/qa/SimpleECC/src/point.hpp" />
 		<Unit filename="../src/qa/SimpleECC/src/simple_ecc_test.cpp" />
 		<Unit filename="../src/qa/SimpleECC/src/test_simple_ecc.hpp" />
+		<Unit filename="../src/qa/ecc_point/ecc_curve.cpp" />
+		<Unit filename="../src/qa/ecc_point/ecc_curve.hpp" />
+		<Unit filename="../src/qa/ecc_point/ecc_elgamal.cpp" />
 		<Unit filename="../src/qa/prime.h" />
 		<Unit filename="../src/qa/qa.cpp" />
 		<Unit filename="../src/qa/qa_internal.hpp" />
 		<Unit filename="../src/qa/qa_internal_empty.hpp" />
 		<Unit filename="../src/qa/uinteger_t.hh" />
+		<Unit filename="../src/vigenere.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
