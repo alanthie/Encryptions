@@ -85,12 +85,11 @@ char* ecc_curve::getMessageFromPoint(message_point& msg)
 	char* message = (char*)malloc((MSG_BYTES_MAX+1)*sizeof(char));
 
     message_point rm;
-	message_point* m = &rm;
 
 	mpz_init_set(rm.p.x,msg.p.x);
 	mpz_init_set(rm.p.y,msg.p.y);
-	//rm.qtd_adicoes = msg.qtd_adicoes; // ??? // Drop last byte
-	mpz_sub_ui(rm.p.x,rm.p.x,rm.qtd_adicoes);
+	//rm.qtd_adicoes = msg.qtd_adicoes; // ???  // to recompute if needed...
+	//mpz_sub_ui(rm.p.x,rm.p.x,rm.qtd_adicoes); // Drop last byte
 
     // Drop last byte
     unsigned int K = 1;
@@ -107,7 +106,7 @@ char* ecc_curve::getMessageFromPoint(message_point& msg)
 		mpz_init(aux);
 
 		mpz_set_str(pot,pow256string(MSG_BYTES_MAX+K-1-i).data(),BASE_16);
-		mpz_fdiv_q(aux,((rm).p).x,pot);
+		mpz_fdiv_q(aux,rm.p.x,pot);
 		message[i]=(mpz_get_ui(aux)>=32 && mpz_get_ui(aux)<127)?mpz_get_ui(aux):'\0';
 	}
 	message[MSG_BYTES_MAX]='\0';
@@ -154,8 +153,8 @@ int ecc_curve::test()
 	fscanf(f,"%s ",order_c);
 	gmp_printf("readings-> prime:%s, a:%s, b: %s, , order:%s \n",prime_c,a_c,b_c,order_c); //readings-> prime
 
-	(rm).p = rp;
-	(rm).qtd_adicoes=0;
+	rm.p = rp;
+	rm.qtd_adicoes=0;
 
 	clock_t starttime, endtime;
 	starttime = clock();
@@ -183,7 +182,7 @@ int ecc_curve::test()
 		return -1;
 	}
 
-    gmp_printf("msg point x,y, msg add:  %Zd %Zd %d \n",((rm).p).x,((rm).p).y,(rm).qtd_adicoes);
+    gmp_printf("msg point x,y, msg add:  %Zd %Zd %d \n",rm.p.x,rm.p.y,rm.qtd_adicoes);
     char* msg = getMessageFromPoint(rm);
 
 	gmp_randseed_ui(st,time(NULL));
@@ -191,12 +190,12 @@ int ecc_curve::test()
 
 	ecc_point rG    = mult(generator_point,random);
 	ecc_point rPub  = mult(publicKey1,random);
-	gmp_printf("rPub.x %Zd rPub.y %Zd Mp.x %Zd\n",(rPub).x,(rPub).y,((rm).p).x);
-	gmp_printf("rG.x %Zd rG.y %Zd\n",(rG).x,(rG).y);
+	gmp_printf("rPub.x %Zd rPub.y %Zd Mp.x %Zd\n",rPub.x,rPub.y,rm.p.x);
+	gmp_printf("rG.x %Zd rG.y %Zd\n",rG.x,rG.y);
 
 	ecc_point Cm = sum(rm.p, rPub);
 	gmp_printf("Encryption [Pm+rG].x %Zd [Pm+rG].y %Zd\n",Cm.x,Cm.y);
-	gmp_printf("Encryption rG.x = %Zd\n",(rG).x);
+	gmp_printf("Encryption rG.x = %Zd\n",rG.x);
 
 	//Decryption
 	ecc_point rGPriv = mult(rG, privateKey);

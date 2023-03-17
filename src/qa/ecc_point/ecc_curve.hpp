@@ -15,7 +15,7 @@ typedef struct ecc_point
     bool is_infinity = false;
 } ecc_point;
 
-typedef struct message_point
+struct message_point
 {
 	ecc_point p;
 	int qtd_adicoes = 0; // msg point x = msg+qtd_adicoes

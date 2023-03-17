@@ -48,17 +48,13 @@ int ecc_curve::quadratic_residue(mpz_t x, mpz_t q, mpz_t n)
 
     if(mod4==3) // directly, x = q^(n+1)/4 mod n
     {
-        //printf("on curve \n\n");
         mpz_add_ui(tmp,tmp,1UL);
         mpz_tdiv_q_2exp(tmp,tmp,2);
         mpz_powm(x,q,tmp,n);
-
-        //gmp_printf("NUMERO X %Zd \n\n",x);
         mpz_clear(tmp);
     }
     else // Tonelli-Shanks
     {
-	    //printf("Tonelli shanks!!!\n");
         mpz_inits(ofac,t,r,c,b,NULL);
 
         // split n - 1 into odd number times power of 2 ofac*2^twofac
@@ -122,7 +118,6 @@ int ecc_curve::existPoint1(mpz_t& x, mpz_t&  y)
 	mpz_pow_ui(exp,x,3);
 	mpz_addmul(exp,x,a);
 	mpz_add(exp,exp,b);
-	//gmp_printf("%Zd x \n",exp);
 	mpz_mod(exp,exp,prime);
 	mpz_pow_ui(eq_result,y,2);
 	mpz_mod(eq_result,eq_result,prime);
