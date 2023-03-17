@@ -1,33 +1,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "ecc_curve.h"
+#include <iostream>
+#include "ecc_curve.hpp"
 
-#define BASE_16 16
-
-int init_curve(char* a1, char* b1,char* prime1, char* order1,int cofactor1,ecc_point g1){
+int ecc_curve::init_curve(char* a1, char* b1, char* prime1, char* order1, int cofactor1, ecc_point g1)
+{
 	mpz_init_set_str(a,a1,BASE_16);
 	mpz_init_set_str(b,b1,BASE_16);
 	mpz_init_set_str(prime,prime1,BASE_16);
 	mpz_init_set_str(order,order1,BASE_16);
 
-	cofactor= cofactor1;
-	if ( existPoint1(g1.x,g1.y)){
+	bits_len = bitSize(prime);
+	std::cout << "BITS " << bits_len  << "\n";
+
+	MSG_BYTES_MAX = bits_len/8;
+	MSG_BYTES_MAX -= 2;             // space to find a valid message on curve x+0, 1,...255 - 50% of x are on curve
+	std::cout << "MSG_BYTES_MAX " << MSG_BYTES_MAX  << "\n";
+
+	cofactor = cofactor1;
+	if (existPoint1(g1.x,g1.y))
+    {
 		generator_point=g1;
 		return 0;
 	}else
 		return -1;
 }
 
-
-int quadratic_residue(mpz_t x,mpz_t q,mpz_t n)
+int ecc_curve::quadratic_residue(mpz_t x, mpz_t q, mpz_t n)
 {
-    int                        leg;
-    mpz_t                        tmp,ofac,nr,t,r,c,b;
-    unsigned int            mod4;
-    mp_bitcnt_t                twofac=0,m,i,ix;
+    int             leg;
+    mpz_t           tmp,ofac,nr,t,r,c,bb; // b??
+    unsigned int    mod4;
+    mp_bitcnt_t     twofac=0,m,i,ix;
 
-    mod4=mpz_tstbit(n,0);
+    mod4 = mpz_tstbit(n,0);
     if(!mod4) // must be odd
         return 0;
 
@@ -38,19 +45,20 @@ int quadratic_residue(mpz_t x,mpz_t q,mpz_t n)
         return leg;
 
     mpz_init_set(tmp,n);
-	
+
     if(mod4==3) // directly, x = q^(n+1)/4 mod n
-        {
-	printf("diretamente\n\n");
+    {
+        //printf("on curve \n\n");
         mpz_add_ui(tmp,tmp,1UL);
         mpz_tdiv_q_2exp(tmp,tmp,2);
         mpz_powm(x,q,tmp,n);
-	gmp_printf("NUMERO X %Zd \n\n",x);
+
+        //gmp_printf("NUMERO X %Zd \n\n",x);
         mpz_clear(tmp);
-        }
+    }
     else // Tonelli-Shanks
-        {
-	printf("Tonelli shanks!!!\n");
+    {
+	    //printf("Tonelli shanks!!!\n");
         mpz_inits(ofac,t,r,c,b,NULL);
 
         // split n - 1 into odd number times power of 2 ofac*2^twofac
@@ -74,48 +82,47 @@ int quadratic_residue(mpz_t x,mpz_t q,mpz_t n)
         mpz_mod(t,t,n); // t = q^ofac mod n
 
         if(mpz_cmp_ui(t,1UL)!=0) // if t = 1 mod n we're done
-            {
+        {
             m=twofac;
             do
-                {
+            {
                 i=2;
                 ix=1;
                 while(ix<m)
-                    {
+                {
                     // find lowest 0 < ix < m | t^2^ix = 1 mod n
                     mpz_powm_ui(tmp,t,i,n); // repeatedly square t
                     if(mpz_cmp_ui(tmp,1UL)==0)
                         break;
                     i<<=1; // i = 2, 4, 8, ...
                     ix++; // ix is log2 i
-                    }
-                mpz_powm_ui(b,c,1<<(m-ix-1),n); // b = c^2^(m-ix-1) mod n
-                mpz_mul(r,r,b);
+                }
+                mpz_powm_ui(bb,c,1<<(m-ix-1),n); // b = c^2^(m-ix-1) mod n
+                mpz_mul(r,r,bb);
                 mpz_mod(r,r,n); // r = r*b mod n
-                mpz_mul(c,b,b);
+                mpz_mul(c,bb,bb);
                 mpz_mod(c,c,n); // c = b^2 mod n
                 mpz_mul(t,t,c);
                 mpz_mod(t,t,n); // t = t b^2 mod n
                 m=ix;
-                }while(mpz_cmp_ui(t,1UL)!=0); // while t mod n != 1
-            }
-        mpz_set(x,r);
-        mpz_clears(tmp,ofac,nr,t,r,c,b,NULL);
+            }while(mpz_cmp_ui(t,1UL)!=0); // while t mod n != 1
         }
+        mpz_set(x,r);
+        mpz_clears(tmp,ofac,nr,t,r,c,bb,NULL);
+    }
 
     return 1;
 }
 
-
-
-int existPoint1(mpz_t x, mpz_t  y){
+int ecc_curve::existPoint1(mpz_t& x, mpz_t&  y)
+{
 	mpz_t exp,eq_result;
 	mpz_init(eq_result);	//Equation Result
 	mpz_init(exp); 			//Exponentiation Result
 	mpz_pow_ui(exp,x,3);
 	mpz_addmul(exp,x,a);
-	mpz_add(exp,exp,b);	
-	gmp_printf("%Zd x \n",exp);
+	mpz_add(exp,exp,b);
+	//gmp_printf("%Zd x \n",exp);
 	mpz_mod(exp,exp,prime);
 	mpz_pow_ui(eq_result,y,2);
 	mpz_mod(eq_result,eq_result,prime);
@@ -125,17 +132,23 @@ int existPoint1(mpz_t x, mpz_t  y){
 		return 0;
 }
 
-ecc_point* sum(ecc_point p1,ecc_point p2){
-	ecc_point* result;
-	result = malloc(sizeof(ecc_point));
+ecc_point ecc_curve::sum(ecc_point p1, ecc_point p2)
+{
+	ecc_point r;
+    ecc_point* result = &r;
+
 	mpz_init((*result).x);
 	mpz_init((*result).y);
+
 	if (mpz_cmp(p1.x,p2.x)==0 && mpz_cmp(p1.y,p2.y)==0)
-		result=double_p(p1);
+		r=double_p(p1);
 	else
 		if( mpz_cmp(p1.x,p2.x)==0 && mpz_cmpabs(p2.y,p1.y)==0)
-			result=INFINITY_POINT;
-		else{
+        {
+		    r.is_infinity = true;
+        }
+		else
+        {
 			mpz_t delta_x,x,y,delta_y,s,s_2;
 			mpz_init(delta_x);
 			mpz_init(x); mpz_init(y);
@@ -158,16 +171,19 @@ ecc_point* sum(ecc_point p1,ecc_point p2){
 			mpz_mod(y,y,prime);
 			mpz_set((*result).y,y);
 		};
-	return result;	
+	return r;
 }
 
-ecc_point* double_p(ecc_point p){
-	ecc_point* result;
-	result= malloc(sizeof(ecc_point));
+ecc_point ecc_curve::double_p(ecc_point p)
+{
+    ecc_point r;
+    ecc_point* result = &r;
+
 	mpz_init((*result).x);
 	mpz_init((*result).y);
-	printf("DP ");
-	if (mpz_cmp_ui(p.y,0)!=0){
+
+	if (mpz_cmp_ui(p.y,0)!=0)
+    {
 		mpz_t s,d_y,d_x,y;
 		mpz_init(d_y);
 		mpz_init(s);
@@ -180,7 +196,7 @@ ecc_point* double_p(ecc_point p){
 		mpz_mod(d_y,d_y,prime);
 		mpz_invert(d_y,d_y,prime);
 		mpz_mul(s,s,d_y);
-		mpz_mod(s,s,prime);	
+		mpz_mod(s,s,prime);
 		mpz_mul_ui(d_x,p.x,2);
 		mpz_pow_ui((*result).x,s,2);
 		mpz_sub((*result).x,(*result).x,d_x);
@@ -190,39 +206,52 @@ ecc_point* double_p(ecc_point p){
 		mpz_mul(s,s,d_x);
 		mpz_add((*result).y,(*result).y,s);
 		mpz_mod((*result).y,(*result).y,prime);
-	}else
-		result=INFINITY_POINT;
-	return result;
+	}
+    else
+    {
+		r.is_infinity = true;
+    }
+	return r;
 }
 
-ecc_point* mult(ecc_point p, mpz_t value){
-	ecc_point* result ;
-	result =malloc(sizeof(ecc_point));
+ecc_point ecc_curve::mult(ecc_point p, mpz_t value)
+{
+    ecc_point r;
+
 	if (mpz_cmp_ui(value,0)==0)
-		return NULL;
+		{r.is_valid=false;return r;}
+
 	if (mpz_cmp_ui(value,1)==0)
-		return (&p);
+		return (p);
+
 	if (mpz_cmp_ui(value,2)==0)
 		return double_p(p);
+
 	mpz_t aux,aux1;
 	mpz_init_set(aux,value);
 	mpz_init_set(aux1,value);
-	if (mpz_cmp_ui(aux,0)!=0){
+	if (mpz_cmp_ui(aux,0)!=0)
+    {
 		mpz_mod_ui(aux,aux,2);
-		if (mpz_cmp_ui(aux,0) != 0 ){
+		if (mpz_cmp_ui(aux,0) != 0 )
+        {
 			mpz_sub_ui(aux1,aux1,1);
-			result = sum(p, (*mult(p,aux1)));
-		}else{
+			r = sum(p, mult(p,aux1) );
+		}else
+		{
 			mpz_set(aux,value);
 			mpz_div_ui(aux1,aux1,2);
-			result = double_p((*mult(p,aux1)));
+			r = double_p(mult(p,aux1));
 		}
 	}
-	return result;
+	return r;
 
-} 
+}
 
-ecc_point* existPoint(mpz_t  p){
+ecc_point ecc_curve::existPoint(mpz_t&  p)
+{
+    ecc_point r;
+
 	mpz_t l;
 	mpz_init(l);
 	mpz_pow_ui(l,p,3);
@@ -233,28 +262,18 @@ ecc_point* existPoint(mpz_t  p){
 	mpz_init_set_ui(i,0);
 	mpz_t y;
 	mpz_init(y);
-	if (quadratic_residue(y,l,prime)==1){
-		gmp_printf("entrei");
-
-		ecc_point* r= malloc(sizeof(ecc_point));
-		mpz_init_set((*r).x,p);
-		mpz_init_set((*r).y,y);
+	if (quadratic_residue(y,l,prime)==1)
+    {
+		mpz_init_set(r.x,p);
+		mpz_init_set(r.y,y);
 		return r;
-	} else
-		return NULL;
-/*	while(mpz_cmp(i,prime)!=0){
-		mpz_set(y,i);
-		mpz_pow_ui(y,y,2);
-		mpz_mod(y,y,prime);
-		gmp_printf(" x %Zd Y %Zd \n",l,y);
-		if (mpz_cmp(y,l)==0){
-			ecc_point* r= malloc(sizeof(ecc_point));
-			mpz_init_set((*r).x,p);
-			mpz_init_set((*r).y,i);
-			return r;
-		}else
-			mpz_add_ui(i,i,1);
-	}*/
-	return NULL;
+	}
+    else
+    {
+        r.is_valid = false;
+		return r;
+    }
+	r.is_valid = false;
+	return r;
 }
 

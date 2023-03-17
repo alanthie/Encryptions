@@ -31,6 +31,8 @@ using namespace cryptoAL;
 //#define TEST_ENCRYPT_DECRYPT true
 #include "SimpleECC/src/test_simple_ecc.hpp"
 
+#include "ecc_point/ecc_curve.hpp"
+
 std::string VERSION = "v0.2";
 std::string FULLVERSION = VERSION + "_" + cryptoAL::get_current_date();
 
@@ -95,6 +97,9 @@ void  menu()
         if (choice == 0) return;
         else if (choice == 1)
         {
+            ecc_curve c;
+            c.test();
+
             std::cout << "F(n)" << std::endl;
             std::cout << "Enter a number: ";
             std::string snum;

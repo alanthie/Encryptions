@@ -78,7 +78,7 @@
 	"mathcommon.h"
 	"BigInteger.h"
 
-1678929848 source:/home/server/dev/Encryptions/src/qa/qa.cpp
+1679003870 source:/home/server/dev/Encryptions/src/qa/qa.cpp
 	"mathcommon.h"
 	"qa_internal_empty.hpp"
 	"qa_internal.hpp"
@@ -92,6 +92,7 @@
 	"../../src/crypto_ecckey.hpp"
 	"ec_gmp/ec_gmp_p_mul.hpp"
 	"SimpleECC/src/test_simple_ecc.hpp"
+	"ecc_point/ecc_curve.hpp"
 
 1678850313 /home/server/dev/Encryptions/src/qa/prime.h
 	"mathcommon.h"
@@ -732,4 +733,23 @@
 	"base_const.hpp"
 	"crypto_key_util.hpp"
 	"crc32a.hpp"
+
+1679009160 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.cpp
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<iostream>
+	"ecc_curve.hpp"
+
+1679009160 /home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.hpp
+	<ctype.h>
+	<string.h>
+	<stdio.h>
+	<gmpxx.h>
+
+1679008573 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_elgamal.cpp
+	<stdlib.h>
+	<stdio.h>
+	<time.h>
+	"ecc_curve.hpp"
 
