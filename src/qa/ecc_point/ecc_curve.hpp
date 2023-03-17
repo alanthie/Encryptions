@@ -18,7 +18,7 @@ typedef struct ecc_point
 typedef struct message_point
 {
 	ecc_point p;
-	int qtd_adicoes; // msg point x = msg+qtd_adicoes
+	int qtd_adicoes = 0; // msg point x = msg+qtd_adicoes
 };
 
 struct ecc_curve
@@ -32,7 +32,7 @@ struct ecc_curve
     mpz_t order;
     int cofactor;
     ecc_point generator_point;
-    unsigned int MSG_BYTES_MAX;
+    unsigned int MSG_BYTES_MAX; // ONE BYTE LESS
 
     int init_curve(char* a, char* b, char* prime, char* order, int cofactor, ecc_point g);
 

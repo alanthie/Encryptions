@@ -15,7 +15,7 @@ int ecc_curve::init_curve(char* a1, char* b1, char* prime1, char* order1, int co
 	std::cout << "BITS " << bits_len  << "\n";
 
 	MSG_BYTES_MAX = bits_len/8;
-	MSG_BYTES_MAX -= 2;             // space to find a valid message on curve x+0, 1,...255 - 50% of x are on curve
+	MSG_BYTES_MAX -= 1;             // space to find a valid message on curve x+0, 1,...255 - 50% of x are on curve
 	std::cout << "MSG_BYTES_MAX " << MSG_BYTES_MAX  << "\n";
 
 	cofactor = cofactor1;

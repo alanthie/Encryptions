@@ -36,19 +36,16 @@ message_point ecc_curve::getECCPointFromMessage(char* message)
 	ecc_point* result = &r;
 
 	printf("%s\n", message);
-	//printf("%c\n", message[0]);
-	//printf("%d\n", (*message));
 
 	int i=MSG_BYTES_MAX-1;
+	// add empty byte
+	i++;
+
 	for (i;i>=0;i--)
     {
 		mpz_t temp;
-		//mpz_init_set_str(temp,pot_256[i],BASE_16); // [---18 bytes--] pow256string
 		mpz_init_set_str(temp,pow256string(i).data(),BASE_16);
-
-		//gmp_printf("temp: %Zd ",temp);
 		mpz_addmul_ui(x,temp,(*message));
-		//printf(" m:%d \n",(*message));
 		++message;
 		if (!(*message))
         {
@@ -56,8 +53,7 @@ message_point ecc_curve::getECCPointFromMessage(char* message)
 		}
 	}
 
-    // check x, x+1, ... x+9(?)
-	//gmp_printf("phase 1 prime=%Zd x=%Zd\n",prime,x); //phase 1 prime
+    // check x, x+1, ... x+255 50%, 75%, ...99.9999...%
 	i=0;
 	do{
 		printf("i-> %d",i);
@@ -67,10 +63,9 @@ message_point ecc_curve::getECCPointFromMessage(char* message)
 		i++;
 		mpz_add_ui(x,x,1);
 	}
-    while( (r.is_valid==false) && i<10);
+    while( (r.is_valid==false) && i<255);
 
 	mpz_mod((r).x,(r).x,prime);
-	//gmp_printf("Phase 2 Point: %Zd %Zd \n",(r).x,(r).y); //Phase 2 Point:
 
 	if (r.is_valid)
     {
@@ -89,37 +84,30 @@ char* ecc_curve::getMessageFromPoint(message_point& msg)
 {
 	char* message = (char*)malloc((MSG_BYTES_MAX+1)*sizeof(char));
 
-	int i = MSG_BYTES_MAX ;
     message_point rm;
 	message_point* m = &rm;
 
-	mpz_init_set(((rm).p).x,((msg).p).x);
-	mpz_init_set(((rm).p).y,((msg).p).y);
-	(*m).qtd_adicoes=(msg).qtd_adicoes;
-	//gmp_printf("X: %Zd \n",((rm).p).x);
-	mpz_sub_ui(((rm).p).x,((rm).p).x,(rm).qtd_adicoes);
-	//printf("\n\n");
+	mpz_init_set(rm.p.x,msg.p.x);
+	mpz_init_set(rm.p.y,msg.p.y);
+	//rm.qtd_adicoes = msg.qtd_adicoes; // ??? // Drop last byte
+	mpz_sub_ui(rm.p.x,rm.p.x,rm.qtd_adicoes);
 
-	i=0;
-	for (i;i<MSG_BYTES_MAX;i++)
+    // Drop last byte
+    unsigned int K = 1;
+
+	int i=0;
+	for (i;i<MSG_BYTES_MAX+K;i++)
     {
 		mpz_t pot;
-		//mpz_init_set_str(pot,pot_256[MSG_BYTES_MAX-i],BASE_16);
-		mpz_init_set_str(pot,pow256string(MSG_BYTES_MAX-i).data(),BASE_16);
+		mpz_init_set_str(pot,pow256string(MSG_BYTES_MAX+K-i).data(),BASE_16);
 
 		mpz_sub_ui(pot,pot,1);
-		//gmp_printf("i:%d pot: %Zd \n",i,pot);
-
-		mpz_and(((rm).p).x,((rm).p).x,pot);
-		//gmp_printf("and_X: %Zd ",((rm).p).x);
+		mpz_and(rm.p.x,rm.p.x,pot);
 		mpz_t aux;
 		mpz_init(aux);
 
-        //mpz_set_str(pot,pot_256[MSG_BYTES_MAX-1-i],BASE_16);
-		mpz_set_str(pot,pow256string(MSG_BYTES_MAX-1-i).data(),BASE_16);
-
+		mpz_set_str(pot,pow256string(MSG_BYTES_MAX+K-1-i).data(),BASE_16);
 		mpz_fdiv_q(aux,((rm).p).x,pot);
-		//printf(".%d.%c ",mpz_get_ui(aux),mpz_get_ui(aux));
 		message[i]=(mpz_get_ui(aux)>=32 && mpz_get_ui(aux)<127)?mpz_get_ui(aux):'\0';
 	}
 	message[MSG_BYTES_MAX]='\0';
@@ -134,7 +122,7 @@ int ecc_curve::test()
 	char  prime_c[80],a_c[80],b_c[80],x_c[80],order_c[80];
 
     char* message = (char*)malloc(200*sizeof(char));
-    std::string s = "23578546432889";
+    std::string s = "FF34567890000456789";
     strcpy(message, s.data());
 
     message_point rm;
@@ -180,15 +168,12 @@ int ecc_curve::test()
 	gmp_randinit_default(st);
 	gmp_randseed_ui(st,time(NULL));
 	mpz_urandomm(random, st, order);
-	//gmp_printf("key generation privateKey is random, order: %Zd %Zd\n",random, order);
 
 	mpz_t  privateKey;
 	mpz_init_set(privateKey, random);
-	//gmp_printf("key generation privateKey: %Zd \n",privateKey);
 
 	ecc_point publicKey1;
 	publicKey1 = mult(generator_point,privateKey);
-	//gmp_printf("key generation pubKey (r*G) pubK.x: %Zd pubK.Y:%Zd priv: %Zd \n",(publicKey1).x,(publicKey1).y,privateKey);
 
 	printf("message: ");
 	rm = getECCPointFromMessage(message);
@@ -221,7 +206,7 @@ int ecc_curve::test()
     message_point rm1;
 
 	rm1.p = sum(Cm, rGPriv); // Cm-rGPriv
-	rm1.qtd_adicoes = rm.qtd_adicoes;
+	//rm1.qtd_adicoes = rm.qtd_adicoes; // ???
 	gmp_printf("Decryption [Cm-rGPriv].x: %Zd [Cm-rGPriv].y: %Zd\n", rm1.p.x, rm1.p.y);
 	printf("Message final from [Cm-rGPriv] point: %s\n", getMessageFromPoint(rm1));
 
