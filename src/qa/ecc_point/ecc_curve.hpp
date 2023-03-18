@@ -1,6 +1,11 @@
 #ifndef __ECC__CURVE__
 #define __ECC__CURVE__
 
+#ifdef _WIN32
+//add preprocessor directive NOMINMAX
+#pragma warning ( disable : 4146 )
+#endif
+
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>

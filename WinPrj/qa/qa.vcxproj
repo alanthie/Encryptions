@@ -144,6 +144,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Base64.cpp" />
+    <ClCompile Include="..\..\src\qa\ecc_point\ecc_curve.cpp" />
+    <ClCompile Include="..\..\src\qa\ecc_point\ecc_elgamal.cpp" />
     <ClCompile Include="..\..\src\qa\qa.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMP.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPmainTest.cpp" />
@@ -161,11 +163,13 @@
     <ClCompile Include="..\..\src\qa\SimpleECC\src\point.cpp" />
     <ClCompile Include="..\..\src\qa\SimpleECC\src\simple_ecc_test.cpp" />
     <ClCompile Include="..\..\src\SHA256.cpp" />
+    <ClCompile Include="..\..\src\vigenere.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Base64.h" />
     <ClInclude Include="..\..\src\base_const.hpp" />
     <ClInclude Include="..\..\src\qa\atomic_bitvector.hpp" />
+    <ClInclude Include="..\..\src\qa\ecc_point\ecc_curve.hpp" />
     <ClInclude Include="..\..\src\qa\iterator_tpl.h" />
     <ClInclude Include="..\..\src\qa\mathcommon.h" />
     <ClInclude Include="..\..\src\qa\prime.h" />
@@ -189,6 +193,7 @@
     <ClInclude Include="..\..\src\qa\SimpleECC\src\test_simple_ecc.hpp" />
     <ClInclude Include="..\..\src\qa\uinteger_t.hh" />
     <ClInclude Include="..\..\src\SHA256.h" />
+    <ClInclude Include="..\..\src\vigenere.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

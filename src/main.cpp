@@ -2,6 +2,11 @@
 #include <fstream>
 #include <chrono>
 
+#ifdef _WIN32
+//add preprocessor directive NOMINMAX
+#pragma warning ( disable : 4146 )
+#endif
+
 #include "DES.h"
 #include "Buffer.hpp"
 #include "SHA256.h"

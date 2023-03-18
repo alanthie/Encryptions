@@ -69,6 +69,15 @@
     <ClCompile Include="..\..\src\qa\SimpleECC\src\point.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\vigenere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\qa\ecc_point\ecc_curve.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\qa\ecc_point\ecc_elgamal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\qa\atomic_bitvector.hpp">
@@ -147,6 +156,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\qa\SimpleECC\src\test_simple_ecc.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vigenere.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\ecc_point\ecc_curve.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

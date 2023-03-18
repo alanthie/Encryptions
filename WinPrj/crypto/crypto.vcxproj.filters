@@ -75,6 +75,15 @@
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\vigenere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\qa\ecc_point\ecc_curve.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\qa\ecc_point\ecc_elgamal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\AESa.h">
@@ -192,6 +201,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMPUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vigenere.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\ecc_point\ecc_curve.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

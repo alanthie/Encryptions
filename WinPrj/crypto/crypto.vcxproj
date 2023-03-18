@@ -25,6 +25,8 @@
     <ClCompile Include="..\..\src\crc32a.cpp" />
     <ClCompile Include="..\..\src\DES.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\qa\ecc_point\ecc_curve.cpp" />
+    <ClCompile Include="..\..\src\qa\ecc_point\ecc_elgamal.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMP.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPmainTest.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPPrime.cpp" />
@@ -39,6 +41,7 @@
     <ClCompile Include="..\..\src\SymAlg.cpp" />
     <ClCompile Include="..\..\src\twofish.c" />
     <ClCompile Include="..\..\src\twofish_cfb.c" />
+    <ClCompile Include="..\..\src\vigenere.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\AESa.h" />
@@ -62,6 +65,7 @@
     <ClInclude Include="..\..\src\IDEA.hpp" />
     <ClInclude Include="..\..\src\ini_parser.hpp" />
     <ClInclude Include="..\..\src\puzzle.hpp" />
+    <ClInclude Include="..\..\src\qa\ecc_point\ecc_curve.hpp" />
     <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMP.h" />
     <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMPPrime.h" />
     <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMPTest.h" />
@@ -80,6 +84,7 @@
     <ClInclude Include="..\..\src\SymAlg.h" />
     <ClInclude Include="..\..\src\twofish.h" />
     <ClInclude Include="..\..\src\vigenere.h" />
+    <ClInclude Include="..\..\src\vigenere.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\crypto_batch.ini" />
