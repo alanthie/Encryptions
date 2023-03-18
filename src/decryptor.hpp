@@ -506,7 +506,127 @@ public:
             }
             else if (is_ecc)
             {
-                //...
+                std::string local_ecc_db = folder_local_ecc + ECCKEY_MY_PRIVATE_DB; // decoding
+
+				uk.url[URL_MAX_SIZE-1] = 0;
+				std::string rsa_key = uk.without_header_token();
+
+				if (uk.rsa_ecc_encoded_data_pad + uk.rsa_ecc_encoded_data_pos + uk.rsa_ecc_encoded_data_len > data_temp.buffer.size())
+				{
+					std::cerr << "ERROR invalid data file (too small): " << file << std::endl;
+					r = false;
+				}
+				else
+				{
+					char c;
+					for(size_t j=0;j<uk.rsa_ecc_encoded_data_len;j++)
+					{
+						c = data_temp.buffer.getdata()[uk.rsa_ecc_encoded_data_pos + uk.rsa_ecc_encoded_data_pad + j];
+						uk.sRSA_ECC_ENCODED_DATA += c;
+					}
+
+					if(uk.rsa_ecc_encoded_data_len != uk.sRSA_ECC_ENCODED_DATA.size())
+					{
+						std::cerr << "ERROR inconsistency reading rsa data: " << uk.sRSA_ECC_ENCODED_DATA.size() << std::endl;
+						r = false;
+					}
+				}
+
+				if (r)
+				{
+					int pos_url = 3;
+        			std::string sURL(&uk.url[pos_url]);
+
+				 	std::vector<std::string> v ;
+				 	std::vector<uint32_t> v_encoded_size;
+
+				 	std::vector<std::string> vv = split(sURL, ";");
+					if (vv.size() < 1)
+					{
+						std::cerr << "ERROR ecc url bad format - missing ecc key name: " << sURL << std::endl;
+						r = false;
+					}
+					else if (vv.size() == 1)
+					{
+                        v = vv;
+					}
+					else
+					{
+                        if (vv.size() % 2 != 0)
+                        {
+                            std::cerr << "ERROR parsing url with muiltiple ecc - uneven " << sURL << " " << sURL.size()<< std::endl;
+                            r = false;
+                        }
+
+                        if (r)
+                        {
+                            long long N = (long long) vv.size() / 2;
+                            for (long long riter = 0; riter< N; riter++)
+                            {
+                                std::string vt0 = vv[2*riter];
+                                std::string vt1 = vv[2*riter + 1];
+
+                                {
+                                    v.push_back(vt0);
+                                    long long n = str_to_ll(vt1);
+                                    if (n >= 0)
+                                    {
+                                        v_encoded_size.push_back((uint32_t)n);
+                                    }
+                                    else
+                                    {
+                                        std::cerr << "ERROR parsing url with muiltiple ecc -  encoded data len invalid " << vt1 << std::endl;
+                                        r = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+					}
+
+					if (r)
+					{
+						if (verbose)
+						{
+							if (v.size() == 1)
+								std::cout << "unique ecc key name in URL: " << v[0] << std::endl;
+							else
+								std::cout << "multiple ecc key in URL: " << v[0] << " " << v[1] << " ..." << std::endl;
+						}
+					}
+
+					// ITER
+					long long N = (long long)v.size();
+					for (long long riter = N - 1; riter >= 0; riter--)
+					{
+                        std::string ecc_key_at_iter = v[riter];
+						ecc_key ek_mine;
+
+						bool r = get_ecc_key(ecc_key_at_iter, local_ecc_db, ek_mine);
+						if (r)
+						{
+							if (riter != 0)
+							{
+								uint32_t msg_size_produced;
+								std::string d = uk.sRSA_ECC_ENCODED_DATA.substr(0, v_encoded_size[riter]);
+
+								std::string t = ecc_decode_string(d, ek_mine, (uint32_t)d.size(), msg_size_produced);
+
+								uk.sRSA_ECC_ENCODED_DATA = t + uk.sRSA_ECC_ENCODED_DATA.substr(d.size()); // may reduce size
+							}
+							else
+							{
+								uint32_t msg_size_produced;
+
+								embedded_ecc_key = ecc_decode_string(uk.sRSA_ECC_ENCODED_DATA, ek_mine, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced);
+							}
+						}
+						else
+						{
+							std::cerr << "ERROR ecc_key not found: " << ecc_key_at_iter << std::endl;
+						}
+					}
+				}
             }
             else
             {

@@ -642,8 +642,6 @@ public:
 
                     if (verbose)
                     {
-                        //std::cout << "key_fromH=" << vurlkey[i].key_fromH << " ";
-                        //std::cout << "key_fromL=" << vurlkey[i].key_fromL << " ";
                         std::cout << "key_pos :"  << t << " ";
                         std::cout << "key_size:"  << vurlkey[i].key_size << " ";
                         std::cout <<  std::endl;
@@ -675,11 +673,6 @@ public:
                     Buffer* b = vurlkey[i].get_buffer(); // allocate
                     b->increase_size(perfect_key_size);
                     b->write(&d.buffer.getdata()[0], databuffer_size, 0);
-
-                    if (verbose)
-                    {
-                        //std::cout << "PADDING: " << perfect_key_size -  databuffer_size << std::endl;
-                    }
 
                     char c[1]; uint32_t rotate_pos;
 					for( uint32_t j = databuffer_size; j< perfect_key_size; j++) // padding vurlkey[i].get_buffer() to perfect_key_size
