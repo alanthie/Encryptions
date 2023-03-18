@@ -883,6 +883,90 @@ void  menu()
           	std::cout << std:: endl;
 		}
 
+		else if (choice == 21)
+        {
+            std::cout << "Enter path of your ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+			std::string pathdb;
+			std::cin >> pathdb;
+			if (pathdb == "0") pathdb = "./";
+			std::string fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+
+            std::cout << "Enter path of other ecc domain database to import " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+			std::string pathotherdb;
+			std::cin >> pathotherdb;
+			if (pathdb == "0") pathotherdb = "./";
+			std::string fileECCDOMOTHERDB = pathotherdb + ECC_DOMAIN_DB;
+
+            if (fileECCDOMDB == fileECCDOMOTHERDB)
+            {
+                std::cerr << "paths should be different" << std::endl;
+                continue;
+            }
+            if (cryptoAL::fileexists(fileECCDOMDB) == false)
+			{
+                std::cerr << "no file: " << fileECCDOMDB << std::endl;
+                continue;
+			}
+            if (cryptoAL::fileexists(fileECCDOMOTHERDB) == false)
+			{
+                std::cerr << "no file: " << fileECCDOMOTHERDB << std::endl;
+                continue;
+			}
+
+			qaclass qa;
+			std::map< std::string, cryptoAL::ecc_domain > map_ecc_my_domain;
+			std::map< std::string, cryptoAL::ecc_domain > map_ecc_other_domain;
+
+			{
+                std::ifstream infile;
+				infile.open (fileECCDOMDB, std::ios_base::in);
+				infile >> bits(map_ecc_my_domain);
+				infile.close();
+			}
+
+			{
+                std::ifstream infile;
+				infile.open (fileECCDOMOTHERDB, std::ios_base::in);
+				infile >> bits(map_ecc_other_domain);
+				infile.close();
+			}
+
+            // backup
+            {
+                std::ofstream outfile;
+                outfile.open(fileECCDOMDB + ".bck", std::ios_base::out);
+                outfile << bits(map_ecc_my_domain);
+                outfile.close();
+            }
+
+			int cnt = 0;
+			for(auto& [eccname, k] : map_ecc_other_domain)
+            {
+                if (map_ecc_my_domain.find(eccname) == map_ecc_my_domain.end())
+                {
+                    map_ecc_my_domain.insert(std::make_pair(eccname, k) );
+
+                    cnt++;
+                    std::cout << "adding domain: " << eccname << std:: endl;
+                    std::cout << "       prime : " << k.s_p << std:: endl;
+                    std::cout << std:: endl;
+                }
+            }
+
+            if (cnt == 0)
+            {
+                std::cout << "no new domain to import" << std:: endl;
+                continue;
+            }
+
+            {
+                std::ofstream outfile;
+                outfile.open(fileECCDOMDB, std::ios_base::out);
+                outfile << bits(map_ecc_my_domain);
+                outfile.close();
+            }
+        }
+
 		else if (choice == 22)
         {
 			std::cout << "Enter path for ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
