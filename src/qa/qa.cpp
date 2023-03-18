@@ -947,9 +947,10 @@ void  menu()
                     map_ecc_my_domain.insert(std::make_pair(eccname, k) );
 
                     cnt++;
+                    std::cout << "---------------" << eccname << std:: endl;
                     std::cout << "adding domain: " << eccname << std:: endl;
                     std::cout << "       prime : " << k.s_p << std:: endl;
-                    std::cout << std:: endl;
+                    std::cout << "---------------" << eccname << std:: endl;
                 }
             }
 
