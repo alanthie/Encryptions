@@ -44,6 +44,8 @@ Optional arguments:
   -s, --staging           	specify the staging folder. [default: ""]
   -l, --local             	specify the local folder of known contents. [default: ""]
   -r, --rsa               	specify the local folder for rsa*.db [default: ""]
+  -epv, --eccpriv         	specify the local folder for private ecc*.db [default: ""]
+  -epu, --eccpub          	specify the local folder for public ecc*.db [default: ""]
   -hh, --histo            	specify the local folder for historical hashes crypto_history_encode.db [default: ""]
   -v, --verbose           	specify the verbose [default: ""]
   -k, --keep              	specify if keeping staging file [default: ""]
@@ -75,7 +77,6 @@ crypto ENCODING SUCCESS
 Encrypted file: msg.zip.encrypted
 Puzzle file   : (default)
 Elapsed time in seconds: 38 sec
-
 </pre>
 
 Example of msg.crypto:
@@ -110,8 +111,9 @@ Current set of encryption algorithms
     RSA (2 primes)
     Shuffling
     Recursive RSA
+    Elliptic Curve
+    Recursive Elliptic Curve
     Future: Multiple primes (3+) RSA
-    Future: Elliptic Curve
 </pre>
 
 Overview:
@@ -138,11 +140,8 @@ Local files (like shared USB)
 [r]MY_RSAKEY_512_2023-03-06_19:12:49
 [r]MY_RSAKEY_9200_2023-03-06_19:17:31
 [r]MY_RSAKEY_1024_2023-03-05_03:43:04
-[r]MY_RSAKEY_1024_2023-03-05_12:44:43
 [r]MY_RSAKEY_2048_2023-03-06_16:33:58
 [r]MY_RSAKEY_3072_2023-03-05_14:07:52
-[r]MY_RSAKEY_4096_2023-03-06_19:13:17
-[r]MY_RSAKEY_512_2023-03-06_19:12:49
 [r]MY_RSAKEY_4096_2023-03-06_19:13:17
 [r]MY_RSAKEY_48000_2023-03-08_17:55:21
 
@@ -152,6 +151,9 @@ Local files (like shared USB)
 ;Historical hashes
 ;Hash index to a historical key [h]4 ==> 889895c4aaabba7566797c4e8c09d417442168b7878ed38bb05ef28606711fee ... 2023-03-13_22:15:07  datasize: 143044
 [h]4
+
+;ECC keys
+[e]MY_ECCKEY_1024_2023-03-18_12:22:36
 </pre>
  
 A tool (qa) for various tasks
@@ -167,18 +169,26 @@ Select a task:
 3. HEX(file, position, keysize)
 4. Puzzle: Make random puzzle from shared binary (like USB keys) data
 5. Puzzle: Resolve puzzle
-6. <Futur usage>
-7.  RSA: View my private RSA key
-8.  RSA: View other public RSA key
-9.  RSA: Extract my public RSA key to file
-10. RSA: Generate RSA key with OPENSSL command line (fastest)
-11. RSA: Test RSA GMP key generator
-12. RSA: Generate RSA key with GMP (fast)
+6. Futur usage
+7.  RSA Key: View my private RSA key
+8.  RSA Key: View public RSA key
+9.  RSA Key: Export my public RSA key
+10. RSA Key: Generate RSA key with OPENSSL command line (fastest)
+11. RSA Key: Test RSA GMP key generator
+12. RSA Key: Generate RSA key with GMP (fast)
 13. ECC: Elliptic Curve test with GMP
-14. Histo: View my encode history hashes
-15. Histo: View my decode history hashes
-16. Histo: Export public decode history hashes
-17. Histo: Confirm public history hashes
+14. Historical Hashes: View my private encode history hashes
+15. Historical Hashes: View my public decode history hashes
+16. Historical Hashes: Export public decode history hashes for confirmation
+17. Historical Hashes: Confirm other public decode history hashes
+18. EC Domain: Import an elliptic curve domain generated from ecgen (output manually saved in a file)
+19. EC Domain: Generate an elliptic curve domain with ecgen
+20. EC Domain: View my elliptic curve domains
+21. EC Domain: Import the elliptic curve domains of other
+22. EC Key: Generate an elliptic curve key
+23. EC Key: View my private elliptic curve keys
+24. EC Key: Export my public elliptic curve keys
+25. EC Key: View public elliptic curve keys
 ==> 
 </pre>
 

@@ -67,8 +67,8 @@ void  menu()
         std::cout << "5. Puzzle: Resolve puzzle" << std::endl;
         std::cout << "6. <Futur usage>" << std::endl;
         std::cout << "7.  RSA Key: View my private RSA key" << std::endl;
-        std::cout << "8.  RSA Key: View other public RSA key" << std::endl;
-        std::cout << "9.  RSA Key: Extract my public RSA key to file" << std::endl;
+        std::cout << "8.  RSA Key: View public RSA key" << std::endl;
+        std::cout << "9.  RSA Key: Export my public RSA key" << std::endl;
         std::cout << "10. RSA Key: Generate RSA key with OPENSSL command line (fastest)" << std::endl;
         std::cout << "11. RSA Key: Test RSA GMP key generator" << std::endl;
         std::cout << "12. RSA Key: Generate RSA key with GMP (fast)" << std::endl;
@@ -83,8 +83,8 @@ void  menu()
         std::cout << "21. EC Domain: Import the elliptic curve domains of other" << std::endl;
 		std::cout << "22. EC Key: Generate an elliptic curve key" << std::endl;
 		std::cout << "23. EC Key: View my private elliptic curve keys" << std::endl;
-		std::cout << "24. EC Key: Export one of my public elliptic curve key" << std::endl;
-		std::cout << "25. EC Key: Import other public elliptic curve keys" << std::endl;
+		std::cout << "24. EC Key: Export my public elliptic curve keys" << std::endl;
+		std::cout << "25. EC Key: View public elliptic curve keys" << std::endl;
         std::cout << "==> ";
         std::cin >> schoice;
 
@@ -305,13 +305,7 @@ void  menu()
                     }
                 }
 
- 				if (cryptoAL::fileexists(fileRSADB) == true)
 				{
-					std::ifstream infile;
-					infile.open (fileRSADB, std::ios_base::in);
-					infile >> bits(map_rsa_private);
-					infile.close();
-
 					std::cout << "------------------------------------------------------" << std::endl;
 					std::cout << "Public keys are in file: " << fileRSADB << std::endl;
 					std::cout << "Links to copy paste into url file when encoding message with RSA" << std::endl;
@@ -1035,6 +1029,7 @@ void  menu()
                     for(auto& [kname, k] : map_ecckey_private)
                     {
                         std::cout << "key name: " << kname << std::endl;
+                        std::cout << "domain:   " << k.dom.name() << std::endl;
                         std::cout << "key size: " << k.dom.key_size_bits << std::endl;
                         std::cout << "key public  kG_x: " << k.s_kg_x<< std::endl;
                         std::cout << "key public  kG_y: " << k.s_kg_y<< std::endl;
@@ -1059,7 +1054,116 @@ void  menu()
           	std::cout << std:: endl;
 		}
 
+		else if (choice == 24)
+      	{
+			std::cout << "Enter path for ecc database " << ECCKEY_MY_PRIVATE_DB << " (0 = current directory) : ";
+			std::string pathdb;
+			std::cin >> pathdb;
+			if (pathdb == "0") pathdb = "./";
+			std::string fileECCKEYDB = pathdb + ECCKEY_MY_PRIVATE_DB;
 
+			std::cout << "Enter file to export to (0 = ./" + ECCKEY_OTHER_PUBLIC_DB + "): ";
+			std::string outfile;
+			std::cin >> outfile;
+			if (outfile == "0") outfile = "./" + ECCKEY_OTHER_PUBLIC_DB;
+
+			qaclass qa;
+			std::map< std::string, ecc_key > map_ecc_private;
+			std::map< std::string, ecc_key > map_ecc_public;
+
+			if (cryptoAL::fileexists(fileECCKEYDB) == true)
+			{
+				std::ifstream infile;
+				infile.open (fileECCKEYDB, std::ios_base::in);
+				infile >> bits(map_ecc_private);
+				infile.close();
+
+				for(auto& [keyname, k] : map_ecc_private)
+				{
+                    ecc_key key_public(k.dom, k.s_kg_x, k.s_kg_y, "");
+                    map_ecc_public.insert(std::make_pair(keyname,  key_public) );
+				}
+
+				std::cout << "---------------------------" << std::endl;
+				std::cout << "Summary of " << outfile << std::endl;
+				std::cout << "---------------------------" << std::endl;
+				for(auto& [keyname, k] : map_ecc_public)
+				{
+				  std::cout << keyname << std:: endl;
+				}
+				std::cout << std:: endl;
+
+				{
+					std::ofstream out;
+					out.open(outfile, std::ios_base::out);
+					out << bits(map_ecc_public);
+					out.close();
+				}
+			}
+			else
+			{
+			  	std::cerr << "no file: " << fileECCKEYDB << std:: endl;
+				continue;
+			}
+		}
+
+	  	else if (choice == 25)
+     	{
+			std::cout << "Enter path for ecc public database " << ECCKEY_OTHER_PUBLIC_DB << " (0 = current directory) : ";
+			std::string pathdb;
+			std::cin >> pathdb;
+			if (pathdb == "0") pathdb = "./";
+			std::string fileECCKEYDB = pathdb + ECCKEY_OTHER_PUBLIC_DB;
+
+            std::cout << "Only show summary (0 = true): ";
+            std::string osummary;
+            std::cin >> osummary;
+            bool onlysummary=false;
+            if (osummary == "0") onlysummary = true;
+
+			qaclass qa;
+			std::map< std::string, ecc_key > map_ecc_public;
+
+			// View
+          	if (cryptoAL::fileexists(fileECCKEYDB) == true)
+      		{
+ 				std::ifstream infile;
+              	infile.open (fileECCKEYDB, std::ios_base::in);
+          		infile >> bits(map_ecc_public);
+             	infile.close();
+
+             	if (onlysummary == false)
+                {
+                    for(auto& [kname, k] : map_ecc_public)
+                    {
+                        std::cout << "key name: " << kname << std::endl;
+                        std::cout << "domain:   " << k.dom.name() << std::endl;
+                        std::cout << "key size: " << k.dom.key_size_bits << std::endl;
+                        std::cout << "key public  kG_x: " << k.s_kg_x<< std::endl;
+                        std::cout << "key public  kG_y: " << k.s_kg_y<< std::endl;
+                        std::cout << "key private k <should be empty> : " << k.s_k << std::endl;
+                        std::cout << std:: endl;
+                    }
+                }
+
+				{
+					std::cout << "------------------------------------------------------" << std::endl;
+					std::cout << "Public keys are in file: " << fileECCKEYDB << std::endl;
+					std::cout << "Links to copy paste into url file when encoding message with ECC" << std::endl;
+					std::cout << "------------------------------------------------------" << std::endl;
+					for(auto& [kname, k] : map_ecc_public)
+					{
+					  std::cout << "[e]" << kname << std:: endl;
+					}
+					std::cout << std:: endl;
+          		}
+      		}
+            else
+            {
+                std::cerr << "no file: "  << fileECCKEYDB << std:: endl;
+				continue;
+            }
+		}
 
 
     }

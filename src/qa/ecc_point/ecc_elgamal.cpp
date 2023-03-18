@@ -199,8 +199,8 @@ void ecc_curve::getMessageFromPoint(message_point& msg, cryptoAL::Buffer& final_
         final_message.write(&out_message.getdata()[i], 1);
    	}
 
-   	char vc[1] = {0};
-   	final_message.write(&vc[0], 1); // 0 for string end
+   	//char vc[1] = {0};
+   	//final_message.write(&vc[0], 1); // 0 for string end ????
 }
 
 bool ecc_curve::test_encode_decode(const std::string& msg)

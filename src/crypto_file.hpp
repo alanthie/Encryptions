@@ -169,7 +169,7 @@ namespace cryptoAL
 
 	std::string ecc_decode_string(	const std::string& smsg, ecc_key& ek,
         							uint32_t msg_input_size_touse,
-									uint32_t& msg_size_produced)
+									uint32_t& msg_size_produced, bool verbose = false)
 	{
 		std::string decoded_ecc_data;
 		std::string msg;
@@ -216,16 +216,31 @@ namespace cryptoAL
 		if (vlen[2] > 0) in_rG_x = v[5];
 		if (vlen[3] > 0) in_rG_y = v[7];
 
-        bool r = ek.decode(	out_msg, in_Cm_x, in_Cm_y, in_rG_x, in_rG_y);
+        bool r = ek.decode(	out_msg, in_Cm_x, in_Cm_y, in_rG_x, in_rG_y, verbose);
 		if (r)
 		{
 			decoded_ecc_data = out_msg;
+			if (verbose)
+			{
+                std::cout << "ecc decoded data: " << decoded_ecc_data << std::endl;
+			}
+		}
+		else
+		{
+            std::cerr << "ERROR ecc decoding" << std::endl;
+            std::cerr << "ecc key domain " << ek.dom.name() << std::endl;
+            std::cerr << "in_Cm_x " << in_Cm_x << std::endl;
+            std::cerr << "in_Cm_y " << in_Cm_y << std::endl;
+            std::cerr << "in_rG_x " << in_rG_x << std::endl;
+            std::cerr << "in_rG_y " << in_rG_y << std::endl;
 		}
 
         msg_size_produced = (uint32_t)decoded_ecc_data.size();
 		if (msg_input_size_touse < smsg.size() )
+		{
             decoded_ecc_data += smsg.substr(msg_input_size_touse);
-
+            std::cout << "ecc recursive decoded data: " << decoded_ecc_data << std::endl;
+        }
 		return decoded_ecc_data;
 	}
 
@@ -277,7 +292,7 @@ namespace cryptoAL
 									const std::string& public_key_of_decoder_y,
                                     uint32_t& msg_input_size_used,
 									uint32_t& msg_size_produced,
-                                    bool SELF_TEST)
+                                    bool SELF_TEST, bool verbose = false)
 	{
 		std::string encoded_ecc_data;
 
@@ -302,7 +317,7 @@ namespace cryptoAL
 			std::string out_rG_y;
 
 		   	bool r = ek.encode(	smsg, public_key_of_decoder_x, public_key_of_decoder_y,
-                    			out_Cm_x, out_Cm_y, out_rG_x, out_rG_y);
+                    			out_Cm_x, out_Cm_y, out_rG_x, out_rG_y, verbose);
 
 			if (r)
 			{
@@ -310,6 +325,12 @@ namespace cryptoAL
 				encoded_ecc_data += std::to_string(out_Cm_y.size()) + ";" + out_Cm_y + ";";
 				encoded_ecc_data += std::to_string(out_rG_x.size()) + ";" + out_rG_x + ";";
 				encoded_ecc_data += std::to_string(out_rG_y.size()) + ";" + out_rG_y + ";";
+
+				if (verbose)
+				{
+                    std::cout << "ecc encoded data [Cm+rG]: " << encoded_ecc_data << std::endl;
+                    std::cout << "ecc encoded data [Cm+rG] size: " << encoded_ecc_data.size() << std::endl;
+				}
 			}
 
 			if (SELF_TEST)
@@ -321,6 +342,11 @@ namespace cryptoAL
 		if (msg_to_encrypt.size() < smsg.size())
 		{
 			encoded_ecc_data += smsg.substr(msg_to_encrypt.size());
+			if (verbose)
+            {
+                std::cout << "ecc recursive encoded data: " << encoded_ecc_data << std::endl;
+                std::cout << "ecc recursive encoded data size: " << encoded_ecc_data.size() << std::endl;
+            }
 		}
 		return encoded_ecc_data;
 	}

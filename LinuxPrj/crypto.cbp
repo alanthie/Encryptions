@@ -98,6 +98,9 @@
 		<Unit filename="../src/qa/RSA_generate/bigint/BigUnsignedInABase.cc" />
 		<Unit filename="../src/qa/RSA_generate/bigint/BigUnsignedInABase.hh" />
 		<Unit filename="../src/qa/RSA_generate/bigint/NumberlikeArray.hh" />
+		<Unit filename="../src/qa/ecc_point/ecc_curve.cpp" />
+		<Unit filename="../src/qa/ecc_point/ecc_curve.hpp" />
+		<Unit filename="../src/qa/ecc_point/ecc_elgamal.cpp" />
 		<Unit filename="../src/random_engine.hpp" />
 		<Unit filename="../src/rng.h" />
 		<Unit filename="../src/twofish.c">

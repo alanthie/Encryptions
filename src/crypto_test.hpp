@@ -80,7 +80,7 @@ void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false,
                         "",
                         "",
                          "",
-                        "",
+                        "", "",
                         "",
                         verb);
 
@@ -90,7 +90,7 @@ void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false,
                             encr.filename_encrypted_data,
                             FOLDER + TESTCASE + "/" + TEST + file_msg_decrypted,
                             "",
-                            "","",
+                            "","", "",
                             "",
                             "",
                             verb

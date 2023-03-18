@@ -32,7 +32,8 @@ public:
 			 	std::string istaging,
 			 	std::string ifolder_local,
 			 	std::string ifolder_local_rsa,
-			 	std::string ifolder_local_ecc,
+			 	std::string ifolder_local_private_ecc,
+                std::string ifolder_local_public_ecc,
 			 	std::string ilocal_histo_path,
 			 	bool verb = false,
 			 	bool keep = false,
@@ -47,7 +48,8 @@ public:
         staging =istaging;
         folder_local = ifolder_local;
         folder_local_rsa = ifolder_local_rsa;
-        folder_local_ecc = ifolder_local_ecc;
+        folder_local_private_ecc = ifolder_local_private_ecc;
+        folder_local_public_ecc  = ifolder_local_public_ecc;
         local_histo_path = ilocal_histo_path;
         verbose = verb;
         keeping = keep;
@@ -385,7 +387,7 @@ public:
 				std::string local_rsa_db = folder_local_rsa + RSA_MY_PRIVATE_DB; // decoding
 
 				uk.url[URL_MAX_SIZE-1] = 0;
-				std::string rsa_key = uk.without_header_token();
+				//std::string rsa_key = uk.without_header_token(); // ???
 
 				if (uk.rsa_ecc_encoded_data_pad + uk.rsa_ecc_encoded_data_pos + uk.rsa_ecc_encoded_data_len > data_temp.buffer.size())
 				{
@@ -506,10 +508,10 @@ public:
             }
             else if (is_ecc)
             {
-                std::string local_ecc_db = folder_local_ecc + ECCKEY_MY_PRIVATE_DB; // decoding
+                std::string local_private_ecc_db = folder_local_private_ecc + ECCKEY_MY_PRIVATE_DB; // decoding
 
 				uk.url[URL_MAX_SIZE-1] = 0;
-				std::string rsa_key = uk.without_header_token();
+				//std::string ecc_key_in_url = uk.without_header_token(); // ???
 
 				if (uk.rsa_ecc_encoded_data_pad + uk.rsa_ecc_encoded_data_pos + uk.rsa_ecc_encoded_data_len > data_temp.buffer.size())
 				{
@@ -588,10 +590,8 @@ public:
 					{
 						if (verbose)
 						{
-							if (v.size() == 1)
-								std::cout << "unique ecc key name in URL: " << v[0] << std::endl;
-							else
-								std::cout << "multiple ecc key in URL: " << v[0] << " " << v[1] << " ..." << std::endl;
+							if (v.size() == 1)	std::cout << "unique ecc key name in URL: " << v[0] << std::endl;
+							else				std::cout << "multiple ecc key in URL: " << v[0] << " " << v[1] << " ..." << std::endl;
 						}
 					}
 
@@ -602,23 +602,44 @@ public:
                         std::string ecc_key_at_iter = v[riter];
 						ecc_key ek_mine;
 
-						bool r = get_ecc_key(ecc_key_at_iter, local_ecc_db, ek_mine);
+						bool r = get_ecc_key(ecc_key_at_iter, local_private_ecc_db, ek_mine);
 						if (r)
 						{
+                            if (verbose)
+                            {
+                                std::cerr << "ecc private key found: " << ecc_key_at_iter << std::endl;
+                                std::cerr << "ecc domain: " << ek_mine.dom.name() << std::endl;
+                            }
+
 							if (riter != 0)
 							{
-								uint32_t msg_size_produced;
 								std::string d = uk.sRSA_ECC_ENCODED_DATA.substr(0, v_encoded_size[riter]);
+                                if (verbose)
+                                {
+                                    std::cerr << "ecc data to decode: " << d << " size: " << d.size() << std::endl;
+                                }
 
-								std::string t = ecc_decode_string(d, ek_mine, (uint32_t)d.size(), msg_size_produced);
+                                uint32_t msg_size_produced;
+								std::string t = ecc_decode_string(d, ek_mine, (uint32_t)d.size(), msg_size_produced, verbose);
+								if (verbose)
+                                {
+                                    std::cerr << "ecc data decoded: " << t << " size: " << t.size() << std::endl;
+                                }
 
 								uk.sRSA_ECC_ENCODED_DATA = t + uk.sRSA_ECC_ENCODED_DATA.substr(d.size()); // may reduce size
 							}
 							else
 							{
 								uint32_t msg_size_produced;
-
-								embedded_ecc_key = ecc_decode_string(uk.sRSA_ECC_ENCODED_DATA, ek_mine, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced);
+								embedded_ecc_key = ecc_decode_string(uk.sRSA_ECC_ENCODED_DATA, ek_mine, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced, verbose);
+								if (verbose)
+                                {
+                                    std::cout << "ecc encoded data:        " << uk.sRSA_ECC_ENCODED_DATA << " size: " << uk.sRSA_ECC_ENCODED_DATA.size() << std::endl;
+                                    std::cout << "ecc encoded data:        " << get_summary_hex(uk.sRSA_ECC_ENCODED_DATA.data(), (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size()) << " size:" << uk.sRSA_ECC_ENCODED_DATA.size() << std::endl;
+                                    std::cout << "ecc embedded random key: " << embedded_ecc_key << " size: " << embedded_ecc_key.size() << std::endl;
+                                    std::cout << "ecc embedded random key: " << get_summary_hex(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size()) << " size:" << embedded_ecc_key.size() << std::endl;
+                                    std::cout << "ecc msg_size_produced:   " << msg_size_produced << std::endl;
+                                }
 							}
 						}
 						else
@@ -1882,7 +1903,8 @@ public:
 	std::string staging;
 	std::string folder_local;
 	std::string folder_local_rsa;
-	std::string folder_local_ecc;
+	std::string folder_local_private_ecc;
+	std::string folder_local_public_ecc;
 	std::string local_histo_path;
 
     cryptodata  data_temp;

@@ -345,9 +345,9 @@ bool ecc_curve::decode(ecc_point& in_Cm, ecc_point& in_rG, std::string& out_msg,
         return false;
 	}
 
-	out_msg = std::string(out_message.getdata(), out_message.size());
+	out_msg = std::string(out_message.getdata(), out_message.size()); // not zero ended buffer out_message
 	if (verbose)
-        std::cout <<"message from [Cm-rGPriv] point: " << out_msg << std::endl;
+        std::cout <<"message from [Cm-rGPriv] point: " << out_msg << " size: " << out_msg.size() << std::endl;
 
 	return true;
 }

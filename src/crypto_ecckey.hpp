@@ -199,9 +199,10 @@ namespace cryptoAL
         typeuinteger get_h() { return key_util::val(dom.s_h);}
 
         bool encode(const std::string& msg, const std::string& publicKey_decoder_x, const std::string& publicKey_decoder_y,
-                    std::string& out_Cm_x, std::string& out_Cm_y, std::string& out_rG_x, std::string& out_rG_y)
+                    std::string& out_Cm_x, std::string& out_Cm_y, std::string& out_rG_x, std::string& out_rG_y, bool verb=false)
         {
             ecc_curve ecc;
+			ecc.verbose = verb;
             int ir = ecc.init_curve(dom.key_size_bits,
                                     cryptoAL::key_util::base64_to_base10(dom.s_a),
                                     cryptoAL::key_util::base64_to_base10(dom.s_b),
@@ -212,6 +213,7 @@ namespace cryptoAL
                                     cryptoAL::key_util::base64_to_base10(dom.s_gy));
             if (ir < 0)
             {
+				std::cerr << "ERROR init ecc curve " << std::endl;
                 return false;
             }
 
@@ -256,13 +258,18 @@ namespace cryptoAL
 //                    out_rG_y = ss.str();
 //                }
             }
+			else
+			{
+				std::cerr << "ERROR ecc encoding " << std::endl;
+			}
             return r;
         }
 
         bool decode(std::string& out_msg,
-                    const std::string& in_Cm_x, const std::string& in_Cm_y, const std::string& in_rG_x, const std::string& in_rG_y)
+                    const std::string& in_Cm_x, const std::string& in_Cm_y, const std::string& in_rG_x, const std::string& in_rG_y, bool verb=false)
         {
             ecc_curve ecc;
+			ecc.verbose = verb;
             int ir = ecc.init_curve(dom.key_size_bits,
                                     cryptoAL::key_util::base64_to_base10(dom.s_a),
                                     cryptoAL::key_util::base64_to_base10(dom.s_b),
@@ -273,6 +280,7 @@ namespace cryptoAL
                                     cryptoAL::key_util::base64_to_base10(dom.s_gy));
             if (ir < 0)
             {
+				std::cerr << "ERROR init ecc curve " << std::endl;
                 return false;
             }
 
@@ -291,6 +299,10 @@ namespace cryptoAL
             if (r)
             {
             }
+			else
+			{
+				std::cerr << "ERROR ecc decoding " << std::endl;
+			}
             return r;
         }
 
@@ -322,14 +334,14 @@ namespace cryptoAL
                 return false;
             }
 
-            std::cerr << "computing  rG = ecc.mult(G, private_key); " << std::endl;
+            if (verb) std::cout << "computing  rG = ecc.mult(G, private_key); " << std::endl;
 			rG = ecc.mult(G, private_key);
 
 			mpz_class kgx(rG.x); s_kg_x = cryptoAL::key_util::base10_to_base64(kgx.get_str(10));
             mpz_class kgy(rG.y); s_kg_y = cryptoAL::key_util::base10_to_base64(kgy.get_str(10));
 
-			std::cout << "public key kg_x:  " << s_kg_x << std::endl;
-			std::cout << "public key kg_y:  " << s_kg_y << std::endl;
+			if (verb) std::cout << "public key kg_x:  " << s_kg_x << std::endl;
+			if (verb) std::cout << "public key kg_y:  " << s_kg_y << std::endl;
 			return true;
 		}
 
@@ -339,7 +351,7 @@ namespace cryptoAL
 			long long Nbytes = 1.33 * dom.key_size_bits / 8;
 			s_k = generate_base64_random_string(Nbytes);
 
-			std::cout << "private key:  " << s_k << std::endl;
+			if (verb) std::cout << "private key:  " << s_k << std::endl;
 
 			bool r = compute_private_key_and_update_kG(verb);
 			return r;

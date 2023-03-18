@@ -42,7 +42,8 @@ public:
                 std::string istaging,                   // Environment - staging path
                 std::string ifolder_local,              // Environment - local data keys file path
                 std::string ifolder_local_rsa,          // Environment - RSA database *.db path
-				std::string ifolder_local_ecc,
+				std::string ifolder_local_private_ecc,
+                std::string ifolder_local_public_ecc,
                 std::string ilocal_histo_path,
                 bool verb = false,                      // Flag - verbose
                 bool keep = false,                      // Flag - keep staging files
@@ -63,7 +64,8 @@ public:
         staging = istaging;
         folder_local = ifolder_local;
         folder_local_rsa = ifolder_local_rsa;
-		folder_local_ecc = ifolder_local_ecc;
+		folder_local_private_ecc = ifolder_local_private_ecc;
+		folder_local_public_ecc = ifolder_local_public_ecc;
         local_histo_path = ilocal_histo_path;
         verbose = verb;
         keeping = keep;
@@ -473,14 +475,20 @@ public:
 
 				if (SELF_TEST)
 				{
-					local_ecc_other_db = folder_local_ecc + ECCKEY_MY_PRIVATE_DB;
-					local_ecc_my_db    = folder_local_ecc + ECCKEY_OTHER_PUBLIC_DB;
+					local_ecc_other_db = folder_local_private_ecc + ECCKEY_MY_PRIVATE_DB;
+					local_ecc_my_db    = folder_local_public_ecc  + ECCKEY_OTHER_PUBLIC_DB;
 				}
 				else
 				{
-					local_ecc_other_db = folder_local_ecc + ECCKEY_OTHER_PUBLIC_DB; // Encoding with a public key of the recipient of the message
-					local_ecc_my_db    = folder_local_ecc + ECCKEY_MY_PRIVATE_DB;
+					local_ecc_other_db = folder_local_public_ecc  + ECCKEY_OTHER_PUBLIC_DB; // Encoding with a public key of the recipient of the message
+					local_ecc_my_db    = folder_local_private_ecc + ECCKEY_MY_PRIVATE_DB;
 				}
+
+                if (verbose)
+                {
+                    std::cout << "public  ecc keys db: " << local_ecc_other_db << std::endl;
+                    std::cout << "private ecc keys db: " << local_ecc_my_db << std::endl;
+                }
 
 				// ITER
 				for (size_t riter=0; riter < v.size(); riter++)
@@ -488,10 +496,30 @@ public:
 				 	std::string ecc_key_at_iter = v[riter];
 
 					ecc_key key_other;
-					r = get_ecc_key(ecc_key_at_iter, local_ecc_other_db, key_other);
-
 					ecc_key key_mine;
-					r = get_compatible_ecc_key(local_ecc_my_db, key_other, key_mine);
+
+					r = get_ecc_key(ecc_key_at_iter, local_ecc_other_db, key_other);
+					if (r==false)
+					{
+                        std::cerr << "ERROR public ecc key not found: " << ecc_key_at_iter << std::endl;
+					}
+					else if (verbose)
+                    {
+                        std::cout << "public ecc key found: " << ecc_key_at_iter << std::endl;
+                    }
+
+					if (r)
+					{
+                        r = get_compatible_ecc_key(local_ecc_my_db, key_other, key_mine);
+                        if (r==false)
+                        {
+                            std::cerr << "ERROR private compatible ecc key not found for public key: " << ecc_key_at_iter << std::endl;
+                        }
+                        else if (verbose)
+                        {
+                            std::cout << "private compatible ecc key found for domain: " << key_mine.dom.name() << std::endl;
+                        }
+                    }
 
                     if (r)
                     {
@@ -504,8 +532,10 @@ public:
 							vurlkey[i].sRSA_ECC_ENCODED_DATA = embedded_ecc_key;
 							if (verbose)
 							{
-								std::cout << "ecc key_len_in_bytes: " << key_len_in_bytes << std::endl;
-								std::cout << "ecc_data: " << get_summary_hex(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size()) << " size:" << embedded_ecc_key.size() << std::endl;
+								std::cout << "ecc key len in bytes:     " << key_len_in_bytes << std::endl;
+								std::cout << "ecc embedded random data: " << embedded_ecc_key << " size:" << embedded_ecc_key.size() << std::endl;
+								std::cout << "ecc embedded random key: " << get_summary_hex(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size()) 
+										  << " size:" << embedded_ecc_key.size() << std::endl;
 							}
 						}
 
@@ -515,10 +545,16 @@ public:
 						std::string t = ecc_encode_string(	vurlkey[i].sRSA_ECC_ENCODED_DATA, key_mine,
                                                             key_other.s_kg_x, key_other.s_kg_y,
 															msg_input_size_used,
-															msg_size_produced, SELF_TEST);
+															msg_size_produced, SELF_TEST, verbose);
 
 						// t may grow
 						vurlkey[i].sRSA_ECC_ENCODED_DATA = t;
+
+						if (verbose)
+						{
+							std::cout << "ecc encoded data :" << t << " size:" << t.size() << std::endl;
+                            std::cout << "ecc encoded data :" << get_summary_hex(t.data(), (uint32_t)t.size()) << " size:" << t.size() << std::endl;
+						}
 
 						if (riter == 0)
 						{
@@ -1799,7 +1835,8 @@ public:
     std::string staging;
     std::string folder_local;
     std::string folder_local_rsa;
-    std::string folder_local_ecc;
+    std::string folder_local_private_ecc;
+    std::string folder_local_public_ecc;
     std::string local_histo_path;
     bool verbose;
     bool keeping;
