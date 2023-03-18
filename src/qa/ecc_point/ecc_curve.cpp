@@ -5,7 +5,7 @@
 #include "ecc_curve.hpp"
 
 int ecc_curve::init_curve(  unsigned int nbits,
-                            const std::string& ia, const std::string& ib, const std::string& iprime, 
+                            const std::string& ia, const std::string& ib, const std::string& iprime,
 							const std::string& iorder, int icofactor, const std::string& igx, const std::string& igy)
 {
     if (verbose) std::cout << "init_curve " << "\n";
@@ -403,7 +403,8 @@ int mpz_sqrtm(mpz_t q, const mpz_t n, const mpz_t p) {
           mpz_mod(y, y, p);               /* y = y * n^-1 (mod p)             */
           i = 0;
           while(mpz_cmp_ui(y, 1) != 0) {
-              i  ;
+          //https://gmplib.org/list-archives/gmp-devel/2006-May/000633.html
+              i++;
               mpz_powm_ui(y, y, 2, p);    /*  y = y ^ 2 (mod p)               */
           }
           if(i == 0) {                    /* q^2 * n^-1 = 1 (mod p), return   */

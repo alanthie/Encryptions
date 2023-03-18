@@ -1,0 +1,26 @@
+server@server-X399-DESIGNARE-EX:~/dev/Encryptions/src/qa/ecgen/build$ ./ecgen --fp -u -p -r 192
+seadata not found, this will probably take quite some time.
+[
+{
+    "field": {
+        "p": "0xfc8f88931241dd05ccc11db66ff45a1bcf7a3c4cfaba61c9"
+    },
+    "a": "0x33d0ace1e83c560c67f108f774cd338b301fd1586769a7b8",
+    "b": "0xeecebf658d539d28aed5c99606a1485d8ccdd69eda09c6aa",
+    "order": "0xfc8f88931241dd05ccc11db60b661236ad9b6ebfe3a3a75f",
+    "subgroups": [
+        {
+            "x": "0x3832fd8db6564763402cebd28bdbe680b7df161e7653242e",
+            "y": "0x32b5a51cd858a78ff9f685d6e3ec236b7a29fdacaa0d84cf",
+            "order": "0xfc8f88931241dd05ccc11db60b661236ad9b6ebfe3a3a75f",
+            "cofactor": "0x1",
+            "points": [
+                {
+                    "x": "0x3832fd8db6564763402cebd28bdbe680b7df161e7653242e",
+                    "y": "0x32b5a51cd858a78ff9f685d6e3ec236b7a29fdacaa0d84cf",
+                    "order": "0xfc8f88931241dd05ccc11db60b661236ad9b6ebfe3a3a75f"
+                }
+            ]
+        }
+    ]
+}]

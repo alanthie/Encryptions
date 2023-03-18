@@ -38,7 +38,7 @@ bool ecc_curve::format_msg_for_ecc(const std::string& msg, cryptoAL::Buffer& out
 
     size_t NBefore = MSG_BYTES_MAX + MSG_BYTES_PAD - (msg.size() + MSG_BYTES_PAD);
     c[0]=0;
-   	for(int i=0;i<NBefore;i++)
+   	for(size_t i=0;i<NBefore;i++)
    	{
         out_message.write(&c[0], 1);
    	}
@@ -46,7 +46,7 @@ bool ecc_curve::format_msg_for_ecc(const std::string& msg, cryptoAL::Buffer& out
    	out_message.write(&c[0], 1);
 
    	if (verbose)
-    for(int i=0;i<out_message.size();i++)
+    for(size_t i=0;i<out_message.size();i++)
    	{
         std::cout << i << " message[i] " << (unsigned int) (unsigned char)out_message.getdata()[i]<< std::endl;
    	}
@@ -69,7 +69,7 @@ message_point ecc_curve::getECCPointFromMessage(cryptoAL::Buffer& message_buffer
     ecc_point r;
 
     size_t NBefore = 0;
-    for(int i=0;i<message_buffer.size();i++)
+    for(size_t i=0;i<message_buffer.size();i++)
    	{
         if (message_buffer.getdata()[i] == 0)
         {
@@ -177,7 +177,7 @@ void ecc_curve::getMessageFromPoint(message_point& msg, cryptoAL::Buffer& final_
 	}
 
     size_t NBefore = 0;
-    for(int i=0;i<MSG_BYTES_MAX+K;i++)
+    for(unsigned int i=0;i<MSG_BYTES_MAX+K;i++)
    	{
         if (out_message.getdata()[i] == 0)
         {
@@ -194,7 +194,7 @@ void ecc_curve::getMessageFromPoint(message_point& msg, cryptoAL::Buffer& final_
     final_message.increase_size(NAfter - 1);
     final_message.init(0);
 
-    for(int i=NBefore; i< MSG_BYTES_MAX+K - 1; i++) // skip last digit counter
+    for(unsigned int i=NBefore; i< MSG_BYTES_MAX+K - 1; i++) // skip last digit counter
    	{
         final_message.write(&out_message.getdata()[i], 1);
    	}

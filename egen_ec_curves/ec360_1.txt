@@ -1,0 +1,26 @@
+server@server-X399-DESIGNARE-EX:~/dev/Encryptions/src/qa/ecgen/build$ ./ecgen --fp -u -p -r 360
+seadata not found, this will probably take quite some time.
+[
+{
+    "field": {
+        "p": "0x9820c35e0231f5b018ed72ed9638dc7a24c9029c8b8643b51cf56eec031bc14bf79aaccec2a05f4eed8e390eb3"
+    },
+    "a": "0x72da776d0e8f40e9532ab9d08965d036c267ea8669b52a4694836bd9a31fec80b1cdd288e45b4a5bcb868a2dda",
+    "b": "0x6b38092b876a24bc7ed410b7e5e3bfc5a3f3f653e222c76123d46846d9d7626565182dca9f16c810861c319273",
+    "order": "0x9820c35e0231f5b018ed72ed9638dc7a24c9029c8b8644fcbf5e6a13a550e23ec8a97872da147611b35f516035",
+    "subgroups": [
+        {
+            "x": "0x056d7c02872877ec76b4442f4d2160fc1040b843347a6b73409b8dd3ea5d06a140e3fb7a18925d1a9940e0c416",
+            "y": "0x3ac33da375ea34e52e0f15445fd5859f762ce55f669bff59d19d35b050d95b46be9ac2a231c038acaa85142812",
+            "order": "0x9820c35e0231f5b018ed72ed9638dc7a24c9029c8b8644fcbf5e6a13a550e23ec8a97872da147611b35f516035",
+            "cofactor": "0x1",
+            "points": [
+                {
+                    "x": "0x056d7c02872877ec76b4442f4d2160fc1040b843347a6b73409b8dd3ea5d06a140e3fb7a18925d1a9940e0c416",
+                    "y": "0x3ac33da375ea34e52e0f15445fd5859f762ce55f669bff59d19d35b050d95b46be9ac2a231c038acaa85142812",
+                    "order": "0x9820c35e0231f5b018ed72ed9638dc7a24c9029c8b8644fcbf5e6a13a550e23ec8a97872da147611b35f516035"
+                }
+            ]
+        }
+    ]
+}]
