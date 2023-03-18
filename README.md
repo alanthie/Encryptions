@@ -8,6 +8,7 @@ Multiple encryption keys for one message to encrypt.
                      public video web files (using youtube-dl), 
                      user/password protected ftp files].
 [Embedded random keys automatically generated and protected by public/private RSA keys].
+[Embedded random keys automatically generated and protected by public/private ECC keys].
 [Historical hash keys].
 </pre>
 
