@@ -31,8 +31,8 @@ namespace cryptoAL
                     return (int)i;
                 }
             }
-            std::cerr << "ERROR pos64 invalid base 64 char " << (int)(unsigned char)c << std::endl;
-            throw "ERROR pos64 invalid base 64 char ";
+            std::cerr << "ERROR pos64v invalid base 64 char " << (int)(unsigned char)c << std::endl;
+            throw std::string("ERROR pos64() invalid base 64 char ");
             return 0;
         }
 
@@ -138,8 +138,8 @@ namespace cryptoAL
             {
                 t = (r % b64);
                 digit = t.toInt();
-                if (digit<0) throw "bad digit";
-                if (digit>63) throw "bad digit";
+                if (digit< 0) throw std::string("to base64 bad digit < 0");
+                if (digit>63) throw std::string("to base64 bad digit > 63");
                 s += cryptoAL::BASEDIGIT64[digit];
                 r = r - digit;
                 r = r / 64;
@@ -159,8 +159,8 @@ namespace cryptoAL
             {
                 t = (r % b10);
                 digit = t.toInt();
-                if (digit<0) throw "bad digit";
-                if (digit>69) throw "bad digit";
+                if (digit<0) throw std::string("to base10 bad digit < 0");
+                if (digit>9) throw std::string("to base10 bad digit > 9");
                 s += cryptoAL::BASEDIGIT10[digit];
                 r = r - digit;
                 r = r / 10;
@@ -282,7 +282,7 @@ seadata not found, this will probably take quite some time.
                 p = hex_to_uinteger(t);
 			}
 			std::cout << "p = " << p << " bits: " << p.bitLength() << std::endl;
-			
+
 			klen_inbits = p.bitLength();
 
 			s = cryptoAL::get_block_infile(FILE, "\"a\":" , ",");

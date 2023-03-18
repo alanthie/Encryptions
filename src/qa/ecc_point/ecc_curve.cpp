@@ -4,31 +4,66 @@
 #include <iostream>
 #include "ecc_curve.hpp"
 
-int ecc_curve::init_curve(char* a1, char* b1, char* prime1, char* order1, int cofactor1, ecc_point g1)
+int ecc_curve::init_curve(  unsigned int nbits,
+                            const std::string& ia, const std::string& ib, const std::string& iprime, const std::string& iorder, int icofactor, const std::string& igx, const std::string& igy)
 {
-	mpz_init_set_str(a,a1,BASE_16);
-	mpz_init_set_str(b,b1,BASE_16);
-	mpz_init_set_str(prime,prime1,BASE_16);
-	mpz_init_set_str(order,order1,BASE_16);
+    if (verbose) std::cout << "init_curve " << "\n";
 
-	bits_len = bitSize(prime);
-	std::cout << "BITS " << bits_len  << "\n";
+    mpz_init_set_str(prime,iprime.data(),10);
+	mpz_init_set_str(a,ia.data(),10);
+	mpz_init_set_str(b,ib.data(),10);
+	mpz_init_set_str(order,iorder.data(),10);
+	mpz_init_set_str(generator_point.x,igx.data(),10);
+	mpz_init_set_str(generator_point.y,igy.data(),10);
+    cofactor = icofactor;
+
+    bits_len = nbits; //bitSize(prime);
+    if (verbose)
+    {
+        std::cout << "BITS " << bits_len  << "\n";
+    }
 
 	MSG_BYTES_MAX = bits_len/8;
 	MSG_BYTES_MAX -= 1;             // space to find a valid message on curve x+0, 1,...255 - 50% of x are on curve
-	std::cout << "MSG_BYTES_MAX " << MSG_BYTES_MAX  << "\n";
+	MSG_BYTES_PAD = 1;
+	if (verbose)
+	{
+        std::cout << "MSG_BYTES_MAX " << MSG_BYTES_MAX  << "\n";
+        std::cout << "MSG_BYTES_PAD " << MSG_BYTES_PAD  << "\n";
+	}
 
-	cofactor = cofactor1;
-	if (existPoint1(g1.x,g1.y))
+	if (existPoint1(generator_point.x,generator_point.y))
     {
-		generator_point=g1;
+        std::cout << "generator_point OK"  << "\n";
 		return 0;
-	}else
+	}
+	else
+	{
+        std::cerr << "ERROR invalid  generator_point"  << "\n";
+        std::cerr << "Gx "  << igx << "\n";
+        std::cerr << "Gy "  << igy << "\n";
 		return -1;
+    }
 }
 
-int ecc_curve::quadratic_residue(mpz_t x, mpz_t q, mpz_t n)
+//if (quadratic_residue(y,l,prime)==1)
+int quadratic_residue(mpz_t x, mpz_t q, mpz_t n)
 {
+    //return test_tonelli(const std::string& sprime, const std::string& sa)
+//    mpz_t out_x;
+//    char* sp = mpz_get_str(NULL, 10, n);
+//    char* sn = mpz_get_str(NULL, 10, q);
+//    std::string ssp(sp);
+//    std::string ssn(sn);
+//    int ret = test_tonelli(ssp, ssn, x); //gmp_printf("x=%Zd\n",x);
+//
+//    void (*freefunc)(void *, size_t);
+//    mp_get_memory_functions (NULL, NULL, &freefunc);
+//    freefunc(sp, strlen(sp) + 1);
+//    freefunc(sp, strlen(sn) + 1);
+//
+//    return ret;
+
     int             leg;
     mpz_t           tmp,ofac,nr,t,r,c,bb; // b??
     unsigned int    mod4;
@@ -55,7 +90,7 @@ int ecc_curve::quadratic_residue(mpz_t x, mpz_t q, mpz_t n)
     }
     else // Tonelli-Shanks
     {
-        mpz_inits(ofac,t,r,c,b,NULL);
+        mpz_inits(ofac,t,r,c,bb,NULL);
 
         // split n - 1 into odd number times power of 2 ofac*2^twofac
         mpz_sub_ui(tmp,tmp,1UL);
@@ -130,10 +165,8 @@ int ecc_curve::existPoint1(mpz_t& x, mpz_t&  y)
 ecc_point ecc_curve::sum(ecc_point p1, ecc_point p2)
 {
 	ecc_point r;
-    ecc_point* result = &r;
-
-	mpz_init((*result).x);
-	mpz_init((*result).y);
+	mpz_init(r.x);
+	mpz_init(r.y);
 
 	if (mpz_cmp(p1.x,p2.x)==0 && mpz_cmp(p1.y,p2.y)==0)
 		r=double_p(p1);
@@ -159,12 +192,12 @@ ecc_point ecc_curve::sum(ecc_point p1, ecc_point p2)
 			mpz_sub(x,s_2,p1.x);
 			mpz_sub(x,x,p2.x);
 			mpz_mod(x,x,prime);
-			mpz_set((*result).x,x);
+			mpz_set(r.x,x);
 			mpz_sub(delta_x,p2.x,x);
 			mpz_neg(y,p2.y);
 			mpz_addmul(y,s,delta_x);
 			mpz_mod(y,y,prime);
-			mpz_set((*result).y,y);
+			mpz_set(r.y,y);
 		};
 	return r;
 }
@@ -268,7 +301,122 @@ ecc_point ecc_curve::existPoint(mpz_t&  p)
         r.is_valid = false;
 		return r;
     }
-	r.is_valid = false;
-	return r;
 }
 
+bool ecc_curve::encode(ecc_point& out_Cm, ecc_point& out_rG, const std::string& msg, ecc_point& publicKey, mpz_t& private_key)
+{
+    cryptoAL::Buffer buffer_message;
+    message_point Pm;
+
+    bool r = format_msg_for_ecc(msg, buffer_message);
+	if (r==false)
+	{
+        std::cerr << "ERROR formatting input msg for encoding" << std::endl;
+        return false;
+	}
+
+	Pm = getECCPointFromMessage(buffer_message);
+	if (Pm.p.is_valid == false)
+    {
+        std::cerr << "ERROR message encoding on elliptic curve" << std::endl;
+		return false;
+	}
+
+	out_rG = mult(generator_point, private_key);
+	ecc_point rPub  = mult(publicKey, private_key);
+	out_Cm = sum(Pm.p, rPub);
+	return true;
+}
+
+bool ecc_curve::decode(ecc_point& in_Cm, ecc_point& in_rG, std::string& out_msg, mpz_t& private_key)
+{
+	ecc_point rGPriv = mult(in_rG, private_key);
+
+    message_point Pm;
+    mpz_neg(rGPriv.y,rGPriv.y); //-rGPriv.y
+	Pm.p = sum(in_Cm, rGPriv);  // Cm-rGPriv
+
+	cryptoAL::Buffer out_message;
+	getMessageFromPoint(Pm, out_message);
+	if (Pm.p.is_valid == false)
+	{
+        std::cerr << "ERROR decoding message from elliptic curve" << std::endl;
+        return false;
+	}
+
+	out_msg = std::string(out_message.getdata(), out_message.size());
+	if (verbose)
+        std::cout <<"message from [Cm-rGPriv] point: " << out_msg << std::endl;
+
+	return true;
+}
+
+/* Solve the modular equatioon x^2 = n (mod p) using the Shanks-Tonelli
+ * algorihm. x will be placed in q and 1 returned if the algorithm is
+ * successful. Otherwise 0 is returned (currently in case n is not a quadratic
+ * residue mod p). A check is done if p = 3 (mod 4), in which case the root is
+ * calculated as n ^ ((p 1) / 4) (mod p).
+ *
+ * Note that currently mpz_legendre is called to make sure that n really is a
+ * quadratic residue. The check can be skipped, at the price of going into an
+ * eternal loop if called with a non-residue.
+ */
+//https://github.com/mounirnasrallah/Quadratic-Sieve/blob/master/src/mpz_sqrtm.c
+int mpz_sqrtm(mpz_t q, const mpz_t n, const mpz_t p) {
+    mpz_t w, n_inv, y;
+    unsigned int i, s;
+
+      if(mpz_divisible_p(n, p)) {         /* Is n a multiple of p?            */
+          mpz_set_ui(q, 0);               /* Yes, then the square root is 0.  */
+          return 1;                       /* (special case, not caught        */
+      }                                   /* otherwise)                       */
+
+      if(mpz_tstbit(p, 1) == 1) {         /* p = 3 (mod 4) ?                  */
+          mpz_set(q, p);
+          mpz_add_ui(q, q, 1);
+          mpz_fdiv_q_2exp(q, q, 2);
+          mpz_powm(q, n, q, p);           /* q = n ^ ((p 1) / 4) (mod p)      */
+          return 1;
+      }
+
+      mpz_init(y);
+      mpz_init(w);
+      mpz_init(n_inv);
+
+      mpz_set(q, p);
+      mpz_sub_ui(q, q, 1);                /* q = p-1                          */
+      s = 0;                              /* Factor out 2^s from q            */
+      while(mpz_tstbit(q, s) == 0) s++  ;
+      mpz_fdiv_q_2exp(q, q, s);           /* q = q / 2^s                      */
+      mpz_set_ui(w, 2);                   /* Search for a non-residue mod p   */
+      while(mpz_legendre(w, p) != -1)     /* by picking the first w such that */
+          mpz_add_ui(w, w, 1);            /* (w/p) is -1                      */
+      mpz_powm(w, w, q, p);               /* w = w^q (mod p)                  */
+      mpz_add_ui(q, q, 1);
+      mpz_fdiv_q_2exp(q, q, 1);           /* q = (q 1) / 2                    */
+      mpz_powm(q, n, q, p);               /* q = n^q (mod p)                  */
+      mpz_invert(n_inv, n, p);
+      for(;;) {
+          mpz_powm_ui(y, q, 2, p);        /* y = q^2 (mod p)                  */
+          mpz_mul(y, y, n_inv);
+          mpz_mod(y, y, p);               /* y = y * n^-1 (mod p)             */
+          i = 0;
+          while(mpz_cmp_ui(y, 1) != 0) {
+              i  ;
+              mpz_powm_ui(y, y, 2, p);    /*  y = y ^ 2 (mod p)               */
+          }
+          if(i == 0) {                    /* q^2 * n^-1 = 1 (mod p), return   */
+              return 1;
+          }
+          if(s-i == 1) {                  /* In case the exponent to w is 1,  */
+              mpz_mul(q, q, w);           /* Don't bother exponentiating      */
+          } else {
+              mpz_powm_ui(y, w, 1 << (s-i-1), p);
+              mpz_mul(q, q, y);
+          }
+          mpz_mod(q, q, p);               /* r = r * w^(2^(s-i-1)) (mod p)    */
+      }
+
+      mpz_clear(w); mpz_clear(n_inv); mpz_clear(y);
+      return 0;
+}

@@ -33,9 +33,12 @@ struct ecc_curve
     mpz_t order;
     int cofactor;
     ecc_point generator_point;
-    unsigned int MSG_BYTES_MAX; // ONE BYTE for counter , one for delimiter 0xff
+    unsigned int MSG_BYTES_MAX; // ONE BYTE for counter
+    unsigned int MSG_BYTES_PAD = 1;
+    bool verbose = false;
 
-    int init_curve(char* a, char* b, char* prime, char* order, int cofactor, ecc_point g);
+    int init_curve( unsigned int nbits,
+                    const std::string& ia, const std::string& ib, const std::string& iprime, const std::string& iorder, int icofactor, const std::string& igx, const std::string& igy);
 
     ecc_point mult(ecc_point p, mpz_t value);
     ecc_point sum(ecc_point p1, ecc_point p2);
@@ -45,23 +48,19 @@ struct ecc_curve
     int existPoint1(mpz_t& x, mpz_t& y);
     ecc_point double_p(ecc_point p);
 
-    int quadratic_residue(mpz_t x, mpz_t q,mpz_t n);
-    int random_in_range (unsigned int min, unsigned int max);
-
-	// TODO use Buffer allowing any char for padding
-    message_point  getECCPointFromMessage(char* message);
-    char*          getMessageFromPoint(message_point& msg);
-
 	message_point  	getECCPointFromMessage(cryptoAL::Buffer& message);
     void 			getMessageFromPoint(message_point& msg_point, cryptoAL::Buffer& message);
+    bool            format_msg_for_ecc(const std::string& msg, cryptoAL::Buffer& buffer_out);
 
-    int test();
-    int test_functions();
+    int  test_msg(const std::string& msg);
+    bool test_encode_decode(const std::string& msg);
 
+    bool encode(ecc_point& out_Cm, ecc_point& out_rG, const std::string& msg, ecc_point& publicKey, mpz_t& private_key);
+    bool decode(ecc_point& in_Cm,  ecc_point& in_rG,  std::string&   out_msg, mpz_t& private_key);
 
-	//  const char* pot_256[21] = {  "1", "100", "10000", "1000000", "100000000", "10000000000", "1000000000000", "100000000000000",
     std::string pow256string(long n)
     {
+        //"1", "100", "10000",
         std::string s = "1";
         if (n==0) return s;
         for(long i=0;i<n;i++)
@@ -76,6 +75,11 @@ struct ecc_curve
        return static_cast<unsigned int>(mpz_sizeinbase(number, 2));
     }
 };
+
+int mpz_sqrtm(mpz_t q, const mpz_t n, const mpz_t p);
+int quadratic_residue(mpz_t x, mpz_t q,mpz_t n);
+int test_tonelli(const std::string& sprime, const std::string& sa, mpz_t out_x);
+int random_in_range (unsigned int min, unsigned int max);
 
 #endif
 

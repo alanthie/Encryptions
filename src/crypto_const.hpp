@@ -3,7 +3,6 @@
 
 #include <filesystem>
 #include <curl/curl.h>
-//#include "encrypt.h"
 #include <chrono>
 #include <ctime>
 #include <sstream>

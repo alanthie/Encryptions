@@ -82,8 +82,9 @@ void  menu()
 		std::cout << "20. EC Domain: View my elliptic curve domains" << std::endl;
         std::cout << "21. EC Domain: Import the elliptic curve domains of other" << std::endl;
 		std::cout << "22. EC Key: Generate an elliptic curve key" << std::endl;
-		std::cout << "23. EC Key: Export one of my public elliptic curve key" << std::endl;
-		std::cout << "24. EC Key: Import other public elliptic curve keys" << std::endl;
+		std::cout << "23. EC Key: View my private elliptic curve keys" << std::endl;
+		std::cout << "24. EC Key: Export one of my public elliptic curve key" << std::endl;
+		std::cout << "25. EC Key: Import other public elliptic curve keys" << std::endl;
         std::cout << "==> ";
         std::cin >> schoice;
 
@@ -98,7 +99,14 @@ void  menu()
         else if (choice == 1)
         {
             ecc_curve c;
-            c.test();
+//            c.test_msg("232FFTT325");
+//            c.test_msg("2");
+//            c.test_msg("232FF232FFTT325TT325");
+
+            bool r;
+            r = c.test_encode_decode("232FFTT325"); if (r) {std::cout << "OK " << std::endl;} else {std::cout << "FAILED " << std::endl;}
+            r = c.test_encode_decode("2");          if (r) {std::cout << "OK " << std::endl;} else {std::cout << "FAILED " << std::endl;}
+            r = c.test_encode_decode("232FF232FFTT325TT325");if (r) {std::cout << "OK " << std::endl;} else {std::cout << "FAILED " << std::endl;}
 
             std::cout << "F(n)" << std::endl;
             std::cout << "Enter a number: ";
@@ -108,8 +116,8 @@ void  menu()
             if (n==-1) continue;
 
             qaclass qa;
-            auto r = qa.F(n);
-            std::cout << "F(" << n << ") = " << r << std::endl;
+            auto rr = qa.F(n);
+            std::cout << "F(" << n << ") = " << rr << std::endl;
             std::cout << std::endl;
         }
 
@@ -814,6 +822,7 @@ void  menu()
         {
             std::cout << "Example: launch this command in Linux for  512 ECC bits key: ./ecgen --fp -v -m 2g -u -p -r 512" << std::endl;
             std::cout << "Example: launch this command in Linux for 1024 ECC bits key: ./ecgen --fp -v -m 8g -u -p -r 1024" << std::endl;
+            std::cout << "Example: launch this command in Linux for 2048 ECC bits key: ./ecgen --fp -v -m 32g -u -p -r 2048" << std::endl;
             std::cout << "Save the output in a text file then do [Import an elliptic curve domain from text file]" << std::endl;
             std::cout << "Enter 0 to continue" << std::endl;
             std::string pathdb;
@@ -879,6 +888,170 @@ void  menu()
           	}
           	std::cout << std:: endl;
 		}
+
+		else if (choice == 22)
+        {
+			std::cout << "Enter path for ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+			std::string pathdb;
+			std::cin >> pathdb;
+			if (pathdb == "0") pathdb = "./";
+			std::string fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+
+			qaclass qa;
+			std::map< std::string, cryptoAL::ecc_domain > map_ecc_domain;
+
+			// View
+			if (cryptoAL::fileexists(fileECCDOMDB) == true)
+			{
+				std::ifstream infile;
+				infile.open (fileECCDOMDB, std::ios_base::in);
+				infile >> bits(map_ecc_domain);
+				infile.close();
+
+				std::cout << "---------------------------" << std::endl;
+				std::cout << "Domains summary in " << fileECCDOMDB << std::endl;
+				std::cout << "---------------------------" << std::endl;
+				std::vector<std::string> vdomname;
+				int cnt=0;
+				for(auto& [eccname, k] : map_ecc_domain)
+				{
+					std::cout << "[" << cnt+1 << "]" << eccname << std::endl;
+					cnt++;
+					vdomname.push_back(eccname);
+				}
+				std::cout << std:: endl;
+
+				if (cnt == 0)
+				{
+                    std::cout << "Add ecc domain first" << std::endl;
+                    continue;
+				}
+
+				std::cout << "Select a ecc domain " << 1 << "-" << std::to_string(cnt) << " (0 = largest key ) : ";
+				std::string dom;
+				std::cin >> dom;
+
+				long long idom = cryptoAL::str_to_ll(dom);
+				if (idom <   1) idom = 1;
+				if (idom > cnt) idom = cnt;
+
+				std::string dom_name = vdomname[idom-1];
+				auto& domain = map_ecc_domain[dom_name];
+
+				ecc_key ek;
+				ek.set_domain(domain);
+				bool r = ek.generate_private_public_key(true);
+
+				std::cout << "Enter path for ecc private keys database " << ECCKEY_MY_PRIVATE_DB << " (0 = same as domain) : ";
+                std::string pathecckeydb;
+                std::cin >> pathecckeydb;
+                if (pathecckeydb == "0") pathecckeydb = pathdb;
+                std::string fileECCKEYDB = pathecckeydb + ECCKEY_MY_PRIVATE_DB;
+
+				// READ
+				std::map< std::string, ecc_key > map_ecckey_private;
+
+				if (cryptoAL::fileexists(fileECCKEYDB) == false)
+				{
+					std::ofstream outfile;
+					outfile.open(fileECCKEYDB, std::ios_base::out);
+					outfile.close();
+				}
+
+				if (cryptoAL::fileexists(fileECCKEYDB) == true)
+				{
+					std::ifstream infile;
+					infile.open (fileECCKEYDB, std::ios_base::in);
+					infile >> bits(map_ecckey_private);
+					infile.close();
+				}
+				else
+				{
+					std::cerr << "no file: "  << fileECCKEYDB << std:: endl;
+					continue;
+				}
+
+				// backup
+				{
+					std::ofstream outfile;
+					outfile.open(fileECCKEYDB + ".bck", std::ios_base::out);
+					outfile << bits(map_ecckey_private);
+					outfile.close();
+				}
+
+				std::string keyname = std::string("MY_ECCKEY_") + std::to_string(domain.key_size_bits) + std::string("_") + cryptoAL::get_current_time_and_date();
+				map_ecckey_private.insert(std::make_pair(keyname, ek));
+
+				{
+					std::ofstream outfile;
+					outfile.open(fileECCKEYDB, std::ios_base::out);
+					outfile << bits(map_ecckey_private);
+					outfile.close();
+				}
+				std::cout << "key saved as: "  << keyname << " in " << fileECCKEYDB << std:: endl;
+			}
+			else
+			{
+				std::cerr << "no file: "  << fileECCDOMDB << std:: endl;
+				continue;
+			}
+		}
+
+        else if (choice == 23)
+        {
+			std::cout << "Enter path for ecc db " << ECCKEY_MY_PRIVATE_DB << " (0 = current directory) : ";
+			std::string pathdb;
+			std::cin >> pathdb;
+			if (pathdb == "0") pathdb = "./";
+			std::string fileECCKEYDB = pathdb + ECCKEY_MY_PRIVATE_DB;
+
+			std::cout << "Only show summary (0 = true): ";
+            std::string osummary;
+            std::cin >> osummary;
+            bool onlysummary=false;
+            if (osummary == "0") onlysummary = true;
+
+			qaclass qa;
+			std::map< std::string, ecc_key > map_ecckey_private;
+
+			// View
+			if (cryptoAL::fileexists(fileECCKEYDB) == true)
+			{
+				std::ifstream infile;
+				infile.open (fileECCKEYDB, std::ios_base::in);
+				infile >> bits(map_ecckey_private);
+				infile.close();
+
+                if (onlysummary == false)
+                {
+                    for(auto& [kname, k] : map_ecckey_private)
+                    {
+                        std::cout << "key name: " << kname << std::endl;
+                        std::cout << "key size: " << k.dom.key_size_bits << std::endl;
+                        std::cout << "key public  kG_x: " << k.s_kg_x<< std::endl;
+                        std::cout << "key public  kG_y: " << k.s_kg_y<< std::endl;
+                        std::cout << "key private k   : " << k.s_k << std::endl;
+                        std::cout << std:: endl;
+                    }
+				}
+			}
+			else
+			{
+				std::cerr << "no file: "  << fileECCKEYDB << std:: endl;
+				continue;
+			}
+
+			std::cout << "---------------------------" << std::endl;
+          	std::cout << "Summary of " << fileECCKEYDB << std::endl;
+         	std::cout << "---------------------------" << std::endl;
+          	for(auto& [kname, k] : map_ecckey_private)
+          	{
+              	std::cout << "[e]" << kname << std:: endl;
+          	}
+          	std::cout << std:: endl;
+		}
+
+
 
 
     }

@@ -5,6 +5,8 @@
 #include "base_const.hpp"
 #include "crypto_key_util.hpp"
 #include "crc32a.hpp"
+#include "qa/ecc_point/ecc_curve.hpp"
+
 
 namespace cryptoAL
 {
@@ -13,10 +15,10 @@ namespace cryptoAL
         ecc_domain()
         {
         }
-		
+
         // elliptic curve domain parameters:
 		int key_size_bits = 0;
-		
+
 		// base 64 string
         std::string s_a;
         std::string s_b;
@@ -24,10 +26,10 @@ namespace cryptoAL
         std::string s_n;    // order cardinality
         std::string s_gx;
         std::string s_gy;
-        std::string s_h;    // factor  
-		
+        std::string s_h;    // factor
+
 		std::string name()
-		{		
+		{
 			std::string t = std::to_string(key_size_bits) + s_a + s_b + s_p + s_n + s_gx + s_gy + s_h;
 
 			SHA256 sha;
@@ -38,8 +40,8 @@ namespace cryptoAL
 			std::string s = std::to_string(key_size_bits) + "_" +  checksum;
 			return s;
 		}
-		
-		ecc_domain(	int nbits, 
+
+		ecc_domain(	int nbits,
 					const std::string& a, const std::string& b, const std::string& p,
 					const std::string& n, const std::string& gx, const std::string& gy,
 					const std::string& h)
@@ -55,7 +57,7 @@ namespace cryptoAL
 		}
 
         static void to_ecc_domain(	ecc_domain& dom, uint32_t keysize_in_bits,
-							const typeuinteger& a, const typeuinteger& b,  const typeuinteger& p, 
+							const typeuinteger& a, const typeuinteger& b,  const typeuinteger& p,
 							const typeuinteger& n, const typeuinteger& gx, const typeuinteger& gy, const typeuinteger& h)
         {
             dom.key_size_bits = keysize_in_bits;
@@ -76,37 +78,37 @@ namespace cryptoAL
                 ss << p ;
                 dom.s_p = cryptoAL::key_util::base10_to_base64(ss.str());
             }
-			
+
 			{
                 std::stringstream ss;
                 ss << n ;
                 dom.s_n = cryptoAL::key_util::base10_to_base64(ss.str());
             }
-			
+
 			{
                 std::stringstream ss;
                 ss << gx ;
                 dom.s_gx = cryptoAL::key_util::base10_to_base64(ss.str());
             }
-			
-			
+
+
 			{
                 std::stringstream ss;
                 ss << gy ;
                 dom.s_gy = cryptoAL::key_util::base10_to_base64(ss.str());
             }
-			
+
 			{
                 std::stringstream ss;
                 ss << h ;
                 dom.s_h = cryptoAL::key_util::base10_to_base64(ss.str());
             }
         }
-		
+
 		friend std::ostream& operator<<(std::ostream &out, Bits<ecc_domain & > my)
         {
-            out << bits(my.t.key_size_bits) 
-                << bits(my.t.s_a) << bits(my.t.s_b) << bits(my.t.s_p) << bits(my.t.s_n) 
+            out << bits(my.t.key_size_bits)
+                << bits(my.t.s_a) << bits(my.t.s_b) << bits(my.t.s_p) << bits(my.t.s_n)
                 << bits(my.t.s_gx) << bits(my.t.s_gy)
                 << bits(my.t.s_h) ;
             return (out);
@@ -114,32 +116,39 @@ namespace cryptoAL
 
         friend std::istream& operator>>(std::istream &in, Bits<ecc_domain &> my)
         {
-            in 	>>  bits(my.t.key_size_bits) 
-                >>  bits(my.t.s_a)  >> bits(my.t.s_b) >> bits(my.t.s_p) >> bits(my.t.s_n) 
+            in 	>>  bits(my.t.key_size_bits)
+                >>  bits(my.t.s_a)  >> bits(my.t.s_b) >> bits(my.t.s_p) >> bits(my.t.s_n)
                 >>  bits(my.t.s_gx) >> bits(my.t.s_gy)
                 >>  bits(my.t.s_h);
             return (in);
         }
 
 	};
-		
+
     struct ecc_key
     {
         ecc_key()
         {
         }
 
-        ecc_key(const ecc_domain& d, const std::string& kg, const std::string& k)
+		void set_domain(const ecc_domain& d)
 		{
 			dom = d;
-			s_kg = kg;
-            s_k  = k;
 		}
-				
-        ecc_key(int nbits, 
+
+        ecc_key(const ecc_domain& d, const std::string& kg_x, const std::string& kg_y, const std::string& k)
+		{
+			dom 	= d;
+			s_kg_x 	= kg_x;
+			s_kg_y 	= kg_y;
+            s_k  	= k;
+		}
+
+        ecc_key(int nbits,
                 const std::string& a, const std::string& b, const std::string& p,
                 const std::string& n, const std::string& gx, const std::string& gy,
-                const std::string& h, const std::string& kg, const std::string& k
+                const std::string& h, const std::string& kg_x, const std::string& kg_y,
+				const std::string& k
                 )
         {
             dom.key_size_bits = nbits;
@@ -150,30 +159,33 @@ namespace cryptoAL
             dom.s_gx = gx;
             dom.s_gy = gy;
             dom.s_h  = h;
-            s_kg = kg;
+            s_kg_x = kg_x;
+			s_kg_y = kg_y;
             s_k  = k;
         }
-  
-        ecc_domain dom;
-        std::string s_kg;   // public
-        std::string s_k;    // private - empty if public key
+
+        ecc_domain  dom;
+        std::string s_kg_x;   	// PUBLIC KEY
+		std::string s_kg_y;
+        std::string s_k;    	// PRIVATE KEY - empty if from OTHER public key
 
         friend std::ostream& operator<<(std::ostream &out, Bits<ecc_key & > my)
         {
-            out << bits(my.t.dom) 
-                << bits(my.t.s_kg) 
+            out << bits(my.t.dom)
+                << bits(my.t.s_kg_x)
+                << bits(my.t.s_kg_y)
                 << bits(my.t.s_k) ;
             return (out);
         }
 
         friend std::istream& operator>>(std::istream &in, Bits<ecc_key &> my)
         {
-            in 	>>  bits(my.t.dom) 
-                >>  bits(my.t.s_kg) 
+            in 	>>  bits(my.t.dom)
+                >>  bits(my.t.s_kg_x)
+                >>  bits(my.t.s_kg_y)
                 >>  bits(my.t.s_k);
             return (in);
         }
-
 
         typeuinteger get_a() { return key_util::val(dom.s_a);}
         typeuinteger get_b() { return key_util::val(dom.s_b);}
@@ -181,25 +193,160 @@ namespace cryptoAL
         typeuinteger get_n() { return key_util::val(dom.s_n);}
         typeuinteger get_gx() { return key_util::val(dom.s_gx);}
         typeuinteger get_gy() { return key_util::val(dom.s_gy);}
-        typeuinteger get_kg() { return key_util::val(s_kg);}
+        typeuinteger get_kg_x() { return key_util::val(s_kg_x);}
+        typeuinteger get_kg_y() { return key_util::val(s_kg_y);}
         typeuinteger get_k() { return key_util::val(s_k);}
-        typeuinteger get_h() { return key_util::val(dom.s_h);}		
+        typeuinteger get_h() { return key_util::val(dom.s_h);}
 
-        typeuinteger encode(const std::string& s)
+        bool encode(const std::string& msg, const std::string& publicKey_decoder_x, const std::string& publicKey_decoder_y,
+                    std::string& out_Cm_x, std::string& out_Cm_y, std::string& out_rG_x, std::string& out_rG_y)
         {
-			typeuinteger r = 0;
+            ecc_curve ecc;
+            int ir = ecc.init_curve(dom.key_size_bits,
+                                    cryptoAL::key_util::base64_to_base10(dom.s_a),
+                                    cryptoAL::key_util::base64_to_base10(dom.s_b),
+                                    cryptoAL::key_util::base64_to_base10(dom.s_p),
+                                    cryptoAL::key_util::base64_to_base10(dom.s_n),
+                                    1,
+                                    cryptoAL::key_util::base64_to_base10(dom.s_gx),
+                                    cryptoAL::key_util::base64_to_base10(dom.s_gy));
+            if (ir < 0)
+            {
+                return false;
+            }
+
+            ecc_point   out_Cm;
+            ecc_point   out_rG;
+
+            ecc_point   publicKey_decoder;
+            mpz_t       privateKey_encoder;
+
+            mpz_init_set_str(privateKey_encoder, cryptoAL::key_util::base64_to_base10(s_k).data(), 10);
+            mpz_init_set_str(publicKey_decoder.x,cryptoAL::key_util::base64_to_base10(publicKey_decoder_x).data(),10);
+            mpz_init_set_str(publicKey_decoder.y,cryptoAL::key_util::base64_to_base10(publicKey_decoder_y).data(),10);
+
+            //bool encode(ecc_point& out_Cm, ecc_point& out_rG, const std::string& msg, ecc_point& publicKey, mpz_t& private_key);
+            bool r = ecc.encode(out_Cm, out_rG, msg, publicKey_decoder, privateKey_encoder);
+            if (r)
+            {
+                mpz_class cmx(out_Cm.x); out_Cm_x = cryptoAL::key_util::base10_to_base64(cmx.get_str(10));
+                mpz_class cmy(out_Cm.y); out_Cm_y = cryptoAL::key_util::base10_to_base64(cmy.get_str(10));
+
+                mpz_class rGx(out_rG.x); out_rG_x = cryptoAL::key_util::base10_to_base64(rGx.get_str(10));
+                mpz_class rGy(out_rG.y); out_rG_y = cryptoAL::key_util::base10_to_base64(rGy.get_str(10));
+
+//                {
+//                    std::stringstream ss;
+//                    ss << out_Cm.x;
+//                    out_Cm_x = ss.str();
+//                }
+//                {
+//                    std::stringstream ss;
+//                    ss << out_Cm.y;
+//                    out_Cm_y = ss.str();
+//                }
+//                {
+//                    std::stringstream ss;
+//                    ss << out_rG.x;
+//                    out_rG_x = ss.str();
+//                }
+//                {
+//                    std::stringstream ss;
+//                    ss << out_rG.y;
+//                    out_rG_y = ss.str();
+//                }
+            }
             return r;
         }
 
-        std::string decode(const typeuinteger& v)
+        bool decode(std::string& out_msg,
+                    const std::string& in_Cm_x, const std::string& in_Cm_y, const std::string& in_rG_x, const std::string& in_rG_y)
         {
-            std::string r = "0";
+            ecc_curve ecc;
+            int ir = ecc.init_curve(dom.key_size_bits,
+                                    cryptoAL::key_util::base64_to_base10(dom.s_a),
+                                    cryptoAL::key_util::base64_to_base10(dom.s_b),
+                                    cryptoAL::key_util::base64_to_base10(dom.s_p),
+                                    cryptoAL::key_util::base64_to_base10(dom.s_n),
+                                    1,
+                                    cryptoAL::key_util::base64_to_base10(dom.s_gx),
+                                    cryptoAL::key_util::base64_to_base10(dom.s_gy));
+            if (ir < 0)
+            {
+                return false;
+            }
+
+            ecc_point in_Cm;
+            ecc_point in_rG;
+
+            mpz_t privateKey_decoder;
+
+            mpz_init_set_str(privateKey_decoder,    cryptoAL::key_util::base64_to_base10(s_k).data(), 10);
+            mpz_init_set_str(in_Cm.x,               cryptoAL::key_util::base64_to_base10(in_Cm_x).data(),10);
+            mpz_init_set_str(in_Cm.y,               cryptoAL::key_util::base64_to_base10(in_Cm_y).data(),10);
+            mpz_init_set_str(in_rG.x,               cryptoAL::key_util::base64_to_base10(in_rG_x).data(),10);
+            mpz_init_set_str(in_rG.y,               cryptoAL::key_util::base64_to_base10(in_rG_y).data(),10);
+
+            bool r = ecc.decode(in_Cm, in_rG, out_msg, privateKey_decoder);
+            if (r)
+            {
+            }
             return r;
         }
 
+    private:
+		bool compute_private_key_and_update_kG(bool verb = false)
+		{
+			ecc_point G;
+			ecc_point rG;
+			mpz_t private_key;
+
+			mpz_init_set_str(G.x, cryptoAL::key_util::base64_to_base10(dom.s_gx).data(),10);
+            mpz_init_set_str(G.y, cryptoAL::key_util::base64_to_base10(dom.s_gy).data(),10);
+
+			mpz_init_set_str(private_key, cryptoAL::key_util::base64_to_base10(s_k).data(), 10);
+
+			ecc_curve ecc;
+			ecc.verbose = verb;
+            int ir = ecc.init_curve(dom.key_size_bits,
+                                    cryptoAL::key_util::base64_to_base10(dom.s_a),
+                                    cryptoAL::key_util::base64_to_base10(dom.s_b),
+                                    cryptoAL::key_util::base64_to_base10(dom.s_p),
+                                    cryptoAL::key_util::base64_to_base10(dom.s_n),
+                                    1,
+                                    cryptoAL::key_util::base64_to_base10(dom.s_gx),
+                                    cryptoAL::key_util::base64_to_base10(dom.s_gy));
+            if (ir < 0)
+            {
+				std::cerr << "ERROR init ecc curve " << std::endl;
+                return false;
+            }
+
+            std::cerr << "computing  rG = ecc.mult(G, private_key); " << std::endl;
+			rG = ecc.mult(G, private_key);
+
+			mpz_class kgx(rG.x); s_kg_x = cryptoAL::key_util::base10_to_base64(kgx.get_str(10));
+            mpz_class kgy(rG.y); s_kg_y = cryptoAL::key_util::base10_to_base64(kgy.get_str(10));
+
+			std::cout << "public key kg_x:  " << s_kg_x << std::endl;
+			std::cout << "public key kg_y:  " << s_kg_y << std::endl;
+			return true;
+		}
+
+    public:
+		bool generate_private_public_key(bool verb = false)
+		{
+			long long Nbytes = 1.33 * dom.key_size_bits / 8;
+			s_k = generate_base64_random_string(Nbytes);
+
+			std::cout << "private key:  " << s_k << std::endl;
+
+			bool r = compute_private_key_and_update_kG(verb);
+			return r;
+		}
 
     };
 
-    
+
 }
 #endif
