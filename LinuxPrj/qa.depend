@@ -201,7 +201,7 @@
 	<stdio.h>
 	<ctype.h>
 
-1679024529 /home/server/dev/Encryptions/src/crypto_file.hpp
+1679111813 /home/server/dev/Encryptions/src/crypto_file.hpp
 	<filesystem>
 	<curl/curl.h>
 	<iostream>
@@ -215,6 +215,7 @@
 	"data.hpp"
 	"puzzle.hpp"
 	"../src/qa/rsa_gen.hpp"
+	"../src/crypto_ecckey.hpp"
 	"encrypt.h"
 	"qa/RSA-GMP/RSAGMP.h"
 	"qa/RSA-GMP/RSAGMPUtils.h"
@@ -733,7 +734,7 @@
 	"crc32a.hpp"
 	"qa/ecc_point/ecc_curve.hpp"
 
-1679104386 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.cpp
+1679111669 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.cpp
 	<stdio.h>
 	<stdlib.h>
 	<math.h>

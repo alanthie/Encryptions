@@ -942,53 +942,61 @@ void  menu()
 				ek.set_domain(domain);
 				bool r = ek.generate_private_public_key(true);
 
-				std::cout << "Enter path for ecc private keys database " << ECCKEY_MY_PRIVATE_DB << " (0 = same as domain) : ";
-                std::string pathecckeydb;
-                std::cin >> pathecckeydb;
-                if (pathecckeydb == "0") pathecckeydb = pathdb;
-                std::string fileECCKEYDB = pathecckeydb + ECCKEY_MY_PRIVATE_DB;
-
-				// READ
-				std::map< std::string, ecc_key > map_ecckey_private;
-
-				if (cryptoAL::fileexists(fileECCKEYDB) == false)
+				if (r)
 				{
-					std::ofstream outfile;
-					outfile.open(fileECCKEYDB, std::ios_base::out);
-					outfile.close();
-				}
+                    std::cout << "Enter path for ecc private keys database " << ECCKEY_MY_PRIVATE_DB << " (0 = same as domain) : ";
+                    std::string pathecckeydb;
+                    std::cin >> pathecckeydb;
+                    if (pathecckeydb == "0") pathecckeydb = pathdb;
+                    std::string fileECCKEYDB = pathecckeydb + ECCKEY_MY_PRIVATE_DB;
 
-				if (cryptoAL::fileexists(fileECCKEYDB) == true)
-				{
-					std::ifstream infile;
-					infile.open (fileECCKEYDB, std::ios_base::in);
-					infile >> bits(map_ecckey_private);
-					infile.close();
-				}
-				else
-				{
-					std::cerr << "no file: "  << fileECCKEYDB << std:: endl;
-					continue;
-				}
+                    // READ
+                    std::map< std::string, ecc_key > map_ecckey_private;
 
-				// backup
-				{
-					std::ofstream outfile;
-					outfile.open(fileECCKEYDB + ".bck", std::ios_base::out);
-					outfile << bits(map_ecckey_private);
-					outfile.close();
-				}
+                    if (cryptoAL::fileexists(fileECCKEYDB) == false)
+                    {
+                        std::ofstream outfile;
+                        outfile.open(fileECCKEYDB, std::ios_base::out);
+                        outfile.close();
+                    }
 
-				std::string keyname = std::string("MY_ECCKEY_") + std::to_string(domain.key_size_bits) + std::string("_") + cryptoAL::get_current_time_and_date();
-				map_ecckey_private.insert(std::make_pair(keyname, ek));
+                    if (cryptoAL::fileexists(fileECCKEYDB) == true)
+                    {
+                        std::ifstream infile;
+                        infile.open (fileECCKEYDB, std::ios_base::in);
+                        infile >> bits(map_ecckey_private);
+                        infile.close();
+                    }
+                    else
+                    {
+                        std::cerr << "no file: "  << fileECCKEYDB << std:: endl;
+                        continue;
+                    }
 
-				{
-					std::ofstream outfile;
-					outfile.open(fileECCKEYDB, std::ios_base::out);
-					outfile << bits(map_ecckey_private);
-					outfile.close();
-				}
-				std::cout << "key saved as: "  << keyname << " in " << fileECCKEYDB << std:: endl;
+                    // backup
+                    {
+                        std::ofstream outfile;
+                        outfile.open(fileECCKEYDB + ".bck", std::ios_base::out);
+                        outfile << bits(map_ecckey_private);
+                        outfile.close();
+                    }
+
+                    std::string keyname = std::string("MY_ECCKEY_") + std::to_string(domain.key_size_bits) + std::string("_") + cryptoAL::get_current_time_and_date();
+                    map_ecckey_private.insert(std::make_pair(keyname, ek));
+
+                    {
+                        std::ofstream outfile;
+                        outfile.open(fileECCKEYDB, std::ios_base::out);
+                        outfile << bits(map_ecckey_private);
+                        outfile.close();
+                    }
+                    std::cout << "key saved as: "  << keyname << " in " << fileECCKEYDB << std:: endl;
+                }
+                else
+                {
+                    std::cerr << "Error generating key " << std:: endl;
+                    continue;
+                }
 			}
 			else
 			{

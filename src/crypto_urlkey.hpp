@@ -32,7 +32,7 @@ public:
 	void clear_dynamic_data()
 	{
 		erase_buffer();
-		sRSA_ENCODED_DATA.clear();
+		sRSA_ECC_ENCODED_DATA.clear();
 	}
 
     Buffer* get_buffer()
@@ -128,14 +128,16 @@ public:
     char key[MIN_KEY_SIZE] = {0};       // RSA KEY_NAME
     char checksum[CHKSUM_SIZE] = {0};   // 64 key
 	char checksum_data[CHKSUM_SIZE] = {0};   // 64 data
-	uint32_t rsa_encoded_data_pad = 0;	// 4 bytes
-	uint32_t rsa_encoded_data_len = 0;	// 4 bytes
-	uint32_t rsa_encoded_data_pos = 0;	// 4 bytes
+
+	uint32_t rsa_ecc_encoded_data_pad = 0;	// 4 bytes
+	uint32_t rsa_ecc_encoded_data_len = 0;	// 4 bytes
+	uint32_t rsa_ecc_encoded_data_pos = 0;	// 4 bytes
+
 	uint32_t crypto_flags = 1;			// 4 bytes
 	uint32_t shuffle_perc = 0;			// 4 bytes
 
     char urlinfo_with_padding[URLINFO_SIZE] = {0};
-	std::string sRSA_ENCODED_DATA; 		// Base64 string of rsa_encoded_data_len // string's implementation uses memory on the heap.
+	std::string sRSA_ECC_ENCODED_DATA; 		// Base64 string of rsa_encoded_data_len // string's implementation uses memory on the heap.
 
 protected:
     Buffer* buff_key = nullptr;

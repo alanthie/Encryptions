@@ -42,6 +42,7 @@ public:
                 std::string istaging,                   // Environment - staging path
                 std::string ifolder_local,              // Environment - local data keys file path
                 std::string ifolder_local_rsa,          // Environment - RSA database *.db path
+				std::string ifolder_local_ecc,
                 std::string ilocal_histo_path,
                 bool verb = false,                      // Flag - verbose
                 bool keep = false,                      // Flag - keep staging files
@@ -62,6 +63,7 @@ public:
         staging = istaging;
         folder_local = ifolder_local;
         folder_local_rsa = ifolder_local_rsa;
+		folder_local_ecc = ifolder_local_ecc;
         local_histo_path = ilocal_histo_path;
         verbose = verb;
         keeping = keep;
@@ -193,6 +195,7 @@ public:
 		bool is_ftp     = false;
 		bool is_local   = false;
 		bool is_rsa     = false;
+		bool is_ecc   	= false;
 		bool is_histo   = false;
 
 		if (vurlkey[i].url[0]=='[')
@@ -213,6 +216,10 @@ public:
             {
                 is_rsa = true;
             }
+			else if (vurlkey[i].url[1]=='e')
+            {
+                is_ecc = true;
+            }
             else if (vurlkey[i].url[1]=='h')
             {
                 is_histo = true;
@@ -224,15 +231,18 @@ public:
 		else if (is_ftp)    pos_url = 3;
 		else if (is_local)  pos_url = 3;
 		else if (is_rsa)    pos_url = 3;
+		else if (is_ecc)    pos_url = 3;
 		else if (is_histo)  pos_url = 3;
         int rc = 0;
 
         cryptodata dataout_local;
         cryptodata dataout_other;
         cryptodata rsa_key_data;
+		cryptodata ecc_key_data;
         cryptodata histo_key_data;
 
         std::string embedded_rsa_key;
+		std::string embedded_ecc_key;
         std::string histo_key;
         history_key kout;
 
@@ -368,7 +378,7 @@ public:
 							// generate random embedded_rsa_key
 							uint32_t key_len_in_bytes = kout.key_size_in_bits/8;
 							embedded_rsa_key = generate_base64_random_string(key_len_in_bytes - 11);
-							vurlkey[i].sRSA_ENCODED_DATA = embedded_rsa_key;
+							vurlkey[i].sRSA_ECC_ENCODED_DATA = embedded_rsa_key;
 							if (verbose)
 							{
 								std::cout << "rsa key_len_in_bytes: " << key_len_in_bytes << std::endl;
@@ -378,25 +388,25 @@ public:
 
 						uint32_t msg_input_size_used = 0;
 						uint32_t msg_size_produced = 0;
-						std::string t = rsa_encode_string(vurlkey[i].sRSA_ENCODED_DATA, kout, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
+						std::string t = rsa_encode_string(vurlkey[i].sRSA_ECC_ENCODED_DATA, kout, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
 
 						// t may grow
-						vurlkey[i].sRSA_ENCODED_DATA = t;
+						vurlkey[i].sRSA_ECC_ENCODED_DATA = t;
 
 						if (riter == 0)
 						{
 							if (v_encoded_size.size() > 0)
-								v_encoded_size[0] = (uint32_t)vurlkey[i].sRSA_ENCODED_DATA.size();
+								v_encoded_size[0] = (uint32_t)vurlkey[i].sRSA_ECC_ENCODED_DATA.size();
 							else
-								v_encoded_size.push_back((uint32_t)vurlkey[i].sRSA_ENCODED_DATA.size() );
+								v_encoded_size.push_back((uint32_t)vurlkey[i].sRSA_ECC_ENCODED_DATA.size() );
 						}
 						else
 						{
 							v_encoded_size[riter] = (uint32_t)msg_size_produced;
 						}
 
-						vurlkey[i].rsa_encoded_data_pos = 0; // set later
-						vurlkey[i].rsa_encoded_data_len = (uint32_t)vurlkey[i].sRSA_ENCODED_DATA.size();
+						vurlkey[i].rsa_ecc_encoded_data_pos = 0; // set later
+						vurlkey[i].rsa_ecc_encoded_data_len = (uint32_t)vurlkey[i].sRSA_ECC_ENCODED_DATA.size();
                		}
 					else
 					{
@@ -434,6 +444,133 @@ public:
 				}
 			}
         }
+		else if (is_ecc)
+        {
+            std::vector<std::string> v = split(s, ";");
+            std::vector<uint32_t> v_encoded_size(v.size(), 0 );
+
+            if (v.size() < 1)
+            {
+                std::cerr << "ERROR ecc url bad format - missing ecc key name: " << s << std::endl;
+                r = false;
+            }
+            else
+            {
+                if (verbose)
+				{
+					if (v.size() == 1)
+                   	 	std::cout << "unique ecc key name in URL: " << v[0] << std::endl;
+					else
+						std::cout << "multiple ecc key in URL: " << v[0] << " " << v[1] << " ..." << std::endl;
+				}
+            }
+
+            if (r)
+            {
+				bool SELF_TEST = self_test;
+				std::string local_ecc_other_db ;
+				std::string local_ecc_my_db ;
+
+				if (SELF_TEST)
+				{
+					local_ecc_other_db = folder_local_ecc + ECCKEY_MY_PRIVATE_DB;
+					local_ecc_my_db    = folder_local_ecc + ECCKEY_OTHER_PUBLIC_DB;
+				}
+				else
+				{
+					local_ecc_other_db = folder_local_ecc + ECCKEY_OTHER_PUBLIC_DB; // Encoding with a public key of the recipient of the message
+					local_ecc_my_db    = folder_local_ecc + ECCKEY_MY_PRIVATE_DB;
+				}
+
+				// ITER
+				for (size_t riter=0; riter < v.size(); riter++)
+				{
+				 	std::string ecc_key_at_iter = v[riter];
+
+					ecc_key key_other;
+					r = get_ecc_key(ecc_key_at_iter, local_ecc_other_db, key_other);
+
+					ecc_key key_mine;
+					r = get_compatible_ecc_key(local_ecc_my_db, key_other, key_mine);
+
+                    if (r)
+                    {
+                        std::string ecc_key_at_iter = v[riter];
+                        if (riter == 0)
+                        {
+							// generate random embedded_ecc_key
+							uint32_t key_len_in_bytes = key_mine.dom.key_size_bits/8;
+							embedded_ecc_key = generate_base64_random_string(key_len_in_bytes - 11);
+							vurlkey[i].sRSA_ECC_ENCODED_DATA = embedded_ecc_key;
+							if (verbose)
+							{
+								std::cout << "ecc key_len_in_bytes: " << key_len_in_bytes << std::endl;
+								std::cout << "ecc_data: " << get_summary_hex(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size()) << " size:" << embedded_ecc_key.size() << std::endl;
+							}
+						}
+
+						uint32_t msg_input_size_used = 0;
+						uint32_t msg_size_produced = 0;
+
+						std::string t = ecc_encode_string(	vurlkey[i].sRSA_ECC_ENCODED_DATA, key_mine,
+                                                            key_other.s_kg_x, key_other.s_kg_y,
+															msg_input_size_used,
+															msg_size_produced, SELF_TEST);
+
+						// t may grow
+						vurlkey[i].sRSA_ECC_ENCODED_DATA = t;
+
+						if (riter == 0)
+						{
+							if (v_encoded_size.size() > 0)
+								v_encoded_size[0] = (uint32_t)vurlkey[i].sRSA_ECC_ENCODED_DATA.size();
+							else
+								v_encoded_size.push_back((uint32_t)vurlkey[i].sRSA_ECC_ENCODED_DATA.size() );
+						}
+						else
+						{
+							v_encoded_size[riter] = (uint32_t)msg_size_produced;
+						}
+
+						vurlkey[i].rsa_ecc_encoded_data_pos = 0; // set later
+						vurlkey[i].rsa_ecc_encoded_data_len = (uint32_t)vurlkey[i].sRSA_ECC_ENCODED_DATA.size();
+               		}
+					else
+					{
+						std::cerr << "ERROR ecc_key not found: " << ecc_key_at_iter << "  in " << local_ecc_other_db << std::endl;
+						break;
+					}
+
+				} // for (size_t riter=0; riter < v.size; riter++)
+
+				if (r)
+				{
+					if (v.size() > 1)
+					{
+						std::string new_URL = "[r]";
+						for (size_t riter=0; riter < v.size(); riter++)
+						{
+							std::string ecc_key_at_iter = v[riter];
+							new_URL += ecc_key_at_iter;
+							new_URL += std::string(";");
+							new_URL += std::to_string(v_encoded_size[riter]);
+							new_URL += std::string(";");
+						}
+						if (new_URL.size() > URL_MAX_SIZE)
+						{
+							std::cerr << "ERROR resursive ecc too long: " << new_URL << std::endl;
+							r = false;
+						}
+						else
+						{
+							vurlkey[i].set_url(new_URL);
+							if (verbose)
+                            	std::cout << "ECC Recursive NEW URL: " << new_URL << " " << new_URL.size() << std::endl;
+						}
+					}
+				}
+			}
+        }
         else
         {
             rc = wget(s.data(), file.data(), verbose);
@@ -450,6 +587,10 @@ public:
 			if (is_rsa)
             {
                 pointer_datafile = &rsa_key_data;
+            }
+			else if (is_ecc)
+            {
+                pointer_datafile = &ecc_key_data;
             }
             else if (is_histo)
             {
@@ -471,6 +612,10 @@ public:
                 if (is_rsa)
                 {
                     d.buffer.write(embedded_rsa_key.data(), (uint32_t)embedded_rsa_key.size());
+                }
+				else if (is_ecc)
+                {
+                    d.buffer.write(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size());
                 }
                 else if (is_histo)
                 {
@@ -517,7 +662,7 @@ public:
 				{
                     if (verbose)
                     {
-                        if (is_rsa == false)
+                        if ((is_rsa == false) && (is_ecc == false))
                         {
                             std::cout << "WARNING URL file size less than key size (padding remaining) "  << "key_pos=" << (int32_t)0 <<  std::endl;
                             std::cout << "WARNING Increase number of URL (or use bigger URL file size) for perfect security" <<  std::endl;
@@ -601,9 +746,10 @@ public:
 		temp.write(&vurlkey[i].key[0], MIN_KEY_SIZE, -1);
 		temp.write(&vurlkey[i].checksum[0], CHKSUM_SIZE, -1);
 		temp.write(&vurlkey[i].checksum_data[0], CHKSUM_SIZE, -1);
-		temp.writeUInt32(vurlkey[i].rsa_encoded_data_pad, -1);
-		temp.writeUInt32(vurlkey[i].rsa_encoded_data_len, -1);
-		temp.writeUInt32(vurlkey[i].rsa_encoded_data_pos, -1);
+
+		temp.writeUInt32(vurlkey[i].rsa_ecc_encoded_data_pad, -1);
+		temp.writeUInt32(vurlkey[i].rsa_ecc_encoded_data_len, -1);
+		temp.writeUInt32(vurlkey[i].rsa_ecc_encoded_data_pos, -1);
 
         if (shufflePerc > 0)
         {
@@ -1488,16 +1634,16 @@ public:
                     return false;
                 }
 
-                // RSA data
-				if (vurlkey[i-1].rsa_encoded_data_len > 0)
+                // RSA or ECC data
+				if (vurlkey[i-1].rsa_ecc_encoded_data_len > 0)
 				{
-					vurlkey[i-1].rsa_encoded_data_pos = data_temp.buffer.size();
+					vurlkey[i-1].rsa_ecc_encoded_data_pos = data_temp.buffer.size();
 
-					if (vurlkey[i-1].rsa_encoded_data_len % PADDING_MULTIPLE != 0)
+					if (vurlkey[i-1].rsa_ecc_encoded_data_len % PADDING_MULTIPLE != 0)
 					{
-						auto p = PADDING_MULTIPLE - (vurlkey[i-1].rsa_encoded_data_len % PADDING_MULTIPLE);
+						auto p = PADDING_MULTIPLE - (vurlkey[i-1].rsa_ecc_encoded_data_len % PADDING_MULTIPLE);
 						char c[1] = {0};
-						vurlkey[i-1].rsa_encoded_data_pad = p;
+						vurlkey[i-1].rsa_ecc_encoded_data_pad = p;
 						for(size_t j=0; j<p; j++)
 						{
 							data_temp.append(&c[0], 1);
@@ -1505,7 +1651,7 @@ public:
                     }
 					else
 					{
-						vurlkey[i-1].rsa_encoded_data_pad = 0;
+						vurlkey[i-1].rsa_ecc_encoded_data_pad = 0;
 					}
 
 					// Update urlinfo
@@ -1516,7 +1662,7 @@ public:
 					}
 
 					// APPEND RSA_ENCODED_DATA
-                    data_temp.append(vurlkey[i-1].sRSA_ENCODED_DATA.data(), vurlkey[i-1].rsa_encoded_data_len);
+                    data_temp.append(vurlkey[i-1].sRSA_ECC_ENCODED_DATA.data(), vurlkey[i-1].rsa_ecc_encoded_data_len);
 				}
 
                 // APPEND URLINFO
@@ -1555,15 +1701,15 @@ public:
 
 
 			// RSA DATA
-			vurlkey[vurlkey.size()-1].rsa_encoded_data_pos = data_temp.buffer.size();
-			if (vurlkey[vurlkey.size()-1].rsa_encoded_data_len > 0)
+			vurlkey[vurlkey.size()-1].rsa_ecc_encoded_data_pos = data_temp.buffer.size();
+			if (vurlkey[vurlkey.size()-1].rsa_ecc_encoded_data_len > 0)
 			{
 				// multiple PADDING_MULTIPLE
-				if (vurlkey[vurlkey.size()-1].rsa_encoded_data_len % PADDING_MULTIPLE != 0)
+				if (vurlkey[vurlkey.size()-1].rsa_ecc_encoded_data_len % PADDING_MULTIPLE != 0)
 				{
-                    auto p = PADDING_MULTIPLE - (vurlkey[vurlkey.size()-1].rsa_encoded_data_len % PADDING_MULTIPLE);
+                    auto p = PADDING_MULTIPLE - (vurlkey[vurlkey.size()-1].rsa_ecc_encoded_data_len % PADDING_MULTIPLE);
                     char c[1] = {0};
-                    vurlkey[vurlkey.size()-1].rsa_encoded_data_pad = p;
+                    vurlkey[vurlkey.size()-1].rsa_ecc_encoded_data_pad = p;
                     for(size_t j=0; j<p; j++)
                     {
                         data_temp.append(&c[0], 1);
@@ -1571,7 +1717,7 @@ public:
 				}
 				else
 				{
-					vurlkey[vurlkey.size()-1].rsa_encoded_data_pad = 0;
+					vurlkey[vurlkey.size()-1].rsa_ecc_encoded_data_pad = 0;
 				}
 
 				// Update
@@ -1582,7 +1728,7 @@ public:
 				}
 
 				// APPEND RSA_ENCODED_DATA
-				data_temp.append(vurlkey[vurlkey.size()-1].sRSA_ENCODED_DATA.data(), vurlkey[vurlkey.size()-1].rsa_encoded_data_len);
+				data_temp.append(vurlkey[vurlkey.size()-1].sRSA_ECC_ENCODED_DATA.data(), vurlkey[vurlkey.size()-1].rsa_ecc_encoded_data_len);
 			}
 
             // APPEND URLINFO
@@ -1660,6 +1806,7 @@ public:
     std::string staging;
     std::string folder_local;
     std::string folder_local_rsa;
+    std::string folder_local_ecc;
     std::string local_histo_path;
     bool verbose;
     bool keeping;

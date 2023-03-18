@@ -14,6 +14,7 @@
 #include "data.hpp"
 #include "puzzle.hpp"
 #include "../src/qa/rsa_gen.hpp"
+#include "../src/crypto_ecckey.hpp"
 #include "encrypt.h"
 
 #ifdef _WIN32
@@ -72,6 +73,69 @@ namespace cryptoAL
 		return r;
 	}
 
+	bool get_compatible_ecc_key(const std::string& local_ecc_mine_db, ecc_key& key_other, ecc_key& key_out_mine)
+	{
+		bool found = false;
+
+		if (fileexists(local_ecc_mine_db) == true)
+		{
+			std::map<std::string, ecc_key> map_ecc;
+
+			std::ifstream infile;
+			infile.open (local_ecc_mine_db, std::ios_base::in);
+			infile >> bits(map_ecc);
+			infile.close();
+
+			for(auto& [userkey, k] : map_ecc)
+			{
+				if ((key_other.dom.name() == k.dom.name()) &&
+					(key_other.dom.key_size_bits == k.dom.key_size_bits) )
+				{
+					found = true;
+					key_out_mine = k;
+					break;	// take first...
+				}
+			}
+		}
+		else
+		{
+			std::cout << "ERROR no ecc file: " << local_ecc_mine_db << std::endl;
+		}
+
+		return found;
+	}
+
+	bool get_ecc_key(const std::string& ecc_key_name, const std::string& local_ecc_db, ecc_key& kout)
+	{
+		bool found = false;
+
+		if (fileexists(local_ecc_db) == true)
+		{
+			std::map<std::string, ecc_key> map_ecc;
+
+			std::ifstream infile;
+			infile.open (local_ecc_db, std::ios_base::in);
+			infile >> bits(map_ecc);
+			infile.close();
+
+			for(auto& [userkey, k] : map_ecc)
+			{
+				if (userkey == ecc_key_name)
+				{
+					found = true;
+					kout = k;
+					break;
+				}
+			}
+		}
+		else
+		{
+			std::cout << "ERROR no ecc file: " << local_ecc_db << std::endl;
+		}
+
+		return found;
+	}
+
 	bool get_rsa_key(const std::string& rsa_key_name, const std::string& local_rsa_db, generate_rsa::rsa_key& kout)
 	{
 		bool found = false;
@@ -103,6 +167,67 @@ namespace cryptoAL
 		return found;
 	}
 
+	std::string ecc_decode_string(	const std::string& smsg, ecc_key& ek,
+        							uint32_t msg_input_size_touse,
+									uint32_t& msg_size_produced)
+	{
+		std::string decoded_ecc_data;
+		std::string msg;
+
+		if (smsg.size() == msg_input_size_touse)
+		{
+            msg = smsg;
+		}
+		else if (msg_input_size_touse < smsg.size() )
+		{
+            msg = smsg.substr(0, msg_input_size_touse);
+		}
+		else
+		{
+            std::cout << "ERROR string to decode too big " << smsg.size() << " " << msg_input_size_touse << std::endl;
+            throw std::string("ERROR string to decode too big");
+		}
+
+		std::string out_msg;
+
+		// parse...
+		std::vector<std::string> v = split(smsg, ";");
+		if (v.size() < 8)
+		{
+			std::cerr << "ERROR ecc_decode_string bad format - missing token " << v.size() << std::endl;
+			throw std::string("ERROR ecc_decode_string bad format - missing token ");
+		}
+
+		long long vlen[4];
+		vlen[0] = cryptoAL::str_to_ll(v[0]);
+		vlen[1] = cryptoAL::str_to_ll(v[2]);
+		vlen[2] = cryptoAL::str_to_ll(v[4]);
+		vlen[3] = cryptoAL::str_to_ll(v[6]);
+
+		std::string in_Cm_x;
+		std::string in_Cm_y;
+		std::string in_rG_x;
+		std::string in_rG_y;
+
+		// check len...
+
+		if (vlen[0] > 0) in_Cm_x = v[1];
+		if (vlen[1] > 0) in_Cm_y = v[3];
+		if (vlen[2] > 0) in_rG_x = v[5];
+		if (vlen[3] > 0) in_rG_y = v[7];
+
+        bool r = ek.decode(	out_msg, in_Cm_x, in_Cm_y, in_rG_x, in_rG_y);
+		if (r)
+		{
+			decoded_ecc_data = out_msg;
+		}
+
+        msg_size_produced = (uint32_t)decoded_ecc_data.size();
+		if (msg_input_size_touse < smsg.size() )
+            decoded_ecc_data += smsg.substr(msg_input_size_touse);
+
+		return decoded_ecc_data;
+	}
 
 	std::string rsa_decode_string(const std::string& smsg, generate_rsa::rsa_key& k,
         uint32_t msg_input_size_touse, uint32_t& msg_size_produced, bool use_gmp)
@@ -144,6 +269,60 @@ namespace cryptoAL
             decoded_rsa_data += smsg.substr(msg_input_size_touse);
 
 		return decoded_rsa_data;
+	}
+
+	std::string ecc_encode_string(  const std::string& smsg,
+									ecc_key& ek,
+									const std::string& public_key_of_decoder_x,
+									const std::string& public_key_of_decoder_y,
+                                    uint32_t& msg_input_size_used,
+									uint32_t& msg_size_produced,
+                                    bool SELF_TEST)
+	{
+		std::string encoded_ecc_data;
+
+		// smsg maybe less or bigger than ecc capacity
+		std::string msg_to_encrypt;
+		uint32_t key_len_bytes = ek.dom.key_size_bits / 8;
+
+		if (key_len_bytes < smsg.size())
+		{
+			msg_to_encrypt = smsg.substr(0, key_len_bytes);
+		}
+		else
+		{
+			msg_to_encrypt = smsg;
+		}
+		msg_input_size_used = (uint32_t)msg_to_encrypt.size();
+
+		{
+			std::string out_Cm_x;
+			std::string out_Cm_y;
+			std::string out_rG_x;
+			std::string out_rG_y;
+
+		   	bool r = ek.encode(	smsg, public_key_of_decoder_x, public_key_of_decoder_y,
+                    			out_Cm_x, out_Cm_y, out_rG_x, out_rG_y);
+
+			if (r)
+			{
+				encoded_ecc_data  = std::to_string(out_Cm_x.size()) + ";" + out_Cm_x + ";";
+				encoded_ecc_data += std::to_string(out_Cm_y.size()) + ";" + out_Cm_y + ";";
+				encoded_ecc_data += std::to_string(out_rG_x.size()) + ";" + out_rG_x + ";";
+				encoded_ecc_data += std::to_string(out_rG_y.size()) + ";" + out_rG_y + ";";
+			}
+
+			if (SELF_TEST)
+			{
+			}
+		}
+
+		msg_size_produced = (uint32_t)encoded_ecc_data.size() ;
+		if (msg_to_encrypt.size() < smsg.size())
+		{
+			encoded_ecc_data += smsg.substr(msg_to_encrypt.size());
+		}
+		return encoded_ecc_data;
 	}
 
 	std::string rsa_encode_string(  const std::string& smsg, generate_rsa::rsa_key& k,

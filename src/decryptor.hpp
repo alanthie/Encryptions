@@ -32,6 +32,7 @@ public:
 			 	std::string istaging,
 			 	std::string ifolder_local,
 			 	std::string ifolder_local_rsa,
+			 	std::string ifolder_local_ecc,
 			 	std::string ilocal_histo_path,
 			 	bool verb = false,
 			 	bool keep = false,
@@ -46,6 +47,7 @@ public:
         staging =istaging;
         folder_local = ifolder_local;
         folder_local_rsa = ifolder_local_rsa;
+        folder_local_ecc = ifolder_local_ecc;
         local_histo_path = ilocal_histo_path;
         verbose = verb;
         keeping = keep;
@@ -115,6 +117,8 @@ public:
             std::string s(out_uk.url);
             if ((s.size() >= 3) && (s[0]=='[') && (s[1]=='r') && (s[2]==']'))
                 std::cout << "url: [r]" << get_summary_hex(s.data()+3, (uint32_t) s.size()-3) << " "<< std::endl;
+            else if ((s.size() >= 3) && (s[0]=='[') && (s[1]=='e') && (s[2]==']'))
+                std::cout << "url: [r]" << get_summary_hex(s.data()+3, (uint32_t) s.size()-3) << " "<< std::endl;
             else
                 std::cout << "url: " << s << " "<< std::endl;
         }
@@ -138,11 +142,6 @@ public:
 		out_uk.key_fromL = temp.readUInt16(pos); pos+=2;
 		out_uk.key_size  = temp.readUInt32(pos); pos+=4;
 
-        if (verbose)
-        {
-            //std::cout << "key_fromH " << out_uk.key_fromH << " ";
-            //std::cout << "key_fromL " << out_uk.key_fromL << std::endl;
-		}
 		int32_t v = out_uk.key_fromH * BASE + out_uk.key_fromL;
 
 		if (verbose)
@@ -153,6 +152,7 @@ public:
 
         // zero
         bool is_rsa =  false;
+        bool is_ecc =  false;
         if (out_uk.url[0]=='[')
         {
             if (out_uk.url[1]=='r')
@@ -163,14 +163,23 @@ public:
                     std::cout << "is_rsa " << std::endl;
                 }
             }
+            else if (out_uk.url[1]=='e')
+            {
+                is_ecc = true;
+                if (verbose)
+                {
+                    std::cout << "is_ecc " << std::endl;
+                }
+            }
         }
 
-        if (is_rsa == false)
+        if ((is_rsa == false) && (is_ecc == false))
         {
             for( uint32_t j = 0; j< MIN_KEY_SIZE; j++) out_uk.key[j] = 0;
         }
         else
         {
+            // NOT USE...
             for( uint32_t j = 0; j< MIN_KEY_SIZE; j++) out_uk.key[j] = temp.getdata()[pos+j];
             out_uk.key[MIN_KEY_SIZE - 1] = 0;
         }
@@ -188,18 +197,17 @@ public:
         }
         pos += CHKSUM_SIZE;
 
-		if (is_rsa == true)
+		if ((is_rsa == true) || (is_ecc == true))
 		{
-            //std::cout << "read_urlinfo URL  is_rsa" << std::endl;
-			out_uk.rsa_encoded_data_pad = temp.readUInt32(pos); pos+=4;
-			out_uk.rsa_encoded_data_len = temp.readUInt32(pos); pos+=4;
-			out_uk.rsa_encoded_data_pos = temp.readUInt32(pos); pos+=4;
+			out_uk.rsa_ecc_encoded_data_pad = temp.readUInt32(pos); pos+=4;
+			out_uk.rsa_ecc_encoded_data_len = temp.readUInt32(pos); pos+=4;
+			out_uk.rsa_ecc_encoded_data_pos = temp.readUInt32(pos); pos+=4;
 		}
 		else
 		{
-			out_uk.rsa_encoded_data_pad = 0; pos+=4;
-			out_uk.rsa_encoded_data_len = 0; pos+=4;
-			out_uk.rsa_encoded_data_pos = 0; pos+=4;
+			out_uk.rsa_ecc_encoded_data_pad = 0; pos+=4;
+			out_uk.rsa_ecc_encoded_data_len = 0; pos+=4;
+			out_uk.rsa_ecc_encoded_data_pos = 0; pos+=4;
 		}
 
 		out_uk.crypto_flags = temp.readUInt32(pos); pos+=4;
@@ -240,9 +248,11 @@ public:
 		cryptodata dataout_local;
         cryptodata dataout_other;
         cryptodata rsa_key_data;
+        cryptodata ecc_key_data;
         cryptodata histo_key_data;
 
         std::string embedded_rsa_key;
+        std::string embedded_ecc_key;
         std::string histo_key;
 
 		char u[URL_MAX_SIZE] = {0};
@@ -251,6 +261,7 @@ public:
         bool is_ftp   =  false;
         bool is_local =  false;
         bool is_rsa   =  false;
+        bool is_ecc   =  false;
         bool is_histo =  false;
 
 		if (r)
@@ -276,6 +287,10 @@ public:
                 {
                     is_rsa = true;
                 }
+                else if (u[1]=='e')
+                {
+                    is_ecc = true;
+                }
                 else if (u[1]=='h')
                 {
                     is_histo = true;
@@ -287,6 +302,7 @@ public:
             else if (is_ftp)     pos_url = 3;
             else if (is_local)   pos_url = 3;
             else if (is_rsa)     pos_url = 3;
+            else if (is_ecc)     pos_url = 3;
             else if (is_histo)   pos_url = 3;
             int rc = 0;
 
@@ -371,7 +387,7 @@ public:
 				uk.url[URL_MAX_SIZE-1] = 0;
 				std::string rsa_key = uk.without_header_token();
 
-				if (uk.rsa_encoded_data_pad + uk.rsa_encoded_data_pos + uk.rsa_encoded_data_len > data_temp.buffer.size())
+				if (uk.rsa_ecc_encoded_data_pad + uk.rsa_ecc_encoded_data_pos + uk.rsa_ecc_encoded_data_len > data_temp.buffer.size())
 				{
 					std::cerr << "ERROR invalid data file (too small): " << file << std::endl;
 					r = false;
@@ -379,15 +395,15 @@ public:
 				else
 				{
 					char c;
-					for(size_t j=0;j<uk.rsa_encoded_data_len;j++)
+					for(size_t j=0;j<uk.rsa_ecc_encoded_data_len;j++)
 					{
-						c = data_temp.buffer.getdata()[uk.rsa_encoded_data_pos + uk.rsa_encoded_data_pad + j];
-						uk.sRSA_ENCODED_DATA += c;
+						c = data_temp.buffer.getdata()[uk.rsa_ecc_encoded_data_pos + uk.rsa_ecc_encoded_data_pad + j];
+						uk.sRSA_ECC_ENCODED_DATA += c;
 					}
 
-					if(uk.rsa_encoded_data_len != uk.sRSA_ENCODED_DATA.size())
+					if(uk.rsa_ecc_encoded_data_len != uk.sRSA_ECC_ENCODED_DATA.size())
 					{
-						std::cerr << "ERROR inconsistency reading rsa data: " << uk.sRSA_ENCODED_DATA.size() << std::endl;
+						std::cerr << "ERROR inconsistency reading rsa data: " << uk.sRSA_ECC_ENCODED_DATA.size() << std::endl;
 						r = false;
 					}
 				}
@@ -467,18 +483,18 @@ public:
 							if (riter != 0)
 							{
 								uint32_t msg_size_produced;
-								std::string d = uk.sRSA_ENCODED_DATA.substr(0, v_encoded_size[riter]);
+								std::string d = uk.sRSA_ECC_ENCODED_DATA.substr(0, v_encoded_size[riter]);
 								std::string t = rsa_decode_string(d, kout, (uint32_t)d.size(), msg_size_produced, use_gmp);
 
 								// may reduce size
-								uk.sRSA_ENCODED_DATA = t + uk.sRSA_ENCODED_DATA.substr(d.size());
+								uk.sRSA_ECC_ENCODED_DATA = t + uk.sRSA_ECC_ENCODED_DATA.substr(d.size());
 
 								//std::cout << "RSA ITER: " << riter << " " << rsa_key_at_iter << " from " << d.size() << " to " << t.size() << " total left " << uk.sRSA_ENCODED_DATA .size() << std::endl;
 							}
 							else
 							{
 								uint32_t msg_size_produced;
-								embedded_rsa_key = rsa_decode_string(uk.sRSA_ENCODED_DATA, kout, (uint32_t)uk.sRSA_ENCODED_DATA.size(), msg_size_produced, use_gmp);
+								embedded_rsa_key = rsa_decode_string(uk.sRSA_ECC_ENCODED_DATA, kout, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced, use_gmp);
 							}
 						}
 						else
@@ -487,6 +503,10 @@ public:
 						}
 					}
 				}
+            }
+            else if (is_ecc)
+            {
+                //...
             }
             else
             {
@@ -505,6 +525,10 @@ public:
 			if (is_rsa)
             {
                 pointer_datafile = &rsa_key_data;
+            }
+            else if (is_ecc)
+            {
+                pointer_datafile = &ecc_key_data;
             }
             else if (is_histo)
             {
@@ -526,6 +550,10 @@ public:
 			    if (is_rsa)
                 {
                     d.buffer.write(embedded_rsa_key.data(), (uint32_t)embedded_rsa_key.size());
+                }
+                else if (is_ecc)
+                {
+                    d.buffer.write(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size());
                 }
                 else if (is_histo)
                 {
@@ -1561,30 +1589,30 @@ public:
                         break;
                     }
 
-					if (uk.rsa_encoded_data_len > 0)
+					if (uk.rsa_ecc_encoded_data_len > 0)
 					{
-						if (data_temp.buffer.size() < uk.rsa_encoded_data_len)
+						if (data_temp.buffer.size() < uk.rsa_ecc_encoded_data_len)
 						{
 							std::cerr << "ERROR " << "encrypted_data can not be decoded  - invalid data size" << std::endl;
 							r = false;
 						}
 						else
 						{
-							data_temp.buffer.remove_last_n_char(uk.rsa_encoded_data_len);
+							data_temp.buffer.remove_last_n_char(uk.rsa_ecc_encoded_data_len);
 						}
 
 						if (r)
 						{
-							if (uk.rsa_encoded_data_pad > 0)
+							if (uk.rsa_ecc_encoded_data_pad > 0)
 							{
-								if (data_temp.buffer.size() < uk.rsa_encoded_data_pad)
+								if (data_temp.buffer.size() < uk.rsa_ecc_encoded_data_pad)
 								{
 									std::cerr << "ERROR " << "encrypted_data can not be decoded pad - invalid data size" << std::endl;
 									r = false;
 								}
 								else
 								{
-									data_temp.buffer.remove_last_n_char(uk.rsa_encoded_data_pad);
+									data_temp.buffer.remove_last_n_char(uk.rsa_ecc_encoded_data_pad);
 								}
 							}
 
@@ -1734,6 +1762,7 @@ public:
 	std::string staging;
 	std::string folder_local;
 	std::string folder_local_rsa;
+	std::string folder_local_ecc;
 	std::string local_histo_path;
 
     cryptodata  data_temp;

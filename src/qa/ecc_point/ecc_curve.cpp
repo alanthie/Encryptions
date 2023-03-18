@@ -5,7 +5,8 @@
 #include "ecc_curve.hpp"
 
 int ecc_curve::init_curve(  unsigned int nbits,
-                            const std::string& ia, const std::string& ib, const std::string& iprime, const std::string& iorder, int icofactor, const std::string& igx, const std::string& igy)
+                            const std::string& ia, const std::string& ib, const std::string& iprime, 
+							const std::string& iorder, int icofactor, const std::string& igx, const std::string& igy)
 {
     if (verbose) std::cout << "init_curve " << "\n";
 
