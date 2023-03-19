@@ -1,0 +1,27 @@
+./ecgen --fp -v -m 16g -u -p -r 512 --threads=16
+seadata not found, this will probably take quite some time.
+[
++++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++-++++++++
+{
+    "field": {
+        "p": "0xd656341cc5e274506c8ce6397af2183fdf3efb27300e30578dfc3e6162aecd70600d0536f3658380370298d1485da3aa7f8ae9f0aad16e8e6f7810a0e3c9b78d"
+    },
+    "a": "0x1c52e6d6cbc8369edf7093835eac7c35577661b4d40f89b081b242de7b535fe0bc9eacb8316fcdbe6bf38cafba8752d8e02de65879dd3ca744470e790d60ec94",
+    "b": "0x969dc5df1cbc5b6cc83a50caba1366532eecda20260da0f54cfccb5f678cb9b27981136f0e83d81eb45219c534b69b7164af37e6353e771bd6ee993d47f963e6",
+    "order": "0xd656341cc5e274506c8ce6397af2183fdf3efb27300e30578dfc3e6162aecd7106276025db526f60d7c61e693e3a2c31be7844517e44e354a821b12f2a687ab5",
+    "subgroups": [
+        {
+            "x": "0x189dea7edfb35688f5f35d34fa9c0910aded8788a6d19b31ffaa2242ad9de64132b5ec18768245efa8b4dc89133d0a9971e022c581a830310f568447f1633a07",
+            "y": "0xa6fd0720c0f21e1c4b4a43d3f0b911f25c54f430dc609870054763d60819eb708d6c21106e0db3f2f722540da94ded1770d6743454581af99813657efecb3c16",
+            "order": "0xd656341cc5e274506c8ce6397af2183fdf3efb27300e30578dfc3e6162aecd7106276025db526f60d7c61e693e3a2c31be7844517e44e354a821b12f2a687ab5",
+            "cofactor": "0x1",
+            "points": [
+                {
+                    "x": "0x189dea7edfb35688f5f35d34fa9c0910aded8788a6d19b31ffaa2242ad9de64132b5ec18768245efa8b4dc89133d0a9971e022c581a830310f568447f1633a07",
+                    "y": "0xa6fd0720c0f21e1c4b4a43d3f0b911f25c54f430dc609870054763d60819eb708d6c21106e0db3f2f722540da94ded1770d6743454581af99813657efecb3c16",
+                    "order": "0xd656341cc5e274506c8ce6397af2183fdf3efb27300e30578dfc3e6162aecd7106276025db526f60d7c61e693e3a2c31be7844517e44e354a821b12f2a687ab5"
+                }
+            ]
+        }
+    ]
+}]
