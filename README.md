@@ -115,6 +115,7 @@ Current set of encryption algorithms
     Elliptic Curve
     Recursive Elliptic Curve
     Future: Multiple primes (3+) RSA
+    Future: Cascading auto generated embedded key protected by multiple RSA/ECC keys
 </pre>
 
 Overview:
@@ -199,18 +200,30 @@ Man-In-The-Middle Attack prevention now implemented
 Planned feature:
 ![Alt text](/Doc/planned1.png?raw=true "planned1")
 
-Anothr example of urls.txt with keys/data split in subfolders:
+Another example of urls.txt with data organized in subfolders:
 <pre>
 ;------------------------------------------------------------------------------------------------------------
-; Encoding commands, msg.zip.encrypted file to be send to the recipient (sam):
-;../../../bin/Release/crypto encode -u urls.txt -g 1 -v 1 -i msg.zip -l ./sam/local/ -r ./sam/ -x 3 -epu ./sam/ -epv ./me/
+; Encoding, msg.zip.encrypted file will be send to the recipient (sam):
+;
+; File to encrypt [-i msg.zip] [default ouput will be msg.zip.encrypted]
+; File describing keys to genrate for encryption [-u urls.txt]
+; Folder containing files of random data commonly shared with recipient [-l ./sam/local/]
+; Folder containing recipient public RSA keys [-r ./sam/]
+; Folder containing recipient public ECC keys [-epu ./sam/]
+; Folder containing my private ECC keys [-epv ./me/]
+; Increase all key size (a default perfect key size is internally computed) by a factor of 3 [-x 3]
+; Verbose on [-v 1]
+; Use GMP for accelerated computation [-g 1]
+;
+; Command:
+; crypto encode -u urls.txt -g 1 -v 1 -i msg.zip -l ./sam/local/ -r ./sam/ -x 3 -epu ./sam/ -epv ./me/
 ;------------------------------------------------------------------------------------------------------------
 
 ;------------------------------------------------------------------------------------------------------------
-; Decoding commands for me:
+; Decoding:
 ;
-; Decoding commands at the recipient site (sam):
-;../../../bin/Release/crypto decode -g 1 -i msg.zip.encrypted -l ./al/local/ -r ./me/  -epu ./al/ -epv ./me/ -v 1
+; Decoding command at the recipient site (sam):
+; crypto decode -g 1 -i msg.zip.encrypted -l ./al/local/ -r ./me/  -epu ./al/ -epv ./me/ -v 1
 ;------------------------------------------------------------------------------------------------------------
 
 ;------------------------------------------------------------------------
