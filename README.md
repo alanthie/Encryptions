@@ -7,14 +7,13 @@ Multiple encryption keys for one message to encrypt.
                      public web files, 
                      public video web files (using youtube-dl), 
                      user/password protected ftp files].
-[Embedded random keys automatically generated and protected by public/private RSA keys].
-[Embedded random keys automatically generated and protected by public/private ECC keys].
+[Embedded random keys automatically generated and protected by public/private RSA or ECC keys].
 [Historical hash keys].
 </pre>
 
 Multiple encryption algorithms for one message to encrypt.
 
-Deep recursive encryption
+Deep recursive and cascading encryption [so can use many lower bits key size if needed]
 
 Unlimited encryption keys size!
 
