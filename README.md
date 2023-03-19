@@ -196,6 +196,9 @@ Select a task:
 Man-In-The-Middle Attack prevention now implemented
 ![Alt text](/Doc/ManInTheMiddleAttack.png?raw=true "ManInTheMiddleAttack")
 
+Planned feature:
+![Alt text](/Doc/planned1.png?raw=true "planned1")
+
 Anothr example of urls.txt with keys/data split in subfolders:
 <pre>
 ;------------------------------------------------------------------------------------------------------------

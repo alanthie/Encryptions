@@ -10,8 +10,6 @@
 #include <string>
 #include "base_const.hpp"
 
-#define CRYUPTO_DEBUG 1
-
 namespace cryptoAL
 {
 
@@ -38,15 +36,15 @@ constexpr static int16_t KEYPOS_ENCODESIZE  = 8;
 constexpr static int16_t URL_LEN_ENCODESIZE = 2;
 constexpr static int16_t CRYPTO_ALGO_ENCODESIZE = 2;
 constexpr static uint32_t URL_MIN_SIZE      = 4;
-constexpr static uint32_t URL_MAX_SIZE      = 64*16; // Multiple RSA keys name;size
+constexpr static uint32_t URL_MAX_SIZE      = 64*16; // Multiple RSA/ECC keys name;size // TODO  make it dynamic (any size)
 
 constexpr static uint32_t MIN_KEY_SIZE      = 64;
 constexpr static int16_t CHKSUM_SIZE        = 64;
 constexpr static int16_t PADDING_LEN_ENCODESIZE = 2;
-constexpr static uint32_t RSA_LEN_ENCODESIZE = 4;
-constexpr static uint32_t RSA_POS_ENCODESIZE = 4;
-constexpr static uint32_t RSA_PAD_ENCODESIZE = 4;
-constexpr static uint32_t CRYPTO_FLAGS_ENCODESIZE = 4;
+constexpr static uint32_t RSA_LEN_ENCODESIZE = 4;   // RSA/ECC
+constexpr static uint32_t RSA_POS_ENCODESIZE = 4;   // RSA/ECC
+constexpr static uint32_t RSA_PAD_ENCODESIZE = 4;   // RSA/ECC
+constexpr static uint32_t CRYPTO_FLAGS_ENCODESIZE   = 4;
 constexpr static uint32_t CRYPTO_SHUFFLE_ENCODESIZE = 4;
 
 constexpr static uint32_t URLINFO_SIZE      =   URL_LEN_ENCODESIZE + URL_MAX_SIZE +
