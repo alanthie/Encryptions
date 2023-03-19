@@ -331,6 +331,8 @@ bool ecc_curve::encode(ecc_point& out_Cm, ecc_point& out_rG, const std::string& 
 
 bool ecc_curve::decode(ecc_point& in_Cm, ecc_point& in_rG, std::string& out_msg, mpz_t& private_key)
 {
+	// TODO validate Cm, rG on the curve...
+
 	ecc_point rGPriv = mult(in_rG, private_key);
 
     message_point Pm;
