@@ -35,7 +35,7 @@ int ecc_curve::init_curve(  unsigned int nbits,
 
 	if (existPoint1(generator_point.x,generator_point.y))
     {
-        std::cout << "generator_point OK"  << "\n";
+        if (verbose) std::cout << "generator_point OK"  << "\n";
 		return 0;
 	}
 	else

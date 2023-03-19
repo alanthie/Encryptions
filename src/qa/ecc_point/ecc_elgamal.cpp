@@ -48,7 +48,7 @@ bool ecc_curve::format_msg_for_ecc(const std::string& msg, cryptoAL::Buffer& out
    	if (verbose)
     for(size_t i=0;i<out_message.size();i++)
    	{
-        std::cout << i << " message[i] " << (unsigned int) (unsigned char)out_message.getdata()[i]<< std::endl;
+        //std::cout << i << " message[i] " << (unsigned int) (unsigned char)out_message.getdata()[i]<< std::endl;
    	}
    	return true;
 }
@@ -91,7 +91,7 @@ message_point ecc_curve::getECCPointFromMessage(cryptoAL::Buffer& message_buffer
 		n = (unsigned int)(unsigned char)(*message);
 		mpz_addmul_ui(x,temp,n);
 		++message;
-		if (verbose) gmp_printf("x=%Zd\n",x);
+		//if (verbose) gmp_printf("x=%Zd\n",x);
 	}
 
     // check x, x+1, ... x+255 50%, 75%, ...99.9999...%

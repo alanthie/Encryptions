@@ -196,6 +196,41 @@ Select a task:
 Man-In-The-Middle Attack prevention now implemented
 ![Alt text](/Doc/ManInTheMiddleAttack.png?raw=true "ManInTheMiddleAttack")
 
+Anothr example of urls.txt with keys/data split in subfolders:
+<pre>
+;------------------------------------------------------------------------------------------------------------
+; Encoding commands, msg.zip.encrypted file to be send to the recipient (sam):
+;../../../bin/Release/crypto encode -u urls.txt -g 1 -v 1 -i msg.zip -l ./sam/local/ -r ./sam/ -x 3 -epu ./sam/ -epv ./me/
+;------------------------------------------------------------------------------------------------------------
+
+;------------------------------------------------------------------------------------------------------------
+; Decoding commands for me:
+;
+; Decoding commands at the recipient site (sam):
+;../../../bin/Release/crypto decode -g 1 -i msg.zip.encrypted -l ./al/local/ -r ./me/  -epu ./al/ -epv ./me/ -v 1
+;------------------------------------------------------------------------------------------------------------
+
+;------------------------------------------------------------------------
+; URL key sources when encoding:
+;------------------------------------------------------------------------
+;Web files
+;https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz
+;https://i.postimg.cc/ZKGMV8SP/Screenshot-from-2023-02-23-19-39-28.png
+
+;Local shared files between me and sam (like shared USB) in ./sam/
+[l]binary.dat.71
+;[l]binary.dat.44
+
+;Historical shared confirmed hashes in ./me/
+;[h]5
+
+;RSA publc keys given by recipient (sam) in ./sam/
+[r]MY_RSAKEY_512_2023-03-18_23:32:34
+
+;ECC publc keys given by recipient (sam) in ./sam/
+[e]MY_ECCKEY_1024_2023-03-18_12:20:21
+</pre>
+
 License
 <pre>
 Free for personal usage
