@@ -199,6 +199,9 @@ Man-In-The-Middle Attack prevention now implemented
 Planned feature:
 ![Alt text](/Doc/planned1.png?raw=true "planned1")
 
+Planned feature:
+![Alt text](/Doc/autokeys.png?raw=true "autokeys")
+
 Another example of urls.txt with data organized in subfolders:
 <pre>
 ;------------------------------------------------------------------------------------------------------------
