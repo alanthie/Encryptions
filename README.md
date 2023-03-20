@@ -113,7 +113,7 @@ Current set of encryption algorithms
     Recursive RSA
     Elliptic Curve
     Recursive Elliptic Curve
-    Future: Multiple primes (3+) RSA
+    Future: Multiple primes (3+) RSA [ the security of Multi-prime RSA is undeniably better than the standard RSA]
     Future: Cascading auto generated embedded key protected by multiple RSA/ECC keys
 </pre>
 
