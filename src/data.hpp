@@ -1,9 +1,9 @@
-#ifndef _INCLUDES_data
-#define _INCLUDES_data
+#ifndef _INCLUDES_cryptodata
+#define _INCLUDES_cryptodata
 
 #include <iostream>
-#include "Buffer.hpp"
 #include "crypto_const.hpp"
+#include "Buffer.hpp"
 #include <fstream>
 #include <stdio.h>
 
@@ -14,7 +14,7 @@ class cryptodata
 {
 public:
     cryptodata(bool verb = false) {verbose = verb;}
-    ~cryptodata() {}
+    virtual ~cryptodata() {}
 
     virtual bool read_from_file(std::string filename, bool allow_realloc = true)
     {

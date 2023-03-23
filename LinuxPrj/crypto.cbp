@@ -70,6 +70,7 @@
 		<Unit filename="../src/crypto_package.hpp" />
 		<Unit filename="../src/crypto_shuffle.hpp" />
 		<Unit filename="../src/crypto_test.hpp" />
+		<Unit filename="../src/cryptodata_list.hpp" />
 		<Unit filename="../src/data.hpp" />
 		<Unit filename="../src/decryptor.hpp" />
 		<Unit filename="../src/encrypt.h" />

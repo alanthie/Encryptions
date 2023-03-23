@@ -236,16 +236,16 @@ namespace cryptoAL
 		}
 	}
 
-	bool export_public_history_key(const std::string& local_histo_db)
+	bool export_public_history_key(const std::string& fileHistoPrivateDB, const std::string& fileHistoPublicDB)
 	{
         bool r = true;
         std::map<std::string, history_key_public> map_histo_pub;
 		std::map<uint32_t, history_key> map_histo;
 
-		if (fileexists(local_histo_db) == true)
+		if (fileexists(fileHistoPrivateDB) == true)
 		{
 			std::ifstream infile;
-			infile.open (local_histo_db, std::ios_base::in);
+			infile.open (fileHistoPrivateDB, std::ios_base::in);
 			infile >> bits(map_histo);
 			infile.close();
 
@@ -257,7 +257,7 @@ namespace cryptoAL
 			}
 
 			std::ofstream outstream;
-            outstream.open(local_histo_db+".public", std::ios_base::out);
+            outstream.open(fileHistoPublicDB, std::ios_base::out);
 			outstream << bits(map_histo_pub);
 			outstream.close();
 		}

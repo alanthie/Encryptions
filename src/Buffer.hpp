@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include "crypto_const.hpp"
 
-class data;
+//class data;
 
 namespace cryptoAL
 {

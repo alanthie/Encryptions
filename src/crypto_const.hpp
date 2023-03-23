@@ -30,6 +30,31 @@ enum class CRYPTO_ALGO_AES
     CFB
 };
 
+enum class CRYPTO_FILE_TYPE : uint32_t
+{
+	Unknown 	= 0,
+	CryptoPack	= 100,
+    RAW 		= 200,
+    PuzzleQA 	= 300,
+    RSA_PUBLIC 	= 400,
+	ECC_DOMAIN 	= 500,
+	ECC_PUBLIC 	= 550,
+	HH_PUBLIC 	= 600,
+	RAW_LOCAL 	= 700,
+	CryptoEncoder = 9999
+};
+
+
+//constexpr E b = to_enum<E>(200);
+template< typename E , typename T>
+constexpr inline typename std::enable_if< std::is_enum<E>::value &&
+                                          std::is_integral<T>::value, E
+                                         >::type
+ to_enum( T value ) noexcept
+ {
+     return static_cast<E>( value );
+ }
+
 constexpr static uint32_t BASE              = 255*256; // BASE*BASE >= FILE_SIZE_LIM, BASE < 256*256 (64k)
 constexpr static int16_t MAGIC_SIZE         = 4;
 constexpr static int16_t KEYPOS_ENCODESIZE  = 8;

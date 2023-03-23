@@ -31,32 +31,38 @@ public:
 			 	std::string ifilename_decrypted_data,
 			 	std::string istaging,
 			 	std::string ifolder_local,
-			 	std::string ifolder_local_rsa,
-			 	std::string ifolder_local_private_ecc,
-                std::string ifolder_local_public_ecc,
-			 	std::string ilocal_histo_path,
+                std::string ifolder_my_private_rsa,
+				std::string ifolder_other_public_rsa,
+				std::string ifolder_my_private_ecc,
+                std::string ifolder_other_public_ecc,
+			 	std::string ifolder_my_private_hh,
+			 	std::string ifolder_other_public_hh,
 			 	bool verb = false,
 			 	bool keep = false,
                 std::string iencryped_ftp_user = "",
                 std::string iencryped_ftp_pwd  = "",
                 std::string iknown_ftp_server  = "",
-                bool iuse_gmp = false)
+                bool iuse_gmp = false,
+                bool autoflag = false)
 	{
         filename_puzzle = ifilename_puzzle;
         filename_encrypted_data = ifilename_encrypted_data;
         filename_decrypted_data = ifilename_decrypted_data;
         staging =istaging;
         folder_local = ifolder_local;
-        folder_local_rsa = ifolder_local_rsa;
-        folder_local_private_ecc = ifolder_local_private_ecc;
-        folder_local_public_ecc  = ifolder_local_public_ecc;
-        local_histo_path = ilocal_histo_path;
+        folder_my_private_rsa = ifolder_my_private_rsa;
+		folder_other_public_rsa = ifolder_other_public_rsa;
+        folder_my_private_ecc = ifolder_my_private_ecc;
+        folder_other_public_ecc  = ifolder_other_public_ecc;
+        folder_my_private_hh = ifolder_my_private_hh;
+        folder_other_public_hh = ifolder_other_public_hh;
         verbose = verb;
         keeping = keep;
         encryped_ftp_user = iencryped_ftp_user;
         encryped_ftp_pwd  = iencryped_ftp_pwd;
         known_ftp_server  = iknown_ftp_server;
         use_gmp = iuse_gmp;
+        auto_flag = autoflag;
 
         if (staging.size()==0)
         {
@@ -345,7 +351,7 @@ public:
             else if (is_histo)
             {
                 history_key kout;
-                std::string local_histo_db = local_histo_path + CRYPTO_HISTORY_DECODE_DB;
+                std::string local_histo_db = folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
 
                 std::string s(&u[pos_url]);
                 std::vector<std::string> v = split(s, ";");
@@ -384,7 +390,7 @@ public:
             }
             else if (is_rsa)
             {
-				std::string local_rsa_db = folder_local_rsa + RSA_MY_PRIVATE_DB; // decoding
+				std::string local_rsa_db = folder_my_private_rsa + RSA_MY_PRIVATE_DB; // decoding
 
 				uk.url[URL_MAX_SIZE-1] = 0;
 				//std::string rsa_key = uk.without_header_token(); // ???
@@ -508,7 +514,7 @@ public:
             }
             else if (is_ecc)
             {
-                std::string local_private_ecc_db = folder_local_private_ecc + ECCKEY_MY_PRIVATE_DB; // decoding
+                std::string local_private_ecc_db = folder_my_private_ecc + ECCKEY_MY_PRIVATE_DB; // decoding
 
 				uk.url[URL_MAX_SIZE-1] = 0;
 				//std::string ecc_key_in_url = uk.without_header_token(); // ???
@@ -1574,9 +1580,9 @@ public:
 
 		if(r)
 		{
-			if (local_histo_path.size() > 0)
+			if (folder_my_private_hh.size() > 0)
 			{
-				std::string local_histo_db = local_histo_path + CRYPTO_HISTORY_DECODE_DB;
+				std::string local_histo_db = folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
 				hkey.make_from_file(encrypted_data, local_histo_db, hkey_ok);
 
                 hkey_ok = get_next_seq(hist_out_seq, local_histo_db);
@@ -1868,7 +1874,7 @@ public:
             r = data_temp.copy_buffer_to(decrypted_data);
             if (r)
             {
-                r = decrypted_data.save_to_file(filename_decrypted_data);
+                r = post_decode(decrypted_data, filename_decrypted_data);
                 if(r==false)
                 {
                     std::cerr << "ERROR " << "saving " << filename_decrypted_data << std::endl;
@@ -1884,7 +1890,7 @@ public:
 		{
 			if (hkey_ok)
 			{
-				std::string local_histo_db = local_histo_path + CRYPTO_HISTORY_DECODE_DB;
+				std::string local_histo_db = folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
                 save_histo_key(hkey, local_histo_db);
                 if (verbose)
                     std::cout << "history sequence saved: "  << hist_out_seq << std::endl;
@@ -1902,10 +1908,12 @@ public:
 	std::string filename_decrypted_data;
 	std::string staging;
 	std::string folder_local;
-	std::string folder_local_rsa;
-	std::string folder_local_private_ecc;
-	std::string folder_local_public_ecc;
-	std::string local_histo_path;
+    std::string folder_my_private_rsa;
+	std::string folder_other_public_rsa;
+    std::string folder_my_private_ecc;
+    std::string folder_other_public_ecc;
+	std::string folder_my_private_hh;
+    std::string folder_other_public_hh;
 
     cryptodata  data_temp;
     cryptodata  data_temp_next;
@@ -1916,6 +1924,44 @@ public:
     std::string known_ftp_server;
     int         staging_cnt=0;
     bool        use_gmp;
+    bool        auto_flag = false;
+
+    cryptodata_list datalist;
+
+	bool post_decode(cryptodata& decrypted_data, const std::string& filename_decrypted_data)
+	{
+        bool r = true;
+
+        if (USE_AUTO_FEATURE == false) // old way
+        {
+            r = decrypted_data.save_to_file(filename_decrypted_data);
+            if(r==false)
+            {
+                std::cerr << "ERROR " << "saving " << filename_decrypted_data << std::endl;
+                return false;
+            }
+            return true;
+        }
+
+		if (!auto_flag)
+        {
+			std::cout << "!auto_flag" << std::endl;
+        }
+		
+        r = datalist.read_write_from(   decrypted_data, filename_decrypted_data,
+                                        folder_other_public_rsa,
+                                        folder_other_public_ecc,
+                                        folder_other_public_hh);
+
+        if (r)
+        {
+            // confirm hh
+        }
+
+        return r;
+    }
+
+
 };
 
 }

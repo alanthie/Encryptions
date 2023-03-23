@@ -506,7 +506,7 @@ void  menu()
 			}
           	else
 			{
-			  	std::cerr << "FAILED to generate key - retry" << std:: endl;
+			  	std::cerr << "ERROR FAILED to generate key - retry" << std:: endl;
 				continue;
 			}
 		}
@@ -582,7 +582,7 @@ void  menu()
 				}
 				else
 				{
-					std::cerr << "no file: "  << fileRSADB << std:: endl;
+					std::cerr << "ERROR no file: "  << fileRSADB << std:: endl;
 					continue;
 				}
 
@@ -621,11 +621,11 @@ void  menu()
 
         else if (choice == 14)
       	{
-			std::cout << "Enter path for encode history database " << CRYPTO_HISTORY_ENCODE_DB << " (0 = current directory) : ";
+			std::cout << "Enter path of encode history database " << HHKEY_MY_PRIVATE_ENCODE_DB << " (0 = current directory) : ";
 			std::string pathdb;
 			std::cin >> pathdb;
 			if (pathdb == "0") pathdb = "./";
-			std::string fileHistoDB = pathdb + CRYPTO_HISTORY_ENCODE_DB;
+			std::string fileHistoDB = pathdb + HHKEY_MY_PRIVATE_ENCODE_DB;
 
 			if (cryptoAL::fileexists(fileHistoDB) == true)
 			{
@@ -633,18 +633,18 @@ void  menu()
 			}
 			else
 			{
-				std::cerr << "no file: " << fileHistoDB << std:: endl;
+				std::cerr << "ERROR no file: " << fileHistoDB << std:: endl;
 				continue;
 			}
         }
 
         else if (choice == 15)
       	{
-			std::cout << "Enter path for decode history database " << CRYPTO_HISTORY_DECODE_DB << " (0 = current directory) : ";
+			std::cout << "Enter path of decode history database " << HHKEY_MY_PRIVATE_DECODE_DB << " (0 = current directory) : ";
 			std::string pathdb;
 			std::cin >> pathdb;
 			if (pathdb == "0") pathdb = "./";
-			std::string fileHistoDB = pathdb + CRYPTO_HISTORY_DECODE_DB;
+			std::string fileHistoDB = pathdb + HHKEY_MY_PRIVATE_DECODE_DB;
 
 			if (cryptoAL::fileexists(fileHistoDB) == true)
 			{
@@ -652,7 +652,7 @@ void  menu()
 			}
 			else
 			{
-				std::cerr << "no file: " << fileHistoDB << std:: endl;
+				std::cerr << "ERROR no file: " << fileHistoDB << std:: endl;
 				continue;
 			}
         }
@@ -662,69 +662,70 @@ void  menu()
 		//std::cout << "16. Histo: Export public decode history hashes" << std::endl;
 		//std::cout << "17. Histo: Confirm public history hashes" << std::endl;
 
-			std::cout << "Enter path for local decode history database " << CRYPTO_HISTORY_DECODE_DB << " (0 = current directory) : ";
+			std::cout << "Enter path ofr private decode history database " << HHKEY_MY_PRIVATE_DECODE_DB << " (0 = current directory) : ";
 			std::string pathdb;
 			std::cin >> pathdb;
 			if (pathdb == "0") pathdb = "./";
-			std::string fileHistoDB = pathdb + CRYPTO_HISTORY_DECODE_DB;
+			std::string fileHistoPrivateDB = pathdb + HHKEY_MY_PRIVATE_DECODE_DB;
+			std::string fileHistoPublicDB  = pathdb + HHKEY_MY_PUBLIC_DECODE_DB;
 
-			if (cryptoAL::fileexists(fileHistoDB) == true)
+			if (cryptoAL::fileexists(fileHistoPrivateDB) == true)
 			{
-				bool r = cryptoAL::export_public_history_key(fileHistoDB);
+				bool r = cryptoAL::export_public_history_key(fileHistoPrivateDB, fileHistoPublicDB);
 				if (r==false)
 				{
-                    std::cerr << "export FAILED" << std:: endl;
+                    std::cerr << "ERROR export FAILED" << std:: endl;
 				}
 				else
 				{
-                    std::cout << "export OK " << fileHistoDB + ".public" <<  std:: endl;
+                    std::cout << "export OK " << fileHistoPublicDB <<  std:: endl;
 				}
 			}
 			else
 			{
-				std::cerr << "no file: " << fileHistoDB << std:: endl;
+				std::cerr << "ERROR no file: " << fileHistoPrivateDB << std:: endl;
 				continue;
 			}
         }
 		else if (choice == 17)
       	{
-			std::cout << "Enter path of encode history database " << CRYPTO_HISTORY_ENCODE_DB << " (0 = current directory) : ";
+			std::cout << "Enter path of encode history database " << HHKEY_MY_PRIVATE_ENCODE_DB << " (0 = current directory) : ";
 			std::string pathdb;
 			std::cin >> pathdb;
 			if (pathdb == "0") pathdb = "./";
-			std::string fileHistoDB = pathdb + CRYPTO_HISTORY_ENCODE_DB;
+			std::string fileHistoPrivateEncodeDB = pathdb + HHKEY_MY_PRIVATE_ENCODE_DB;
 
-			std::cout << "Enter path to read (" + CRYPTO_HISTORY_DECODE_DB + ".public" + ")" +  " from " << " (0 = current directory) : ";
+			std::cout << "Enter path to read (" + HHKEY_OTHER_PUBLIC_DECODE_DB + ")" +  " from " << " (0 = current directory) : ";
 			std::string pathreaddb;
 			std::cin >> pathreaddb;
 			if (pathreaddb == "0") pathreaddb = "./";
-			std::string importfile = pathreaddb + CRYPTO_HISTORY_DECODE_DB + ".public";
+			std::string importfile = pathreaddb + HHKEY_OTHER_PUBLIC_DECODE_DB;
 
-			if (cryptoAL::fileexists(fileHistoDB) == true)
+			if (cryptoAL::fileexists(fileHistoPrivateEncodeDB) == true)
 			{
 				if (cryptoAL::fileexists(importfile) == true)
 				{
 					uint32_t cnt;
 					uint32_t n;
-					bool r = confirm_history_key(fileHistoDB, importfile, cnt, n);
+					bool r = confirm_history_key(fileHistoPrivateEncodeDB, importfile, cnt, n);
 					if (r==false)
 					{
-						std::cerr << "confirm FAILED" << std:: endl;
+						std::cerr << "ERROR confirm FAILED" << std:: endl;
 					}
 					else
 					{
-						std::cerr << "number of new confirm: " << cnt << ", number of hashes: " << n << std:: endl;
+						std::cerr << "ERROR number of new confirm: " << cnt << ", number of hashes: " << n << std:: endl;
 					}
 				}
 				else
 				{
-					std::cerr << "no file: " << importfile << std:: endl;
+					std::cerr << "ERROR no file: " << importfile << std:: endl;
 
 				}
             }
 			else
 			{
-				std::cerr << "no file: " << fileHistoDB << std:: endl;
+				std::cerr << "ERROR no file: " << fileHistoPrivateEncodeDB << std:: endl;
 				continue;
 			}
         }
@@ -775,7 +776,7 @@ void  menu()
 					}
 					else
 					{
-						std::cerr << "no file: "  << fileECCDOMDB << std:: endl;
+						std::cerr << "ERROR no file: "  << fileECCDOMDB << std:: endl;
 						continue;
 					}
 
@@ -801,13 +802,13 @@ void  menu()
 				}
 				else
                 {
-                    std::cerr << "parse error" << std:: endl;
+                    std::cerr << "ERROR parse error" << std:: endl;
                     continue;
                 }
 			}
 			else
 			{
-				std::cerr << "no file: " << eccfile << std:: endl;
+				std::cerr << "ERROR no file: " << eccfile << std:: endl;
 				continue;
 			}
         }
@@ -899,17 +900,17 @@ void  menu()
 
             if (fileECCDOMDB == fileECCDOMOTHERDB)
             {
-                std::cerr << "paths should be different" << std::endl;
+                std::cerr << "ERROR paths should be different" << std::endl;
                 continue;
             }
             if (cryptoAL::fileexists(fileECCDOMDB) == false)
 			{
-                std::cerr << "no file: " << fileECCDOMDB << std::endl;
+                std::cerr << "ERROR no file: " << fileECCDOMDB << std::endl;
                 continue;
 			}
             if (cryptoAL::fileexists(fileECCDOMOTHERDB) == false)
 			{
-                std::cerr << "no file: " << fileECCDOMOTHERDB << std::endl;
+                std::cerr << "ERROR no file: " << fileECCDOMOTHERDB << std::endl;
                 continue;
 			}
 
@@ -1048,7 +1049,7 @@ void  menu()
                     }
                     else
                     {
-                        std::cerr << "no file: "  << fileECCKEYDB << std:: endl;
+                        std::cerr << "ERROR no file: "  << fileECCKEYDB << std:: endl;
                         continue;
                     }
 
@@ -1073,13 +1074,13 @@ void  menu()
                 }
                 else
                 {
-                    std::cerr << "Error generating key " << std:: endl;
+                    std::cerr << "ERROR generating key " << std:: endl;
                     continue;
                 }
 			}
 			else
 			{
-				std::cerr << "no file: "  << fileECCDOMDB << std:: endl;
+				std::cerr << "ERROR no file: "  << fileECCDOMDB << std:: endl;
 				continue;
 			}
 		}
@@ -1125,7 +1126,7 @@ void  menu()
 			}
 			else
 			{
-				std::cerr << "no file: "  << fileECCKEYDB << std:: endl;
+				std::cerr << "ERROR no file: "  << fileECCKEYDB << std:: endl;
 				continue;
 			}
 
@@ -1187,7 +1188,7 @@ void  menu()
 			}
 			else
 			{
-			  	std::cerr << "no file: " << fileECCKEYDB << std:: endl;
+			  	std::cerr << "ERROR no file: " << fileECCKEYDB << std:: endl;
 				continue;
 			}
 		}
@@ -1245,7 +1246,7 @@ void  menu()
       		}
             else
             {
-                std::cerr << "no file: "  << fileECCKEYDB << std:: endl;
+                std::cerr << "ERROR no file: "  << fileECCKEYDB << std:: endl;
 				continue;
             }
 		}

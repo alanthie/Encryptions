@@ -278,25 +278,37 @@ int main_crypto(int argc, char **argv)
                 .default_value(std::string(""))
                 .help("specify the staging folder.");
 
+            encode_command.add_argument("-a", "--auto")
+                .default_value(std::string(""))
+                .help("auto export public keys with the encrypted data");
+
             encode_command.add_argument("-l", "--local")
                 .default_value(std::string(""))
                 .help("specify the local folder of known contents.");
 
-            encode_command.add_argument("-r", "--rsa")
+            encode_command.add_argument("-rpv", "--rsapriv")
                 .default_value(std::string(""))
-                .help("specify the local folder for rsa*.db");
+                .help("specify my private folder for rsa*.db");
+
+			encode_command.add_argument("-rpu", "--rsapub")
+                .default_value(std::string(""))
+                .help("specify the other public folder for rsa*.db");
 
             encode_command.add_argument("-epv", "--eccpriv")
                 .default_value(std::string(""))
-                .help("specify the local folder for private ecc*.db");
+                .help("specify my private folder for private ecc*.db");
 
             encode_command.add_argument("-epu", "--eccpub")
                 .default_value(std::string(""))
-                .help("specify the local folder for public ecc*.db");
+                .help("specify the other public folder for public ecc*.db");
 
-            encode_command.add_argument("-hh", "--histo")
+            encode_command.add_argument("-hpv", "--histopriv")
                 .default_value(std::string(""))
-                .help("specify the local folder for historical hashes crypto_history_encode.db");
+                .help("specify the private folder for historical hashes");
+				
+			encode_command.add_argument("-hpu", "--histopub")
+                .default_value(std::string(""))
+                .help("specify the other public folder for historical hashes");
 
             encode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
@@ -355,26 +367,38 @@ int main_crypto(int argc, char **argv)
             decode_command.add_argument("-s", "--staging")
                 .default_value(std::string(""))
                 .help("specify the staging folder.");
+				
+			decode_command.add_argument("-a", "--auto")
+                .default_value(std::string(""))
+                .help("auto import public keys with the decrypted data");
 
             decode_command.add_argument("-l", "--local")
                 .default_value(std::string(""))
                 .help("specify the local folder of known contents.");
 
-            decode_command.add_argument("-r", "--rsa")
+            decode_command.add_argument("-rpv", "--rsapriv")
                 .default_value(std::string(""))
-                .help("specify the local folder for rsa*.db");
+                .help("specify my private folder for rsa*.db");
+
+			decode_command.add_argument("-rpu", "--rsapub")
+                .default_value(std::string(""))
+                .help("specify the other public folder for rsa*.db");
 
             decode_command.add_argument("-epv", "--eccpriv")
                 .default_value(std::string(""))
-                .help("specify the local folder for private ecc*.db");
+                .help("specify my private folder for private ecc*.db");
 
             decode_command.add_argument("-epu", "--eccpub")
                 .default_value(std::string(""))
-                .help("specify the local folder for public ecc*.db");
+                .help("specify other publicfolder for public ecc*.db");
 
-            decode_command.add_argument("-hh", "--histo")
+            decode_command.add_argument("-hpv", "--histopriv")
                 .default_value(std::string(""))
-                .help("specify the local folder for historical hashes crypto_history_decode.db");
+                .help("specify the private folder for historical hashes");
+				
+			decode_command.add_argument("-hpu", "--histopub")
+                .default_value(std::string(""))
+                .help("specify the other public folder for historical hashes");
 
             decode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
@@ -711,13 +735,16 @@ int main_crypto(int argc, char **argv)
             auto url_path = cmd.get<std::string>("--url");
             auto staging_path = cmd.get<std::string>("--staging");
             auto local_path = cmd.get<std::string>("--local");
-            auto local_rsa_path = cmd.get<std::string>("--rsa");
-            auto local_ecc_private_path = cmd.get<std::string>("--eccpriv");
-            auto local_ecc_public_path = cmd.get<std::string>("--eccpub");
-            auto local_histo_path = cmd.get<std::string>("--histo");
+            auto rsa_my_private_path = cmd.get<std::string>("--rsapriv");
+			auto rsa_other_public_path = cmd.get<std::string>("--rsapub");
+            auto ecc_my_private_path = cmd.get<std::string>("--eccpriv");
+            auto ecc_other_public_path = cmd.get<std::string>("--eccpub");
+			auto hh_my_private_path = cmd.get<std::string>("--histopriv");
+            auto hh_other_public_path = cmd.get<std::string>("--histopub");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
             auto gmp = cmd.get<std::string>("--gmp");
+            auto autoon = cmd.get<std::string>("--auto");
             auto selftest = cmd.get<std::string>("--selftest");
             auto keyfactor = cmd.get<std::string>("--keyfactor");
             auto known_ftp_server  = cmd.get<std::string>("--known_ftp_server");
@@ -766,6 +793,7 @@ int main_crypto(int argc, char **argv)
             bool verbose = verb.size() > 0 ? true : false;
             bool keeping = keep.size() > 0 ? true : false;
             bool bgmp = gmp.size() > 0 ? true : false;
+            bool bauto = autoon.size() > 0 ? true : false;
             bool bselftest = selftest .size() > 0 ? true : false;
 
             std::cout << "crypto ENCODING..." << std::endl;
@@ -777,10 +805,12 @@ int main_crypto(int argc, char **argv)
                 output_path,
                 staging_path,
                 local_path,
-                local_rsa_path,
-                local_ecc_private_path,
-                local_ecc_public_path,
-                local_histo_path,
+                rsa_my_private_path,
+				rsa_other_public_path,
+                ecc_my_private_path,
+                ecc_other_public_path,
+                hh_my_private_path,
+				hh_other_public_path,
                 verbose,
                 keeping,
                 encryped_ftp_user,
@@ -789,7 +819,8 @@ int main_crypto(int argc, char **argv)
                 ikeyfactor,
                 bgmp,
                 bselftest,
-                ishufflePerc);
+                ishufflePerc,
+                bauto);
 
             if (encr.encrypt(false) == true)
             {
@@ -817,13 +848,16 @@ int main_crypto(int argc, char **argv)
             auto puzzle_path = cmd.get<std::string>("--puzzle");
             auto staging_path = cmd.get<std::string>("--staging");
             auto local_path = cmd.get<std::string>("--local");
-            auto local_rsa_path = cmd.get<std::string>("--rsa");
-            auto local_ecc_private_path = cmd.get<std::string>("--eccpriv");
-            auto local_ecc_public_path = cmd.get<std::string>("--eccpub");
-            auto local_histo_path = cmd.get<std::string>("--histo");
+            auto rsa_my_private_path = cmd.get<std::string>("--rsapriv");
+			auto rsa_other_public_path = cmd.get<std::string>("--rsapub");
+            auto ecc_my_private_path = cmd.get<std::string>("--eccpriv");
+            auto ecc_other_public_path = cmd.get<std::string>("--eccpub");
+            auto hh_my_private_path = cmd.get<std::string>("--histopriv");
+            auto hh_other_public_path = cmd.get<std::string>("--histopub");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
 			auto gmp = cmd.get<std::string>("--gmp");
+			auto autoon = cmd.get<std::string>("--auto");
             auto known_ftp_server  = cmd.get<std::string>("--known_ftp_server");
             auto encryped_ftp_user = cmd.get<std::string>("--encryped_ftp_user");
             auto encryped_ftp_pwd  = cmd.get<std::string>("--encryped_ftp_pwd");
@@ -831,6 +865,7 @@ int main_crypto(int argc, char **argv)
             bool verbose = verb.size() > 0 ? true : false;
             bool keeping = keep.size() > 0 ? true : false;
 			bool bgmp = gmp.size() > 0 ? true : false;
+			bool bauto = autoon.size() > 0 ? true : false;
 
             if (output_path.size() == 0)
             {
@@ -843,16 +878,19 @@ int main_crypto(int argc, char **argv)
                 output_path,
                 staging_path,
                 local_path,
-                local_rsa_path,
-                local_ecc_private_path,
-                local_ecc_public_path,
-                local_histo_path,
+                rsa_my_private_path,
+				rsa_other_public_path,
+                ecc_my_private_path,
+                ecc_other_public_path,
+                hh_my_private_path,
+				hh_other_public_path,
                 verbose,
                 keeping,
                 encryped_ftp_user,
                 encryped_ftp_pwd,
                 known_ftp_server,
-				bgmp);
+				bgmp,
+				bauto);
 
             if (decr.decrypt() == true)
             {

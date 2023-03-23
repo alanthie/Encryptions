@@ -17,6 +17,8 @@
 #include "crc32a.hpp"
 #include "crypto_shuffle.hpp"
 #include "crypto_history.hpp"
+#include "cryptodata_list.hpp"
+#include "crypto_keymgr.hpp"
 
 namespace cryptoAL
 {
@@ -41,10 +43,12 @@ public:
                 std::string ifilename_encrypted_data,   // OUTPUT (required) FILE - ENCRYPTED DATA
                 std::string istaging,                   // Environment - staging path
                 std::string ifolder_local,              // Environment - local data keys file path
-                std::string ifolder_local_rsa,          // Environment - RSA database *.db path
-				std::string ifolder_local_private_ecc,
-                std::string ifolder_local_public_ecc,
-                std::string ilocal_histo_path,
+                std::string ifolder_my_private_rsa,     // Environment - RSA database *.db path
+				std::string ifolder_other_public_rsa,   // Environment
+				std::string ifolder_my_private_ecc,
+                std::string ifolder_other_public_ecc,
+                std::string ifolder_my_private_hh,
+                std::string ifolder_other_public_hh,
                 bool verb = false,                      // Flag - verbose
                 bool keep = false,                      // Flag - keep staging files
                 std::string iencryped_ftp_user = "",
@@ -53,7 +57,8 @@ public:
                 long ikey_size_factor = 1,              // Parameter - keys size multiplier
 				bool iuse_gmp = false,                  // Flag - use gmp for big computation
 				bool iself_test = false,                // Flag - verify encryption
-				long ishufflePerc = 0)                  // Parameter - shuffling percentage
+				long ishufflePerc = 0,                  // Parameter - shuffling percentage
+				bool autoflag = false )
     {
         filename_urls = ifilename_urls;
         filename_msg_data = ifilename_msg_data;
@@ -63,10 +68,12 @@ public:
         filename_encrypted_data = ifilename_encrypted_data;
         staging = istaging;
         folder_local = ifolder_local;
-        folder_local_rsa = ifolder_local_rsa;
-		folder_local_private_ecc = ifolder_local_private_ecc;
-		folder_local_public_ecc = ifolder_local_public_ecc;
-        local_histo_path = ilocal_histo_path;
+        folder_my_private_rsa   = ifolder_my_private_rsa;
+		folder_other_public_rsa = ifolder_other_public_rsa;
+		folder_my_private_ecc   = ifolder_my_private_ecc;
+		folder_other_public_ecc = ifolder_other_public_ecc;
+        folder_my_private_hh    = ifolder_my_private_hh;
+        folder_other_public_hh  = ifolder_other_public_hh;
         verbose = verb;
         keeping = keep;
         encryped_ftp_user = iencryped_ftp_user;
@@ -76,6 +83,7 @@ public:
 		use_gmp = iuse_gmp;
 		self_test = iself_test;
 		shufflePerc = ishufflePerc;
+		auto_flag = autoflag;
 
         if (key_size_factor < 1) key_size_factor = 1;
 
@@ -284,7 +292,7 @@ public:
         }
         else if (is_histo)
         {
-            std::string local_histo_db = local_histo_path + CRYPTO_HISTORY_ENCODE_DB;
+            std::string local_histo_db = folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
             std::vector<std::string> v = split(s, ";");
             if (v.size() < 1)
             {
@@ -357,11 +365,11 @@ public:
 
 				if (SELF_TEST)
 				{
-					local_rsa_db = folder_local_rsa + RSA_MY_PRIVATE_DB;
+					local_rsa_db = folder_my_private_rsa + RSA_MY_PRIVATE_DB;
 				}
 				else
 				{
-					local_rsa_db = folder_local_rsa + RSA_OTHER_PUBLIC_DB; // Encoding with a public key of the recipient of the message
+					local_rsa_db = folder_other_public_rsa + RSA_OTHER_PUBLIC_DB; // Encoding with a public key of the recipient of the message
 				}
 
 				// ITER
@@ -475,13 +483,13 @@ public:
 
 				if (SELF_TEST)
 				{
-					local_ecc_other_db = folder_local_private_ecc + ECCKEY_MY_PRIVATE_DB;
-					local_ecc_my_db    = folder_local_public_ecc  + ECCKEY_OTHER_PUBLIC_DB;
+					local_ecc_other_db = folder_my_private_ecc + ECCKEY_MY_PRIVATE_DB;
+					local_ecc_my_db    = folder_other_public_ecc  + ECCKEY_OTHER_PUBLIC_DB;
 				}
 				else
 				{
-					local_ecc_other_db = folder_local_public_ecc  + ECCKEY_OTHER_PUBLIC_DB; // Encoding with a public key of the recipient of the message
-					local_ecc_my_db    = folder_local_private_ecc + ECCKEY_MY_PRIVATE_DB;
+					local_ecc_other_db = folder_other_public_ecc  + ECCKEY_OTHER_PUBLIC_DB; // Encoding with a public key of the recipient of the message
+					local_ecc_my_db    = folder_my_private_ecc + ECCKEY_MY_PRIVATE_DB;
 				}
 
                 if (verbose)
@@ -534,7 +542,7 @@ public:
 							{
 								std::cout << "ecc key len in bytes:     " << key_len_in_bytes << std::endl;
 								std::cout << "ecc embedded random data: " << embedded_ecc_key << " size:" << embedded_ecc_key.size() << std::endl;
-								std::cout << "ecc embedded random key: " << get_summary_hex(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size()) 
+								std::cout << "ecc embedded random key: " << get_summary_hex(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size())
 										  << " size:" << embedded_ecc_key.size() << std::endl;
 							}
 						}
@@ -1423,6 +1431,8 @@ public:
 
     bool encrypt(bool allow_empty_url = false)
     {
+        bool r = true;
+
         bool empty_puzzle = false;
         if (filename_puzzle.size() ==  0)
         {
@@ -1547,11 +1557,13 @@ public:
             }
         }
 
-        // DATA  read
-        if (msg_data.read_from_file(filename_msg_data) == false)
+        // -----------------------
+        // DATA prepare
+        // -----------------------
+        r = pre_encode(filename_msg_data, msg_data);
+        if (r==false)
         {
-            std::cerr << "ERROR " << "reading msg file: " << filename_msg_data <<std::endl;
-            return false;
+            return r;
         }
 
         msg_input_size = msg_data.buffer.size();
@@ -1795,9 +1807,9 @@ public:
         data_temp_next.copy_buffer_to(encrypted_data);
         encrypted_data.save_to_file(filename_encrypted_data);   // SAVE
 
-		if (local_histo_path.size() > 0)
+		if (folder_my_private_hh.size() > 0)
 		{
-			std::string local_histo_db = local_histo_path + CRYPTO_HISTORY_ENCODE_DB;
+			std::string local_histo_db = folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
 			bool result;
 			history_key hkey(encrypted_data, local_histo_db, result);
             if (result)
@@ -1834,10 +1846,13 @@ public:
     std::string filename_encrypted_data;
     std::string staging;
     std::string folder_local;
-    std::string folder_local_rsa;
-    std::string folder_local_private_ecc;
-    std::string folder_local_public_ecc;
-    std::string local_histo_path;
+    std::string folder_my_private_rsa;
+	std::string folder_other_public_rsa;
+    std::string folder_my_private_ecc;
+    std::string folder_other_public_ecc;
+    std::string folder_my_private_hh;
+    std::string folder_other_public_hh;
+
     bool verbose;
     bool keeping;
     std::string encryped_ftp_user;
@@ -1852,6 +1867,65 @@ public:
 	uint32_t perfect_key_size = 0;
 	long key_size_factor = 1;
 	uint32_t shufflePerc = 0;
+
+    bool auto_flag = false;
+    std::string auto_options;
+
+	cryptodata_list datalist;
+
+    // pre encode() [if auto flag, export and add my public keys db]
+	bool pre_encode(const std::string& filename, cryptodata& out_data) // TODO ? local folder ...
+	{
+        bool r = true;
+
+        if (USE_AUTO_FEATURE == false)  // old way
+        {
+            r = out_data.read_from_file(filename);
+            if (r == false)
+            {
+                std::cerr << "ERROR " << "reading file: " << filename <<std::endl;
+                return false;
+            }
+            return true;
+        }
+
+        // add msg_data to datalist
+        cryptodata* msg_data = nullptr;
+        datalist.add_data(msg_data, filename, filename, CRYPTO_FILE_TYPE::RAW); // same name??
+
+        if (!auto_flag)
+        {
+			std::cout << "!auto_flag" << std::endl;
+        }
+        else
+        {
+            // auto gen keys if in auto_options...
+
+            std::vector<keymgr::public_key_desc> vpubkeys;
+            r = keymgr::export_public_keys( vpubkeys,
+                                            folder_my_private_rsa,
+                                            folder_my_private_ecc,
+                                            folder_my_private_hh);
+            if (r==false)
+            {
+                return false;
+            }
+
+            // add public keys (maybe none) to datalist
+            for(size_t i=0;i <vpubkeys.size(); i++)
+            {
+                datalist.add_data(vpubkeys[i].buffer, vpubkeys[i].public_filename, vpubkeys[i].public_other_short_filename, vpubkeys[i].filetype);
+            }
+        }
+
+        r = datalist.create_header_trailer_buffer(out_data);
+        if (r==false)
+        {
+            return false;
+        }
+
+        return r;
+	}
 };
 
 }
