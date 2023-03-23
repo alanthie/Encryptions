@@ -17,12 +17,13 @@ const std::string RSA_MY_PRIVATE_DB             = "rsa_my_private.db";   	// (n,
 const std::string RSA_MY_PUBLIC_DB              = "rsa_my_public.db";       // export from RSA_MY_PRIVATE_DB
 const std::string RSA_OTHER_PUBLIC_DB           = "rsa_other_public.db";	// (n,e)
 
-const std::string HHKEY_MY_PRIVATE_ENCODE_DB    = "hhkey_my_private_encode.db";	// when encoding
-const std::string HHKEY_MY_PUBLIC_ENCODE_DB   	= "hhkey_my_public_encode.db"; 	// export from HHKEY_MY_PRIVATE_DB
-const std::string HHKEY_MY_PRIVATE_DECODE_DB    = "hhkey_my_private_decode.db";	// when decoding
-const std::string HHKEY_MY_PUBLIC_DECODE_DB     = "hhkey_my_public_decode.db";	// export
-const std::string HHKEY_OTHER_PUBLIC_ENCODE_DB  = "hhkey_other_public_encode.db";
-const std::string HHKEY_OTHER_PUBLIC_DECODE_DB  = "hhkey_other_public_decode.db";	// to confirm it was decode = HHKEY_MY_PUBLIC_DECODE_DB
+const std::string HHKEY_MY_PRIVATE_ENCODE_DB    = "hhkey_my_private_encode.db";		// when encoding SHA[0,1,2,...], when confirmed become keys
+const std::string HHKEY_MY_PRIVATE_DECODE_DB    = "hhkey_my_private_decode.db";		// when decoding
+const std::string HHKEY_MY_PUBLIC_DECODE_DB     = "hhkey_my_public_decode.db";		// export 
+const std::string HHKEY_OTHER_PUBLIC_DECODE_DB  = "hhkey_other_public_decode.db";	// short name of HHKEY_MY_PUBLIC_DECODE_DB
+
+//const std::string HHKEY_MY_PUBLIC_ENCODE_DB   	= "hhkey_my_public_encode.db"; 	// export from HHKEY_MY_PRIVATE_DB
+//const std::string HHKEY_OTHER_PUBLIC_ENCODE_DB  = "hhkey_other_public_encode.db";
 
 const std::string ECC_DOMAIN_DB      			= "ecc_domain.db";
 const std::string ECCKEY_MY_PRIVATE_DB      	= "ecckey_my_private.db";

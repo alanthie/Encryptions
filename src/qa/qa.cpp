@@ -689,13 +689,16 @@ void  menu()
         }
 		else if (choice == 17)
       	{
+			// Conirming: 
+			// 	Received HHKEY_OTHER_PUBLIC_DECODE_DB
+			// 	Update HHKEY_MY_PRIVATE_ENCODE_DB
 			std::cout << "Enter path of encode history database " << HHKEY_MY_PRIVATE_ENCODE_DB << " (0 = current directory) : ";
 			std::string pathdb;
 			std::cin >> pathdb;
 			if (pathdb == "0") pathdb = "./";
-			std::string fileHistoPrivateEncodeDB = pathdb + HHKEY_MY_PRIVATE_ENCODE_DB;
+			std::string fileHistoPrivateEncodeDB = pathdb + HHKEY_MY_PRIVATE_DECODE_DB;
 
-			std::cout << "Enter path to read (" + HHKEY_OTHER_PUBLIC_DECODE_DB + ")" +  " from " << " (0 = current directory) : ";
+			std::cout << "Enter path to read received hh (" + HHKEY_OTHER_PUBLIC_DECODE_DB + ")" << " (0 = current directory) : ";
 			std::string pathreaddb;
 			std::cin >> pathreaddb;
 			if (pathreaddb == "0") pathreaddb = "./";
@@ -714,7 +717,7 @@ void  menu()
 					}
 					else
 					{
-						std::cerr << "ERROR number of new confirm: " << cnt << ", number of hashes: " << n << std:: endl;
+						std::cerr << "number of new confirm: " << cnt << ", number of hashes: " << n << std:: endl;
 					}
 				}
 				else

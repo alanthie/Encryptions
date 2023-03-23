@@ -38,8 +38,8 @@ namespace keymgr
             }
             else if (t == CRYPTO_FILE_TYPE::HH_PUBLIC)
             {
-                public_filename = path_private_db + HHKEY_MY_PUBLIC_ENCODE_DB;
-                public_other_short_filename = HHKEY_OTHER_PUBLIC_ENCODE_DB;
+                public_filename = path_private_db + HHKEY_MY_PUBLIC_DECODE_DB; // reading the exported file
+                public_other_short_filename = HHKEY_OTHER_PUBLIC_DECODE_DB;		// remote name
             }
         }
     };
@@ -124,8 +124,8 @@ namespace keymgr
         }
         else if (t == CRYPTO_FILE_TYPE::HH_PUBLIC)
         {
-            std::string filePrivateHistoDB = path_private_db + HHKEY_MY_PRIVATE_ENCODE_DB;
-            std::string filePublicHistoDB  = path_private_db + HHKEY_MY_PUBLIC_ENCODE_DB;
+            std::string filePrivateHistoDB = path_private_db + HHKEY_MY_PRIVATE_DECODE_DB;
+            std::string filePublicHistoDB  = path_private_db + HHKEY_MY_PUBLIC_DECODE_DB;
 
 			if (cryptoAL::fileexists(filePrivateHistoDB) == true)
 			{
@@ -141,7 +141,7 @@ namespace keymgr
                 for(auto& [seqkey, k] : map_histo)
                 {
                     history_key_public kout;
-                    history_key_to_public(k, kout);
+                    history_key_to_public(k, kout); // kout = SHA (kin.data_sha[0]+kin.data_sha[1]+kin.data_sha[2]);
                     map_histo_pub[k.data_sha[0]]=kout;
                 }
 

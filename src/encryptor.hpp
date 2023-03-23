@@ -1876,6 +1876,7 @@ public:
     // pre encode() [if auto flag, export and add my public keys db]
 	bool pre_encode(const std::string& filename, cryptodata& out_data) // TODO ? local folder ...
 	{
+        datalist.verbose = verbose;
         bool r = true;
 
         if (USE_AUTO_FEATURE == false)  // old way

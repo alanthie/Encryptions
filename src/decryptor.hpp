@@ -1930,6 +1930,7 @@ public:
 
 	bool post_decode(cryptodata& decrypted_data, const std::string& filename_decrypted_data)
 	{
+        datalist.verbose = verbose;
         bool r = true;
 
         if (USE_AUTO_FEATURE == false) // old way
@@ -1947,15 +1948,50 @@ public:
         {
 			std::cout << "!auto_flag" << std::endl;
         }
-		
+
         r = datalist.read_write_from(   decrypted_data, filename_decrypted_data,
                                         folder_other_public_rsa,
                                         folder_other_public_ecc,
-                                        folder_other_public_hh);
+                                        folder_other_public_hh,
+                                        verbose);
 
         if (r)
         {
-            // confirm hh
+            // Confirming: 
+			// 	Received HHKEY_OTHER_PUBLIC_DECODE_DB
+			// 	Update HHKEY_MY_PRIVATE_ENCODE_DB
+			std::string fileHistoPrivateEncodeDB = folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
+			std::string importfile = folder_other_public_hh + HHKEY_OTHER_PUBLIC_DECODE_DB;
+
+			if (cryptoAL::fileexists(fileHistoPrivateEncodeDB) == true)
+			{
+				if (cryptoAL::fileexists(importfile) == true)
+				{
+					uint32_t cnt;
+					uint32_t n;
+					bool r = confirm_history_key(fileHistoPrivateEncodeDB, importfile, cnt, n);
+					if (r==false)
+					{
+						std::cerr << "WARNING confirm of HH keys FAILED" << std:: endl;
+						r = false;
+					}
+					else
+					{
+						std::cerr << "Number of new confirm: " << cnt << ", number of hashes: " << n << std:: endl;
+					}
+				}
+				else
+				{
+					std::cerr << "WARNING no file to import HH keys confirmation: " << importfile << std:: endl;
+				}
+            }
+			else
+			{
+				if (cryptoAL::fileexists(importfile) == true)
+				{
+					std::cerr << "WARNING no file to update HH keys confirmation: " << fileHistoPrivateEncodeDB << std:: endl;
+				}
+			}
         }
 
         return r;
