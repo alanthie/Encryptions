@@ -253,8 +253,12 @@ int main_crypto(int argc, char **argv)
         {
             encode_command.add_description("Encodes a file into an encrypted file");
 
+          	encode_command.add_argument("-cfg", "--cfg")
+                .default_value(std::string(""))
+                .help("specify a config file.");
+
             encode_command.add_argument("-i", "--input")
-                .required()
+                .default_value(std::string(""))
                 .help("specify the input file.");
 
             encode_command.add_argument("-o", "--output")
@@ -355,8 +359,12 @@ int main_crypto(int argc, char **argv)
         {
             decode_command.add_description("Decodes and extracts a file from an encrypted file");
 
+          	decode_command.add_argument("-cfg", "--cfg")
+                .default_value(std::string(""))
+                .help("specify a config file.");
+
             decode_command.add_argument("-i", "--input")
-                .required()
+                .default_value(std::string(""))
                 .help("specify the input encrypted file.");
 
             decode_command.add_argument("-o", "--output")
@@ -730,6 +738,7 @@ int main_crypto(int argc, char **argv)
         if (program.is_subcommand_used("encode"))
         {
             auto& cmd = encode_command;
+			auto cfg = cmd.get<std::string>("--cfg");
             auto input_path = cmd.get<std::string>("--input");
             auto output_path = cmd.get<std::string>("--output");
             auto puzzle_path = cmd.get<std::string>("--puzzle");
@@ -799,8 +808,9 @@ int main_crypto(int argc, char **argv)
             bool bauto = autoon.size() > 0 ? true : false;
             bool bselftest = selftest .size() > 0 ? true : false;
 
-            std::cout << "crypto ENCODING..." << std::endl;
-            encryptor encr(url_path,
+            std::cout << "CRYPTO ENCODING..." << std::endl;
+            encryptor encr(cfg,
+				url_path,
                 input_path,
                 puzzle_path,
                 qa_puzzle_path,
@@ -827,10 +837,10 @@ int main_crypto(int argc, char **argv)
 
             if (encr.encrypt(false) == true)
             {
-                std::cerr << "crypto ENCODING SUCCESS" << std::endl;
-                std::cout << "Encrypted file: " << output_path << std::endl;
+                std::cerr << "CRYPTO ENCODING SUCCESS" << std::endl;
+                std::cout << "Encrypted file: " << encr.filename_encrypted_data << std::endl;
                 if (puzzle_path.size() > 0)
-                    std::cout << "Puzzle file   : " << qa_puzzle_path << std::endl;
+                    std::cout << "Puzzle file   : " << encr.filename_partial_puzzle << std::endl;
                 else
                     std::cout << "Puzzle file   : " << "<default>"<< std::endl;
                 return 0;
@@ -846,6 +856,7 @@ int main_crypto(int argc, char **argv)
         else if (program.is_subcommand_used("decode"))
         {
             auto& cmd = decode_command;
+			auto cfg = cmd.get<std::string>("--cfg");
             auto input_path = cmd.get<std::string>("--input");
             auto output_path = cmd.get<std::string>("--output");
             auto puzzle_path = cmd.get<std::string>("--puzzle");
@@ -872,11 +883,14 @@ int main_crypto(int argc, char **argv)
 
             if (output_path.size() == 0)
             {
-                output_path = input_path + ".decrypted";
+                if (input_path.size() > 0)
+                    output_path = input_path + ".decrypted";
             }
 
-            std::cout << "crypto DECODING..." << std::endl;
-            decryptor decr(puzzle_path,
+            std::cout << "CRYPTO DECODING..." << std::endl;
+            decryptor decr(
+				cfg,
+				puzzle_path,
                 input_path,
                 output_path,
                 staging_path,
@@ -897,8 +911,8 @@ int main_crypto(int argc, char **argv)
 
             if (decr.decrypt() == true)
             {
-                std::cout << "crypto DECODING SUCCESS" << std::endl;
-                std::cout << "Decrypted file: " << output_path << std::endl;
+                std::cout << "CRYPTO DECODING SUCCESS" << std::endl;
+                std::cout << "Decrypted file: " << decr.filename_decrypted_data << std::endl;
                 return 0;
             }
             else

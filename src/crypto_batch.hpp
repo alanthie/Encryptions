@@ -5,13 +5,13 @@
 #include <fstream>
 #include <chrono>
 
+#include "crypto_const.hpp"
 #include "DES.h"
 #include "Buffer.hpp"
 #include "SHA256.h"
 #include "argparse.hpp"
 #include "ini_parser.hpp"
 #include "random_engine.hpp"
-#include "crypto_const.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
 #include "encryptor.hpp"
@@ -185,7 +185,8 @@ bool batch(std::string mode, std::string inifile, bool verbose)
             ikeyfactor = 1;
         }
 
-        encryptor encr(folder_encoder_input + encoding_input_urls,
+        encryptor encr("",
+                       folder_encoder_input + encoding_input_urls,
                        folder_encoder_input + encoding_input_msg,
                        folder_encoder_input + encoding_input_puzzle,
                        folder_encoder_output + encoding_output_qa_puzzle,
@@ -249,7 +250,7 @@ bool batch(std::string mode, std::string inifile, bool verbose)
             return false;
         }
 
-        decryptor decr(folder_decoder_input + decoding_input_qa_puzzle,
+        decryptor decr("",folder_decoder_input + decoding_input_qa_puzzle,
                        folder_decoder_input + decoding_input_msg_encrypted,
                        folder_decoder_output + decoding_output_msg_unencrypted,
                        folder_staging,

@@ -125,17 +125,28 @@ namespace
 class ini_parser
 {
     public:
-        const std::string BOOL_TRUE;
-        const std::string BOOL_FALSE;
+        const std::string BOOL_TRUE = "BOOL_TRUE";
+        const std::string BOOL_FALSE = "BOOL_FALSE";
 
-        ini_parser(const std::string& filename)
+        ini_parser(const std::string& file)
             : BOOL_TRUE("BOOL_TRUE")
             , BOOL_FALSE("BOOL_FALSE")
-            , filename(filename)
+            , filename(file)
             , current_section("")
         {
             parse(filename);
         }
+
+		void reset(const std::string& file)
+		{
+			filename = file;
+			current_section = "";
+
+			input.clear();
+			sections.clear();
+
+			parse(filename);
+		}
 
         //typedef std::map<std::string, std::string> properties;
         std::map<std::string, std::map<std::string, std::string>>& get_sections()
@@ -343,6 +354,11 @@ class ini_parser
 
         void parse(const std::string& filename)
         {
+			if (filename.size() == 0)
+			{
+				return;
+			}
+		
             std::fstream file;
             file.open(filename);
             if (!file.is_open())
@@ -486,7 +502,7 @@ class ini_parser
         }
 
     private:
-        const std::string filename;
+        std::string filename;
         std::vector<std::string> input;
 
         typedef std::map<std::string, std::string> properties;

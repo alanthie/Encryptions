@@ -57,6 +57,7 @@
 		<Unit filename="../src/SymAlg.cpp" />
 		<Unit filename="../src/SymAlg.h" />
 		<Unit filename="../src/argparse.hpp" />
+		<Unit filename="../src/base_const.hpp" />
 		<Unit filename="../src/common/cryptomath.h" />
 		<Unit filename="../src/common/includes.cpp" />
 		<Unit filename="../src/common/includes.h" />
@@ -67,8 +68,11 @@
 		<Unit filename="../src/crypto_const.hpp" />
 		<Unit filename="../src/crypto_file.hpp" />
 		<Unit filename="../src/crypto_history.hpp" />
+		<Unit filename="../src/crypto_key_parser.hpp" />
 		<Unit filename="../src/crypto_package.hpp" />
+		<Unit filename="../src/crypto_parsing.hpp" />
 		<Unit filename="../src/crypto_shuffle.hpp" />
+		<Unit filename="../src/crypto_strutil.hpp" />
 		<Unit filename="../src/crypto_test.hpp" />
 		<Unit filename="../src/cryptodata_list.hpp" />
 		<Unit filename="../src/data.hpp" />

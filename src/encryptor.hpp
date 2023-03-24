@@ -20,6 +20,7 @@
 #include "cryptodata_list.hpp"
 #include "crypto_keymgr.hpp"
 #include "crypto_key_parser.hpp"
+#include "crypto_cfg.hpp"
 
 namespace cryptoAL
 {
@@ -28,15 +29,16 @@ static bool s_Twofish_initialise = false;
 
 class encryptor
 {
-// main use is: bool encrypt(bool allow_empty_url = false)
+// main use is: bool encrypt()
 
 friend class crypto_package;
 private:
-    encryptor() {}
+    encryptor() : cfg("") {}
 
 public:
 
-    encryptor(  std::string ifilename_urls,             // INPUT  (optional) FILE - URL for making KEYS
+    encryptor(  std::string ifilename_cfg,
+                std::string ifilename_urls,             // INPUT  (optional) FILE - URL for making KEYS
                 std::string ifilename_msg_data,         // INPUT  (required) FILE - PLAINTEXT DATA to encrypt
                 std::string ifilename_puzzle,           // INPUT  (optional) FILE - fully resolved puzzle - first key
                 std::string ifilename_partial_puzzle,   // OUTPUT (optional) FILE - unresolved formatted qa puzzle with checksum
@@ -60,13 +62,16 @@ public:
 				bool iself_test = false,                // Flag - verify encryption
 				long ishufflePerc = 0,                  // Parameter - shuffling percentage
 				bool autoflag = false )
+        : cfg (ifilename_cfg, verb)
     {
+        filename_cfg = ifilename_cfg;
         filename_urls = ifilename_urls;
         filename_msg_data = ifilename_msg_data;
         filename_puzzle = ifilename_puzzle;
         filename_partial_puzzle = ifilename_partial_puzzle;
         filename_full_puzzle = ifilename_full_puzzle;
         filename_encrypted_data = ifilename_encrypted_data;
+
         staging = istaging;
         folder_local = ifolder_local;
         folder_my_private_rsa   = ifolder_my_private_rsa;
@@ -75,30 +80,115 @@ public:
 		folder_other_public_ecc = ifolder_other_public_ecc;
         folder_my_private_hh    = ifolder_my_private_hh;
         folder_other_public_hh  = ifolder_other_public_hh;
+
         verbose = verb;
         keeping = keep;
         encryped_ftp_user = iencryped_ftp_user;
         encryped_ftp_pwd  = iencryped_ftp_pwd;
         known_ftp_server  = iknown_ftp_server;
-        key_size_factor = ikey_size_factor;
-		use_gmp = iuse_gmp;
-		self_test = iself_test;
-		shufflePerc = ishufflePerc;
-		auto_flag = autoflag;
 
-        if (key_size_factor < 1) key_size_factor = 1;
+        key_size_factor = ikey_size_factor;
+
+		use_gmp 	= iuse_gmp;
+		self_test 	= iself_test;
+		shufflePerc = ishufflePerc;
+		auto_flag 	= autoflag;
+
+        puz.verbose = verb;
+
+        if (filename_cfg.size() > 0)
+        {
+            cfg_parse_result = cfg.parse();
+            if (cfg_parse_result)
+            {
+                process_cfg_param();
+            }
+        }
+
+		if (key_size_factor < 1) key_size_factor = 1;
 
         if (staging.size()==0)
         {
             staging ="./";
         }
 
-        puz.verbose = verb;
+		if (shufflePerc > 100) shufflePerc = 100;
+
+        if (filename_partial_puzzle.size() == 0)
+        {
+            if (filename_full_puzzle.size() > 0)
+                filename_partial_puzzle = filename_full_puzzle + ".qa";
+        }
+
+        if (filename_encrypted_data.size() == 0)
+        {
+            if (filename_msg_data.size() > 0)
+                filename_encrypted_data = filename_msg_data + ".encrypted";
+        }
+
+        if (verbose)
+            show_param();
     }
 
     ~encryptor()
     {
     }
+
+	void process_cfg_param()
+	{
+		if (filename_urls.size() == 0) 			filename_urls 		= cfg.cmdparam.filename_urls;
+		if (filename_msg_data.size() == 0) 		filename_msg_data 	= cfg.cmdparam.filename_msg_data;
+		if (filename_puzzle.size() == 0) 		filename_puzzle 	= cfg.cmdparam.filename_puzzle;
+		if (filename_full_puzzle.size() == 0) 	filename_full_puzzle = cfg.cmdparam.filename_full_puzzle;
+		if (filename_encrypted_data.size() == 0) filename_encrypted_data = cfg.cmdparam.filename_encrypted_data;
+
+		if (staging.size() == 0) 				staging 				= cfg.cmdparam.folder_staging;
+		if (folder_local.size() == 0) 			folder_local 			= cfg.cmdparam.folder_local;
+		if (folder_my_private_rsa.size() == 0) 	folder_my_private_rsa 	= cfg.cmdparam.folder_my_private_rsa;
+		if (folder_other_public_rsa.size() == 0)folder_other_public_rsa = cfg.cmdparam.folder_other_public_rsa;
+		if (folder_my_private_ecc.size() == 0) 	folder_my_private_ecc 	= cfg.cmdparam.folder_my_private_ecc;
+		if (folder_other_public_ecc.size() == 0)folder_other_public_ecc = cfg.cmdparam.folder_other_public_ecc;
+		if (folder_my_private_hh.size() == 0)	folder_my_private_hh 	= cfg.cmdparam.folder_my_private_hh;
+		if (folder_other_public_hh.size() == 0)	folder_other_public_hh 	= cfg.cmdparam.folder_other_public_hh;
+
+		if (verbose == false) 					if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.verbose) == 1) verbose = true;
+		if (keeping == false) 					if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.keeping) == 1) keeping = true;
+		if (use_gmp == false) 					if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.use_gmp) == 1) use_gmp = true;
+		if (self_test == false) 				if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.self_test) == 1) self_test = true;
+		if (auto_flag == false) 				if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.auto_flag) == 1) auto_flag = true;
+
+		if (shufflePerc == 0) 					{if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.shufflePerc) > 0) shufflePerc = cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.shufflePerc);}
+		if (key_size_factor <= 1) 				{if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.key_size_factor) >= 1) key_size_factor = cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.key_size_factor);}
+	}
+
+	void show_param()
+	{
+		std::cout << "-------------------------------------------------" << std::endl;
+		std::cout << "parameters:" << std::endl;
+		std::cout << "-------------------------------------------------" << std::endl;
+        std::cout << "filename_urls: " << filename_urls << std::endl;
+        std::cout << "filename_msg_data: " << filename_msg_data << std::endl;
+        std::cout << "filename_puzzle: " << filename_puzzle << std::endl;
+        std::cout << "filename_full_puzzle: " << filename_full_puzzle << std::endl;
+        std::cout << "filename_encrypted_data: " << filename_encrypted_data << std::endl;
+
+        std::cout << "staging folder: " << staging << std::endl;
+        std::cout << "folder_local: " << folder_local << std::endl;
+        std::cout << "folder_my_private_rsa: " << folder_my_private_rsa << std::endl;
+        std::cout << "folder_other_public_rsa: " << folder_other_public_rsa << std::endl;
+        std::cout << "folder_my_private_ecc: " << folder_my_private_ecc << std::endl;
+        std::cout << "folder_other_public_ecc: " << folder_other_public_ecc << std::endl;
+        std::cout << "folder_my_private_hh: " << folder_my_private_hh << std::endl;
+        std::cout << "folder_other_public_hh: " << folder_other_public_hh << std::endl;
+
+        std::cout << "keeping: " << keeping << std::endl;
+        std::cout << "use_gmp: " << use_gmp << std::endl;
+        std::cout << "self_test: " << self_test << std::endl;
+        std::cout << "auto_flag: " << auto_flag << std::endl;
+        std::cout << "shufflePerc: " << shufflePerc << std::endl;
+        std::cout << "key_size_factor: " << key_size_factor << std::endl;
+		std::cout << "-------------------------------------------------" << std::endl;
+	}
 
     bool read_file_urls(std::string filename)
     {
@@ -113,6 +203,12 @@ public:
 
         if (r)
         {
+//            crypto_cfg cfg("/home/server/dev/Encryptions/src/default_cfg.ini", true);
+//            cfg.parse();
+//            long long b = cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.use_gmp);
+//            std::cerr << "cfg.cmdparam.use_gmp " << b << std::endl;
+
+
 //            keyspec_parser kp;
 //            kp.parse(urls_data);
 //            kp.show();
@@ -1817,6 +1913,10 @@ public:
 
         data_temp_next.copy_buffer_to(encrypted_data);
         encrypted_data.save_to_file(filename_encrypted_data);   // SAVE
+        if (verbose)
+        {
+            std::cout << "saved to "  << filename_encrypted_data << std::endl;
+        }
 
 		if (folder_my_private_hh.size() > 0)
 		{
@@ -1840,6 +1940,8 @@ public:
 		return true;
     }
 
+	bool 				cfg_parse_result = true;
+    crypto_cfg          cfg;
     cryptodata          urls_data;
     cryptodata          msg_data;
     puzzle              puz;
@@ -1849,6 +1951,7 @@ public:
     cryptodata          data_temp;
     cryptodata          data_temp_next;
 
+    std::string filename_cfg;
     std::string filename_urls;
     std::string filename_msg_data;
     std::string filename_puzzle;

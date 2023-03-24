@@ -168,6 +168,12 @@ namespace cryptoAL
         std::string s_kg_x;   	// PUBLIC KEY
 		std::string s_kg_y;
         std::string s_k;    	// PRIVATE KEY - empty if from OTHER public key
+		
+		// TODO key flags
+		bool 		confirmed 	= false;
+		bool 		deleted 	= false;	// marked for deleted
+		uint32_t 	usage_count = 0;
+		std::string dt_confirmed = "";
 
         friend std::ostream& operator<<(std::ostream &out, Bits<ecc_key & > my)
         {

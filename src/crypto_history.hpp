@@ -82,7 +82,11 @@ namespace cryptoAL
         uint32_t data_size  = 0;
         std::string data_sha[3] = {""};
 		std::string dt  = "";
-		bool confirmed  = false;
+		
+		// TODO key flags
+		bool 		confirmed 	= false;
+		bool 		deleted 	= false;	// marked for deleted
+		uint32_t 	usage_count = 0;
 		std::string dt_confirmed = "";
 
         friend std::ostream& operator<<(std::ostream &out, Bits<history_key & > my)

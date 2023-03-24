@@ -23,10 +23,11 @@ class decryptor
 {
 friend class crypto_package;
 private:
-    decryptor() {}
+    decryptor() : cfg("") {}
 
 public:
-	decryptor(  std::string ifilename_puzzle,
+	decryptor(  std::string ifilename_cfg,
+				std::string ifilename_puzzle,
                 std::string ifilename_encrypted_data,
 			 	std::string ifilename_decrypted_data,
 			 	std::string istaging,
@@ -44,10 +45,13 @@ public:
                 std::string iknown_ftp_server  = "",
                 bool iuse_gmp = false,
                 bool autoflag = false)
+        : cfg(ifilename_cfg, verb)
 	{
+		filename_cfg = ifilename_cfg;
         filename_puzzle = ifilename_puzzle;
         filename_encrypted_data = ifilename_encrypted_data;
         filename_decrypted_data = ifilename_decrypted_data;
+
         staging =istaging;
         folder_local = ifolder_local;
         folder_my_private_rsa = ifolder_my_private_rsa;
@@ -56,26 +60,98 @@ public:
         folder_other_public_ecc  = ifolder_other_public_ecc;
         folder_my_private_hh = ifolder_my_private_hh;
         folder_other_public_hh = ifolder_other_public_hh;
+
         verbose = verb;
         keeping = keep;
+
         encryped_ftp_user = iencryped_ftp_user;
         encryped_ftp_pwd  = iencryped_ftp_pwd;
         known_ftp_server  = iknown_ftp_server;
-        use_gmp = iuse_gmp;
-        auto_flag = autoflag;
 
-        if (staging.size()==0)
+        use_gmp     = iuse_gmp;
+        auto_flag   = autoflag;
+		use_gmp     = iuse_gmp;
+
+		puz.verbose = verb;
+
+        if (filename_cfg.size() > 0)
+        {
+            cfg_parse_result = cfg.parse();
+            if (cfg_parse_result)
+            {
+                process_cfg_param();
+            }
+        }
+
+		if (staging.size()==0)
         {
             staging ="./";
         }
 
-        puz.verbose = verb;
-        use_gmp = iuse_gmp;
+        if (filename_decrypted_data.size() == 0)
+        {
+            if (filename_encrypted_data.size() > 0)
+            {
+                filename_decrypted_data = filename_encrypted_data + ".decrypted";
+            }
+            else
+            {
+                // ?
+            }
+        }
+
+        if (verbose)
+            show_param();
 	}
 
     ~decryptor()
     {
     }
+
+	void show_param()
+	{
+		std::cout << "-------------------------------------------------" << std::endl;
+		std::cout << "parameters:" << std::endl;
+		std::cout << "-------------------------------------------------" << std::endl;
+        std::cout << "filename_puzzle " << filename_puzzle << std::endl;
+        std::cout << "filename_encrypted_data " << filename_encrypted_data << std::endl;
+        std::cout << "filename_decrypted_data " << filename_decrypted_data << std::endl;
+
+        std::cout << "staging " << staging << std::endl;
+        std::cout << "folder_local " << folder_local << std::endl;
+        std::cout << "folder_my_private_rsa " << folder_my_private_rsa << std::endl;
+        std::cout << "folder_other_public_rsa " << folder_other_public_rsa << std::endl;
+        std::cout << "folder_my_private_ecc " << folder_my_private_ecc << std::endl;
+        std::cout << "folder_other_public_ecc " << folder_other_public_ecc << std::endl;
+        std::cout << "folder_my_private_hh " << folder_my_private_hh << std::endl;
+        std::cout << "folder_other_public_hh " << folder_other_public_hh << std::endl;
+
+        std::cout << "keeping " << keeping << std::endl;
+        std::cout << "use_gmp " << use_gmp << std::endl;
+        std::cout << "auto_flag " << auto_flag << std::endl;
+        std::cout << "-------------------------------------------------" << std::endl;
+	}
+
+	void process_cfg_param()
+	{
+		if (filename_puzzle.size() == 0) 		    filename_puzzle 	= cfg.cmdparam.filename_puzzle;
+		if (filename_encrypted_data.size() == 0)    filename_encrypted_data = cfg.cmdparam.filename_encrypted_data;
+		if (filename_decrypted_data.size() == 0)    filename_decrypted_data = cfg.cmdparam.filename_decrypted_data;
+
+		if (staging.size() == 0) 				staging 				= cfg.cmdparam.folder_staging;
+		if (folder_local.size() == 0) 			folder_local 			= cfg.cmdparam.folder_local;
+		if (folder_my_private_rsa.size() == 0) 	folder_my_private_rsa 	= cfg.cmdparam.folder_my_private_rsa;
+		if (folder_other_public_rsa.size() == 0)folder_other_public_rsa = cfg.cmdparam.folder_other_public_rsa;
+		if (folder_my_private_ecc.size() == 0) 	folder_my_private_ecc 	= cfg.cmdparam.folder_my_private_ecc;
+		if (folder_other_public_ecc.size() == 0)folder_other_public_ecc = cfg.cmdparam.folder_other_public_ecc;
+		if (folder_my_private_hh.size() == 0)	folder_my_private_hh 	= cfg.cmdparam.folder_my_private_hh;
+		if (folder_other_public_hh.size() == 0)	folder_other_public_hh 	= cfg.cmdparam.folder_other_public_hh;
+
+		if (verbose == false) 					if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.verbose) == 1) verbose = true;
+		if (keeping == false) 					if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.keeping) == 1) keeping = true;
+		if (use_gmp == false) 					if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.use_gmp) == 1) use_gmp = true;
+		if (auto_flag == false) 				if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.auto_flag) == 1) auto_flag = true;
+	}
 
     bool read_urlinfo(Buffer& temp, urlkey& out_uk)
 	{
@@ -1899,10 +1975,13 @@ public:
 		return r;
 	}
 
+	bool cfg_parse_result= true;
+	crypto_cfg  cfg;
 	puzzle      puz;
     cryptodata  encrypted_data;
     cryptodata  decrypted_data;
 
+	std::string filename_cfg;
 	std::string filename_puzzle;
     std::string filename_encrypted_data;
 	std::string filename_decrypted_data;

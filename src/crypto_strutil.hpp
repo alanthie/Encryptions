@@ -93,6 +93,45 @@ namespace strutil
         return ret;
     }
 
+	std::string get_str_between_two_str(const std::string& s,
+										const std::string& start_delim,
+										const std::string& stop_delim,
+										unsigned& first_delim_pos,
+										unsigned& last_delim_pos,
+										unsigned& end_pos_of_first_delim)
+	{
+		first_delim_pos = s.find(start_delim);
+
+		if (first_delim_pos != std::string::npos)
+		{
+			end_pos_of_first_delim = first_delim_pos + start_delim.length();
+			if (end_pos_of_first_delim < s.size())
+			{
+				last_delim_pos = s.find(stop_delim, end_pos_of_first_delim+1);
+				if (last_delim_pos != std::string::npos)
+				{
+                    if (last_delim_pos > first_delim_pos)
+                        return s.substr(first_delim_pos, last_delim_pos - first_delim_pos + 1);
+				}
+			}
+		}
+		return "";
+	}
+
+	long long str_to_ll(const std::string& snum)
+    {
+       long long r = -1;
+       try
+       {
+           r = std::stoll(snum);
+       }
+       catch (...)
+       {
+           r = -1;
+       }
+       return r;
+    }
+
 
 }
 }

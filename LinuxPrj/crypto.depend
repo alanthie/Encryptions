@@ -45,7 +45,7 @@
 
 1675991523 /home/server/dev/Encryptions/src/DES_Const.h
 
-1679612689 source:/home/server/dev/Encryptions/src/main.cpp
+1679697030 source:/home/server/dev/Encryptions/src/main.cpp
 	<iostream>
 	<fstream>
 	<chrono>
@@ -105,7 +105,7 @@
 	<variant>
 	<vector>
 
-1676905265 /home/server/dev/Encryptions/src/ini_parser.hpp
+1679691039 /home/server/dev/Encryptions/src/ini_parser.hpp
 	<map>
 	<string>
 	<vector>
@@ -196,7 +196,7 @@
 	"qa/RSA-GMP/RSAGMP.h"
 	"qa/RSA-GMP/RSAGMPUtils.h"
 
-1679623858 /home/server/dev/Encryptions/src/encryptor.hpp
+1679696330 /home/server/dev/Encryptions/src/encryptor.hpp
 	"crypto_const.hpp"
 	<iostream>
 	<fstream>
@@ -216,6 +216,7 @@
 	"cryptodata_list.hpp"
 	"crypto_keymgr.hpp"
 	"crypto_key_parser.hpp"
+	"crypto_cfg.hpp"
 
 1590687588 /home/server/dev/Encryptions/src/twofish.h
 
@@ -233,7 +234,7 @@
 	<stdio.h>
 	<string.h>
 
-1679611839 /home/server/dev/Encryptions/src/decryptor.hpp
+1679697112 /home/server/dev/Encryptions/src/decryptor.hpp
 	"crypto_const.hpp"
 	<iostream>
 	<fstream>
@@ -249,7 +250,7 @@
 	"crypto_shuffle.hpp"
 	"crypto_history.hpp"
 
-1679528054 /home/server/dev/Encryptions/src/crypto_test.hpp
+1679685648 /home/server/dev/Encryptions/src/crypto_test.hpp
 	"crypto_const.hpp"
 	"crypto_file.hpp"
 	"data.hpp"
@@ -260,17 +261,17 @@
 	"Salsa20.h"
 	"IDEA.hpp"
 
-1679528070 /home/server/dev/Encryptions/src/crypto_batch.hpp
+1679685648 /home/server/dev/Encryptions/src/crypto_batch.hpp
 	<iostream>
 	<fstream>
 	<chrono>
+	"crypto_const.hpp"
 	"DES.h"
 	"Buffer.hpp"
 	"SHA256.h"
 	"argparse.hpp"
 	"ini_parser.hpp"
 	"random_engine.hpp"
-	"crypto_const.hpp"
 	"data.hpp"
 	"puzzle.hpp"
 	"encryptor.hpp"
@@ -332,7 +333,7 @@
 	<string>
 	"crypto_file.hpp"
 
-1678918350 /home/server/dev/Encryptions/src/qa/rsa_gen.hpp
+1679672965 /home/server/dev/Encryptions/src/qa/rsa_gen.hpp
 	"mathcommon.h"
 	"../base_const.hpp"
 	"../crypto_key_util.hpp"
@@ -515,7 +516,7 @@
 
 1589882733 /home/server/dev/Encryptions/src/qa/iterator_tpl.h
 
-1679611839 /home/server/dev/Encryptions/src/crypto_history.hpp
+1679670854 /home/server/dev/Encryptions/src/crypto_history.hpp
 	"crypto_const.hpp"
 	<map>
 	<string>
@@ -547,7 +548,7 @@
 	<ctype.h>
 	"vigenere.hpp"
 
-1679166635 /home/server/dev/Encryptions/src/crypto_ecckey.hpp
+1679670866 /home/server/dev/Encryptions/src/crypto_ecckey.hpp
 	"qa/mathcommon.h"
 	"base_const.hpp"
 	"crypto_key_util.hpp"
@@ -580,7 +581,7 @@
 	<fstream>
 	<stdio.h>
 
-1679630500 /home/server/dev/Encryptions/src/crypto_keymgr.hpp
+1679665341 /home/server/dev/Encryptions/src/crypto_keymgr.hpp
 	"base_const.hpp"
 	"crypto_const.hpp"
 	"data.hpp"
@@ -601,10 +602,17 @@
 	"crypto_strutil.hpp"
 	"data.hpp"
 
-1679611063 /home/server/dev/Encryptions/src/crypto_strutil.hpp
+1679684131 /home/server/dev/Encryptions/src/crypto_strutil.hpp
 	"base_const.hpp"
 	<sstream>
 	<iomanip>
 	<string>
 	<algorithm>
+
+1679696971 /home/server/dev/Encryptions/src/crypto_cfg.hpp
+	"crypto_const.hpp"
+	"ini_parser.hpp"
+	"crypto_strutil.hpp"
+	"data.hpp"
+	<iostream>
 

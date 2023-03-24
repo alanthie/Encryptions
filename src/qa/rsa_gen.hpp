@@ -31,6 +31,12 @@ namespace generate_rsa
         std::string s_n; // base 64
         std::string s_e; // base 64
         std::string s_d; // base 64 empty if public key
+		
+		// TODO key flags
+		bool 		confirmed 	= false;
+		bool 		deleted 	= false;	// marked for delete
+		uint32_t 	usage_count = 0;
+		std::string dt_confirmed = "";
 
         friend std::ostream& operator<<(std::ostream &out, Bits<rsa_key & > my)
         {

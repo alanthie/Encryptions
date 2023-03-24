@@ -269,6 +269,8 @@ namespace keymgr
 		}
 		else if (newk)
 		{
+			// TODO -count key usage or maintain a pool of keys
+			
 			// ECC new keys [r]new * [rG]other
 			// TODO some way to link the 2 ... get_compatible_ecc() dont do it
 			// vmapkeyname[i] = ecc_public_key_name+ecc_private_key_name; // get_specific_compatible_ecc() 
