@@ -32,12 +32,13 @@ struct keyspec
 {
 	// [e]MY_RSAKEY_8100_2023-03-08_11:35:16
 	// [mode]block;[e]MY_RSAKEY_8100_2023-03-08_11:35:16;[r]MY_RSAKEY_8100_2023-03-08_11:35:16;
-	// [mode]recur;[r:]last=10,first=4,rnd=2;[h:]last=10,first=4,rnd=2;
+	// [mode]recur;[r:]last=10,first=4,rnd=2;[e:]last=10,first=4,rnd=2,new=4;
 	keyspec_type ktype 		= keyspec_type::Unknown;
 	bool		is_spec		= false;
 	uint32_t	first_n 	= 0;
 	uint32_t	random_n	= 0;
 	uint32_t	last_n		= 0;
+	uint32_t	new_n		= 0; // a new ECC private r can by generate thrn give rg
 	std::string	keyname;
 	std::vector<std::string> vmaterialized_keyname; // if is_spec is in use
 
@@ -85,10 +86,6 @@ public:
 		}
 	}
 
-	// [e]MY_RSAKEY_8100_2023-03-08_11:35:16
-	// [e]MY_RSAKEY_8100_2023-03-08_11:35:16;[r]MY_RSAKEY_8100_2023-03-08_11:35:16;
-	// [mode]block;[e]MY_RSAKEY_8100_2023-03-08_11:35:16;[r]MY_RSAKEY_8100_2023-03-08_11:35:16;
-	// [mode]recur;[r:]last=10,first=4,rnd=2;[h:]last=10,first=4,rnd=2;
     bool parse(cryptodata& data)
     {
         std::vector<std::string> vlines;
@@ -262,6 +259,13 @@ public:
 							n = strutil::stol(eq[1]);
 						if (n<0) n = 0;
 						r.random_n = n;
+					}
+					else if (eq[0] == "new")
+					{
+						if (eq[1].size()>0)
+							n = strutil::stol(eq[1]);
+						if (n<0) n = 0;
+						r.new_n = n;
 					}
 				}
 			}

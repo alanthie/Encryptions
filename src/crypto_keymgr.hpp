@@ -186,10 +186,11 @@ namespace keymgr
 		return (ta<tb); 
 	}
 
-	bool get_n_keys(	keyspec_type t, uint32_t n, bool first, bool last, bool random, std::vector<std::string>&  vkeys_out,
+	bool get_n_keys(	keyspec_type t, uint32_t n, bool first, bool last, bool random, bool newk, std::vector<std::string>&  vkeys_out,
 						const std::string& folder_other_public_rsa,
                        	const std::string& folder_other_public_ecc,
-                       	const std::string& folder_my_private_hh)
+                       	const std::string& folder_my_private_hh,
+						const std::string& folder_my_private_ecc)
 	{
 		std::vector<std::string> vmapkeyname;
 		
@@ -266,13 +267,22 @@ namespace keymgr
 			if (n > vmapkeyname.size()) n = vmapkeyname.size();
 			// TODO
 		}
+		else if (newk)
+		{
+			// ECC new keys [r]new * [rG]other
+			// TODO some way to link the 2 ... get_compatible_ecc() dont do it
+			// vmapkeyname[i] = ecc_public_key_name+ecc_private_key_name; // get_specific_compatible_ecc() 
+			// folder_my_private_ecc
+			// TODO
+		}
 		return true;
 	}
 	
 	bool materialize_keys(	keyspec& key_in,
 							const std::string& folder_other_public_rsa,
                             const std::string& folder_other_public_ecc,
-                            const std::string& folder_my_private_hh)
+                            const std::string& folder_my_private_hh,
+							const std::string& folder_my_private_ecc)
 	{
 		bool r = true;
 
@@ -280,15 +290,19 @@ namespace keymgr
 		{
 			if (key_in.first_n > 0)
 			{
-				r = get_n_keys(key_in.ktype, key_in.first_n, true, false, false, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh);
+				r = get_n_keys(key_in.ktype, key_in.first_n, true, false, false, false, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc);
 			}
 			if (key_in.last_n > 0)
 			{
-				r = get_n_keys(key_in.ktype, key_in.last_n, false, true, false, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh);
+				r = get_n_keys(key_in.ktype, key_in.last_n, false, true, false, false, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc);
 			}
 			if (key_in.random_n > 0)
 			{
-				r = get_n_keys(key_in.ktype, key_in.random_n, false, false, true, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh);
+				r = get_n_keys(key_in.ktype, key_in.random_n, false, false, true, false, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc);
+			}
+			if (key_in.new_n > 0)
+			{
+				r = get_n_keys(key_in.ktype, key_in.random_n, false, false, false, true, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc);
 			}
 		}
  		else
