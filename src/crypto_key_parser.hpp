@@ -31,8 +31,8 @@ enum keyspec_composition_mode
 struct keyspec
 {
 	// [e]MY_RSAKEY_8100_2023-03-08_11:35:16
-	// [e]MY_RSAKEY_8100_2023-03-08_11:35:16;[r]MY_RSAKEY_8100_2023-03-08_11:35:16;
-	// [r:]last=10,first=4,rnd=2;[h:]last=10,first=4,rnd=2;
+	// [mode]block;[e]MY_RSAKEY_8100_2023-03-08_11:35:16;[r]MY_RSAKEY_8100_2023-03-08_11:35:16;
+	// [mode]recur;[r:]last=10,first=4,rnd=2;[h:]last=10,first=4,rnd=2;
 	keyspec_type ktype 		= keyspec_type::Unknown;
 	bool		is_spec		= false;
 	uint32_t	first_n 	= 0;
@@ -49,11 +49,15 @@ struct keyspec
 struct keyspec_composite
 {
 	std::vector<keyspec> vkeyspec;
-	keyspec_composition_mode mode = keyspec_composition_mode::None;
+	keyspec_composition_mode mode = keyspec_composition_mode::Recursive;
 
     void show()
     {
-        //std::cout << "vkeyspec size " << vkeyspec.size() << std::endl;
+		if (vkeyspec.size() > 1)
+		{
+			if 		(mode == keyspec_composition_mode::BlockSplit) std::cout << "mode = block" << std::endl;
+			else if (mode == keyspec_composition_mode::Recursive)  std::cout << "mode = recursive" << std::endl;
+		}
         for(size_t i=0;i<vkeyspec.size();i++)
         {
             std::cout << "vkeyspec [" << i << "]" ;//<< std::endl;
@@ -82,7 +86,8 @@ public:
 
 	// [e]MY_RSAKEY_8100_2023-03-08_11:35:16
 	// [e]MY_RSAKEY_8100_2023-03-08_11:35:16;[r]MY_RSAKEY_8100_2023-03-08_11:35:16;
-	// [r:]last=10,first=4,random=2;[h:]last=10,first=4,random=2;
+	// [mode]block;[e]MY_RSAKEY_8100_2023-03-08_11:35:16;[r]MY_RSAKEY_8100_2023-03-08_11:35:16;
+	// [mode]recur;[r:]last=10,first=4,rnd=2;[h:]last=10,first=4,rnd=2;
     bool parse(cryptodata& data)
     {
         std::vector<std::string> vlines;
@@ -159,10 +164,16 @@ public:
 		keyspec_composite r;
 		keyspec k;
 
+		keyspec_composition_mode m;
 		std::vector<std::string> v = split(line, ";");
 		for(size_t i=0;i<v.size();i++)
 		{
-			if 		(has_token("[r]",  v[i], 0)) k = parse_key("[r]", 0, keyspec_type::RSA, false, v[i]);
+			if (has_token("[mode]",v[i], 0))
+			{
+				m = parse_mode(v[i]);
+				r.mode = m;
+			}
+			else if (has_token("[r]",  v[i], 0)) k = parse_key("[r]", 0, keyspec_type::RSA, false, v[i]);
 			else if (has_token("[r:]", v[i], 0)) k = parse_key("[r:]",0, keyspec_type::RSA, true,  v[i]);
 			else if (has_token("[e]",  v[i], 0)) k = parse_key("[e]", 0, keyspec_type::ECC, false, v[i]);
 			else if (has_token("[e:]", v[i], 0)) k = parse_key("[e:]",0, keyspec_type::ECC, true,  v[i]);
@@ -197,6 +208,14 @@ public:
 			}
 		}
 		return r;
+	}
+
+	keyspec_composition_mode parse_mode(const std::string& keydesc)
+	{
+		std::string s = keydesc.substr(std::string("[mode]").size());
+		if 		(s==std::string("block")) return keyspec_composition_mode::BlockSplit;
+		else if (s==std::string("recur")) return keyspec_composition_mode::Recursive;
+		else return keyspec_composition_mode::None;
 	}
 
 	keyspec parse_key(const std::string& token, size_t pos, keyspec_type t, bool is_spec, const std::string& keydesc)
