@@ -1,15 +1,14 @@
 #ifndef _INCLUDES_crypto_parsing
 #define _INCLUDES_crypto_parsing
 
+#include "base_const.hpp"
 #include <filesystem>
 #include <curl/curl.h>
-//#include "encrypt.h"
 #include <chrono>
 #include <ctime>
 #include <sstream>
 #include <iomanip>
 #include <string>
-#include "base_const.hpp"
 #include "crypto_file.hpp"
 
 namespace cryptoAL
@@ -193,10 +192,10 @@ std::string remove_delim(const std::string& s, char delim)
     return r;
 }
 
-namespace fs = std::filesystem;
-bool fileexists2(const fs::path& p, fs::file_status s = fs::file_status{})
+//namespace fs = std::filesystem;
+bool fileexists2(const std::filesystem::path& p, std::filesystem::file_status s = std::filesystem::file_status{})
 {
-    if(fs::status_known(s) ? fs::exists(s) : fs::exists(p))
+    if(std::filesystem::status_known(s) ? std::filesystem::exists(s) : std::filesystem::exists(p))
         return true;
     else
         return false;

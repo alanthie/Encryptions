@@ -1,11 +1,11 @@
 #ifndef _INCLUDES_cryptodata
 #define _INCLUDES_cryptodata
 
-#include <iostream>
 #include "crypto_const.hpp"
 #include "Buffer.hpp"
 #include <fstream>
 #include <stdio.h>
+#include <iostream>
 
 namespace cryptoAL
 {

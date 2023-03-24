@@ -1,15 +1,14 @@
 #ifndef _INCLUDES_crypto_file
 #define _INCLUDES_crypto_file
 
+#include "crypto_const.hpp"
 #include <filesystem>
 #include <curl/curl.h>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 #include "DES.h"
-#include "Buffer.hpp"
 #include "SHA256.h"
-#include "crypto_const.hpp"
 #include "crypto_parsing.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"

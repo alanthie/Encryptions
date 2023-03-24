@@ -1,7 +1,7 @@
 #ifndef CRYPTO_HISTORY_H_INCLUDED
 #define CRYPTO_HISTORY_H_INCLUDED
 
-#include "base_const.hpp"
+#include "crypto_const.hpp"
 #include <map>
 #include <string>
 #include "c_plus_plus_serializer.h"

@@ -1,13 +1,13 @@
 #ifndef _INCLUDES_encryptor
 #define _INCLUDES_encryptor
 
+#include "crypto_const.hpp"
 #include <iostream>
 #include <fstream>
 #include "DES.h"
 #include "AESa.h"
 #include "Buffer.hpp"
 #include "SHA256.h"
-#include "crypto_const.hpp"
 #include "crypto_urlkey.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
@@ -19,6 +19,7 @@
 #include "crypto_history.hpp"
 #include "cryptodata_list.hpp"
 #include "crypto_keymgr.hpp"
+#include "crypto_key_parser.hpp"
 
 namespace cryptoAL
 {
@@ -112,6 +113,11 @@ public:
 
         if (r)
         {
+//            keyspec_parser kp;
+//            kp.parse(urls_data);
+//            kp.show();
+//            return false;
+
             for(size_t i=0;i<urls_data.buffer.size();i++)
             {
                 // parse url

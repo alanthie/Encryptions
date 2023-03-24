@@ -7,13 +7,13 @@
 #pragma warning ( disable : 4146 )
 #endif
 
+#include "crypto_const.hpp"
+
 #include "DES.h"
-#include "Buffer.hpp"
 #include "SHA256.h"
 #include "argparse.hpp"
 #include "ini_parser.hpp"
 #include "random_engine.hpp"
-#include "crypto_const.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
 #include "encryptor.hpp"
@@ -21,9 +21,12 @@
 #include "crypto_test.hpp"
 #include "crypto_batch.hpp"
 #include "crypto_package.hpp"
-#include"crypto_parsing.hpp"
+#include "crypto_parsing.hpp"
 #include "vigenere.hpp"
 #include "data.hpp"
+
+// ../../../bin/Release/crypto encode -i msg.zip -u urls.txt  -l ./sam/local/ -v 1 -g 1 -rpv ./me/ -rpu ./sam/ -epv ./me/ -epu ./sam/ -hpv ./me/ -hpu ./sam/ -a 1
+//
 
 // ------------------------------------------------------------------------------------------------------------
 // *.crypto file available!
@@ -305,7 +308,7 @@ int main_crypto(int argc, char **argv)
             encode_command.add_argument("-hpv", "--histopriv")
                 .default_value(std::string(""))
                 .help("specify the private folder for historical hashes");
-				
+
 			encode_command.add_argument("-hpu", "--histopub")
                 .default_value(std::string(""))
                 .help("specify the other public folder for historical hashes");
@@ -367,7 +370,7 @@ int main_crypto(int argc, char **argv)
             decode_command.add_argument("-s", "--staging")
                 .default_value(std::string(""))
                 .help("specify the staging folder.");
-				
+
 			decode_command.add_argument("-a", "--auto")
                 .default_value(std::string(""))
                 .help("auto import public keys with the decrypted data");
@@ -395,7 +398,7 @@ int main_crypto(int argc, char **argv)
             decode_command.add_argument("-hpv", "--histopriv")
                 .default_value(std::string(""))
                 .help("specify the private folder for historical hashes");
-				
+
 			decode_command.add_argument("-hpu", "--histopub")
                 .default_value(std::string(""))
                 .help("specify the other public folder for historical hashes");

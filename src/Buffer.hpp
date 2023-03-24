@@ -1,15 +1,14 @@
 #ifndef CRYPTO_BUFFER_HPP
 #define CRYPTO_BUFFER_HPP
 
+#include "crypto_const.hpp"
 #include <stdint.h>
 #include <string.h>
 #include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
-#include "crypto_const.hpp"
 
-//class data;
 
 namespace cryptoAL
 {

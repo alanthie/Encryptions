@@ -1,13 +1,13 @@
 #ifndef _INCLUDES_decryptor
 #define _INCLUDES_decryptor
 
+#include "crypto_const.hpp"
 #include <iostream>
 #include <fstream>
 #include "DES.h"
 #include "AESa.h"
 #include "Buffer.hpp"
 #include "SHA256.h"
-#include "crypto_const.hpp"
 #include "crypto_file.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
@@ -1957,7 +1957,7 @@ public:
 
         if (r)
         {
-            // Confirming: 
+            // Confirming:
 			// 	Received HHKEY_OTHER_PUBLIC_DECODE_DB
 			// 	Update HHKEY_MY_PRIVATE_ENCODE_DB
 			std::string fileHistoPrivateEncodeDB = folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
