@@ -3,12 +3,11 @@
 
 #include "base_const.hpp"
 #include "crypto_const.hpp"
-#include "c_plus_plus_serializer.h"
 #include "data.hpp"
 #include "crypto_file.hpp"
+#include "crypto_key_parser.hpp"
 #include "crc32a.hpp"
-#include <map>
-#include <string>
+#include "c_plus_plus_serializer.h"
 
 namespace cryptoAL
 {
@@ -178,7 +177,126 @@ namespace keymgr
         return r;
 	}
 
+	bool sortkey(const std::string& a, const std::string& b) 
+	{ 
+		int na = a.size() - 19; if (na < 1) na = 0;
+		int nb = b.size() - 19; if (nb < 1) nb = 0;
+		std::string ta = a.substr(na);
+		std::string tb = b.substr(nb);
+		return (ta<tb); 
+	}
 
+	bool get_n_keys(	keyspec_type t, uint32_t n, bool first, bool last, bool random, std::vector<std::string>&  vkeys_out,
+						const std::string& folder_other_public_rsa,
+                       	const std::string& folder_other_public_ecc,
+                       	const std::string& folder_my_private_hh)
+	{
+		std::vector<std::string> vmapkeyname;
+		
+		if (t == keyspec_type::RSA)
+		{
+			std::string filePublicOtherDB = folder_other_public_rsa + RSA_OTHER_PUBLIC_DB;
+			std::map<std::string, generate_rsa::rsa_key> map_rsa_public;
+			// fileexist...
+			
+			std::ifstream infile;
+			infile.open (filePublicOtherDB, std::ios_base::in);
+			infile >> bits(map_rsa_public);
+			infile.close();
+				
+			for(auto& [keyname, k] : map_rsa_public)
+			{
+				vmapkeyname.push_back(keyname);
+			}
+		}
+		else if (t == keyspec_type::ECC)
+		{
+			std::string filePublicOtherDB = folder_other_public_ecc + ECCKEY_OTHER_PUBLIC_DB;
+			std::map<std::string, ecc_key> map_ecc_public;
+			// fileexist...
+			
+			std::ifstream infile;
+			infile.open (filePublicOtherDB, std::ios_base::in);
+			infile >> bits(map_ecc_public);
+			infile.close();
+
+			for(auto& [keyname, k] : map_ecc_public)
+			{
+				vmapkeyname.push_back(keyname);
+			}
+		}
+		else if (t == keyspec_type::HH)
+		{
+			std::string fileMyPrivaterDB = folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
+			std::map<std::string, history_key_public> map_hh_public;
+			// fileexist...
+			
+			std::ifstream infile;
+			infile.open (fileMyPrivaterDB, std::ios_base::in);
+			infile >> bits(map_hh_public);
+			infile.close();
+				
+			for(auto& [keyname, k] : map_hh_public)
+			{
+				vmapkeyname.push_back(keyname);
+			}
+		}
+		
+		// TODO some ordering propery required in db or dt MY_RSAKEY_512_2023-03-18_23:32:34 in key name...
+		std::sort(vmapkeyname.begin(), vmapkeyname.end(), sortkey); 
+
+		if (first)
+		{
+			if (n > vmapkeyname.size()) n = vmapkeyname.size();
+			for(size_t i = 0; i< n; i++)
+			{
+				vkeys_out.push_back(vmapkeyname[i]);
+			}
+		}
+		else if (last)
+		{
+			if (n > vmapkeyname.size()) n = vmapkeyname.size();
+			for(size_t i = vmapkeyname.size() - 1; i >= vmapkeyname.size() - n; i--)
+			{
+				vkeys_out.push_back(vmapkeyname[i]);
+			}
+		}
+		else if (random)
+		{
+			if (n > vmapkeyname.size()) n = vmapkeyname.size();
+			// TODO
+		}
+		return true;
+	}
+	
+	bool materialize_keys(	keyspec& key_in,
+							const std::string& folder_other_public_rsa,
+                            const std::string& folder_other_public_ecc,
+                            const std::string& folder_my_private_hh)
+	{
+		bool r = true;
+
+		if (key_in.is_spec)
+		{
+			if (key_in.first_n > 0)
+			{
+				r = get_n_keys(key_in.ktype, key_in.first_n, true, false, false, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh);
+			}
+			if (key_in.last_n > 0)
+			{
+				r = get_n_keys(key_in.ktype, key_in.last_n, false, true, false, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh);
+			}
+			if (key_in.random_n > 0)
+			{
+				r = get_n_keys(key_in.ktype, key_in.random_n, false, false, true, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh);
+			}
+		}
+ 		else
+ 		{
+		}
+		
+		return r;
+	}
 
 }
 }

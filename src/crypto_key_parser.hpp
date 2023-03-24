@@ -39,6 +39,7 @@ struct keyspec
 	uint32_t	random_n	= 0;
 	uint32_t	last_n		= 0;
 	std::string	keyname;
+	std::vector<std::string> vmaterialized_keyname; // if is_spec is in use
 
     void show()
 	{

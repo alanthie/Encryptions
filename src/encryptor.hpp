@@ -116,6 +116,11 @@ public:
 //            keyspec_parser kp;
 //            kp.parse(urls_data);
 //            kp.show();
+//
+//            bool keymgr::materialize_keys(	keyspec& key_in,
+//							  const std::string& folder_other_public_rsa,
+//                            const std::string& folder_other_public_ecc,
+//                            const std::string& folder_my_private_hh)
 //            return false;
 
             for(size_t i=0;i<urls_data.buffer.size();i++)
