@@ -24,6 +24,7 @@
 #include "../../src/crypto_history.hpp"
 #include "../../src/crypto_key_util.hpp"
 #include "../../src/crypto_ecckey.hpp"
+#include "../../src/crypto_cfg.hpp"
 using namespace cryptoAL;
 
 #include "ec_gmp/ec_gmp_p_mul.hpp"
@@ -49,25 +50,37 @@ void  menu()
 {
     long long choice = 1;
     long long last_choice = 1;
-    long long n;
+    //long long n;
+	
+	bool first_time = true;
+	bool cfg_parse_result = false;
+	std::string cfg_file;
+	crypto_cfg cfg("", false);
 
     std::string schoice;
     while(choice != 0)
     {
         std::cout << "====================================" << std::endl;
         std::cout << "QA version   : " << FULLVERSION   << std::endl;
+
+		if (cfg_parse_result == false)
+			std::cout << "Not using a configuration file" <<std::endl;
+		else
+			std::cout << "Current configuration file: [" << cfg_file << "]" << std::endl;
+
         std::cout << "Select a task: " << std::endl;
         std::cout << "====================================" << std::endl;
         std::cout << "0. Quit" << std::endl;
         std::cout << "*. Last choice" << std::endl;
-        std::cout << "1. Custom secret F(n)" << std::endl;
-        std::cout << "2. Custom secret P(n)" << std::endl;
+        std::cout << "1. Use a configuration file for default parameters" << std::endl;
+        std::cout << "2. Show configuration" << std::endl;
         std::cout << "3. HEX(file, position, keysize)" << std::endl;
         std::cout << "4. Puzzle: Make random puzzle from shared binary (like USB keys) data" << std::endl;
         std::cout << "5. Puzzle: Resolve puzzle" << std::endl;
         std::cout << "6. <Futur usage>" << std::endl;
         std::cout << "7.  RSA Key: View my private RSA key" << std::endl;
-        std::cout << "8.  RSA Key: View public RSA key" << std::endl;
+        std::cout << "8.  RSA Key: View my public RSA key (also included in the private db)" << std::endl;
+		std::cout << "81. RSA Key: View other public RSA key" << std::endl;
         std::cout << "9.  RSA Key: Export my public RSA key" << std::endl;
         std::cout << "10. RSA Key: Generate RSA key with OPENSSL command line (fastest)" << std::endl;
         std::cout << "11. RSA Key: Test RSA GMP key generator" << std::endl;
@@ -84,9 +97,18 @@ void  menu()
 		std::cout << "22. EC Key: Generate an elliptic curve key" << std::endl;
 		std::cout << "23. EC Key: View my private elliptic curve keys" << std::endl;
 		std::cout << "24. EC Key: Export my public elliptic curve keys" << std::endl;
-		std::cout << "25. EC Key: View public elliptic curve keys" << std::endl;
+		std::cout << "25. EC Key: View my public elliptic curve keys (also included in the private db)" << std::endl;
+		std::cout << "26. EC Key: View other public elliptic curve keys" << std::endl;
         std::cout << "==> ";
-        std::cin >> schoice;
+		
+		if (first_time)
+		{
+			schoice = "1";
+		}
+		else
+		{
+        	std::cin >> schoice;
+		}
 
         if (schoice == "*") choice = last_choice;
         else choice = cryptoAL::str_to_ll(schoice);
@@ -98,6 +120,39 @@ void  menu()
         if (choice == 0) return;
         else if (choice == 1)
         {
+			// "1. Use a config file"
+			first_time = false;
+					
+			std::cout << "Enter full path of the config file (0 = ./cfg.ini, 1 = skip): ";
+			std::string sfile;
+			std::cin >> sfile;
+			if (sfile.size() == 0)
+			{
+			}
+			else
+			{
+				if (sfile == "1")
+				{	
+					continue;
+				}
+                
+				if (sfile == "0") sfile = "./cfg.ini";
+				if (cryptoAL::fileexists(sfile) == true)
+				{
+					cfg_file = sfile;
+					cfg.reset_cfg(cfg_file);
+					cfg_parse_result = cfg.parse();
+
+					if (cfg_parse_result)
+					{
+					}
+					else
+					{
+					}
+				}
+			}
+
+/*
             ecc_curve c;
 //            c.test_msg("232FFTT325");
 //            c.test_msg("2");
@@ -119,10 +174,19 @@ void  menu()
             auto rr = qa.F(n);
             std::cout << "F(" << n << ") = " << rr << std::endl;
             std::cout << std::endl;
+*/
         }
 
         else if (choice == 2)
         {
+			// 2. Show configuration"
+			if (cfg_parse_result)
+			{
+				cfg.show();
+			}
+
+
+			/*
             std::cout << "P(n)" << std::endl;
             std::cout << "Enter a number: ";
             std::string snum;
@@ -134,6 +198,7 @@ void  menu()
             auto r = qa.P(n);
             std::cout << "P(" << n << ") = " << r << std::endl;
             std::cout << std::endl;
+*/
         }
 
         else if (choice == 3)
@@ -161,10 +226,10 @@ void  menu()
 
         else if (choice == 4)
       	{
-             qaclass qa;
-             std::cout << "Enter folder of qa binary random data: ";
-             std::string sf;
-             std::cin >> sf;
+         	qaclass qa;
+			std::cout << "Enter folder of qa binary random data: ";
+     		std::string sf;
+         	std::cin >> sf;
 
             std::cout << "Enter puzzle filename (0 = defaut): ";
             std::string pf;
@@ -215,11 +280,20 @@ void  menu()
 
 		else if (choice == 7)
         {
-			std::cout << "Enter path for rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
+			// 7.  RSA Key: View my private RSA key"
+			std::string fileRSADB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_rsa.size()>0))
+			{
+				fileRSADB = cfg.cmdparam.folder_my_private_rsa + RSA_MY_PRIVATE_DB;
+			}
+			else
+			{
+				std::cout << "Enter path for my private rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
+				std::string pathdb;
+				std::cin >> pathdb;
+				if (pathdb == "0") pathdb = "./";
+				fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
+			}
 
 			std::cout << "Only show summary (0 = true): ";
             std::string osummary;
@@ -247,6 +321,9 @@ void  menu()
                         std::cout << "key public  n (base 10): " << k.get_n()<< std:: endl;
                         std::cout << "key public  e (base 10): " << k.get_e() << std:: endl;
                         std::cout << "key private d (base 10): " << k.get_d() << std:: endl;
+                        std::cout << "key confirmed : " << k.confirmed << std::endl;
+                        std::cout << "key marked for delete : " << k.deleted << std::endl;
+                        std::cout << "key usage count: " << k.usage_count<< std::endl;
                         std::cout << std:: endl;
                     }
 				}
@@ -269,11 +346,19 @@ void  menu()
 
 	  	else if (choice == 8)
      	{
-			std::cout << "Enter path for rsa public database " << RSA_OTHER_PUBLIC_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileRSADB = pathdb + RSA_OTHER_PUBLIC_DB;
+			std::string fileRSADB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_rsa.size()>0))
+			{
+				fileRSADB = cfg.cmdparam.folder_my_private_rsa + RSA_MY_PUBLIC_DB;
+			}
+			else
+			{
+				std::cout << "Enter path for my rsa public database " << RSA_MY_PUBLIC_DB << " (0 = current directory) : ";
+				std::string pathdb;
+				std::cin >> pathdb;
+				if (pathdb == "0") pathdb = "./";
+				fileRSADB = pathdb + RSA_MY_PUBLIC_DB;
+			}
 
             std::cout << "Only show summary (0 = true): ";
             std::string osummary;
@@ -301,13 +386,83 @@ void  menu()
                         std::cout << "key public  n (base 10): " << k.get_n()<< std:: endl;
                         std::cout << "key public  e (base 10): " << k.get_e() << std:: endl;
                         std::cout << "key private d (base 10): <should be zero> " << k.get_d() << std:: endl;
+                        std::cout << "key confirmed : " << k.confirmed << std::endl;
+                        std::cout << "key marked for delete : " << k.deleted << std::endl;
+                        std::cout << "key usage count: " << k.usage_count<< std::endl;
                         std::cout << std:: endl;
                     }
                 }
 
 				{
 					std::cout << "------------------------------------------------------" << std::endl;
-					std::cout << "Public keys are in file: " << fileRSADB << std::endl;
+					std::cout << "My public keys are in file: " << fileRSADB << std::endl;
+					std::cout << "------------------------------------------------------" << std::endl;
+					for(auto& [user, k] : map_rsa_private)
+					{
+					  std::cout << "[r]" << user << std:: endl;
+					}
+					std::cout << std:: endl;
+          		}
+      		}
+            else
+            {
+                std::cerr << "no file: "  << fileRSADB << std:: endl;
+				continue;
+            }
+		}
+
+		else if (choice == 81)
+     	{
+			std::string fileRSADB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_other_public_rsa.size()>0))
+			{
+				fileRSADB = cfg.cmdparam.folder_other_public_rsa + RSA_OTHER_PUBLIC_DB;
+			}
+			else
+			{
+				std::cout << "Enter path of other rsa public database " << RSA_OTHER_PUBLIC_DB << " (0 = current directory) : ";
+				std::string pathdb;
+				std::cin >> pathdb;
+				if (pathdb == "0") pathdb = "./";
+				fileRSADB = pathdb + RSA_OTHER_PUBLIC_DB;
+			}
+
+            std::cout << "Only show summary (0 = true): ";
+            std::string osummary;
+            std::cin >> osummary;
+            bool onlysummary=false;
+            if (osummary == "0") onlysummary = true;
+
+			qaclass qa;
+			std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
+
+			// View
+          	if (cryptoAL::fileexists(fileRSADB) == true)
+      		{
+ 				std::ifstream infile;
+              	infile.open (fileRSADB, std::ios_base::in);
+          		infile >> bits(map_rsa_private);
+             	infile.close();
+
+             	if (onlysummary == false)
+                {
+                    for(auto& [user, k] : map_rsa_private)
+                    {
+                        std::cout << "key name: " << user << std:: endl;
+                        std::cout << "key size: " << k.key_size_in_bits << std:: endl;
+                        std::cout << "key public  n (base 10): " << k.get_n()<< std:: endl;
+                        std::cout << "key public  e (base 10): " << k.get_e() << std:: endl;
+                        std::cout << "key private d (base 10): <should be zero> " << k.get_d() << std:: endl;
+                        std::cout << "key confirmed : " << k.confirmed << std::endl;
+                        std::cout << "key marked for delete : " << k.deleted << std::endl;
+                        std::cout << "key usage count: " << k.usage_count<< std::endl;
+                        std::cout << std:: endl;
+                    }
+                }
+
+				{
+					std::cout << "------------------------------------------------------" << std::endl;
+					std::cout << "Other public keys are in file: " << fileRSADB << std::endl;
 					std::cout << "Links to copy paste into url file when encoding message with RSA" << std::endl;
 					std::cout << "------------------------------------------------------" << std::endl;
 					for(auto& [user, k] : map_rsa_private)
@@ -326,16 +481,29 @@ void  menu()
 
       	else if (choice == 9)
       	{
-			std::cout << "Enter path for rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
+            //std::cout << "9.  RSA Key: Export my public RSA key" << std::endl;
+			std::string fileRSADB;
 			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_rsa.size()>0))
+			{
+                pathdb = cfg.cmdparam.folder_my_private_rsa;
+				fileRSADB = cfg.cmdparam.folder_my_private_rsa + RSA_MY_PRIVATE_DB;
+			}
+			else
+			{
+				std::cout << "Enter path of my private rsa database to read: " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
+				std::string pathdb;
+				std::cin >> pathdb;
+				if (pathdb == "0") pathdb = "./";
+				fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
+			}
 
-			std::cout << "Enter file to export to (0 = ./" + RSA_OTHER_PUBLIC_DB + "): ";
-			std::string outfile;
-			std::cin >> outfile;
-			if (outfile == "0") outfile = "./" + RSA_OTHER_PUBLIC_DB;
+			std::string outfile = pathdb + RSA_MY_PUBLIC_DB;
+			std::cout << "Public rsa keys would be saved in: " << outfile << std::endl;
+
+			//std::cout << "Enter file to export to (0 = ./" + RSA_OTHER_PUBLIC_DB + "): ";
+			//std::cin >> outfile;
+			//if (outfile == "0") outfile = "./" + RSA_OTHER_PUBLIC_DB;
 
 			qaclass qa;
 			std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
@@ -395,11 +563,19 @@ void  menu()
 			if (klen == 0) klen = 16384;
 			klen = keybits8x(klen);
 
-			std::cout << "Enter path for rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
+			std::string fileRSADB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_rsa.size()>0))
+			{
+				fileRSADB = cfg.cmdparam.folder_my_private_rsa + RSA_MY_PRIVATE_DB;
+			}
+			else
+			{
+				std::cout << "Enter path for rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
+				std::string pathdb;
+				std::cin >> pathdb;
+				if (pathdb == "0") pathdb = "./";
+				fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
+			}
 
 			std::cout << "Enter path for OPENSSL "<< " (0 = not needed, 1 = D:\\000DEV\\Encryptions\\Exec_Windows\\binOpenSSL\\ for openssl.exe) : ";
 			std::string pathopenssl;
@@ -536,11 +712,19 @@ void  menu()
 			if (klen == 0) klen = 2048;
 			klen = keybits8x(klen);
 
-			std::cout << "Enter path for rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
+			std::string fileRSADB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_rsa.size()>0))
+			{
+				fileRSADB = cfg.cmdparam.folder_my_private_rsa + RSA_MY_PRIVATE_DB;
+			}
+			else
+			{
+				std::cout << "Enter path for rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
+				std::string pathdb;
+				std::cin >> pathdb;
+				if (pathdb == "0") pathdb = "./";
+				fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
+			}
 
 			int nt = std::thread::hardware_concurrency();
 			std::cout << "using " << nt << " threads" << std::endl;
@@ -621,11 +805,19 @@ void  menu()
 
         else if (choice == 14)
       	{
-			std::cout << "Enter path of encode history database " << HHKEY_MY_PRIVATE_ENCODE_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileHistoDB = pathdb + HHKEY_MY_PRIVATE_ENCODE_DB;
+      		std::string fileHistoDB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_hh.size()>0))
+			{
+				fileHistoDB = cfg.cmdparam.folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
+			}
+			else
+			{
+                std::cout << "Enter path of encode history database " << HHKEY_MY_PRIVATE_ENCODE_DB << " (0 = current directory) : ";
+                std::string pathdb;
+                std::cin >> pathdb;
+                if (pathdb == "0") pathdb = "./";
+                fileHistoDB = pathdb + HHKEY_MY_PRIVATE_ENCODE_DB;
+			}
 
 			if (cryptoAL::fileexists(fileHistoDB) == true)
 			{
@@ -640,11 +832,19 @@ void  menu()
 
         else if (choice == 15)
       	{
-			std::cout << "Enter path of decode history database " << HHKEY_MY_PRIVATE_DECODE_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileHistoDB = pathdb + HHKEY_MY_PRIVATE_DECODE_DB;
+            std::string fileHistoDB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_hh.size()>0))
+			{
+				fileHistoDB = cfg.cmdparam.folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
+			}
+			else
+			{
+                std::cout << "Enter path of decode history database " << HHKEY_MY_PRIVATE_DECODE_DB << " (0 = current directory) : ";
+                std::string pathdb;
+                std::cin >> pathdb;
+                if (pathdb == "0") pathdb = "./";
+                fileHistoDB = pathdb + HHKEY_MY_PRIVATE_DECODE_DB;
+			}
 
 			if (cryptoAL::fileexists(fileHistoDB) == true)
 			{
@@ -659,15 +859,23 @@ void  menu()
 
 		else if (choice == 16)
       	{
-		//std::cout << "16. Histo: Export public decode history hashes" << std::endl;
-		//std::cout << "17. Histo: Confirm public history hashes" << std::endl;
-
-			std::cout << "Enter path ofr private decode history database " << HHKEY_MY_PRIVATE_DECODE_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileHistoPrivateDB = pathdb + HHKEY_MY_PRIVATE_DECODE_DB;
-			std::string fileHistoPublicDB  = pathdb + HHKEY_MY_PUBLIC_DECODE_DB;
+            //std::cout << "16. Histo: Export public decode history hashes" << std::endl;
+            std::string fileHistoPrivateDB;
+            std::string fileHistoPublicDB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_hh.size()>0))
+			{
+				fileHistoPrivateDB = cfg.cmdparam.folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
+				fileHistoPublicDB  = cfg.cmdparam.folder_my_private_hh + HHKEY_MY_PUBLIC_DECODE_DB;
+			}
+			else
+			{
+                std::cout << "Enter path of private decode history database " << HHKEY_MY_PRIVATE_DECODE_DB << " (0 = current directory) : ";
+                std::string pathdb;
+                std::cin >> pathdb;
+                if (pathdb == "0") pathdb = "./";
+                fileHistoPrivateDB = pathdb + HHKEY_MY_PRIVATE_DECODE_DB;
+                fileHistoPublicDB  = pathdb + HHKEY_MY_PUBLIC_DECODE_DB;
+            }
 
 			if (cryptoAL::fileexists(fileHistoPrivateDB) == true)
 			{
@@ -689,20 +897,37 @@ void  menu()
         }
 		else if (choice == 17)
       	{
-			// Conirming: 
+			// Conirming:
 			// 	Received HHKEY_OTHER_PUBLIC_DECODE_DB
 			// 	Update HHKEY_MY_PRIVATE_ENCODE_DB
-			std::cout << "Enter path of encode history database " << HHKEY_MY_PRIVATE_ENCODE_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileHistoPrivateEncodeDB = pathdb + HHKEY_MY_PRIVATE_DECODE_DB;
+			std::string fileHistoPrivateEncodeDB;
+            std::string importfile;
 
-			std::cout << "Enter path to read received hh (" + HHKEY_OTHER_PUBLIC_DECODE_DB + ")" << " (0 = current directory) : ";
-			std::string pathreaddb;
-			std::cin >> pathreaddb;
-			if (pathreaddb == "0") pathreaddb = "./";
-			std::string importfile = pathreaddb + HHKEY_OTHER_PUBLIC_DECODE_DB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_hh.size()>0))
+			{
+				fileHistoPrivateEncodeDB = cfg.cmdparam.folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
+			}
+			else
+			{
+                std::cout << "Enter path of encode history database " << HHKEY_MY_PRIVATE_ENCODE_DB << " (0 = current directory) : ";
+                std::string pathdb;
+                std::cin >> pathdb;
+                if (pathdb == "0") pathdb = "./";
+                fileHistoPrivateEncodeDB = pathdb + HHKEY_MY_PRIVATE_DECODE_DB;
+            }
+
+            if ((cfg_parse_result) && (cfg.cmdparam.folder_other_public_hh.size()>0))
+			{
+				importfile = cfg.cmdparam.folder_other_public_hh + HHKEY_OTHER_PUBLIC_DECODE_DB;
+			}
+			else
+			{
+                std::cout << "Enter path to read received hh (" + HHKEY_OTHER_PUBLIC_DECODE_DB + ")" << " (0 = current directory) : ";
+                std::string pathreaddb;
+                std::cin >> pathreaddb;
+                if (pathreaddb == "0") pathreaddb = "./";
+                importfile = pathreaddb + HHKEY_OTHER_PUBLIC_DECODE_DB;
+            }
 
 			if (cryptoAL::fileexists(fileHistoPrivateEncodeDB) == true)
 			{
@@ -741,11 +966,19 @@ void  menu()
 			std::string eccfile;
 			std::cin >> eccfile;
 
-			std::cout << "Enter path for ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+			std::string fileECCDOMDB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
+			{
+				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + ECC_DOMAIN_DB;
+			}
+			else
+			{
+                std::cout << "Enter path for ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+                std::string pathdb;
+                std::cin >> pathdb;
+                if (pathdb == "0") pathdb = "./";
+                fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+			}
 
 			if (cryptoAL::fileexists(eccfile) == true)
 			{
@@ -818,24 +1051,41 @@ void  menu()
 
         else if (choice == 19)
         {
-            std::cout << "Example: launch this command in Linux for  512 ECC bits key: ./ecgen --fp -v -m 2g -u -p -r 512" << std::endl;
-            std::cout << "Example: launch this command in Linux for 1024 ECC bits key: ./ecgen --fp -v -m 8g -u -p -r 1024" << std::endl;
+            std::cout << "Example: launch this command in Linux for  512 ECC bits key: ./ecgen --fp -v -m 2g  -u -p -r 512" << std::endl;
+            std::cout << "Example: launch this command in Linux for 1024 ECC bits key: ./ecgen --fp -v -m 16g -u -p -r 1024" << std::endl;
             std::cout << "Example: launch this command in Linux for 2048 ECC bits key: ./ecgen --fp -v -m 32g -u -p -r 2048" << std::endl;
             std::cout << "Save the output in a text file then do [Import an elliptic curve domain from text file]" << std::endl;
             std::cout << "Enter 0 to continue" << std::endl;
-            std::string pathdb;
-            std::cin >> pathdb;
-            if (pathdb == "0") pathdb = "./";
-            std::string fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+
+            std::string fileECCDOMDB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
+			{
+				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + ECC_DOMAIN_DB;
+			}
+			else
+			{
+                std::string pathdb;
+                std::cin >> pathdb;
+                if (pathdb == "0") pathdb = "./";
+                fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+            }
         }
 
         else if (choice == 20)
         {
-			std::cout << "Enter path for ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+            std::string fileECCDOMDB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
+			{
+				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + ECC_DOMAIN_DB;
+			}
+			else
+			{
+                std::cout << "Enter path for ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+                std::string pathdb;
+                std::cin >> pathdb;
+                if (pathdb == "0") pathdb = "./";
+                fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+			}
 
 			std::cout << "Only show summary (0 = true): ";
             std::string osummary;
@@ -867,6 +1117,9 @@ void  menu()
                         std::cout << "ecc gx : " << k.s_gx << std:: endl;
                         std::cout << "ecc gy : " << k.s_gy << std:: endl;
                         std::cout << "ecc h : " << k.s_h << std:: endl;
+                        std::cout << "ecc confirmed : " << k.confirmed << std::endl;
+                        std::cout << "ecc marked for delete : " << k.deleted << std::endl;
+                        std::cout << "ecc usage count: " << k.usage_count<< std::endl;
                         std::cout << std:: endl;
                     }
 				}
@@ -889,16 +1142,25 @@ void  menu()
 
 		else if (choice == 21)
         {
-            std::cout << "Enter path of your ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+            std::string fileECCDOMDB;
+            std::string pathdb;
+            if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
+			{
+				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + ECC_DOMAIN_DB;
+				pathdb = cfg.cmdparam.folder_my_private_ecc;
+			}
+			else
+			{
+                std::cout << "Enter path of your ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+                std::cin >> pathdb;
+                if (pathdb == "0") pathdb = "./";
+                fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+			}
 
             std::cout << "Enter path of other ecc domain database to import " << ECC_DOMAIN_DB << " (0 = current directory) : ";
 			std::string pathotherdb;
 			std::cin >> pathotherdb;
-			if (pathdb == "0") pathotherdb = "./";
+			if (pathotherdb == "0") pathotherdb = "./";
 			std::string fileECCDOMOTHERDB = pathotherdb + ECC_DOMAIN_DB;
 
             if (fileECCDOMDB == fileECCDOMOTHERDB)
@@ -974,11 +1236,20 @@ void  menu()
 
 		else if (choice == 22)
         {
-			std::cout << "Enter path for ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+            std::string fileECCDOMDB;
+            std::string pathDOMdb;
+            if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
+			{
+				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + ECC_DOMAIN_DB;
+				pathDOMdb = cfg.cmdparam.folder_my_private_ecc;
+			}
+			else
+			{
+                std::cout << "Enter path for ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+                std::cin >> pathDOMdb;
+                if (pathDOMdb == "0") pathDOMdb = "./";
+                fileECCDOMDB = pathDOMdb + ECC_DOMAIN_DB;
+			}
 
 			qaclass qa;
 			std::map< std::string, cryptoAL::ecc_domain > map_ecc_domain;
@@ -1027,11 +1298,19 @@ void  menu()
 
 				if (r)
 				{
-                    std::cout << "Enter path for ecc private keys database " << ECCKEY_MY_PRIVATE_DB << " (0 = same as domain) : ";
-                    std::string pathecckeydb;
-                    std::cin >> pathecckeydb;
-                    if (pathecckeydb == "0") pathecckeydb = pathdb;
-                    std::string fileECCKEYDB = pathecckeydb + ECCKEY_MY_PRIVATE_DB;
+                    std::string fileECCKEYDB;
+                    if (cfg_parse_result)
+                    {
+                        fileECCKEYDB = cfg.cmdparam.folder_my_private_ecc + ECCKEY_MY_PRIVATE_DB;
+                    }
+                    else
+                    {
+                        std::cout << "Enter path for ecc private keys database " << ECCKEY_MY_PRIVATE_DB << " (0 = same as domain) : ";
+                        std::string pathecckeydb;
+                        std::cin >> pathecckeydb;
+                        if (pathecckeydb == "0") pathecckeydb = pathDOMdb;
+                        fileECCKEYDB = pathecckeydb + ECCKEY_MY_PRIVATE_DB;
+                    }
 
                     // READ
                     std::map< std::string, ecc_key > map_ecckey_private;
@@ -1090,11 +1369,19 @@ void  menu()
 
         else if (choice == 23)
         {
-			std::cout << "Enter path for ecc db " << ECCKEY_MY_PRIVATE_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileECCKEYDB = pathdb + ECCKEY_MY_PRIVATE_DB;
+            std::string fileECCKEYDB;
+            if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
+			{
+				fileECCKEYDB = cfg.cmdparam.folder_my_private_ecc + ECCKEY_MY_PRIVATE_DB;
+			}
+			else
+			{
+                std::cout << "Enter path for my private ecc keys db " << ECCKEY_MY_PRIVATE_DB << " (0 = current directory) : ";
+                std::string pathdb;
+                std::cin >> pathdb;
+                if (pathdb == "0") pathdb = "./";
+                fileECCKEYDB = pathdb + ECCKEY_MY_PRIVATE_DB;
+			}
 
 			std::cout << "Only show summary (0 = true): ";
             std::string osummary;
@@ -1123,6 +1410,9 @@ void  menu()
                         std::cout << "key public  kG_x: " << k.s_kg_x<< std::endl;
                         std::cout << "key public  kG_y: " << k.s_kg_y<< std::endl;
                         std::cout << "key private k   : " << k.s_k << std::endl;
+                        std::cout << "key confirmed : " << k.confirmed << std::endl;
+                        std::cout << "key marked for delete : " << k.deleted << std::endl;
+                        std::cout << "key usage count: " << k.usage_count<< std::endl;
                         std::cout << std:: endl;
                     }
 				}
@@ -1145,16 +1435,24 @@ void  menu()
 
 		else if (choice == 24)
       	{
-			std::cout << "Enter path for ecc database " << ECCKEY_MY_PRIVATE_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileECCKEYDB = pathdb + ECCKEY_MY_PRIVATE_DB;
+            // 24. EC Key: Export my public elliptic curve keys
+            std::string fileECCKEYDB;
+            std::string pathdb;
+            if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
+			{
+				fileECCKEYDB = cfg.cmdparam.folder_my_private_ecc + ECCKEY_MY_PRIVATE_DB;
+				pathdb = cfg.cmdparam.folder_my_private_ecc;
+			}
+			else
+			{
+                std::cout << "Enter path for my private ecc keys db " << ECCKEY_MY_PRIVATE_DB << " (0 = current directory) : ";
+                std::cin >> pathdb;
+                if (pathdb == "0") pathdb = "./";
+                fileECCKEYDB = pathdb + ECCKEY_MY_PRIVATE_DB;
+			}
 
-			std::cout << "Enter file to export to (0 = ./" + ECCKEY_OTHER_PUBLIC_DB + "): ";
-			std::string outfile;
-			std::cin >> outfile;
-			if (outfile == "0") outfile = "./" + ECCKEY_OTHER_PUBLIC_DB;
+			std::string outfile = pathdb + ECCKEY_MY_PUBLIC_DB;
+			std::cout << "Public ecc keys would be saved in: " << outfile << std::endl;;
 
 			qaclass qa;
 			std::map< std::string, ecc_key > map_ecc_private;
@@ -1198,11 +1496,20 @@ void  menu()
 
 	  	else if (choice == 25)
      	{
-			std::cout << "Enter path for ecc public database " << ECCKEY_OTHER_PUBLIC_DB << " (0 = current directory) : ";
-			std::string pathdb;
-			std::cin >> pathdb;
-			if (pathdb == "0") pathdb = "./";
-			std::string fileECCKEYDB = pathdb + ECCKEY_OTHER_PUBLIC_DB;
+            std::string fileECCKEYDB;
+            std::string pathdb;
+            if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
+			{
+				fileECCKEYDB = cfg.cmdparam.folder_my_private_ecc + ECCKEY_MY_PUBLIC_DB;
+				pathdb = cfg.cmdparam.folder_my_private_ecc;
+			}
+			else
+			{
+                std::cout << "Enter path for my ecc public database " << ECCKEY_MY_PUBLIC_DB << " (0 = current directory) : ";
+                std::cin >> pathdb;
+                if (pathdb == "0") pathdb = "./";
+                fileECCKEYDB = pathdb + ECCKEY_MY_PUBLIC_DB;
+			}
 
             std::cout << "Only show summary (0 = true): ";
             std::string osummary;
@@ -1231,14 +1538,16 @@ void  menu()
                         std::cout << "key public  kG_x: " << k.s_kg_x<< std::endl;
                         std::cout << "key public  kG_y: " << k.s_kg_y<< std::endl;
                         std::cout << "key private k <should be empty> : " << k.s_k << std::endl;
+                        std::cout << "key confirmed : " << k.confirmed << std::endl;
+                        std::cout << "key marked for delete : " << k.deleted << std::endl;
+                        std::cout << "key usage count: " << k.usage_count<< std::endl;
                         std::cout << std:: endl;
                     }
                 }
 
 				{
 					std::cout << "------------------------------------------------------" << std::endl;
-					std::cout << "Public keys are in file: " << fileECCKEYDB << std::endl;
-					std::cout << "Links to copy paste into url file when encoding message with ECC" << std::endl;
+					std::cout << "My public keys are in file: " << fileECCKEYDB << std::endl;
 					std::cout << "------------------------------------------------------" << std::endl;
 					for(auto& [kname, k] : map_ecc_public)
 					{
@@ -1254,6 +1563,75 @@ void  menu()
             }
 		}
 
+		else if (choice == 26)
+     	{
+            std::string fileECCKEYDB;
+            std::string pathdb;
+            if ((cfg_parse_result) && (cfg.cmdparam.folder_other_public_ecc.size()>0))
+			{
+				fileECCKEYDB = cfg.cmdparam.folder_other_public_ecc + ECCKEY_OTHER_PUBLIC_DB;
+				pathdb = cfg.cmdparam.folder_my_private_ecc;
+			}
+			else
+			{
+                std::cout << "Enter path of other ecc public database " << ECCKEY_OTHER_PUBLIC_DB << " (0 = current directory) : ";
+                std::cin >> pathdb;
+                if (pathdb == "0") pathdb = "./";
+                fileECCKEYDB = pathdb + ECCKEY_OTHER_PUBLIC_DB;
+			}
+
+            std::cout << "Only show summary (0 = true): ";
+            std::string osummary;
+            std::cin >> osummary;
+            bool onlysummary=false;
+            if (osummary == "0") onlysummary = true;
+
+			qaclass qa;
+			std::map< std::string, ecc_key > map_ecc_public;
+
+			// View
+          	if (cryptoAL::fileexists(fileECCKEYDB) == true)
+      		{
+ 				std::ifstream infile;
+              	infile.open (fileECCKEYDB, std::ios_base::in);
+          		infile >> bits(map_ecc_public);
+             	infile.close();
+
+             	if (onlysummary == false)
+                {
+                    for(auto& [kname, k] : map_ecc_public)
+                    {
+                        std::cout << "key name: " << kname << std::endl;
+                        std::cout << "domain:   " << k.dom.name() << std::endl;
+                        std::cout << "key size: " << k.dom.key_size_bits << std::endl;
+                        std::cout << "key public  kG_x: " << k.s_kg_x<< std::endl;
+                        std::cout << "key public  kG_y: " << k.s_kg_y<< std::endl;
+                        std::cout << "key private k <should be empty> : " << k.s_k << std::endl;
+                        std::cout << "key confirmed : " << k.confirmed << std::endl;
+                        std::cout << "key marked for delete : " << k.deleted << std::endl;
+                        std::cout << "key usage count: " << k.usage_count<< std::endl;
+                        std::cout << std:: endl;
+                    }
+                }
+
+				{
+					std::cout << "------------------------------------------------------" << std::endl;
+					std::cout << "Other public keys are in file: " << fileECCKEYDB << std::endl;
+					std::cout << "Links to copy paste into url file when encoding message with ECC" << std::endl;
+					std::cout << "------------------------------------------------------" << std::endl;
+					for(auto& [kname, k] : map_ecc_public)
+					{
+					  std::cout << "[e]" << kname << std:: endl;
+					}
+					std::cout << std:: endl;
+          		}
+      		}
+            else
+            {
+                std::cerr << "ERROR no file: "  << fileECCKEYDB << std:: endl;
+				continue;
+            }
+		}
 
     }
 

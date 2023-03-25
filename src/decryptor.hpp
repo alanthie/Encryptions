@@ -15,6 +15,7 @@
 #include "crc32a.hpp"
 #include "crypto_shuffle.hpp"
 #include "crypto_history.hpp"
+#include "crypto_cfg.hpp"
 
 namespace cryptoAL
 {
@@ -45,7 +46,7 @@ public:
                 std::string iknown_ftp_server  = "",
                 bool iuse_gmp = false,
                 bool autoflag = false)
-        : cfg(ifilename_cfg, verb)
+        : cfg(ifilename_cfg, false)
 	{
 		filename_cfg = ifilename_cfg;
         filename_puzzle = ifilename_puzzle;
@@ -111,25 +112,25 @@ public:
 	void show_param()
 	{
 		std::cout << "-------------------------------------------------" << std::endl;
-		std::cout << "parameters:" << std::endl;
+		std::cout << "Parameters:" << std::endl;
 		std::cout << "-------------------------------------------------" << std::endl;
-        std::cout << "filename_puzzle " << filename_puzzle << std::endl;
-        std::cout << "filename_encrypted_data " << filename_encrypted_data << std::endl;
-        std::cout << "filename_decrypted_data " << filename_decrypted_data << std::endl;
+        std::cout << "filename_puzzle:         " << filename_puzzle << std::endl;
+        std::cout << "filename_encrypted_data: " << filename_encrypted_data << std::endl;
+        std::cout << "filename_decrypted_data: " << filename_decrypted_data << std::endl;
 
-        std::cout << "staging " << staging << std::endl;
-        std::cout << "folder_local " << folder_local << std::endl;
-        std::cout << "folder_my_private_rsa " << folder_my_private_rsa << std::endl;
-        std::cout << "folder_other_public_rsa " << folder_other_public_rsa << std::endl;
-        std::cout << "folder_my_private_ecc " << folder_my_private_ecc << std::endl;
-        std::cout << "folder_other_public_ecc " << folder_other_public_ecc << std::endl;
-        std::cout << "folder_my_private_hh " << folder_my_private_hh << std::endl;
-        std::cout << "folder_other_public_hh " << folder_other_public_hh << std::endl;
+        std::cout << "staging:                 " << staging << std::endl;
+        std::cout << "folder_local:            " << folder_local << std::endl;
+        std::cout << "folder_my_private_rsa:   " << folder_my_private_rsa << std::endl;
+        std::cout << "folder_other_public_rsa: " << folder_other_public_rsa << std::endl;
+        std::cout << "folder_my_private_ecc:   " << folder_my_private_ecc << std::endl;
+        std::cout << "folder_other_public_ecc: " << folder_other_public_ecc << std::endl;
+        std::cout << "folder_my_private_hh:    " << folder_my_private_hh << std::endl;
+        std::cout << "folder_other_public_hh:  " << folder_other_public_hh << std::endl;
 
-        std::cout << "keeping " << keeping << std::endl;
-        std::cout << "use_gmp " << use_gmp << std::endl;
-        std::cout << "auto_flag " << auto_flag << std::endl;
-        std::cout << "-------------------------------------------------" << std::endl;
+        std::cout << "keeping:   " << keeping << std::endl;
+        std::cout << "use_gmp:   " << use_gmp << std::endl;
+        std::cout << "auto_flag: " << auto_flag << std::endl;
+        std::cout << "-------------------------------------------------" << std::endl<< std::endl;
 	}
 
 	void process_cfg_param()
@@ -2032,6 +2033,9 @@ public:
                                         folder_other_public_rsa,
                                         folder_other_public_ecc,
                                         folder_other_public_hh,
+                                        folder_my_private_rsa,
+                                        folder_my_private_ecc,
+                                        folder_my_private_hh,
                                         verbose);
 
         if (r)
@@ -2052,11 +2056,12 @@ public:
 					if (r==false)
 					{
 						std::cerr << "WARNING confirm of HH keys FAILED" << std:: endl;
-						r = false;
+						//r = false;
 					}
 					else
 					{
-						std::cerr << "Number of new confirm: " << cnt << ", number of hashes: " << n << std:: endl;
+						if (verbose)
+							std::cout << "Number of new confirm: " << cnt << ", number of hashes: " << n << std:: endl;
 					}
 				}
 				else
@@ -2073,6 +2078,55 @@ public:
 			}
         }
 
+        if (r)
+        {
+            bool ok[4] = {true};
+            bool key_updated[4] = {false};
+
+            ok[0] = keymgr::status_confirm_or_delete(folder_my_private_rsa, CRYPTO_FILE_TYPE::RSA_KEY_STATUS , key_updated[0], verbose);
+            if (ok[0]==false)
+            {
+                std::cerr << "WARNING failed to update rsa keys status " << std:: endl;
+            }
+
+            ok[1] = keymgr::status_confirm_or_delete(folder_my_private_ecc, CRYPTO_FILE_TYPE::ECC_KEY_STATUS , key_updated[1], verbose);
+            if (ok[1]==false)
+            {
+                std::cerr << "WARNING failed to update ecc keys status " << std:: endl;
+            }
+
+            ok[2] = keymgr::status_confirm_or_delete(folder_my_private_hh,  CRYPTO_FILE_TYPE::HH_KEY_STATUS ,  key_updated[2], verbose);
+            if (ok[2]==false)
+            {
+                std::cerr << "WARNING failed to update hh keys status " << std:: endl;
+            }
+			
+			ok[3] = keymgr::status_confirm_or_delete(folder_my_private_ecc,  CRYPTO_FILE_TYPE::ECC_DOM_STATUS ,  key_updated[3], verbose);
+            if (ok[3]==false)
+            {
+                std::cerr << "WARNING failed to update ecc domain keys status " << std:: endl;
+            }
+        }
+
+		if (r)
+        {
+			bool key_merged = false;
+			bool ok = keymgr::merge_other_ecc_domain(folder_my_private_ecc, folder_other_public_ecc, key_merged, verbose);
+		}
+
+		if (r)
+        {
+			// WHEN to do it: was already marked as deleted and did not receive another deleted record this decode (encode sent a confimation before)
+			// cleanup public other [k.deleted == true]
+			/*
+			bool ok[3] = {true};
+            bool key_deleted[3] = {false};
+			ok[0] = keymgr::delete_public_keys_marked_for_deleting(folder_other_publice_rsa, CRYPTO_FILE_TYPE::RSA_MY_PUBLIC , key_deleted[0]);
+			ok[1] = keymgr::delete_public_keys_marked_for_deleting(folder_other_publice_ecc, CRYPTO_FILE_TYPE::ECC_MY_PUBLIC , key_deleted[1]);
+			ok[2] = keymgr::delete_public_keys_marked_for_deleting(folder_other_publice_hh,  CRYPTO_FILE_TYPE::HH_MY_PUBLIC , key_deleted[2]);
+			*/
+		}
+		
         return r;
     }
 

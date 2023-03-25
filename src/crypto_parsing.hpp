@@ -1,7 +1,7 @@
 #ifndef _INCLUDES_crypto_parsing
 #define _INCLUDES_crypto_parsing
 
-#include "base_const.hpp"
+#include "crypto_const.hpp"
 #include <filesystem>
 #include <curl/curl.h>
 #include <chrono>
@@ -214,10 +214,10 @@ std::string get_block_infile(std::string FILE, std::string start, std::string la
 			size_t pos_end;
 			if ((pos_start = s.find(start, 0)) != std::string::npos)
 			{
-				std::cerr << "start: " << pos_start << std::endl;
+				//std::cerr << "start: " << pos_start << std::endl;
 			   	if ((pos_end = s.find(last, pos_start)) != std::string::npos)
 			   	{
-			   		std::cerr << "end: " << pos_start << std::endl;
+			   		//std::cerr << "end: " << pos_start << std::endl;
 				   	if (pos_end  > (pos_start + start.size())  )
 					   	return s.substr(pos_start+start.size(), pos_end - (pos_start+start.size()) );
 					else

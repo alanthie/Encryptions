@@ -256,6 +256,10 @@ int main_crypto(int argc, char **argv)
           	encode_command.add_argument("-cfg", "--cfg")
                 .default_value(std::string(""))
                 .help("specify a config file.");
+				
+			encode_command.add_argument("-a", "--auto")
+                .default_value(std::string(""))
+                .help("auto export public/status keys with the encrypted data");
 
             encode_command.add_argument("-i", "--input")
                 .default_value(std::string(""))
@@ -284,10 +288,6 @@ int main_crypto(int argc, char **argv)
             encode_command.add_argument("-s", "--staging")
                 .default_value(std::string(""))
                 .help("specify the staging folder.");
-
-            encode_command.add_argument("-a", "--auto")
-                .default_value(std::string(""))
-                .help("auto export public keys with the encrypted data");
 
             encode_command.add_argument("-l", "--local")
                 .default_value(std::string(""))
@@ -362,6 +362,10 @@ int main_crypto(int argc, char **argv)
           	decode_command.add_argument("-cfg", "--cfg")
                 .default_value(std::string(""))
                 .help("specify a config file.");
+				
+			decode_command.add_argument("-a", "--auto")
+                .default_value(std::string(""))
+                .help("auto import public/status keys with the decrypted data");
 
             decode_command.add_argument("-i", "--input")
                 .default_value(std::string(""))
@@ -378,10 +382,6 @@ int main_crypto(int argc, char **argv)
             decode_command.add_argument("-s", "--staging")
                 .default_value(std::string(""))
                 .help("specify the staging folder.");
-
-			decode_command.add_argument("-a", "--auto")
-                .default_value(std::string(""))
-                .help("auto import public keys with the decrypted data");
 
             decode_command.add_argument("-l", "--local")
                 .default_value(std::string(""))

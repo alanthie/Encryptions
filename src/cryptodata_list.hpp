@@ -1,6 +1,7 @@
 #ifndef _INCLUDES_cryptodata_list
 #define _INCLUDES_cryptodata_list
 
+#include "crypto_const.hpp"
 #include <iostream>
 #include "data.hpp"
 #include <fstream>
@@ -11,15 +12,15 @@ namespace cryptoAL
 
 struct cryptodata_list_header_item
 {
-	CRYPTO_FILE_TYPE    data_type = CRYPTO_FILE_TYPE::Unknown; // raw data, rsadb, eccdb, hhdb, ...
+	CRYPTO_FILE_TYPE    data_type = CRYPTO_FILE_TYPE::Unknown; // raw data, rsa, ecc, hh, KEY_STATUS, ...
 	uint32_t            data_size = 0;
 	std::string         filename;       // only for reading not saved in header
-	std::string         public_other_short_filename;
+	std::string         recipient_short_filename;
 
-	cryptodata_list_header_item(const std::string& file, const std::string& publicothershortfilename, uint32_t datasize, CRYPTO_FILE_TYPE datatype)
+	cryptodata_list_header_item(const std::string& file, const std::string& recipientshortfilename, uint32_t datasize, CRYPTO_FILE_TYPE datatype)
 	{
 		filename = file;
-		public_other_short_filename = publicothershortfilename;
+		recipient_short_filename = recipientshortfilename;
 		data_size = datasize;
 		data_type = datatype;
 	}
@@ -31,11 +32,12 @@ struct cryptodata_list_header
 	uint32_t version = 1000;
 	std::vector<cryptodata_list_header_item> vitem;
 
-	void add_item(const std::string& filename, const std::string& publicothershortfilename, uint32_t datasize, CRYPTO_FILE_TYPE datatype, bool verbose=false)
+	void add_item(const std::string& filename, const std::string& recipientshortfilename, uint32_t datasize, CRYPTO_FILE_TYPE datatype, bool verbose=false)
 	{
-        if (verbose) std::cout << "header add item: " << filename << " datasize: " << datasize << " datatype: " << (uint32_t)datatype << " shortfilename: " << publicothershortfilename  << std::endl;
+        verbose=verbose;
+        //if (verbose) std::cout << "header add item: " << filename << " datasize: " << datasize << " datatype: " << (uint32_t)datatype << " shortfilename: " << recipientshortfilename  << std::endl;
 
-		cryptodata_list_header_item hitem(filename, publicothershortfilename, datasize, datatype);
+		cryptodata_list_header_item hitem(filename, recipientshortfilename, datasize, datatype);
 		vitem.push_back(hitem);
 	}
 
@@ -49,8 +51,8 @@ struct cryptodata_list_header
 		{
 			r+=4; // data_type
 			r+=4; // data_size
-			r+=4; // public_other_short_filename.size()
-			r+=vitem[i].public_other_short_filename.size();
+			r+=4; // recipient_short_filename.size()
+			r+=vitem[i].recipient_short_filename.size();
 		}
 		return r;
 	}
@@ -58,17 +60,19 @@ struct cryptodata_list_header
 	void show()
 	{
 		std::cout << "------------------------------------------------- "  << std::endl;
-		std::cout << "HEADER get_total_size: "  << get_total_size()<< std::endl;
+		std::cout << "HEADER : " << std::endl;
+		std::cout << "------------------------------------------------- "  << std::endl;
+		std::cout << "size:        "  << get_total_size()<< std::endl;
         std::string m(magic_number, 8);
-        std::cout << "magic: " 		<< m << std::endl;
-		std::cout << "version: " 	<< version << std::endl;
-		std::cout << "vitem size: " 	<< vitem.size() << std::endl;
+        std::cout << "magic:       " 		<< m << std::endl;
+		std::cout << "version:     " 	<< version << std::endl;
+		std::cout << "files count: " 	<< vitem.size() << std::endl;
 		for(size_t i=0;i<vitem.size();i++)
 		{
-			std::cout   << "data_type: "<< (uint32_t)vitem[i].data_type
-                        << " data_size: "<< vitem[i].data_size
-                        << " short_filename: " << vitem[i].public_other_short_filename
-                        << " filename: " << vitem[i].filename
+			std::cout   << "data type: "<< (uint32_t)vitem[i].data_type
+                        << ", data size: "<< vitem[i].data_size
+                        << ", remote short filename: " << vitem[i].recipient_short_filename
+                        << ", local filename: " << vitem[i].filename
                         << std::endl;
 		}
 		std::cout << "------------------------------------------------- "  << std::endl<< std::endl;
@@ -87,8 +91,8 @@ struct cryptodata_list_header
 		{
 			bout.writeUInt32((uint32_t)vitem[i].data_type, -1);
 			bout.writeUInt32(vitem[i].data_size, -1);
-			bout.writeUInt32(vitem[i].public_other_short_filename.size(), -1);
-			bout.write(vitem[i].public_other_short_filename.data(),vitem[i].public_other_short_filename.size(), -1);
+			bout.writeUInt32(vitem[i].recipient_short_filename.size(), -1);
+			bout.write(vitem[i].recipient_short_filename.data(),vitem[i].recipient_short_filename.size(), -1);
 		}
 		return r;
 	}
@@ -103,6 +107,9 @@ struct cryptodata_list_header
                             const std::string&  folder_other_public_rsa,
                             const std::string&  folder_other_public_ecc,
                             const std::string&  folder_other_public_hh,
+							const std::string&  folder_my_private_rsa,
+                            const std::string&  folder_my_private_ecc,
+                            const std::string&  folder_my_private_hh,
                             bool verbose = false)
 	{
 		bool r = true;
@@ -149,7 +156,12 @@ struct cryptodata_list_header
             std::string filename;
 			if      (data_type == CRYPTO_FILE_TYPE::RSA_PUBLIC) filename = folder_other_public_rsa + shortfilename;
 			else if (data_type == CRYPTO_FILE_TYPE::ECC_PUBLIC) filename = folder_other_public_ecc + shortfilename;
+			else if (data_type == CRYPTO_FILE_TYPE::ECC_DOMAIN) filename = folder_other_public_ecc + shortfilename;
 			else if (data_type == CRYPTO_FILE_TYPE::HH_PUBLIC)  filename = folder_other_public_hh  + shortfilename;
+			else if (data_type == CRYPTO_FILE_TYPE::RSA_KEY_STATUS)  	filename = folder_my_private_rsa + shortfilename;
+			else if (data_type == CRYPTO_FILE_TYPE::ECC_KEY_STATUS) 	filename = folder_my_private_ecc + shortfilename;
+			else if (data_type == CRYPTO_FILE_TYPE::ECC_DOM_STATUS) 	filename = folder_my_private_ecc + shortfilename;
+			else if (data_type == CRYPTO_FILE_TYPE::HH_KEY_STATUS)  	filename = folder_my_private_hh  + shortfilename;
 			else filename = shortfilename;
 
 			add_item(filename, shortfilename, data_size, data_type);
@@ -163,17 +175,17 @@ struct cryptodata_list_header
 
 struct cryptodata_item
 {
-    cryptodata_item(const std::string& file, const std::string& publicothershortfilename, cryptodata* buff, CRYPTO_FILE_TYPE datatype)
+    cryptodata_item(const std::string& file, const std::string& recipientshortfilename, cryptodata* buff, CRYPTO_FILE_TYPE datatype)
     {
-		data_type = datatype;
-        filename = file;
-        public_other_short_filename = publicothershortfilename;
+		data_type 	= datatype;
+        filename 	= file;
+        recipient_short_filename = recipientshortfilename;
         b = buff;
     }
 
 	CRYPTO_FILE_TYPE 	data_type = CRYPTO_FILE_TYPE::Unknown;
     std::string 		filename;
-    std::string         public_other_short_filename;
+    std::string         recipient_short_filename;
     cryptodata* 		b = nullptr;
 };
 
@@ -206,25 +218,35 @@ public:
                             const std::string&  folder_other_public_rsa,
                             const std::string&  folder_other_public_ecc,
                             const std::string&  folder_other_public_hh,
+							const std::string&  folder_my_private_rsa,
+                            const std::string&  folder_my_private_ecc,
+                            const std::string&  folder_my_private_hh,
 							bool verbose = false)
 	{
 		bool r = true;
 		r = header.read_from_buffer(in_data.buffer,
                                     folder_other_public_rsa,
                                     folder_other_public_ecc,
-                                    folder_other_public_hh, verbose);
+                                    folder_other_public_hh,
+									folder_my_private_rsa,
+                           			folder_my_private_ecc,
+                             		folder_my_private_hh,
+									verbose);
 		if (r)
 		{
 			for(size_t i=0;i<header.vitem.size();i++)
 			{
 				cryptodata* p = new cryptodata();
-				cryptodata_item item(header.vitem[i].filename, header.vitem[i].public_other_short_filename, p, header.vitem[i].data_type);
+				cryptodata_item item(header.vitem[i].filename, header.vitem[i].recipient_short_filename, p, header.vitem[i].data_type);
 				vitem.push_back(item);
 			}
 
             int cntRAW = 0;
 			uint32_t posdata = header.get_total_size();
 
+			if (verbose) std::cout << "------------------------------------ " <<  std:: endl;
+			if (verbose) std::cout << " Saving files: " << std:: endl;
+			if (verbose) std::cout << "------------------------------------ " <<  std:: endl;
 			for(size_t i=0;i<vitem.size();i++)
 			{
                 if ( (cntRAW==0) && (header.vitem[i].data_type == CRYPTO_FILE_TYPE::RAW))
@@ -233,14 +255,21 @@ public:
                     vitem[i].filename = filename_decrypted_data;
                 }
 				vitem[i].b->buffer.increase_size(header.vitem[i].data_size);
+
+				// This is a copy of all public valid key - not incremental.....
 				vitem[i].b->buffer.write(&in_data.buffer.getdata()[posdata], header.vitem[i].data_size, 0);
 
 				// bck...
 
+				if (verbose)
+				{
+					std::cout << "saving... " << vitem[i].filename << std:: endl;
+				}
 				vitem[i].b->save_to_file(vitem[i].filename);
 
 				posdata += header.vitem[i].data_size;
 			}
+			if (verbose) std::cout << "------------------------------------ "  << std:: endl<< std:: endl;
 		}
 		else
 		{
@@ -250,15 +279,15 @@ public:
 		return r;
 	}
 
-    void add_data(cryptodata* b, const std::string& filename, const std::string& public_other_short_filename, CRYPTO_FILE_TYPE datatype)
+    void add_data(cryptodata* b, const std::string& filename, const std::string& recipient_short_filename, CRYPTO_FILE_TYPE datatype)
     {
-		cryptodata_item item(filename, public_other_short_filename, b, datatype);
+		cryptodata_item item(filename, recipient_short_filename, b, datatype);
 		vitem.push_back(item);
 
 		if (b != nullptr)
-			header.add_item(filename, public_other_short_filename, b->buffer.size(), datatype, verbose);
+			header.add_item(filename, recipient_short_filename, b->buffer.size(), datatype, verbose);
 		else
-			header.add_item(filename, public_other_short_filename, 0, datatype, verbose);
+			header.add_item(filename, recipient_short_filename, 0, datatype, verbose);
     }
 
  	void update_data_size_in_header()
@@ -274,6 +303,9 @@ public:
 
 	bool read_data_fromfile()
 	{
+		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
+		if (verbose) std::cout << "Reading files: "<< std::endl;
+		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
 	 	bool r = true;
 		for(size_t i=0;i<vitem.size();i++)
 		{
@@ -289,6 +321,7 @@ public:
                 break;
             }
 		}
+		if (verbose) std::cout << "-------------------------------------- "<< std::endl << std::endl;
 		return r;
 	}
 

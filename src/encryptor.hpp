@@ -62,7 +62,7 @@ public:
 				bool iself_test = false,                // Flag - verify encryption
 				long ishufflePerc = 0,                  // Parameter - shuffling percentage
 				bool autoflag = false )
-        : cfg (ifilename_cfg, verb)
+        : cfg (ifilename_cfg, false)
     {
         filename_cfg = ifilename_cfg;
         filename_urls = ifilename_urls;
@@ -166,28 +166,28 @@ public:
 		std::cout << "-------------------------------------------------" << std::endl;
 		std::cout << "parameters:" << std::endl;
 		std::cout << "-------------------------------------------------" << std::endl;
-        std::cout << "filename_urls: " << filename_urls << std::endl;
-        std::cout << "filename_msg_data: " << filename_msg_data << std::endl;
-        std::cout << "filename_puzzle: " << filename_puzzle << std::endl;
-        std::cout << "filename_full_puzzle: " << filename_full_puzzle << std::endl;
+        std::cout << "filename_urls:           " << filename_urls << std::endl;
+        std::cout << "filename_msg_data:       " << filename_msg_data << std::endl;
+        std::cout << "filename_puzzle:         " << filename_puzzle << std::endl;
+        std::cout << "filename_full_puzzle:    " << filename_full_puzzle << std::endl;
         std::cout << "filename_encrypted_data: " << filename_encrypted_data << std::endl;
 
-        std::cout << "staging folder: " << staging << std::endl;
-        std::cout << "folder_local: " << folder_local << std::endl;
-        std::cout << "folder_my_private_rsa: " << folder_my_private_rsa << std::endl;
+        std::cout << "staging folder:          " << staging << std::endl;
+        std::cout << "folder_local:            " << folder_local << std::endl;
+        std::cout << "folder_my_private_rsa:   " << folder_my_private_rsa << std::endl;
         std::cout << "folder_other_public_rsa: " << folder_other_public_rsa << std::endl;
-        std::cout << "folder_my_private_ecc: " << folder_my_private_ecc << std::endl;
+        std::cout << "folder_my_private_ecc:   " << folder_my_private_ecc << std::endl;
         std::cout << "folder_other_public_ecc: " << folder_other_public_ecc << std::endl;
-        std::cout << "folder_my_private_hh: " << folder_my_private_hh << std::endl;
-        std::cout << "folder_other_public_hh: " << folder_other_public_hh << std::endl;
+        std::cout << "folder_my_private_hh:    " << folder_my_private_hh << std::endl;
+        std::cout << "folder_other_public_hh:  " << folder_other_public_hh << std::endl;
 
-        std::cout << "keeping: " << keeping << std::endl;
-        std::cout << "use_gmp: " << use_gmp << std::endl;
-        std::cout << "self_test: " << self_test << std::endl;
-        std::cout << "auto_flag: " << auto_flag << std::endl;
+        std::cout << "keeping:     " << keeping << std::endl;
+        std::cout << "use_gmp:     " << use_gmp << std::endl;
+        std::cout << "self_test:   " << self_test << std::endl;
+        std::cout << "auto_flag:   " << auto_flag << std::endl;
         std::cout << "shufflePerc: " << shufflePerc << std::endl;
         std::cout << "key_size_factor: " << key_size_factor << std::endl;
-		std::cout << "-------------------------------------------------" << std::endl;
+		std::cout << "-------------------------------------------------" << std::endl<< std::endl;
 	}
 
     bool read_file_urls(std::string filename)
@@ -423,6 +423,8 @@ public:
                 if (r)
                 {
                     uint32_t seq = (uint32_t)iseq;
+
+					// TODO - Use only HH confirmed....
                     r = get_history_key(seq, local_histo_db, kout);
                     if (r)
                     {
@@ -1987,7 +1989,7 @@ public:
 
 	cryptodata_list datalist;
 
-    // pre encode() [if auto flag, export and add my public keys db]
+    // pre encode() [if auto flag, export public keys and satus other]
 	bool pre_encode(const std::string& filename, cryptodata& out_data) // TODO ? local folder ...
 	{
         datalist.verbose = verbose;
@@ -2004,7 +2006,7 @@ public:
             return true;
         }
 
-        // add msg_data to datalist
+        // add message
         cryptodata* msg_data = nullptr;
         datalist.add_data(msg_data, filename, filename, CRYPTO_FILE_TYPE::RAW); // same name??
 
@@ -2014,23 +2016,43 @@ public:
         }
         else
         {
-            // auto gen keys if in auto_options...
+            // auto gen keys...
 
-            std::vector<keymgr::public_key_desc> vpubkeys;
+			// my public keys to export
+            std::vector<keymgr::public_key_desc_exporting> vpubkeys;
             r = keymgr::export_public_keys( vpubkeys,
                                             folder_my_private_rsa,
                                             folder_my_private_ecc,
-                                            folder_my_private_hh);
+                                            folder_my_private_hh,
+                                            verbose);
             if (r==false)
             {
                 return false;
             }
 
-            // add public keys (maybe none) to datalist
             for(size_t i=0;i <vpubkeys.size(); i++)
             {
                 datalist.add_data(vpubkeys[i].buffer, vpubkeys[i].public_filename, vpubkeys[i].public_other_short_filename, vpubkeys[i].filetype);
             }
+
+
+			// status other public keys to export
+			std::vector<keymgr::status_key_desc_exporting> vpubstatuskeys;
+            r = keymgr::export_public_status_keys( 	vpubstatuskeys,
+													folder_other_public_rsa,
+													folder_other_public_ecc,
+													folder_other_public_hh,
+													verbose);
+            if (r==false)
+            {
+                return false;
+            }
+
+            for(size_t i=0;i <vpubstatuskeys.size(); i++)
+            {
+                datalist.add_data(vpubstatuskeys[i].buffer, vpubstatuskeys[i].public_filename, vpubstatuskeys[i].public_other_short_filename, vpubstatuskeys[i].filetype);
+            }
+
         }
 
         r = datalist.create_header_trailer_buffer(out_data);

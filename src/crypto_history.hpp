@@ -67,23 +67,22 @@ namespace cryptoAL
 
         history_key(uint32_t dsize, const std::string& a, const std::string& b, const std::string& c)
         {
-            data_size = dsize;
+			sequence 	= 0;
+            data_size 	= dsize;
             data_sha[0] = a; // hash full
             data_sha[1] = b; // hash half
             data_sha[2] = c; // hash second half
-
-			sequence = 0;
-			confirmed = false;
 			dt = cryptoAL::get_current_time_and_date();
+			confirmed 	= false;
+			deleted 	= false;
+			usage_count = 0;
 			dt_confirmed = "";
         }
 
-		uint32_t sequence   = 0; // index
-        uint32_t data_size  = 0;
+		uint32_t 	sequence   	= 0; // index
+        uint32_t 	data_size  	= 0;
         std::string data_sha[3] = {""};
-		std::string dt  = "";
-		
-		// TODO key flags
+		std::string dt  		= "";
 		bool 		confirmed 	= false;
 		bool 		deleted 	= false;	// marked for deleted
 		uint32_t 	usage_count = 0;
@@ -96,6 +95,8 @@ namespace cryptoAL
 				<< bits(my.t.data_sha[0]) << bits(my.t.data_sha[1]) << bits(my.t.data_sha[2])
 				<< bits(my.t.dt)
 				<< bits(my.t.confirmed)
+				<< bits(my.t.deleted)
+				<< bits(my.t.usage_count)
 				<< bits(my.t.dt_confirmed);
             return (out);
         }
@@ -107,6 +108,8 @@ namespace cryptoAL
 				>> bits(my.t.data_sha[0]) >> bits(my.t.data_sha[1]) >> bits(my.t.data_sha[2])
 				>> bits(my.t.dt)
 				>> bits(my.t.confirmed)
+				>> bits(my.t.deleted)
+				>> bits(my.t.usage_count)
 				>> bits(my.t.dt_confirmed);
             return (in);
         }

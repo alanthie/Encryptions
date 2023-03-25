@@ -1,8 +1,8 @@
 #ifndef ECCKEY_H_INCLUDED
 #define ECCKEY_H_INCLUDED
 
+#include "crypto_const.hpp"
 #include "qa/mathcommon.h"
-#include "base_const.hpp"
 #include "crypto_key_util.hpp"
 #include "crc32a.hpp"
 #include "qa/ecc_point/ecc_curve.hpp"
@@ -16,6 +16,20 @@ namespace cryptoAL
         {
         }
 
+		void create_from(const ecc_domain& d)
+        {
+			key_size_bits = d.key_size_bits;
+            s_a = d.s_a;
+            s_b = d.s_b;
+            s_p = d.s_p;
+            s_n = d.s_n;
+            s_gx = d.s_gx;
+            s_gy = d.s_gy;
+            s_h  = d.s_h;
+
+			// flags default
+        }
+
         // elliptic curve domain parameters:
 		int key_size_bits = 0;
 
@@ -27,6 +41,12 @@ namespace cryptoAL
         std::string s_gx;
         std::string s_gy;
         std::string s_h;    // factor
+
+		// key flags
+		bool 		confirmed 	= false;
+		bool 		deleted 	= false;	// marked for deleted
+		uint32_t 	usage_count = 0;
+		std::string dt_confirmed = "";
 
 		std::string name()
 		{
@@ -110,7 +130,11 @@ namespace cryptoAL
             out << bits(my.t.key_size_bits)
                 << bits(my.t.s_a) << bits(my.t.s_b) << bits(my.t.s_p) << bits(my.t.s_n)
                 << bits(my.t.s_gx) << bits(my.t.s_gy)
-                << bits(my.t.s_h) ;
+                << bits(my.t.s_h)
+			    << bits(my.t.confirmed)
+				<< bits(my.t.deleted)
+				<< bits(my.t.usage_count)
+				<< bits(my.t.dt_confirmed);
             return (out);
         }
 
@@ -119,7 +143,11 @@ namespace cryptoAL
             in 	>>  bits(my.t.key_size_bits)
                 >>  bits(my.t.s_a)  >> bits(my.t.s_b) >> bits(my.t.s_p) >> bits(my.t.s_n)
                 >>  bits(my.t.s_gx) >> bits(my.t.s_gy)
-                >>  bits(my.t.s_h);
+                >>  bits(my.t.s_h)
+				>>  bits(my.t.confirmed)
+				>>  bits(my.t.deleted)
+				>>  bits(my.t.usage_count)
+				>>  bits(my.t.dt_confirmed);
             return (in);
         }
 
@@ -168,8 +196,8 @@ namespace cryptoAL
         std::string s_kg_x;   	// PUBLIC KEY
 		std::string s_kg_y;
         std::string s_k;    	// PRIVATE KEY - empty if from OTHER public key
-		
-		// TODO key flags
+
+		// key flags
 		bool 		confirmed 	= false;
 		bool 		deleted 	= false;	// marked for deleted
 		uint32_t 	usage_count = 0;
@@ -180,7 +208,11 @@ namespace cryptoAL
             out << bits(my.t.dom)
                 << bits(my.t.s_kg_x)
                 << bits(my.t.s_kg_y)
-                << bits(my.t.s_k) ;
+                << bits(my.t.s_k)
+                << bits(my.t.confirmed)
+				<< bits(my.t.deleted)
+				<< bits(my.t.usage_count)
+				<< bits(my.t.dt_confirmed);
             return (out);
         }
 
@@ -189,7 +221,11 @@ namespace cryptoAL
             in 	>>  bits(my.t.dom)
                 >>  bits(my.t.s_kg_x)
                 >>  bits(my.t.s_kg_y)
-                >>  bits(my.t.s_k);
+                >>  bits(my.t.s_k)
+                >>  bits(my.t.confirmed)
+				>>  bits(my.t.deleted)
+				>>  bits(my.t.usage_count)
+				>>  bits(my.t.dt_confirmed);
             return (in);
         }
 
@@ -242,27 +278,6 @@ namespace cryptoAL
 
                 mpz_class rGx(out_rG.x); out_rG_x = cryptoAL::key_util::base10_to_base64(rGx.get_str(10));
                 mpz_class rGy(out_rG.y); out_rG_y = cryptoAL::key_util::base10_to_base64(rGy.get_str(10));
-
-//                {
-//                    std::stringstream ss;
-//                    ss << out_Cm.x;
-//                    out_Cm_x = ss.str();
-//                }
-//                {
-//                    std::stringstream ss;
-//                    ss << out_Cm.y;
-//                    out_Cm_y = ss.str();
-//                }
-//                {
-//                    std::stringstream ss;
-//                    ss << out_rG.x;
-//                    out_rG_x = ss.str();
-//                }
-//                {
-//                    std::stringstream ss;
-//                    ss << out_rG.y;
-//                    out_rG_y = ss.str();
-//                }
             }
 			else
 			{

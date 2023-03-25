@@ -42,6 +42,10 @@ enum class CRYPTO_FILE_TYPE : uint32_t
 	ECC_PUBLIC 	= 550,
 	HH_PUBLIC 	= 600,
 	RAW_LOCAL 	= 700,
+	RSA_KEY_STATUS 	= 1000, // Public RSA keys requiring receive confirmation or deletion (marked for delete)
+	ECC_KEY_STATUS 	= 1010,
+	ECC_DOM_STATUS 	= 1030,
+	HH_KEY_STATUS 	= 1040,
 	CryptoEncoder = 9999
 };
 

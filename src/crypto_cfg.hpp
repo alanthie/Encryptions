@@ -119,7 +119,9 @@ public:
 
 		if (verbose)
 		{
+			if (verbose) std::cout << "-------------------------------------- "<< std::endl;
 			std::cout << "config file content " << filecfg << std::endl;
+			if (verbose) std::cout << "-------------------------------------- "<< std::endl;
 			for(auto& [s, m] : map_sections)
 			{
 				std::cout << "[" << s << "]" << std::endl;
@@ -128,6 +130,7 @@ public:
 					std::cout  << p << "=" << v << std::endl;
 				}
 			}
+			if (verbose) std::cout << "-------------------------------------- "<< std::endl;
 			std::cout << std::endl;
 		}
 
@@ -220,6 +223,37 @@ public:
 		cmdparam.shufflePerc        			= apply_var(ini.get_string("shufflePerc", CFG_cmdparam_section));
 		cmdparam.auto_flag       			    = apply_var(ini.get_string("auto_flag", CFG_cmdparam_section));
 	}
+
+	void show()
+	{
+		std::cout << "-------------------------------------------------" << std::endl;
+		std::cout << "cmd parameters section:" << std::endl;
+		std::cout << "-------------------------------------------------" << std::endl;
+        std::cout << "filename_urls:           " << cmdparam.filename_urls  << std::endl;
+        std::cout << "filename_msg_data:       " << cmdparam.filename_msg_data << std::endl;
+        std::cout << "filename_puzzle:         " << cmdparam.filename_puzzle << std::endl;
+        std::cout << "filename_full_puzzle:    " << cmdparam.filename_full_puzzle  << std::endl;
+        std::cout << "filename_encrypted_data: " << cmdparam.filename_encrypted_data  << std::endl;
+		std::cout << "filename_decrypted_data: " << cmdparam.filename_decrypted_data  << std::endl;
+
+        std::cout << "folder_staging:          " << cmdparam.folder_staging  << std::endl;
+        std::cout << "folder_my_private_rsa:   " << cmdparam.folder_my_private_rsa << std::endl;
+        std::cout << "folder_other_public_rsa: " << cmdparam.folder_other_public_rsa   << std::endl;
+        std::cout << "folder_my_private_ecc:   " << cmdparam.folder_my_private_ecc   << std::endl;
+        std::cout << "folder_other_public_ecc: " << cmdparam.folder_other_public_ecc << std::endl;
+        std::cout << "folder_my_private_hh:    " << cmdparam.folder_my_private_hh << std::endl;
+        std::cout << "folder_other_public_hh:  " << cmdparam.folder_other_public_hh << std::endl;
+
+        std::cout << "keeping:     " << cmdparam.keeping << std::endl;
+        std::cout << "use_gmp:     " << cmdparam.use_gmp << std::endl;
+        std::cout << "self_test:   " << cmdparam.self_test << std::endl;
+        std::cout << "auto_flag:   " << cmdparam.auto_flag << std::endl;
+        std::cout << "shufflePerc: " << cmdparam.shufflePerc << std::endl;
+        std::cout << "key_size_factor: " << cmdparam.key_size_factor << std::endl;
+		std::cout << "-------------------------------------------------" << std::endl<< std::endl;
+	}
+
+
 };
 
 

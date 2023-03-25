@@ -28,14 +28,16 @@ the key length must be at least as large as the message and only used once
 Example, encodes a file into an encrypted file
 <pre>
 ./crypto encode -h
-Usage: encode [-h] --input VAR [--output VAR] [--puzzle VAR] [--qapuzzle VAR] [--fullpuzzle VAR] [--url VAR] [--staging VAR] [--local VAR] [--rsa VAR] [--keep VAR] [--keyfactor VAR] [--known_ftp_server VAR] [--encryped_ftp_user VAR] [--encryped_ftp_pwd VAR] [--gmp VAR] [--selftest VAR] [--shuffle VAR]
+Usage: encode [-h] [--cfg VAR] [--auto VAR] [--input VAR] [--output VAR] [--puzzle VAR] [--qapuzzle VAR] [--fullpuzzle VAR] [--url VAR] [--staging VAR] [--local VAR] [--rsapriv VAR] [--rsapub VAR] [--eccpriv VAR] [--eccpub VAR] [--histopriv VAR] [--histopub VAR] [--keep VAR] [--keyfactor VAR] [--known_ftp_server VAR] [--encryped_ftp_user VAR] [--encryped_ftp_pwd VAR] [--gmp VAR] [--selftest VAR] [--shuffle VAR]
 
 Encodes a file into an encrypted file
 
 Optional arguments:
   -h, --help              	shows help message and exits 
   -v, --version           	prints version information and exits 
-  -i, --input             	specify the input file. [required]
+  -cfg, --cfg             	specify a config file. [default: ""]
+  -a, --auto              	auto export public/status keys with the encrypted data [default: ""]
+  -i, --input             	specify the input file. [default: ""]
   -o, --output            	specify the output encrypted file (default to <input path>.encrypted) [default: ""]
   -p, --puzzle            	specify the input (optional) puzzle file. [default: ""]
   -q, --qapuzzle          	specify the output qa puzzle file (default to <puzzle path>.qa) [default: ""]
@@ -43,10 +45,12 @@ Optional arguments:
   -u, --url               	specify the (optional input) url list file. [default: ""]
   -s, --staging           	specify the staging folder. [default: ""]
   -l, --local             	specify the local folder of known contents. [default: ""]
-  -r, --rsa               	specify the local folder for rsa*.db [default: ""]
-  -epv, --eccpriv         	specify the local folder for private ecc*.db [default: ""]
-  -epu, --eccpub          	specify the local folder for public ecc*.db [default: ""]
-  -hh, --histo            	specify the local folder for historical hashes crypto_history_encode.db [default: ""]
+  -rpv, --rsapriv         	specify my private folder for rsa*.db [default: ""]
+  -rpu, --rsapub          	specify the other public folder for rsa*.db [default: ""]
+  -epv, --eccpriv         	specify my private folder for private ecc*.db [default: ""]
+  -epu, --eccpub          	specify the other public folder for public ecc*.db [default: ""]
+  -hpv, --histopriv       	specify the private folder for historical hashes [default: ""]
+  -hpu, --histopub        	specify the other public folder for historical hashes [default: ""]
   -v, --verbose           	specify the verbose [default: ""]
   -k, --keep              	specify if keeping staging file [default: ""]
   -x, --keyfactor         	specify a key_size_factor, this multiply the key size by the factor [default: "1"]
@@ -55,6 +59,8 @@ Optional arguments:
   -fp, --encryped_ftp_pwd 	specify list of ftp password (encrypted with string_encode) [default: ""]
   -g, --gmp               	use gmp [default: ""]
   -t, --selftest          	encryption selftest [default: ""]
+  -sh, --shuffle          	specify pre encryption shuffling percentage of data 0-100 [default: "0"]
+
   -sh, --shuffle          	specify pre encryption shuffling percentage of data 0-100 [default: "0"]
   
 Output example:
@@ -160,19 +166,21 @@ Local files (like shared USB)
 A tool (qa) for various tasks
 <pre>
 ====================================
-QA version   : v0.1_2023-03-12
+QA version   : v0.2_2023-03-25
+Not using a configuration file
 Select a task: 
 ====================================
 0. Quit
 *. Last choice
-1. Custom secret F(n)
-2. Custom secret P(n)
+1. Use a configuration file for default parameters
+2. Show configuration
 3. HEX(file, position, keysize)
 4. Puzzle: Make random puzzle from shared binary (like USB keys) data
 5. Puzzle: Resolve puzzle
 6. Futur usage
 7.  RSA Key: View my private RSA key
-8.  RSA Key: View public RSA key
+8.  RSA Key: View my public RSA key (also included in the private db)
+81. RSA Key: View other public RSA key
 9.  RSA Key: Export my public RSA key
 10. RSA Key: Generate RSA key with OPENSSL command line (fastest)
 11. RSA Key: Test RSA GMP key generator
@@ -189,7 +197,8 @@ Select a task:
 22. EC Key: Generate an elliptic curve key
 23. EC Key: View my private elliptic curve keys
 24. EC Key: Export my public elliptic curve keys
-25. EC Key: View public elliptic curve keys
+25. EC Key: View my public elliptic curve keys (also included in the private db)
+26. EC Key: View other public elliptic curve keys
 ==> 
 </pre>
 
@@ -199,55 +208,8 @@ Man-In-The-Middle Attack prevention now implemented
 Planned feature:
 ![Alt text](/Doc/planned1.png?raw=true "planned1")
 
-Planned feature:
+Auto transmission of public keys now implemented:
 ![Alt text](/Doc/autokeys.png?raw=true "autokeys")
-
-Another example of urls.txt with data organized in subfolders:
-<pre>
-;------------------------------------------------------------------------------------------------------------
-; Encoding, msg.zip.encrypted file will be send to the recipient (sam):
-;
-; File to encrypt [-i msg.zip] [default ouput will be msg.zip.encrypted]
-; File describing keys to genrate for encryption [-u urls.txt]
-; Folder containing files of random data commonly shared with recipient [-l ./sam/local/]
-; Folder containing recipient public RSA keys [-r ./sam/]
-; Folder containing recipient public ECC keys [-epu ./sam/]
-; Folder containing my private ECC keys [-epv ./me/]
-; Increase all key size (a default perfect key size is internally computed) by a factor of 3 [-x 3]
-; Verbose on [-v 1]
-; Use GMP for accelerated computation [-g 1]
-;
-; Command:
-; crypto encode -u urls.txt -g 1 -v 1 -i msg.zip -l ./sam/local/ -r ./sam/ -x 3 -epu ./sam/ -epv ./me/
-;------------------------------------------------------------------------------------------------------------
-
-;------------------------------------------------------------------------------------------------------------
-; Decoding:
-;
-; Decoding command at the recipient site (sam):
-; crypto decode -g 1 -i msg.zip.encrypted -l ./al/local/ -r ./me/  -epu ./al/ -epv ./me/ -v 1
-;------------------------------------------------------------------------------------------------------------
-
-;------------------------------------------------------------------------
-; URL key sources when encoding:
-;------------------------------------------------------------------------
-;Web files
-;https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz
-;https://i.postimg.cc/ZKGMV8SP/Screenshot-from-2023-02-23-19-39-28.png
-
-;Local shared files between me and sam (like shared USB) in ./sam/
-[l]binary.dat.71
-;[l]binary.dat.44
-
-;Historical shared confirmed hashes in ./me/
-;[h]5
-
-;RSA publc keys given by recipient (sam) in ./sam/
-[r]MY_RSAKEY_512_2023-03-18_23:32:34
-
-;ECC publc keys given by recipient (sam) in ./sam/
-[e]MY_ECCKEY_1024_2023-03-18_12:20:21
-</pre>
 
 License
 <pre>

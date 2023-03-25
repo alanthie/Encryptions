@@ -78,7 +78,7 @@
 	"mathcommon.h"
 	"BigInteger.h"
 
-1679171596 source:/home/server/dev/Encryptions/src/qa/qa.cpp
+1679770309 source:/home/server/dev/Encryptions/src/qa/qa.cpp
 	"mathcommon.h"
 	"qa_internal_empty.hpp"
 	"qa_internal.hpp"
@@ -90,6 +90,7 @@
 	"../../src/crypto_history.hpp"
 	"../../src/crypto_key_util.hpp"
 	"../../src/crypto_ecckey.hpp"
+	"../../src/crypto_cfg.hpp"
 	"ec_gmp/ec_gmp_p_mul.hpp"
 	"SimpleECC/src/test_simple_ecc.hpp"
 	"ecc_point/ecc_curve.hpp"
@@ -157,23 +158,24 @@
 	<numeric>
 	<stdexcept>
 
-1678331446 /home/server/dev/Encryptions/src/data.hpp
-	<iostream>
-	"Buffer.hpp"
+1679611817 /home/server/dev/Encryptions/src/data.hpp
 	"crypto_const.hpp"
+	"Buffer.hpp"
 	<fstream>
 	<stdio.h>
+	<iostream>
 
-1679491766 /home/server/dev/Encryptions/src/Buffer.hpp
+1679612067 /home/server/dev/Encryptions/src/Buffer.hpp
+	"crypto_const.hpp"
 	<stdint.h>
 	<string.h>
 	<algorithm>
 	<iostream>
 	<fstream>
 	<stdio.h>
-	"crypto_const.hpp"
 
-1679493178 /home/server/dev/Encryptions/src/crypto_const.hpp
+1679771812 /home/server/dev/Encryptions/src/crypto_const.hpp
+	"base_const.hpp"
 	<filesystem>
 	<curl/curl.h>
 	<chrono>
@@ -181,7 +183,7 @@
 	<sstream>
 	<iomanip>
 	<string>
-	"base_const.hpp"
+	<iostream>
 
 1679023785 /home/server/dev/Encryptions/src/encrypt.h
 	"Base64.h"
@@ -201,16 +203,15 @@
 	<stdio.h>
 	<ctype.h>
 
-1679166720 /home/server/dev/Encryptions/src/crypto_file.hpp
+1679612157 /home/server/dev/Encryptions/src/crypto_file.hpp
+	"crypto_const.hpp"
 	<filesystem>
 	<curl/curl.h>
 	<iostream>
 	<fstream>
 	<filesystem>
 	"DES.h"
-	"Buffer.hpp"
 	"SHA256.h"
-	"crypto_const.hpp"
 	"crypto_parsing.hpp"
 	"data.hpp"
 	"puzzle.hpp"
@@ -345,7 +346,7 @@
 	<variant>
 	<vector>
 
-1676905265 /home/server/dev/Encryptions/src/ini_parser.hpp
+1679691039 /home/server/dev/Encryptions/src/ini_parser.hpp
 	<map>
 	<string>
 	<vector>
@@ -447,12 +448,13 @@
 	<stdlib.h>
 	"twofish.h"
 
-1679543653 /home/server/dev/Encryptions/src/base_const.hpp
+1679783106 /home/server/dev/Encryptions/src/base_const.hpp
 	<cstddef>
 	<map>
 	<string>
 
-1679024425 /home/server/dev/Encryptions/src/crypto_parsing.hpp
+1679769121 /home/server/dev/Encryptions/src/crypto_parsing.hpp
+	"crypto_const.hpp"
 	<filesystem>
 	<curl/curl.h>
 	<chrono>
@@ -460,10 +462,9 @@
 	<sstream>
 	<iomanip>
 	<string>
-	"base_const.hpp"
 	"crypto_file.hpp"
 
-1678918350 /home/server/dev/Encryptions/src/qa/rsa_gen.hpp
+1679713725 /home/server/dev/Encryptions/src/qa/rsa_gen.hpp
 	"mathcommon.h"
 	"../base_const.hpp"
 	"../crypto_key_util.hpp"
@@ -712,8 +713,8 @@
 	<string.h>
 	<gmpxx.h>
 
-1678806051 /home/server/dev/Encryptions/src/crypto_history.hpp
-	"base_const.hpp"
+1679713596 /home/server/dev/Encryptions/src/crypto_history.hpp
+	"crypto_const.hpp"
 	<map>
 	<string>
 	"c_plus_plus_serializer.h"
@@ -727,9 +728,9 @@
 	"qa/RSA_generate/bigint/BigIntegerLibrary.hh"
 	"c_plus_plus_serializer.h"
 
-1679166635 /home/server/dev/Encryptions/src/crypto_ecckey.hpp
+1679776774 /home/server/dev/Encryptions/src/crypto_ecckey.hpp
+	"crypto_const.hpp"
 	"qa/mathcommon.h"
-	"base_const.hpp"
 	"crypto_key_util.hpp"
 	"crc32a.hpp"
 	"qa/ecc_point/ecc_curve.hpp"
@@ -781,4 +782,18 @@
 	<chrono>
 	<iostream>
 	<gmpxx.h>
+
+1679765667 /home/server/dev/Encryptions/src/crypto_cfg.hpp
+	"crypto_const.hpp"
+	"ini_parser.hpp"
+	"crypto_strutil.hpp"
+	"data.hpp"
+	<iostream>
+
+1679700053 /home/server/dev/Encryptions/src/crypto_strutil.hpp
+	"crypto_const.hpp"
+	<sstream>
+	<iomanip>
+	<string>
+	<algorithm>
 

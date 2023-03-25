@@ -1,7 +1,7 @@
 #ifndef _INCLUDES_crypto_strutil_HPP
 #define _INCLUDES_crypto_strutil_HPP
 
-#include "base_const.hpp"
+#include "crypto_const.hpp"
 #include <sstream>
 #include <iomanip>
 #include <string>

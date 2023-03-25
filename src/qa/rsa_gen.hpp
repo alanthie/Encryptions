@@ -27,12 +27,12 @@ namespace generate_rsa
             s_d = c;
         }
 
-        uint32_t key_size_in_bits = 2048;
+        uint32_t key_size_in_bits = 0;
         std::string s_n; // base 64
         std::string s_e; // base 64
         std::string s_d; // base 64 empty if public key
-		
-		// TODO key flags
+
+		// key flags
 		bool 		confirmed 	= false;
 		bool 		deleted 	= false;	// marked for delete
 		uint32_t 	usage_count = 0;
@@ -40,16 +40,23 @@ namespace generate_rsa
 
         friend std::ostream& operator<<(std::ostream &out, Bits<rsa_key & > my)
         {
-            out << bits(my.t.key_size_in_bits) << bits(my.t.s_n) << bits(my.t.s_e) << bits(my.t.s_d);
+            out << bits(my.t.key_size_in_bits) << bits(my.t.s_n) << bits(my.t.s_e) << bits(my.t.s_d)
+            	<< bits(my.t.confirmed)
+				<< bits(my.t.deleted)
+				<< bits(my.t.usage_count)
+				<< bits(my.t.dt_confirmed);
             return (out);
         }
 
         friend std::istream& operator>>(std::istream &in, Bits<rsa_key &> my)
         {
-            in >> bits(my.t.key_size_in_bits) >> bits(my.t.s_n) >> bits(my.t.s_e) >> bits(my.t.s_d);
+            in >> bits(my.t.key_size_in_bits) >> bits(my.t.s_n) >> bits(my.t.s_e) >> bits(my.t.s_d)
+                >> bits(my.t.confirmed)
+				>> bits(my.t.deleted)
+				>> bits(my.t.usage_count)
+				>> bits(my.t.dt_confirmed);
             return (in);
         }
-
 
         typeuinteger get_n() { return cryptoAL::key_util::val(s_n);}
         typeuinteger get_e() { return cryptoAL::key_util::val(s_e);}
