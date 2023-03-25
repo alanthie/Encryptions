@@ -61,8 +61,6 @@ Optional arguments:
   -t, --selftest          	encryption selftest [default: ""]
   -sh, --shuffle          	specify pre encryption shuffling percentage of data 0-100 [default: "0"]
 
-  -sh, --shuffle          	specify pre encryption shuffling percentage of data 0-100 [default: "0"]
-  
 Output example:
 MESSAGE is 117169 bytes
 Padding msg with bytes: 15
