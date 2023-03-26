@@ -217,6 +217,25 @@ max_usage2	= keytype:rsa,bits:1024,max_usage_count:16
 policy1     = keytype:rsa, pool_first:10, pool_random:30, pool_last:10, pool_new:20, pool_max:100
 </pre>
 
+Regular upload of Elliptic Curves of increasing number of bits
+<pre>
+ecgen_ec_curves/ec192_1.txt
+ecgen_ec_curves/ec256_1.txt
+ecgen_ec_curves/ec256_2.txt
+ecgen_ec_curves/ec256_3.txt
+ecgen_ec_curves/ec256_4.txt
+ecgen_ec_curves/ec256_5.txt
+ecgen_ec_curves/ec256_6.txt
+ecgen_ec_curves/ec360_1.txt
+ecgen_ec_curves/ec512_1.txt
+ecgen_ec_curves/ec512_2.txt
+ecgen_ec_curves/ec512_3.txt
+ecgen_ec_curves/ec1024_1.txt
+ecgen_ec_curves/ec1024_2.txt
+ecgen_ec_curves/ec1024_3.txt
+ecgen_ec_curves/ec1536_1.txt
+</pre>
+
 A tool (qa) for various tasks
 <pre>
 ====================================
