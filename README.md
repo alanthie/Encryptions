@@ -129,38 +129,94 @@ Recursive RSA (and Elliptic Curve):
 
 Example of urls.txt:
 <pre>
-;Web files
-https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz
-https://i.postimg.cc/ZKGMV8SP/Screenshot-from-2023-02-23-19-39-28.png
+;------------------------------------------------------------------------------------------------------------
+; Encoding commands, msg.zip.encrypted file to be send to the recipient (sam):
+; crypto encode -u urls.txt -g 1 -v 1 -i msg.zip -l ./sam/local/ -r ./sam/ -x 3 -epu ./sam/ -epv ./me/
+; or
+; crypto encode -cfg ./cfg.ini -v 1 -a 1
+;------------------------------------------------------------------------------------------------------------
 
-Local files (like shared USB)
-[l]binary.dat.72
-[l]binary.dat.73
-[l]binary.dat.76
-[l]binary.dat.77
-[l]binary.dat.78
+;------------------------------------------------------------------------------------------------------------
+; Decoding commands for me:
+;
+; Decoding commands at the recipient site (sam):
+; decode -g 1 -i msg.zip.encrypted -l ./al/local/ -r ./me/  -epu ./al/ -epv ./me/ -v 1
+; or
+; crypto decode -cfg ./cfg.ini -v 1 -a 1
+;------------------------------------------------------------------------------------------------------------
 
-;RSA keys
-[r]MY_RSAKEY_16384_2023-03-06_19:32:02
-[r]MY_RSAKEY_512_2023-03-06_19:12:49
-[r]MY_RSAKEY_9200_2023-03-06_19:17:31
-[r]MY_RSAKEY_1024_2023-03-05_03:43:04
-[r]MY_RSAKEY_2048_2023-03-06_16:33:58
-[r]MY_RSAKEY_3072_2023-03-05_14:07:52
-[r]MY_RSAKEY_4096_2023-03-06_19:13:17
-[r]MY_RSAKEY_48000_2023-03-08_17:55:21
+;------------------------------------------------------------------------
+; URL keys source when encoding:
+;------------------------------------------------------------------------
+;Web files (also ftp[f] and videos[v])
+[w]https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz
+[w]https://i.postimg.cc/ZKGMV8SP/Screenshot-from-2023-02-23-19-39-28.png
 
-;RECURSIVE RSA
-[r]MY_RSAKEY_2048_2023-03-09_15:28:31;MY_RSAKEY_8100_2023-03-08_11:35:16;MY_RSAKEY_1024_2023-03-05_19:36:04;MY_RSAKEY_512_2023-03-09_12:14:49
+;Local shared files between me and sam (like shared USB) in ./sam/
+[l]binary.dat.71
+[l]binary.dat.44
 
-;Historical hashes
-;Hash index to a historical key [h]4 ==> 889895c4aaabba7566797c4e8c09d417442168b7878ed38bb05ef28606711fee ... 2023-03-13_22:15:07  datasize: 143044
-[h]4
+;Historical shared confirmed hashes in ./me/
+[h]5
 
-;ECC keys
-[e]MY_ECCKEY_1024_2023-03-18_12:22:36
+;RSA public keys given by recipient (sam) in ./sam/
+[r]MY_RSAKEY_2048_2023-03-25_14:29:11
+[r]MY_RSAKEY_2048_2023-03-25_14:29:11;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;
+[mode]block;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;
+[r:]last=10,first=6,random=7;[r:]last=1,first=2,random=25;
+
+;ECC publc keys given by recipient (sam) in ./sam/
+[e]MY_ECCKEY_360_2023-03-25_14:33:22
+[mode]recur;[e]MY_ECCKEY_1024_2023-03-18_12:20:21;[e]MY_ECCKEY_360_2023-03-25_14:33:22
+[e:]last=10,first=1,random=15;[r:]last=10,first=26,random=22;
+[e:]last=10,first=2,random=35;[r:]last=13,first=16,random=13;
 </pre>
  
+Example of config file:
+<pre>
+;
+; cfg.ini 
+;
+; ./crypto encode -cfg ./cfg.ini -i msg.zip
+; ./crypto decode -cfg ./cfg.ini -i msg.zip.encrypted
+;
+
+[var]
+var_folder_me_and_other = /home/server/dev/Encryptions/testcase/test/AL/
+
+[cmdparam]
+filename_urls               = urls.txt
+filename_msg_data           = msg.zip
+filename_puzzle             = 
+filename_full_puzzle        = 
+filename_encrypted_data     = msg.zip.encrypted
+filename_decrypted_data     = 
+keeping                     = 0
+folder_local                = <var_folder_me_and_other>sam/local/
+folder_my_private_rsa       = <var_folder_me_and_other>me/
+folder_other_public_rsa     = <var_folder_me_and_other>sam/
+folder_my_private_ecc       = <var_folder_me_and_other>me/
+folder_other_public_ecc     = <var_folder_me_and_other>sam/
+folder_my_private_hh        = <var_folder_me_and_other>me/
+folder_other_public_hh      = <var_folder_me_and_other>sam/
+encryped_ftp_user           = 
+encryped_ftp_pwd            = 
+known_ftp_server            = 
+auto_flag                   =
+use_gmp                     = 1
+self_test                   = 0
+key_size_factor             = 3
+shufflePerc                 = 0
+verbose                     = 1
+
+[keymgr]
+max_usage1	= keytype:rsa,bits:64,max_usage_count:1
+max_usage2	= keytype:rsa,bits:1024,max_usage_count:16
+
+[keygen]
+policy1     = keytype:rsa, pool_first:10, pool_random:30, pool_last:10, pool_new:20, pool_max:100
+</pre>
+
 A tool (qa) for various tasks
 <pre>
 ====================================

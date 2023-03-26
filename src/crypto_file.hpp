@@ -297,7 +297,12 @@ namespace cryptoAL
 
 		// smsg maybe less or bigger than ecc capacity
 		std::string msg_to_encrypt;
+		
+		//	MSG_BYTES_MAX = bits_len/8;
+		//	MSG_BYTES_MAX -= 1;             // space to find a valid message on curve x+0, 1,...255 - 50% of x are on curve
+		//	MSG_BYTES_PAD = 1;
 		uint32_t key_len_bytes = ek.dom.key_size_bits / 8;
+		key_len_bytes--;
 
 		if (key_len_bytes < smsg.size())
 		{
@@ -315,8 +320,8 @@ namespace cryptoAL
 			std::string out_rG_x;
 			std::string out_rG_y;
 
-		   	bool r = ek.encode(	smsg, public_key_of_decoder_x, public_key_of_decoder_y,
-                    			out_Cm_x, out_Cm_y, out_rG_x, out_rG_y, verbose);
+		   	//bool r = ek.encode(	smsg, public_key_of_decoder_x, public_key_of_decoder_y, out_Cm_x, out_Cm_y, out_rG_x, out_rG_y, verbose);
+			bool r = ek.encode(	msg_to_encrypt, public_key_of_decoder_x, public_key_of_decoder_y, out_Cm_x, out_Cm_y, out_rG_x, out_rG_y, verbose);
 
 			if (r)
 			{

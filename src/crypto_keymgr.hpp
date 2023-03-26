@@ -6,6 +6,7 @@
 #include "data.hpp"
 #include "crypto_file.hpp"
 #include "crypto_key_parser.hpp"
+#include "random_engine.hpp"
 #include "crc32a.hpp"
 #include "c_plus_plus_serializer.h"
 
@@ -917,7 +918,7 @@ namespace keymgr
 			}
 			else
 			{
-			  	std::cerr << "WARNING no file: " << filePrivateRSADB << std:: endl;
+			  	//std::cerr << "WARNING no file: " << filePrivateRSADB << std:: endl;
 			}
         }
         else if (t == CRYPTO_FILE_TYPE::ECC_PUBLIC)
@@ -967,7 +968,7 @@ namespace keymgr
 			}
 			else
 			{
-			  	std::cerr << "WARNING no file: " << filePrivateECCDB << std:: endl;
+			  	//std::cerr << "WARNING no file: " << filePrivateECCDB << std:: endl;
 			}
         }
 		else if (t == CRYPTO_FILE_TYPE::ECC_DOMAIN)
@@ -1018,7 +1019,7 @@ namespace keymgr
 			}
 			else
 			{
-			  	std::cerr << "WARNING no file: " << fileMyDomainDB << std:: endl;
+			  	//std::cerr << "WARNING no file: " << fileMyDomainDB << std:: endl;
 			}
         }
         else if (t == CRYPTO_FILE_TYPE::HH_PUBLIC)
@@ -1065,7 +1066,7 @@ namespace keymgr
 			}
 			else
 			{
-				std::cerr << "WARNING no file: " << filePrivateHistoDB << std:: endl;
+				//std::cerr << "WARNING no file: " << filePrivateHistoDB << std:: endl;
 			}
         }
         return r;
@@ -1077,7 +1078,7 @@ namespace keymgr
                             const std::string&  folder_my_private_hh,
                             bool verbose = false)
 	{
-		bool key_exist[3];
+		bool key_exist[4] = {false};
         bool r = true;
 
 		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
@@ -1086,15 +1087,15 @@ namespace keymgr
 
         if (r) r = export_public_key(folder_my_private_rsa  , CRYPTO_FILE_TYPE::RSA_PUBLIC, key_exist[0], verbose);
         if (r) r = export_public_key(folder_my_private_ecc  , CRYPTO_FILE_TYPE::ECC_PUBLIC, key_exist[1], verbose);
-		if (r) r = export_public_key(folder_my_private_ecc  , CRYPTO_FILE_TYPE::ECC_DOMAIN, key_exist[1], verbose);
-        if (r) r = export_public_key(folder_my_private_hh   , CRYPTO_FILE_TYPE::HH_PUBLIC,  key_exist[2], verbose);
+		if (r) r = export_public_key(folder_my_private_ecc  , CRYPTO_FILE_TYPE::ECC_DOMAIN, key_exist[2], verbose);
+        if (r) r = export_public_key(folder_my_private_hh   , CRYPTO_FILE_TYPE::HH_PUBLIC,  key_exist[3], verbose);
 
         if (r)
         {
             if (key_exist[0]) vout.emplace_back(folder_my_private_rsa  , CRYPTO_FILE_TYPE::RSA_PUBLIC);
             if (key_exist[1]) vout.emplace_back(folder_my_private_ecc  , CRYPTO_FILE_TYPE::ECC_PUBLIC);
-			if (key_exist[1]) vout.emplace_back(folder_my_private_ecc  , CRYPTO_FILE_TYPE::ECC_DOMAIN);
-            if (key_exist[2]) vout.emplace_back(folder_my_private_hh   , CRYPTO_FILE_TYPE::HH_PUBLIC);
+			if (key_exist[2]) vout.emplace_back(folder_my_private_ecc  , CRYPTO_FILE_TYPE::ECC_DOMAIN);
+            if (key_exist[3]) vout.emplace_back(folder_my_private_hh   , CRYPTO_FILE_TYPE::HH_PUBLIC);
         }
 		if (verbose) std::cout << "-------------------------------------- " << std::endl << std::endl;
         return r;
@@ -1106,7 +1107,7 @@ namespace keymgr
 									const std::string&  folder_other_public_hh,
 									bool verbose = false)
 	{
-		bool key_exist[3];
+		bool key_exist[4] = {false};
         bool r = true;
 		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
 		if (verbose) std::cout << "Exporting other status keys: "<< std::endl;
@@ -1114,15 +1115,15 @@ namespace keymgr
 
         if (r) r = export_public_status_key(folder_other_public_rsa  , CRYPTO_FILE_TYPE::RSA_KEY_STATUS, key_exist[0], verbose);
         if (r) r = export_public_status_key(folder_other_public_ecc  , CRYPTO_FILE_TYPE::ECC_KEY_STATUS, key_exist[1], verbose);
-		if (r) r = export_public_status_key(folder_other_public_ecc  , CRYPTO_FILE_TYPE::ECC_DOM_STATUS, key_exist[1], verbose);
-        if (r) r = export_public_status_key(folder_other_public_hh   , CRYPTO_FILE_TYPE::HH_KEY_STATUS,  key_exist[2], verbose);
+		if (r) r = export_public_status_key(folder_other_public_ecc  , CRYPTO_FILE_TYPE::ECC_DOM_STATUS, key_exist[2], verbose);
+        if (r) r = export_public_status_key(folder_other_public_hh   , CRYPTO_FILE_TYPE::HH_KEY_STATUS,  key_exist[3], verbose);
 
         if (r)
         {
             if (key_exist[0]) vout.emplace_back(folder_other_public_rsa  , CRYPTO_FILE_TYPE::RSA_KEY_STATUS);
             if (key_exist[1]) vout.emplace_back(folder_other_public_ecc  , CRYPTO_FILE_TYPE::ECC_KEY_STATUS);
-			if (key_exist[1]) vout.emplace_back(folder_other_public_ecc  , CRYPTO_FILE_TYPE::ECC_DOM_STATUS);
-            if (key_exist[2]) vout.emplace_back(folder_other_public_hh   , CRYPTO_FILE_TYPE::HH_KEY_STATUS);
+			if (key_exist[2]) vout.emplace_back(folder_other_public_ecc  , CRYPTO_FILE_TYPE::ECC_DOM_STATUS);
+            if (key_exist[3]) vout.emplace_back(folder_other_public_hh   , CRYPTO_FILE_TYPE::HH_KEY_STATUS);
         }
 		if (verbose) std::cout << "-------------------------------------- "<< std::endl<< std::endl;
         return r;
@@ -1138,12 +1139,13 @@ namespace keymgr
 	}
 
 	// With ECC keys we can generate new r,rG keys when encoding with recipient r'G public key
-	bool get_n_keys(    keyspec_type t, uint32_t n, bool first, bool last, bool random, bool newk,
+	bool get_n_keys(    keyspec_type t, uint32_t n, bool first, bool last, bool random, bool newkeys,
                         std::vector<std::string>&  vkeys_out,
 						const std::string& folder_other_public_rsa,
                        	const std::string& folder_other_public_ecc,
                        	const std::string& folder_my_private_hh,
-						const std::string& folder_my_private_ecc)
+						const std::string& folder_my_private_ecc,
+						bool verbose = false)
 	{
 		std::vector<std::string> vmapkeyname;
 
@@ -1153,6 +1155,7 @@ namespace keymgr
 
 		if (t == keyspec_type::RSA)
 		{
+			//std::cout << "get_n_keys RSA in " << folder_other_public_rsa + RSA_OTHER_PUBLIC_DB << std::endl;
 			std::string filePublicOtherDB = folder_other_public_rsa + RSA_OTHER_PUBLIC_DB;
 			if (cryptoAL::fileexists(filePublicOtherDB) == true)
 			{
@@ -1163,13 +1166,13 @@ namespace keymgr
 
 				for(auto& [keyname, k] : map_rsa_public)
 				{
-
 					vmapkeyname.push_back(keyname);
 				}
 			}
 		}
 		else if (t == keyspec_type::ECC)
 		{
+			//std::cout << "get_n_keys ECC in " << folder_other_public_ecc + ECCKEY_OTHER_PUBLIC_DB << std::endl;
 			std::string filePublicOtherDB = folder_other_public_ecc + ECCKEY_OTHER_PUBLIC_DB;
 			if (cryptoAL::fileexists(filePublicOtherDB) == true)
 			{
@@ -1186,6 +1189,7 @@ namespace keymgr
 		}
 		else if (t == keyspec_type::HH)
 		{
+			//std::cout << "get_n_keys HH in " << folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB << std::endl;
 			std::string fileMyPrivaterDB = folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
 			if (cryptoAL::fileexists(fileMyPrivaterDB) == true)
 			{
@@ -1202,58 +1206,82 @@ namespace keymgr
 		}
 
 		// sort with date in key name MY_RSAKEY_512_2023-03-18_23:32:34
-		std::sort(vmapkeyname.begin(), vmapkeyname.end(), sortkey);
+		if (vmapkeyname.size() > 0)
+		{
+			std::sort(vmapkeyname.begin(), vmapkeyname.end(), sortkey);
 
-		if (first)
-		{
-			if (n > vmapkeyname.size()) n = vmapkeyname.size();
-			for(size_t i = 0; i< n; i++)
+			if (first)
 			{
-				vkeys_out.push_back(vmapkeyname[i]);
+				if (n > vmapkeyname.size()) n = vmapkeyname.size();
+				for(size_t i = 0; i< n; i++)
+				{
+					if (i < vmapkeyname.size())
+						vkeys_out.push_back(vmapkeyname[i]);
+					else
+						{std::cerr << "error " << i << std::endl; return false;}
+				}
 			}
-		}
-		else if (last)
-		{
-			if (n > vmapkeyname.size()) n = vmapkeyname.size();
-			for(size_t i = vmapkeyname.size() - 1; i >= vmapkeyname.size() - n; i--)
+			else if (last)
 			{
-				vkeys_out.push_back(vmapkeyname[i]);
+                size_t cnt=0;
+				if (n > vmapkeyname.size()) n = vmapkeyname.size();
+				for(size_t i = vmapkeyname.size() - 1; i >= 0; i--)
+				{
+                    if (cnt < n)
+                    {
+                        if (i < vmapkeyname.size())
+						{
+							cnt++;
+                            vkeys_out.push_back(vmapkeyname[i]);
+						}
+                        else
+                        {
+                            std::cerr << "internal error " << i << std::endl;
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+				}
 			}
-		}
-		else if (random)
-		{
-			if (n > vmapkeyname.size()) n = vmapkeyname.size();
-			// TODO
-		}
-		else if (newk)
-		{
-			// count key usage
-            uint32_t cnt_usage_zero = 0;
-            for(size_t i = 0; i < vmapkeyname.size(); i++)
+			else if (random)
 			{
-                if (map_ecc_public[vmapkeyname[i]].usage_count == 0)
-                {
-                    cnt_usage_zero++;
-                }
-			}
-			if (cnt_usage_zero < n)
-			{
-                // generate new ECC keys;
-                // recompute vmapkeyname with cnt_usage == 0
-                // .....
-			}
+				random_engine rd;
 
-			cnt_usage_zero = 0;
-            for(size_t i = 0; i < vmapkeyname.size(); i++)
-			{
-                if (map_ecc_public[vmapkeyname[i]].usage_count == 0)
-                {
-                    cnt_usage_zero++;
-                    vkeys_out.push_back(vmapkeyname[i]);
-
-                    if (cnt_usage_zero >= n) break;
-                }
+				for(size_t i = 0; i< n; i++)
+				{
+					uint32_t t = (uint32_t) (rd.get_rand() * vmapkeyname.size());
+					if ( (t>=0) && (t < vmapkeyname.size()) )
+					{
+						vkeys_out.push_back(vmapkeyname[t]);
+					}
+					else
+                    {
+                        std::cerr << "internal error " << i << std::endl;
+                        return false;
+                    }
+				}
 			}
+			/*
+			else if (newkeys)
+			{
+				// count key usage
+				uint32_t cnt_usage_zero = 0;
+				for(auto& [kname, key] : map_ecc_public)
+				{
+                    if (key,usage_count == 0)
+                        cnt_usage_zero++;
+				}
+				if (cnt_usage_zero < n)
+				{
+					// generate new ECC keys;
+					// compute vmapkeyname with cnt_usage == 0
+					// .....
+				}
+			}
+			*/
 		}
 		return true;
 	}
@@ -1262,7 +1290,8 @@ namespace keymgr
 							const std::string& folder_other_public_rsa,
                             const std::string& folder_other_public_ecc,
                             const std::string& folder_my_private_hh,
-							const std::string& folder_my_private_ecc)
+							const std::string& folder_my_private_ecc,
+							bool verbose = false)
 	{
 		bool r = true;
 
@@ -1270,25 +1299,25 @@ namespace keymgr
 		{
 			if (key_in.first_n > 0)
 			{
-				r = get_n_keys(key_in.ktype, key_in.first_n, true, false, false, false, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc);
+				r = get_n_keys(key_in.ktype, key_in.first_n, true, false, false, false, key_in.vmaterialized_keyname,
+				folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc,verbose);
 			}
 			if (key_in.last_n > 0)
 			{
-				r = get_n_keys(key_in.ktype, key_in.last_n, false, true, false, false, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc);
+				r = get_n_keys(key_in.ktype, key_in.last_n, false, true, false, false, key_in.vmaterialized_keyname,
+				folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc,verbose);
 			}
 			if (key_in.random_n > 0)
 			{
-				r = get_n_keys(key_in.ktype, key_in.random_n, false, false, true, false, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc);
+				r = get_n_keys(key_in.ktype, key_in.random_n, false, false, true, false, key_in.vmaterialized_keyname,
+				folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc,verbose);
 			}
 			if (key_in.new_n > 0)
 			{
-				r = get_n_keys(key_in.ktype, key_in.random_n, false, false, false, true, key_in.vmaterialized_keyname, folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc);
+				r = get_n_keys(key_in.ktype, key_in.random_n, false, false, false, true, key_in.vmaterialized_keyname,
+				folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc,verbose);
 			}
 		}
- 		else
- 		{
-		}
-
 		return r;
 	}
 

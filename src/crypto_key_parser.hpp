@@ -34,17 +34,28 @@ struct keyspec
 	// [mode]block;[e]MY_RSAKEY_8100_2023-03-08_11:35:16;[r]MY_RSAKEY_8100_2023-03-08_11:35:16;
 	// [mode]recur;[r:]last=10,first=4,rnd=2;[e:]last=10,first=4,rnd=2,new=4;
 	keyspec_type ktype 		= keyspec_type::Unknown;
+
 	bool		is_spec		= false;
 	uint32_t	first_n 	= 0;
 	uint32_t	random_n	= 0;
 	uint32_t	last_n		= 0;
-	uint32_t	new_n		= 0; // a new ECC private r can by generate thrn give rg
-	std::string	keyname;
-	std::vector<std::string> vmaterialized_keyname; // if is_spec is in use
+	uint32_t	new_n		= 0; // a new ECC private r can by generate then give rg
+
+	std::string	keyname;							// if is_spec == false
+	std::vector<std::string> vmaterialized_keyname; // if is_spec == true
 
     void show()
 	{
-        std::cout << "key type " << (long)ktype << " is_spec " << is_spec << " keyname " << keyname << " first_n " << first_n << " random_n " << random_n << " last_n " << last_n << std::endl;
+		if (is_spec)
+		{
+        	std::cout << "type=" << (long)ktype << ", first_n=" << first_n << ", random_n=" << random_n << ", last_n=" << last_n << std::endl;
+			for(size_t i=0;i<vmaterialized_keyname.size();i++)
+			{
+				std::cout << "      [" << i << "]" << ": " << vmaterialized_keyname[i] << std::endl;
+			}
+		}
+		else
+			std::cout << "type=" << (long)ktype << ", keyname=" << keyname << std::endl;
 	}
 };
 
@@ -57,15 +68,107 @@ struct keyspec_composite
     {
 		if (vkeyspec.size() > 1)
 		{
-			if 		(mode == keyspec_composition_mode::BlockSplit) std::cout << "mode = block" << std::endl;
-			else if (mode == keyspec_composition_mode::Recursive)  std::cout << "mode = recursive" << std::endl;
+			if 		(mode == keyspec_composition_mode::BlockSplit) std::cout << "   mode = block" << std::endl;
+			else if (mode == keyspec_composition_mode::Recursive)  std::cout << "   mode = recursive" << std::endl;
 		}
         for(size_t i=0;i<vkeyspec.size();i++)
         {
-            std::cout << "vkeyspec [" << i << "]" ;//<< std::endl;
+			if (vkeyspec[i].is_spec)
+            	std::cout << "   spec [" << i << "]:" ;//<< std::endl;
+			else
+				std::cout << "   key  [" << i << "]:" ;//<< std::endl;
             vkeyspec[i].show();
         }
     }
+
+	std::string format_key_line(int fmt, bool verbose = false)
+	{
+		std::string r;
+		if (fmt!=1) return r;
+
+		// TODO...
+		// old format, no mixing of recursive keys
+		bool 		start_token_done = false;
+		std::string start_token;
+		keyspec_type start_type;
+
+		uint32_t token_type;
+		uint32_t cnt = 0;
+		for(size_t i=0;i<vkeyspec.size();i++)
+        {
+			if (vkeyspec[i].is_spec)
+            {
+				if (vkeyspec[i].vmaterialized_keyname.size() > 0)
+				{
+					for(size_t j=0;j<vkeyspec[i].vmaterialized_keyname.size();j++)
+					{
+						if (start_token_done == false)
+						{
+							if      (vkeyspec[i].ktype == LocalFile) 	start_token = "[l]";
+							else if (vkeyspec[i].ktype == WebFile) 		start_token = "[w]";
+							else if (vkeyspec[i].ktype == FTPFile) 		start_token = "[f]";
+							else if (vkeyspec[i].ktype == VideoFile) 	start_token = "[v]";
+							else if (vkeyspec[i].ktype == RSA) 			start_token = "[r]";
+							else if (vkeyspec[i].ktype == ECC) 			start_token = "[e]";
+							else if (vkeyspec[i].ktype == HH) 			start_token = "[h]";
+							else
+							{
+								//...
+								continue;
+							}
+
+							start_type = vkeyspec[i].ktype;
+							start_token_done = true;
+							r += start_token;
+							r += vkeyspec[i].vmaterialized_keyname[j];
+						}
+						else if (vkeyspec[i].ktype == start_type)
+						{
+							r += ";";
+							r += vkeyspec[i].vmaterialized_keyname[j];
+						}
+						else
+						{
+							// drop...
+						}
+					}
+				}
+			}
+			else
+			{
+				if (start_token_done == false)
+				{
+					if      (vkeyspec[i].ktype == LocalFile) 	start_token = "[l]";
+					else if (vkeyspec[i].ktype == WebFile) 		start_token = "[w]";
+					else if (vkeyspec[i].ktype == FTPFile) 		start_token = "[f]";
+					else if (vkeyspec[i].ktype == VideoFile) 	start_token = "[v]";
+					else if (vkeyspec[i].ktype == RSA) 			start_token = "[r]";
+					else if (vkeyspec[i].ktype == ECC) 			start_token = "[e]";
+					else if (vkeyspec[i].ktype == HH) 			start_token = "[h]";
+					else
+					{
+						//...
+						continue;
+					}
+					start_type = vkeyspec[i].ktype;
+					start_token_done = true;
+					r += start_token;
+					r += vkeyspec[i].keyname;
+				}
+				else if (vkeyspec[i].ktype == start_type)
+				{
+					r += ";";
+					r += vkeyspec[i].keyname;
+				}
+				else
+				{
+					// drop...
+				}
+			}
+        }
+
+		return r;
+	}
 };
 
 class keyspec_parser
@@ -78,12 +181,15 @@ public:
 
 	void show()
 	{
-        std::cout << "vkeyspec_composite size "  << vkeyspec_composite.size() << std::endl;
+		std::cout << "--------------------------------------" << std::endl;
+        std::cout << "key lines: "  << vkeyspec_composite.size() << std::endl;
+		std::cout << "--------------------------------------" << std::endl;
         for(size_t i=0;i<vkeyspec_composite.size();i++)
 		{
-            std::cout << "vkeyspec_composite [" << i << "]" << std::endl;
+            std::cout << "key line [" << i << "]:" << std::endl;
             vkeyspec_composite[i].show();
 		}
+		std::cout << "--------------------------------------" << std::endl;
 	}
 
     bool parse(cryptodata& data)

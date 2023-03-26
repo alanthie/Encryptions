@@ -348,11 +348,11 @@ public:
         bool is_rsa   =  false;
         bool is_ecc   =  false;
         bool is_histo =  false;
+		bool is_web	  =  false;
 
 		if (r)
 		{
-            for( uint32_t j = 0; j< URL_MAX_SIZE; j++)
-                u[j] = uk.url[j];
+            for( uint32_t j = 0; j< URL_MAX_SIZE; j++) u[j] = uk.url[j];
 
             if (u[0]=='[')
             {
@@ -380,7 +380,11 @@ public:
                 {
                     is_histo = true;
                 }
-            }
+				else if (u[1]=='w')
+				{
+					is_web = true;
+				}
+			}
 
             int pos_url = 0;
             if      (is_video)   pos_url = 3;
@@ -389,6 +393,7 @@ public:
             else if (is_rsa)     pos_url = 3;
             else if (is_ecc)     pos_url = 3;
             else if (is_histo)   pos_url = 3;
+			else if (is_web)   	 pos_url = 3;
             int rc = 0;
 
             if (is_video)
@@ -584,7 +589,7 @@ public:
 						}
 						else
 						{
-							std::cerr << "ERROR rsa_key not found: " << rsa_key_at_iter << std::endl;
+							std::cerr << "ERROR rsa_key not found: [" << rsa_key_at_iter << "], in: " << local_rsa_db << std::endl;
 						}
 					}
 				}
@@ -732,12 +737,15 @@ public:
 					}
 				}
             }
-            else
+            else if (is_web)
             {
-                rc = wget(u, file.data(), verbose);
+				int pos_url = 3;
+				std::string s(&u[pos_url]);
+                //rc = wget(u, file.data(), verbose);
+				rc = wget(s.data(), file.data(), verbose);
 				if (rc != 0)
 				{
-					std::cerr << "ERROR " << "unable to read web url contents " << "URL " << u << std::endl;
+					std::cerr << "ERROR " << "unable to read web url contents " << "URL " << s << std::endl;
 					r = false;
 				}
             }

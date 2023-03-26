@@ -192,101 +192,134 @@ public:
 
     bool read_file_urls(std::string filename)
     {
-        char c;
         bool r = true;
         r = urls_data.read_from_file(filename);
 
-        std::string s;
-        char url[URL_MAX_SIZE] = { 0 };
-        int pos = -1;
-        uint32_t idx=0;
-
         if (r)
         {
-//            crypto_cfg cfg("/home/server/dev/Encryptions/src/default_cfg.ini", true);
-//            cfg.parse();
-//            long long b = cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.use_gmp);
-//            std::cerr << "cfg.cmdparam.use_gmp " << b << std::endl;
+			if (USE_KEYURL_FEATURE)
+			{
+				keyspec_parser kp;
+				kp.parse(urls_data);
 
-
-//            keyspec_parser kp;
-//            kp.parse(urls_data);
-//            kp.show();
-//
-//            bool keymgr::materialize_keys(	keyspec& key_in,
-//							  const std::string& folder_other_public_rsa,
-//                            const std::string& folder_other_public_ecc,
-//                            const std::string& folder_my_private_hh)
-//            return false;
-
-            for(size_t i=0;i<urls_data.buffer.size();i++)
-            {
-                // parse url
-                c = urls_data.buffer.getdata()[i];
-                pos++;
-
-                if ((c == '\n') || (i==urls_data.buffer.size()-1))
-                {
-					if (i==urls_data.buffer.size()-1)
+				for(size_t i=0;i<kp.vkeyspec_composite.size();i++)
+				{
+					for(size_t j=0;j<kp.vkeyspec_composite[i].vkeyspec.size();j++)
 					{
-						if ((c!=0) && (c!='\r') && (c!='\n'))
+						if (kp.vkeyspec_composite[i].vkeyspec[j].is_spec)
 						{
-							url[idx] = c;
-							idx++;
+							bool t = keymgr::materialize_keys(	kp.vkeyspec_composite[i].vkeyspec[j],
+																folder_other_public_rsa,
+																folder_other_public_ecc,
+																folder_my_private_hh,
+																folder_my_private_ecc,
+																verbose);
+							if (t==false)
+							{
+								//... warn
+							}
 						}
 					}
+				}
+				if (verbose)
+					kp.show();
 
-                    uint32_t len = idx;
+				for(size_t i=0;i<kp.vkeyspec_composite.size();i++)
+				{
+					std::string s = kp.vkeyspec_composite[i].format_key_line(1, verbose);
+					std::cout << "url[]: " << s << std::endl;
 
-                    if ( ((len >= URL_MIN_SIZE) && (len <= URL_MAX_SIZE)) && (url[0]!=';') )
-                    {
-                        urlkey uk;
-                        for(uint32_t ii=0;ii<URL_MAX_SIZE;ii++) uk.url[ii] = 0;
-
-                        uint32_t idx2=0;
-                        for (uint32_t ii = 0; ii < len; ii++)
-                        {
-                            if ((url[ii] != '\n') && (url[ii] != '\r'))
-                                uk.url[idx2] = url[ii];
-                            idx2++;
-                        }
-//                        std::string su(url);
-//                        std::cout << "[" << su << "]\n";
-
-                        uk.url_size = idx2;
-                        vurlkey.push_back(uk);
-                    }
-                    else
-                    {
-                        // skip!
-                        if (len > 0)
-                        {
-                            if (url[0]!=';')
-                                std::cerr << "WARNING url skipped, " << "(url.size() >= URL_MIN_SIZE) && (url.size() <= URL_MAX_SIZE))  url=" << url <<std::endl;
-                        }
-                    }
-                    s.clear();
-                    for(uint32_t ii=0;ii<URL_MAX_SIZE;ii++) url[ii] = 0;
-                    pos = -1;
-                    idx = 0;
-                }
-                else
-                {
-                    if ((c!=0) && (c!='\r') && (c!='\n'))
-                    {
-						if (idx < URL_MAX_SIZE)
+					if ((s.size() >= URL_MIN_SIZE ) && (s.size() < URL_MAX_SIZE ))
+					{
+						urlkey uk;
+						for(uint32_t ii=0;ii<URL_MAX_SIZE;ii++) uk.url[ii] = 0;
+						uint32_t idx2 = 0;
+						for (uint32_t ii = 0; ii < s.size(); ii++)
 						{
-							url[idx] = c;
-							idx++;
+							if ((s[ii] != '\n') && (s[ii] != '\r'))
+								uk.url[idx2] = s[ii];
+							idx2++;
+						}
+						uk.url_size = idx2;
+						vurlkey.push_back(uk);;
+					}
+				}
+			}
+			else
+			{
+			  	char c;
+				std::string s;
+				char url[URL_MAX_SIZE] = { 0 };
+				int pos = -1;
+				uint32_t idx=0;
+
+				for(size_t i=0;i<urls_data.buffer.size();i++)
+				{
+					// parse url
+					c = urls_data.buffer.getdata()[i];
+					pos++;
+
+					if ((c == '\n') || (i==urls_data.buffer.size()-1))
+					{
+						if (i==urls_data.buffer.size()-1)
+						{
+							if ((c!=0) && (c!='\r') && (c!='\n'))
+							{
+								url[idx] = c;
+								idx++;
+							}
+						}
+
+						uint32_t len = idx;
+
+						if ( ((len >= URL_MIN_SIZE) && (len <= URL_MAX_SIZE)) && (url[0]!=';') )
+						{
+							urlkey uk;
+							for(uint32_t ii=0;ii<URL_MAX_SIZE;ii++) uk.url[ii] = 0;
+
+							uint32_t idx2=0;
+							for (uint32_t ii = 0; ii < len; ii++)
+							{
+								if ((url[ii] != '\n') && (url[ii] != '\r'))
+									uk.url[idx2] = url[ii];
+								idx2++;
+							}
+
+							uk.url_size = idx2;
+							vurlkey.push_back(uk);
 						}
 						else
 						{
-							std::string su(url);
-							std::cerr << "WARNING url skipped, " << "url size >= URL_MAX_SIZE url=" << su << std::endl;
+							// skip!
+							if (len > 0)
+							{
+								if (url[0]!=';')
+									std::cerr << "WARNING url skipped, " << "(url.size() >= URL_MIN_SIZE) && (url.size() <= URL_MAX_SIZE))  url=" << url <<std::endl;
+							}
 						}
-                    }
-                }
-            }
+						s.clear();
+						for(uint32_t ii=0;ii<URL_MAX_SIZE;ii++) url[ii] = 0;
+						pos = -1;
+						idx = 0;
+					}
+					else
+					{
+						if ((c!=0) && (c!='\r') && (c!='\n'))
+						{
+							if (idx < URL_MAX_SIZE)
+							{
+								url[idx] = c;
+								idx++;
+							}
+							else
+							{
+								std::string su(url);
+								std::cerr << "WARNING url skipped, " << "url size >= URL_MAX_SIZE url=" << su << std::endl;
+							}
+						}
+					}
+				}
+			}
         }
         return r;
     }
@@ -314,6 +347,7 @@ public:
 		bool is_rsa     = false;
 		bool is_ecc   	= false;
 		bool is_histo   = false;
+		bool is_web     = false;
 
 		if (vurlkey[i].url[0]=='[')
 		{
@@ -341,6 +375,10 @@ public:
             {
                 is_histo = true;
             }
+            else if (vurlkey[i].url[1]=='w')
+            {
+                is_web = true;
+            }
 		}
 
 		int pos_url = 0;
@@ -350,6 +388,7 @@ public:
 		else if (is_rsa)    pos_url = 3;
 		else if (is_ecc)    pos_url = 3;
 		else if (is_histo)  pos_url = 3;
+		else if (is_web)    pos_url = 3;
         int rc = 0;
 
         cryptodata dataout_local;
@@ -700,7 +739,7 @@ public:
 				{
 					if (v.size() > 1)
 					{
-						std::string new_URL = "[r]";
+						std::string new_URL = "[e]";
 						for (size_t riter=0; riter < v.size(); riter++)
 						{
 							std::string ecc_key_at_iter = v[riter];
@@ -724,7 +763,7 @@ public:
 				}
 			}
         }
-        else
+        else if (is_web)
         {
             rc = wget(s.data(), file.data(), verbose);
             if (rc!= 0)
@@ -732,6 +771,9 @@ public:
                 std::cerr << "ERROR with wget, error code: " << rc << " url: " << s <<  " file: " << file << std::endl;
                 r = false;
             }
+        }
+        else
+        {
         }
 
 		if (r)
