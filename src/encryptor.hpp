@@ -2138,19 +2138,12 @@ public:
         cryptodata* msg_data = nullptr;
         datalist.add_data(msg_data, filename, filename, CRYPTO_FILE_TYPE::RAW); // same name??
 
-		//--------------------------------------
-		// converter padding pgn, ...
-		//--------------------------------------
-		//datalist.set_converter(converter); // TEST PNG
-
         if (!auto_flag)
         {
 			std::cout << "!auto_flag" << std::endl;
         }
         else
         {
-            // auto gen keys...
-
 			// my public keys to export
             std::vector<keymgr::public_key_desc_exporting> vpubkeys;
             r = keymgr::export_public_keys( vpubkeys,

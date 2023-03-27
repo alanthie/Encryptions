@@ -101,7 +101,7 @@ public:
         if(binaryFile == NULL)
         {
 			if (verbose)
-            	std::cerr << "Error reading file: " << BIN_IN_FILE << std:: endl;
+            	std::cerr << "Error opening file: " << BIN_IN_FILE << std:: endl;
             return 0;
         }
         else
