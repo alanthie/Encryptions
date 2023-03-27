@@ -78,6 +78,9 @@
     <ClCompile Include="..\..\src\qa\ecc_point\ecc_elgamal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\qa\Bin2PNG\lodepng.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\qa\atomic_bitvector.hpp">
@@ -162,6 +165,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\qa\ecc_point\ecc_curve.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\qa\Bin2PNG\lodepng.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

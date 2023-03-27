@@ -144,6 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Base64.cpp" />
+    <ClCompile Include="..\..\src\qa\Bin2PNG\lodepng.cpp" />
     <ClCompile Include="..\..\src\qa\ecc_point\ecc_curve.cpp" />
     <ClCompile Include="..\..\src\qa\ecc_point\ecc_elgamal.cpp" />
     <ClCompile Include="..\..\src\qa\qa.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="..\..\src\Base64.h" />
     <ClInclude Include="..\..\src\base_const.hpp" />
     <ClInclude Include="..\..\src\qa\atomic_bitvector.hpp" />
+    <ClInclude Include="..\..\src\qa\Bin2PNG\lodepng.h" />
     <ClInclude Include="..\..\src\qa\ecc_point\ecc_curve.hpp" />
     <ClInclude Include="..\..\src\qa\iterator_tpl.h" />
     <ClInclude Include="..\..\src\qa\mathcommon.h" />

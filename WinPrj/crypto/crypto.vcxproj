@@ -25,6 +25,7 @@
     <ClCompile Include="..\..\src\crc32a.cpp" />
     <ClCompile Include="..\..\src\DES.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\qa\Bin2PNG\lodepng.cpp" />
     <ClCompile Include="..\..\src\qa\ecc_point\ecc_curve.cpp" />
     <ClCompile Include="..\..\src\qa\ecc_point\ecc_elgamal.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMP.cpp" />
@@ -65,6 +66,7 @@
     <ClInclude Include="..\..\src\IDEA.hpp" />
     <ClInclude Include="..\..\src\ini_parser.hpp" />
     <ClInclude Include="..\..\src\puzzle.hpp" />
+    <ClInclude Include="..\..\src\qa\Bin2PNG\lodepng.h" />
     <ClInclude Include="..\..\src\qa\ecc_point\ecc_curve.hpp" />
     <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMP.h" />
     <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMPPrime.h" />
