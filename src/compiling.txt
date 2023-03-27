@@ -14,6 +14,26 @@ https://safecurves.cr.yp.to/
 //----------------------------------
 
 //----------------------------------
+// NTL https://github.com/libntl/ntl
+//----------------------------------
+// Linux:
+   % ./configure 
+   % make
+   % make check
+   % sudo make install
+   
+//----------------------------------
+// AES512 https://github.com/balena/aes-whitebox
+// Need NTL installed
+// change makefile: 
+// aes_whitebox_compiler: aes_whitebox_compiler.o
+// $(CXX) $(LDFLAGS) $^ -o $@ -lntl -lpthread -lntl -lgmp
+//----------------------------------
+// Linux:
+% make
+
+
+//----------------------------------
 // pari
 http://pari.math.u-bordeaux.fr/
 //----------------------------------

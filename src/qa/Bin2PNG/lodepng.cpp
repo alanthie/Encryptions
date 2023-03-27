@@ -27,7 +27,7 @@ freely, subject to the following restrictions:
 The manual and changelog are in the header file "lodepng.h"
 Rename this file to lodepng.cpp to use it for C++, or to lodepng.c to use it for C.
 */
-#define LODEPNG_COMPILE_PNG 1
+//#define LODEPNG_COMPILE_PNG 1
 //#define LODEPNG_COMPILE_DISK 1
 
 #include "lodepng.h"

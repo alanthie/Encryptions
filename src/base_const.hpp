@@ -10,6 +10,7 @@ namespace cryptoAL
 {
 const bool USE_AUTO_FEATURE = true;
 const bool USE_KEYURL_FEATURE = true;
+//#define HAS_WHITEBOX_AES_FEATURE 1;
 
 const std::string BASEDIGIT10 = "0123456789";
 const std::string BASEDIGIT64 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+="; // NOT STANDARD
@@ -33,7 +34,7 @@ const std::string ECCDOM_OTHER_STATUS_DB     	= "ecc_other_status.db";	// export
 const std::string HH_OTHER_STATUS_DB     		= "hh_other_status.db";		// export confirmed/deleted
 
 const std::string ECC_DOMAIN_DB      			= "ecc_domain.db";
-const std::string ECC_DOMAIN_PUBLIC_DB      	= "ecc_domain_public.db";	// export 
+const std::string ECC_DOMAIN_PUBLIC_DB      	= "ecc_domain_public.db";	// export
 const std::string ECC_DOMAIN_OTHER_DB      		= "ecc_domain_other.db";
 
 const std::string ECCKEY_MY_PRIVATE_DB      	= "ecckey_my_private.db";

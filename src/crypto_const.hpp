@@ -20,6 +20,9 @@ enum class CRYPTO_ALGO : uint16_t
     ALGO_BIN_AES_16_16_ecb,
     ALGO_BIN_AES_16_16_cbc,
     ALGO_BIN_AES_16_16_cfb,
+	ALGO_BIN_AES_32_32_ecb,
+    ALGO_BIN_AES_32_32_cbc,
+    ALGO_BIN_AES_32_32_cfb,
     ALGO_TWOFISH,
     ALGO_Salsa20,
     ALGO_IDEA

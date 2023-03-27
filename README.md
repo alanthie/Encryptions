@@ -36,9 +36,10 @@ Optional arguments:
   -h, --help              	shows help message and exits 
   -v, --version           	prints version information and exits 
   -cfg, --cfg             	specify a config file. [default: ""]
-  -a, --auto              	auto export public/status keys with the encrypted data [default: ""]
+  -a, --auto              	auto export public/status keys with the encrypted data (ex: -a 1) [default: ""]
   -i, --input             	specify the input file. [default: ""]
   -o, --output            	specify the output encrypted file (default to <input path>.encrypted) [default: ""]
+  -png, --png             	convert encrypted file to an image png file (ex: -png 1) [default: ""]
   -p, --puzzle            	specify the input (optional) puzzle file. [default: ""]
   -q, --qapuzzle          	specify the output qa puzzle file (default to <puzzle path>.qa) [default: ""]
   -f, --fullpuzzle        	specify the output (optional) full puzzle file. [default: ""]
@@ -62,20 +63,22 @@ Optional arguments:
   -sh, --shuffle          	specify pre encryption shuffling percentage of data 0-100 [default: "0"]
 
 Output example:
-MESSAGE is 117169 bytes
-Padding msg with bytes: 15
-Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 1831, number of keys (32 bytes): 1104, shuffling: 0%
-Encryptor encode() binAES 16_16 - aes_type: 0, number of rounds : 1, number of blocks (16 bytes): 7404, number of keys (16 bytes): 2208, shuffling: 0%
-Encryptor encode() binAES 16_16 - aes_type: 2, number of rounds : 1, number of blocks (16 bytes): 7484, number of keys (16 bytes): 2208, shuffling: 0%
-Encryptor encode() twofish 16_16             , number of rounds : 1, number of blocks (16 bytes): 7564, number of keys (16 bytes): 2208, shuffling: 0%
-Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 1933, number of keys (32 bytes): 1104, shuffling: 0%
-Encryptor encode() idea 8_16                 , number of rounds : 1, number of blocks (8 bytes): 15808, number of keys (16 bytes): 2208, shuffling: 0%
-Encryptor encode() binAES 16_16 - aes_type: 1, number of rounds : 1, number of blocks (16 bytes): 8076, number of keys (16 bytes): 2208, shuffling: 0%
-Encryptor encode() binAES 16_16 - aes_type: 0, number of rounds : 1, number of blocks (16 bytes): 8248, number of keys (16 bytes): 2208, shuffling: 0%
-Encryptor encode() binAES 16_16 - aes_type: 2, number of rounds : 1, number of blocks (16 bytes): 8340, number of keys (16 bytes): 2208, shuffling: 0%
-Encryptor encode() twofish 16_16             , number of rounds : 1, number of blocks (16 bytes): 8756, number of keys (16 bytes): 2208, shuffling: 0%
-Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 2213, number of keys (32 bytes): 4, shuffling: 0%
-data encrypted size: 141636
+MESSAGE is 128437 bytes
+Padding msg with bytes: 11
+Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 2007, number of keys (32 bytes): 1008, shuffling: 0%
+Encryptor encode() binAES 16_16 - aes_type: 0, number of rounds : 1, number of blocks (16 bytes): 8108, number of keys (16 bytes): 2016, shuffling: 0%
+Encryptor encode() binAES 16_16 - aes_type: 2, number of rounds : 1, number of blocks (16 bytes): 8188, number of keys (16 bytes): 2016, shuffling: 0%
+Encryptor encode() binAES 32_32 - aes_type: 1, number of rounds : 1, number of blocks (32 bytes): 4134, number of keys (32 bytes): 1008, shuffling: 0%
+Encryptor encode() binAES 32_32 - aes_type: 0, number of rounds : 1, number of blocks (32 bytes): 4174, number of keys (32 bytes): 1008, shuffling: 0%
+Encryptor encode() binAES 32_32 - aes_type: 2, number of rounds : 1, number of blocks (32 bytes): 4214, number of keys (32 bytes): 1008, shuffling: 0%
+Encryptor encode() twofish 16_16             , number of rounds : 1, number of blocks (16 bytes): 8508, number of keys (16 bytes): 2016, shuffling: 0%
+Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 2147, number of keys (32 bytes): 1008, shuffling: 0%
+Encryptor encode() idea 8_16                 , number of rounds : 1, number of blocks (8 bytes): 17560, number of keys (16 bytes): 2016, shuffling: 0%
+Encryptor encode() binAES 16_16 - aes_type: 1, number of rounds : 1, number of blocks (16 bytes): 8888, number of keys (16 bytes): 2016, shuffling: 0%
+Encryptor encode() binAES 16_16 - aes_type: 0, number of rounds : 1, number of blocks (16 bytes): 9108, number of keys (16 bytes): 2016, shuffling: 0%
+Encryptor encode() binAES 16_16 - aes_type: 2, number of rounds : 1, number of blocks (16 bytes): 9344, number of keys (16 bytes): 2016, shuffling: 0%
+Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 2364, number of keys (32 bytes): 4, shuffling: 0%
+data encrypted size: 151300
 qa_puz_key size:     128
 crypto ENCODING SUCCESS
 Encrypted file: msg.zip.encrypted
@@ -106,18 +109,22 @@ One-Time Pad Cipher (Perfect Security) https://www.youtube.com/watch?v=F5Yrk6LHM
 Current set of encryption algorithms
 <pre>
     Binary DES
-    Binary AES ecb
-    Binary AES cbc
-    Binary AES cfb
+    Binary AES 128 bits ecb
+    Binary AES 128 bits cbc
+    Binary AES 128 bits cfb
+    Binary AES 256 bits ecb
+    Binary AES 256 bits cbc
+    Binary AES 256 bits cfb
     TWOFISH
     Salsa20
     IDEA
     RSA (2 primes)
-    Shuffling
     Recursive RSA
+    Shuffling
     Elliptic Curve
     Recursive Elliptic Curve
-    Future: Multiple primes (3+) RSA [ the security of Multi-prime RSA is undeniably better than the standard RSA]
+    Future: WhiteBox (against compromise environment) AES 512, AES 1024, AES 2048, AES 4096
+    Future: Multiple primes (3+) RSA [the security of Multi-prime RSA is undeniably better than the standard RSA]
     Future: Cascading auto generated embedded key protected by multiple RSA/ECC keys
 </pre>
 
@@ -126,6 +133,9 @@ Overview:
 
 Recursive RSA (and Elliptic Curve):
 ![Alt text](/Doc/RecursiveRSA.png?raw=true "Recursive RSA")
+
+Planned feature: WhiteBox (against compromise environment) AES
+![Alt text](/Doc/wbaes.png?raw=true "wbaes")
 
 Example of urls.txt:
 <pre>
@@ -207,6 +217,8 @@ use_gmp                     = 1
 self_test                   = 0
 key_size_factor             = 3
 shufflePerc                 = 0
+converter                   =
+check_converter             =
 verbose                     = 1
 
 [keymgr]

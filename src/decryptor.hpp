@@ -175,6 +175,9 @@ public:
         if ((out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
             (out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
             (out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) &&
+			(out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_32_32_ecb) &&
+            (out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_32_32_cbc) &&
+            (out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_32_32_cfb) &&
             (out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH) &&
             (out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_Salsa20) &&
             (out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_IDEA)
@@ -1459,6 +1462,155 @@ public:
 
         return r;
 	}
+	
+	bool decode_binaes32_32(cryptodata& data_encrypted,
+                            const char* key, uint32_t key_size,
+                            cryptodata& data_decrypted,
+                            CRYPTO_ALGO_AES aes_type)
+	{
+        bool r = true;
+		char c;
+
+        if (key_size == 0)
+		{
+            std::cerr << "ERROR decode_binaes32_32 - key_size = 0 " <<  "" << std::endl;
+            return false;
+        }
+        if (data_encrypted.buffer.size() == 0)
+		{
+            std::cerr << "ERROR decode_binaes32_32 - data file is empty " << std::endl;
+            return false;
+        }
+
+        if (key_size % 32 != 0)
+		{
+            std::cerr << "ERROR decode_binaes32_32 - key_size must be 32x " <<  key_size << std::endl;
+            return false;
+        }
+        if (data_encrypted.buffer.size() % 32 != 0)
+		{
+            std::cerr << "ERROR decode_binaes32_32 - data size must be 32x " <<  data_encrypted.buffer.size() << std::endl;
+            return false;
+        }
+
+		uint32_t nround = 1;
+		uint32_t nblock = data_encrypted.buffer.size() / 32;
+		uint32_t nkeys  = key_size / 32;
+
+		if (data_encrypted.buffer.size() > 0)
+		{
+            if (key_size > data_encrypted.buffer.size() )
+            {
+                nround = key_size / data_encrypted.buffer.size();
+                nround++;
+            }
+		}
+
+		if (verbose)
+		{
+            std::cout <<    "decryptor decode() binAES 32_32 - aes_type: " << (int)aes_type <<
+                            ", number of rounds : " << nround <<
+                            ", number of blocks (32 bytes): " << nblock <<
+                            ", number of keys (32 bytes): "   << nkeys  << std::endl;
+        }
+
+		unsigned char KEY[32+1];
+        unsigned char encrypted[32+1];
+		uint32_t key_idx = 0;
+
+		for(size_t roundi = 0; roundi < nround; roundi++)
+		{
+            if (roundi > 0)
+            {
+                data_decrypted.buffer.seek_begin();
+            }
+
+            if (nround > 0)
+            {
+                key_idx = ((nround - roundi - 1) *  nblock) % nkeys;
+            }
+            //std::cout << "roundi " << roundi << " key_idx " << key_idx << std::endl;
+
+            if (r == false)
+                break;
+
+            for(size_t blocki = 0; blocki < nblock; blocki++)
+            {
+                if (roundi == 0)
+                {
+                    for(size_t j = 0; j < 32; j++)
+                    {
+                        c = data_encrypted.buffer.getdata()[32*blocki + j];
+                        encrypted[j] = c;
+                    }
+                    encrypted[32]=0;
+                }
+                else
+                {
+                    for(size_t j = 0; j < 32; j++)
+                    {
+                        c = data_decrypted.buffer.getdata()[32*blocki + j];
+                        encrypted[j] = c;
+                    }
+                    encrypted[32]=0;
+                }
+
+                for(size_t j = 0; j < 32; j++)
+                {
+                    c = key[32*key_idx + j];
+                    KEY[j] = c;
+                }
+                KEY[32]=0;
+
+                key_idx++;
+                if (key_idx >= nkeys) key_idx=0;
+
+                unsigned int plainLen = 32 * sizeof(unsigned char);  //bytes in plaintext
+
+                if (aes_type == CRYPTO_ALGO_AES::ECB)
+                {
+                    binAES aes(AESKeyLength::AES_256);  //key length, can be 128, 192 or 256
+                    auto p = aes.DecryptECB(encrypted, plainLen, KEY);
+
+                    data_decrypted.buffer.write((char*)&p[0], 32, -1);
+                    delete []p;
+                }
+                else if (aes_type == CRYPTO_ALGO_AES::CBC)
+                {
+                    const unsigned char iv[32] = {
+                        0x30, 0x31, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+						0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,};
+
+                    binAES aes(AESKeyLength::AES_256);  // key length, can be 128, 192 or 256
+                    auto p = aes.DecryptCBC(encrypted, plainLen, KEY, iv);
+
+                    data_decrypted.buffer.write((char*)&p[0], 32, -1);
+                    delete []p;
+                }
+                else if (aes_type == CRYPTO_ALGO_AES::CFB)
+                {
+                    const unsigned char iv[32] = {
+                        0x40, 0x41, 0x42, 0x43, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+						0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x16, 0x17,0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,};
+
+                    binAES aes(AESKeyLength::AES_256);  //key length, can be 128, 192 or 256
+                    auto p = aes.DecryptCFB(encrypted, plainLen, KEY, iv);
+
+                    data_decrypted.buffer.write((char*)&p[0], 32, -1);
+                    delete []p;
+                }
+                else
+                {
+                    std::cerr << "ERROR unsupportes AES type " << (int)aes_type << std::endl;
+                    r = false;
+                    break;
+                }
+            }
+        }
+
+        return r;
+	}
+
 
 	bool decode(size_t iter, size_t NITER, uint16_t crypto_algo, uint32_t crypto_flags, uint32_t shuffle_perc,
                 cryptodata& data_encrypted, const char* key, uint32_t key_size, cryptodata& data_decrypted)
@@ -1489,11 +1641,17 @@ public:
         }
 		else
 		{
+			bool bin16=true;
             CRYPTO_ALGO_AES aes_type = CRYPTO_ALGO_AES::ECB;
-            if      (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) aes_type = CRYPTO_ALGO_AES::CBC;
+            if      (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) aes_type = CRYPTO_ALGO_AES::ECB;
             else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) aes_type = CRYPTO_ALGO_AES::CFB;
+			else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) aes_type = CRYPTO_ALGO_AES::CBC;
+            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_32_32_ecb) {aes_type = CRYPTO_ALGO_AES::ECB;bin16=false;}
+            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_32_32_cfb) {aes_type = CRYPTO_ALGO_AES::CFB;bin16=false;}
+			else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_32_32_cbc) {aes_type = CRYPTO_ALGO_AES::CBC;bin16=false;}
 
-            r = decode_binaes16_16(data_encrypted, key, key_size, data_decrypted, aes_type);
+			if (bin16)  r = decode_binaes16_16(data_encrypted, key, key_size, data_decrypted, aes_type);
+			else		r = decode_binaes32_32(data_encrypted, key, key_size, data_decrypted, aes_type);
         }
 
 		if (r)
@@ -1922,6 +2080,9 @@ public:
                     if ((uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) &&
+						(uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_32_32_ecb) &&
+                        (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_32_32_cbc) &&
+                        (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_32_32_cfb) &&
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH) &&
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_Salsa20) &&
                         (uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_IDEA)
