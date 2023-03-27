@@ -82,6 +82,8 @@
 		<Unit filename="../src/ini_parser.hpp" />
 		<Unit filename="../src/main.cpp" />
 		<Unit filename="../src/puzzle.hpp" />
+		<Unit filename="../src/qa/Bin2PNG/lodepng.cpp" />
+		<Unit filename="../src/qa/Bin2PNG/lodepng.h" />
 		<Unit filename="../src/qa/RSA-GMP/RSAGMP.cpp" />
 		<Unit filename="../src/qa/RSA-GMP/RSAGMP.h" />
 		<Unit filename="../src/qa/RSA-GMP/RSAGMPPrime.cpp" />

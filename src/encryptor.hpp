@@ -21,6 +21,7 @@
 #include "crypto_keymgr.hpp"
 #include "crypto_key_parser.hpp"
 #include "crypto_cfg.hpp"
+#include "crypto_png.hpp"
 
 namespace cryptoAL
 {
@@ -61,7 +62,8 @@ public:
 				bool iuse_gmp = false,                  // Flag - use gmp for big computation
 				bool iself_test = false,                // Flag - verify encryption
 				long ishufflePerc = 0,                  // Parameter - shuffling percentage
-				bool autoflag = false )
+				bool autoflag = false,
+				uint32_t iconverter = 0)
         : cfg (ifilename_cfg, false)
     {
         filename_cfg = ifilename_cfg;
@@ -93,6 +95,7 @@ public:
 		self_test 	= iself_test;
 		shufflePerc = ishufflePerc;
 		auto_flag 	= autoflag;
+		converter 	= iconverter;
 
         puz.verbose = verb;
 
@@ -159,6 +162,7 @@ public:
 
 		if (shufflePerc == 0) 					{if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.shufflePerc) > 0) shufflePerc = cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.shufflePerc);}
 		if (key_size_factor <= 1) 				{if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.key_size_factor) >= 1) key_size_factor = cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.key_size_factor);}
+		if (converter <= 1) 					{if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.converter) >= 1) converter = cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.converter);}
 	}
 
 	void show_param()
@@ -187,6 +191,8 @@ public:
         std::cout << "auto_flag:   " << auto_flag << std::endl;
         std::cout << "shufflePerc: " << shufflePerc << std::endl;
         std::cout << "key_size_factor: " << key_size_factor << std::endl;
+		std::cout << "converter:   " << converter << std::endl;
+		std::cout << "verbose:     " << verbose << std::endl;
 		std::cout << "-------------------------------------------------" << std::endl<< std::endl;
 	}
 
@@ -227,7 +233,7 @@ public:
 				for(size_t i=0;i<kp.vkeyspec_composite.size();i++)
 				{
 					std::string s = kp.vkeyspec_composite[i].format_key_line(1, verbose);
-					std::cout << "url[]: " << s << std::endl;
+					if (verbose) std::cout << "url[]: " << s << std::endl;
 
 					if ((s.size() >= URL_MIN_SIZE ) && (s.size() < URL_MAX_SIZE ))
 					{
@@ -1955,12 +1961,41 @@ public:
             std::cout << "qa_puz_key size:     "  << qa_puz_key.size() << std::endl;
         }
 
-        data_temp_next.copy_buffer_to(encrypted_data);
-        encrypted_data.save_to_file(filename_encrypted_data);   // SAVE
-        if (verbose)
-        {
-            std::cout << "saved to "  << filename_encrypted_data << std::endl;
-        }
+        //--------------------------------------------------------
+        // post_encode()
+        //--------------------------------------------------------
+		if (converter > 0)
+		{
+			if (verbose)
+			{
+				std::cout << "post encode..." << std::endl;
+			}
+
+			std::string new_output_filename;
+			bool r = post_encode(data_temp_next, filename_encrypted_data, encrypted_data, new_output_filename); // Convert and  SAVE
+			if (r == false)
+			{
+				std::cout << "ERROR post_encode to "  << new_output_filename << std::endl;
+				return false; // disable -pgn next time
+			}
+			else
+			{
+				filename_encrypted_data = new_output_filename; // override
+				if (verbose)
+				{
+					std::cout << "saved to "  << new_output_filename << std::endl;
+				}
+			}
+		}
+		else
+		{
+			data_temp_next.copy_buffer_to(encrypted_data);
+			encrypted_data.save_to_file(filename_encrypted_data);   // SAVE
+			if (verbose)
+			{
+				std::cout << "saved to "  << filename_encrypted_data << std::endl;
+			}
+		}
 
 		if (folder_my_private_hh.size() > 0)
 		{
@@ -2029,7 +2064,58 @@ public:
     bool auto_flag = false;
     std::string auto_options;
 
+	uint32_t converter = 0; // 1==PNG
 	cryptodata_list datalist;
+
+	bool post_encode(cryptodata& indata, const std::string& filename, cryptodata& out_encrypted_data, std::string& new_output_filename)
+	{
+		bool r = true;
+		new_output_filename = filename;
+
+		if (converter == 1) // 1==PNG
+		{
+			// NEED an envelop for data so size get to square for png
+			cryptodata_list newdatalist(verbose);
+			newdatalist.set_converter(converter); // PNG padding
+			newdatalist.add_data(&indata, filename, filename, CRYPTO_FILE_TYPE::RAW);
+
+			// out_encrypted_data is a working buffer
+			r = newdatalist.create_header_trailer_buffer(out_encrypted_data);
+			if (r==false)
+			{
+				std::cerr << "ERROR " << " post_encode error with create_header_trailer_buffer " << std::endl;
+				return false;
+			}
+			if (verbose) newdatalist.header.show();
+
+			std::string filename_tmp_envelop = filename +".temp";
+			out_encrypted_data.save_to_file(filename_tmp_envelop);
+			if (verbose) std::cout << "INFO " << "filename_tmp_envelop: " << filename_tmp_envelop <<std::endl;
+
+			new_output_filename = filename + ".png";
+			converter::pgn_converter png;
+			int cr = png.binaryToPng(filename_tmp_envelop, new_output_filename); // SAVE as PGN
+			if (cr != 0)
+			{
+				std::cerr << "ERROR " << "converting to file: " << new_output_filename <<std::endl;
+				if (fileexists(filename_tmp_envelop))
+					std::remove(filename_tmp_envelop.data());
+				return false;
+			}
+			if (fileexists(filename_tmp_envelop))
+				std::remove(filename_tmp_envelop.data());
+		}
+		else
+		{
+			indata.copy_buffer_to(out_encrypted_data);
+			out_encrypted_data.save_to_file(filename);   // SAVE
+			if (verbose)
+			{
+				std::cout << "saved to "  << filename << std::endl;
+			}
+		}
+		return r;
+	}
 
     // pre encode() [if auto flag, export public keys and satus other]
 	bool pre_encode(const std::string& filename, cryptodata& out_data) // TODO ? local folder ...
@@ -2051,6 +2137,11 @@ public:
         // add message
         cryptodata* msg_data = nullptr;
         datalist.add_data(msg_data, filename, filename, CRYPTO_FILE_TYPE::RAW); // same name??
+
+		//--------------------------------------
+		// converter padding pgn, ...
+		//--------------------------------------
+		//datalist.set_converter(converter); // TEST PNG
 
         if (!auto_flag)
         {

@@ -16,6 +16,7 @@
 #include "crypto_shuffle.hpp"
 #include "crypto_history.hpp"
 #include "crypto_cfg.hpp"
+#include "crypto_png.hpp"
 
 namespace cryptoAL
 {
@@ -45,7 +46,8 @@ public:
                 std::string iencryped_ftp_pwd  = "",
                 std::string iknown_ftp_server  = "",
                 bool iuse_gmp = false,
-                bool autoflag = false)
+                bool autoflag = false,
+				bool icheck_converter = false)
         : cfg(ifilename_cfg, false)
 	{
 		filename_cfg = ifilename_cfg;
@@ -72,6 +74,7 @@ public:
         use_gmp     = iuse_gmp;
         auto_flag   = autoflag;
 		use_gmp     = iuse_gmp;
+		check_converter = icheck_converter;
 
 		puz.verbose = verb;
 
@@ -130,6 +133,8 @@ public:
         std::cout << "keeping:   " << keeping << std::endl;
         std::cout << "use_gmp:   " << use_gmp << std::endl;
         std::cout << "auto_flag: " << auto_flag << std::endl;
+		std::cout << "check_converter (png): " << check_converter << std::endl;
+		std::cout << "verbose:   " << verbose << std::endl;
         std::cout << "-------------------------------------------------" << std::endl<< std::endl;
 	}
 
@@ -152,6 +157,7 @@ public:
 		if (keeping == false) 					if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.keeping) == 1) keeping = true;
 		if (use_gmp == false) 					if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.use_gmp) == 1) use_gmp = true;
 		if (auto_flag == false) 				if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.auto_flag) == 1) auto_flag = true;
+		if (check_converter == false) 			if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.check_converter) == 1) check_converter = true;
 	}
 
     bool read_urlinfo(Buffer& temp, urlkey& out_uk)
@@ -297,12 +303,6 @@ public:
 
 		out_uk.crypto_flags = temp.readUInt32(pos); pos+=4;
 		out_uk.shuffle_perc = temp.readUInt32(pos); pos+=4;
-
-//        std::string s(out_uk.url);
-//		std::cout << "read_urlinfo URL" <<" " << s << " " << s.size() << std::endl;
-//		std::cout << "read_urlinfo URL rsa_encoded_data_pad "  <<" " << out_uk.rsa_encoded_data_pad << " " << std::endl;
-//		std::cout << "read_urlinfo URL rsa_encoded_data_len "  <<" " << out_uk.rsa_encoded_data_len << " "  << std::endl;
-//		std::cout << "read_urlinfo URL rsa_encoded_data_pos "  <<" " << out_uk.rsa_encoded_data_pos << " "  << std::endl;
 
 		return r;
 	}
@@ -1643,14 +1643,52 @@ public:
 			}
 		}
 
+		// pre_decode
 		if (r)
 		{
-            if (encrypted_data.read_from_file(filename_encrypted_data) == false)
+			if (check_converter == true)
 			{
-                std::cerr << "ERROR " << "reading encrypted file " << filename_encrypted_data <<  std::endl;
-				r = false;
+				bool is_png = converter::pgn_converter::is_file_ext_png(filename_encrypted_data);
+				if (is_png)
+				{
+					if (verbose)
+					{
+						std::cout << "pre decode - reading png... " << filename_encrypted_data <<  std::endl;
+					}
+
+					std::string new_filename_encrypted_data;
+					bool r = pre_decode(1, filename_encrypted_data, encrypted_data, new_filename_encrypted_data);
+					if (r == false)
+					{
+						std::cout << "ERROR converting png to file: "  << new_filename_encrypted_data << std::endl;
+					}
+					else
+					{
+						if (verbose)
+						{
+							std::cout << "saved to "  << new_filename_encrypted_data << std::endl;
+						}
+						if (filename_encrypted_data != new_filename_encrypted_data)
+						{
+							// new_filename_encrypted_data file not use anymore, data in memory
+							if (fileexists(new_filename_encrypted_data))
+								std::remove(new_filename_encrypted_data.data());
+						}
+						filename_encrypted_data = new_filename_encrypted_data; // override
+					}
+				}
+			}
+			else
+			{
+				if (encrypted_data.read_from_file(filename_encrypted_data) == false)
+				{
+					std::cerr << "ERROR " << "reading encrypted file " << filename_encrypted_data <<  std::endl;
+					r = false;
+				}
 			}
 		}
+
+		//remove_padding();
 
 		auto file_size = encrypted_data.buffer.size();
 		if (file_size < 4)
@@ -2013,8 +2051,79 @@ public:
     int         staging_cnt=0;
     bool        use_gmp;
     bool        auto_flag = false;
+	bool		check_converter = false;
 
     cryptodata_list datalist;
+
+	bool pre_decode(uint32_t converterid, const std::string& filename_encrypted_data, cryptodata& output_encrypted_data, std::string& new_output_filename)
+	{
+		bool r = true;
+		if (converterid == 1)
+		{
+			// or append suffix....
+			new_output_filename = converter::pgn_converter::remove_ext_png(filename_encrypted_data);
+			if (verbose)
+				std::cout << "filename without png extension: " << new_output_filename << std::endl;
+
+			converter::pgn_converter converter(verbose);
+			std::string filename_tmp_envelop = filename_encrypted_data +".pngtobin.temp";
+
+			cryptodata dtemp_envelop;
+			int rc = converter.pngToBinary(filename_encrypted_data.data(), filename_tmp_envelop.data());
+			if (rc == 0)
+			{
+				if (dtemp_envelop.read_from_file(filename_tmp_envelop) == false)
+				{
+					std::cerr << "ERROR " << "reading pgn file " << filename_tmp_envelop <<  std::endl;					
+					r = false;
+				}
+			}
+			else
+			{
+				std::cerr << "ERROR " << "decoding png " << std::endl;
+				r = false;
+			}
+
+			if (fileexists(filename_tmp_envelop))
+				std::remove(filename_tmp_envelop.data());
+					
+			if (r)
+			{
+                // NEED to extract raw encrypted data from pgn envelop
+				cryptodata_list newdatalist(verbose);
+                newdatalist.set_converter(converterid); // PNG padding
+
+				r = newdatalist.read_write_from(dtemp_envelop, new_output_filename,
+												folder_other_public_rsa,
+												folder_other_public_ecc,
+												folder_other_public_hh,
+												folder_my_private_rsa,
+												folder_my_private_ecc,
+												folder_my_private_hh,
+												verbose);
+				if (r==false)
+                {
+                    std::cerr << "ERROR " << " pre_decode error with PGN envelop " << new_output_filename << std::endl;
+                    return false;
+                }
+				
+				if (output_encrypted_data.read_from_file(new_output_filename) == false)
+				{
+					std::cerr << "ERROR " << "reading encrypted file " << new_output_filename <<  std::endl;
+					r = false;
+				}
+			}
+		}
+		else
+        {
+            if (output_encrypted_data.read_from_file(filename_encrypted_data) == false)
+            {
+                std::cerr << "ERROR " << "reading encrypted file " << filename_encrypted_data <<  std::endl;
+                r = false;
+            }
+        }
+		return r;
+	}
 
 	bool post_decode(cryptodata& decrypted_data, const std::string& filename_decrypted_data)
 	{
@@ -2108,7 +2217,7 @@ public:
             {
                 std::cerr << "WARNING failed to update hh keys status " << std:: endl;
             }
-			
+
 			ok[3] = keymgr::status_confirm_or_delete(folder_my_private_ecc,  CRYPTO_FILE_TYPE::ECC_DOM_STATUS ,  key_updated[3], verbose);
             if (ok[3]==false)
             {
@@ -2134,7 +2243,7 @@ public:
 			ok[2] = keymgr::delete_public_keys_marked_for_deleting(folder_other_publice_hh,  CRYPTO_FILE_TYPE::HH_MY_PUBLIC , key_deleted[2]);
 			*/
 		}
-		
+
         return r;
     }
 

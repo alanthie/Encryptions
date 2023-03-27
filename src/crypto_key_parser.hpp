@@ -92,7 +92,6 @@ struct keyspec_composite
 		std::string start_token;
 		keyspec_type start_type;
 
-		uint32_t token_type;
 		uint32_t cnt = 0;
 		for(size_t i=0;i<vkeyspec.size();i++)
         {

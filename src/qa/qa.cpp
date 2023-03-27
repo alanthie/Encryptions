@@ -34,6 +34,7 @@ using namespace cryptoAL;
 
 #include "ecc_point/ecc_curve.hpp"
 
+
 std::string VERSION = "v0.2";
 std::string FULLVERSION = VERSION + "_" + cryptoAL::get_current_date();
 
@@ -51,7 +52,7 @@ void  menu()
     long long choice = 1;
     long long last_choice = 1;
     //long long n;
-	
+
 	bool first_time = true;
 	bool cfg_parse_result = false;
 	std::string cfg_file;
@@ -100,7 +101,7 @@ void  menu()
 		std::cout << "25. EC Key: View my public elliptic curve keys (also included in the private db)" << std::endl;
 		std::cout << "26. EC Key: View other public elliptic curve keys" << std::endl;
         std::cout << "==> ";
-		
+
 		if (first_time)
 		{
 			schoice = "1";
@@ -122,7 +123,7 @@ void  menu()
         {
 			// "1. Use a config file"
 			first_time = false;
-					
+
 			std::cout << "Enter full path of the config file (0 = ./cfg.ini, 1 = skip): ";
 			std::string sfile;
 			std::cin >> sfile;
@@ -132,10 +133,10 @@ void  menu()
 			else
 			{
 				if (sfile == "1")
-				{	
+				{
 					continue;
 				}
-                
+
 				if (sfile == "0") sfile = "./cfg.ini";
 				if (cryptoAL::fileexists(sfile) == true)
 				{
@@ -276,6 +277,9 @@ void  menu()
 
    		else if (choice == 6)
         {
+            qaclass qa;
+            qa.binaryToPng();
+            qa.pngToBinary();
         }
 
 		else if (choice == 7)

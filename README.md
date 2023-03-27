@@ -284,6 +284,9 @@ Planned feature:
 Auto transmission of public keys now implemented:
 ![Alt text](/Doc/autokeys.png?raw=true "autokeys")
 
+Feature availble: Transform encrypted data to another format (ex: png image):
+![Alt text](/Doc/png.png?raw=true "png")
+
 License
 <pre>
 Free for personal usage

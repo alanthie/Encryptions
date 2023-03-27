@@ -61,6 +61,8 @@ struct cfg_cmdparam
 	std::string shufflePerc;
 	std::string auto_flag;
 	std::string verbose;
+	std::string converter;
+	std::string check_converter;
 };
 
 class crypto_cfg
@@ -222,6 +224,8 @@ public:
 		cmdparam.key_size_factor        		= apply_var(ini.get_string("key_size_factor", CFG_cmdparam_section));
 		cmdparam.shufflePerc        			= apply_var(ini.get_string("shufflePerc", CFG_cmdparam_section));
 		cmdparam.auto_flag       			    = apply_var(ini.get_string("auto_flag", CFG_cmdparam_section));
+		cmdparam.converter       			    = apply_var(ini.get_string("converter", CFG_cmdparam_section));
+		cmdparam.check_converter       			= apply_var(ini.get_string("check_converter", CFG_cmdparam_section));
 	}
 
 	void show()
@@ -250,6 +254,9 @@ public:
         std::cout << "auto_flag:   " << cmdparam.auto_flag << std::endl;
         std::cout << "shufflePerc: " << cmdparam.shufflePerc << std::endl;
         std::cout << "key_size_factor: " << cmdparam.key_size_factor << std::endl;
+		std::cout << "converter:   " << cmdparam.converter << std::endl;
+		std::cout << "check_converter: " << cmdparam.check_converter << std::endl;
+		std::cout << "verbose:     " << cmdparam.verbose << std::endl;
 		std::cout << "-------------------------------------------------" << std::endl<< std::endl;
 	}
 

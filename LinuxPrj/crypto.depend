@@ -45,7 +45,7 @@
 
 1675991523 /home/server/dev/Encryptions/src/DES_Const.h
 
-1679761593 source:/home/server/dev/Encryptions/src/main.cpp
+1679878145 source:/home/server/dev/Encryptions/src/main.cpp
 	<iostream>
 	<fstream>
 	<chrono>
@@ -196,7 +196,7 @@
 	"qa/RSA-GMP/RSAGMP.h"
 	"qa/RSA-GMP/RSAGMPUtils.h"
 
-1679808117 /home/server/dev/Encryptions/src/encryptor.hpp
+1679877725 /home/server/dev/Encryptions/src/encryptor.hpp
 	"crypto_const.hpp"
 	<iostream>
 	<fstream>
@@ -217,6 +217,7 @@
 	"crypto_keymgr.hpp"
 	"crypto_key_parser.hpp"
 	"crypto_cfg.hpp"
+	"crypto_png.hpp"
 
 1590687588 /home/server/dev/Encryptions/src/twofish.h
 
@@ -234,7 +235,7 @@
 	<stdio.h>
 	<string.h>
 
-1679808638 /home/server/dev/Encryptions/src/decryptor.hpp
+1679877838 /home/server/dev/Encryptions/src/decryptor.hpp
 	"crypto_const.hpp"
 	<iostream>
 	<fstream>
@@ -250,6 +251,7 @@
 	"crypto_shuffle.hpp"
 	"crypto_history.hpp"
 	"crypto_cfg.hpp"
+	"crypto_png.hpp"
 
 1679685648 /home/server/dev/Encryptions/src/crypto_test.hpp
 	"crypto_const.hpp"
@@ -318,7 +320,7 @@
 	"crc32a.hpp"
 	"puzzle.hpp"
 
-1679802186 /home/server/dev/Encryptions/src/base_const.hpp
+1679811524 /home/server/dev/Encryptions/src/base_const.hpp
 	<cstddef>
 	<map>
 	<string>
@@ -576,8 +578,9 @@
 	<time.h>
 	"ecc_curve.hpp"
 
-1679782590 /home/server/dev/Encryptions/src/cryptodata_list.hpp
+1679878283 /home/server/dev/Encryptions/src/cryptodata_list.hpp
 	"crypto_const.hpp"
+	"crypto_png.hpp"
 	<iostream>
 	"data.hpp"
 	<fstream>
@@ -599,7 +602,7 @@
 	<map>
 	<string>
 
-1679807108 /home/server/dev/Encryptions/src/crypto_key_parser.hpp
+1679810771 /home/server/dev/Encryptions/src/crypto_key_parser.hpp
 	"crypto_const.hpp"
 	<iostream>
 	"crypto_strutil.hpp"
@@ -612,10 +615,34 @@
 	<string>
 	<algorithm>
 
-1679765667 /home/server/dev/Encryptions/src/crypto_cfg.hpp
+1679877998 /home/server/dev/Encryptions/src/crypto_cfg.hpp
 	"crypto_const.hpp"
 	"ini_parser.hpp"
 	"crypto_strutil.hpp"
 	"data.hpp"
 	<iostream>
+
+1679814451 source:/home/server/dev/Encryptions/src/qa/Bin2PNG/lodepng.cpp
+	"lodepng.h"
+	<stdio.h>
+	<stdlib.h>
+	<fstream>
+
+1383144870 /home/server/dev/Encryptions/src/qa/Bin2PNG/lodepng.h
+	<string.h>
+	<vector>
+	<string>
+	"lodepng.h"
+	<iostream>
+	"lodepng.h"
+
+1679862798 /home/server/dev/Encryptions/src/crypto_png.hpp
+	"crypto_const.hpp"
+	"qa/Bin2PNG/lodepng.h"
+	<iostream>
+	<fstream>
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<filesystem>
 

@@ -45,6 +45,8 @@
 		<Unit filename="../src/crypto_file.hpp" />
 		<Unit filename="../src/crypto_parsing.hpp" />
 		<Unit filename="../src/data.hpp" />
+		<Unit filename="../src/qa/Bin2PNG/lodepng.cpp" />
+		<Unit filename="../src/qa/Bin2PNG/lodepng.h" />
 		<Unit filename="../src/qa/RSA-GMP/RSAGMP.cpp" />
 		<Unit filename="../src/qa/RSA-GMP/RSAGMP.h" />
 		<Unit filename="../src/qa/RSA-GMP/RSAGMPPrime.cpp" />

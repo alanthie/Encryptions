@@ -51,7 +51,7 @@
 namespace cryptoAL
 {
 
-std::string VERSION = "0.5";
+std::string VERSION = "0.7";
 
 int main_crypto(int argc, char **argv)
 {
@@ -256,10 +256,10 @@ int main_crypto(int argc, char **argv)
           	encode_command.add_argument("-cfg", "--cfg")
                 .default_value(std::string(""))
                 .help("specify a config file.");
-				
+
 			encode_command.add_argument("-a", "--auto")
                 .default_value(std::string(""))
-                .help("auto export public/status keys with the encrypted data");
+                .help("auto export public/status keys with the encrypted data (ex: -a 1)");
 
             encode_command.add_argument("-i", "--input")
                 .default_value(std::string(""))
@@ -268,6 +268,10 @@ int main_crypto(int argc, char **argv)
             encode_command.add_argument("-o", "--output")
                 .default_value(std::string(""))
                 .help("specify the output encrypted file (default to <input path>.encrypted)");
+
+			encode_command.add_argument("-png", "--png")
+                .default_value(std::string(""))
+                .help("convert encrypted file to an image png file (ex: -png 1)");
 
             encode_command.add_argument("-p", "--puzzle")
                 .default_value(std::string(""))
@@ -362,7 +366,7 @@ int main_crypto(int argc, char **argv)
           	decode_command.add_argument("-cfg", "--cfg")
                 .default_value(std::string(""))
                 .help("specify a config file.");
-				
+
 			decode_command.add_argument("-a", "--auto")
                 .default_value(std::string(""))
                 .help("auto import public/status keys with the decrypted data");
@@ -370,6 +374,10 @@ int main_crypto(int argc, char **argv)
             decode_command.add_argument("-i", "--input")
                 .default_value(std::string(""))
                 .help("specify the input encrypted file.");
+
+			decode_command.add_argument("-png", "--png")
+                .default_value(std::string(""))
+                .help("process png input file as encrypted file (ex: -png 1.");
 
             decode_command.add_argument("-o", "--output")
                 .default_value(std::string(""))
@@ -763,6 +771,7 @@ int main_crypto(int argc, char **argv)
             auto encryped_ftp_user = cmd.get<std::string>("--encryped_ftp_user");
             auto encryped_ftp_pwd  = cmd.get<std::string>("--encryped_ftp_pwd");
             auto shuffle  = cmd.get<std::string>("--shuffle");
+			auto png = cmd.get<std::string>("--png");
 
             if (qa_puzzle_path.size() == 0)
             {
@@ -808,6 +817,23 @@ int main_crypto(int argc, char **argv)
             bool bauto = autoon.size() > 0 ? true : false;
             bool bselftest = selftest .size() > 0 ? true : false;
 
+			long iconverter = 0;
+			if (png.size() > 0)
+			{
+                try
+                {
+                    size_t sz = 0;
+                    iconverter = std::stol (png, &sz);
+                }
+                catch(...)
+                {
+                    std::cout << "Warning invalid png value, png reset to 0" << std::endl;
+                    iconverter = 0;
+                }
+            }
+			if (iconverter<0) iconverter = 0;
+			if (iconverter>1) iconverter = 1; // only PNG for now
+
             std::cout << "CRYPTO ENCODING..." << std::endl;
             encryptor encr(cfg,
 				url_path,
@@ -833,7 +859,8 @@ int main_crypto(int argc, char **argv)
                 bgmp,
                 bselftest,
                 ishufflePerc,
-                bauto);
+                bauto,
+                (uint32_t)iconverter);
 
             if (encr.encrypt(false) == true)
             {
@@ -875,11 +902,13 @@ int main_crypto(int argc, char **argv)
             auto known_ftp_server  = cmd.get<std::string>("--known_ftp_server");
             auto encryped_ftp_user = cmd.get<std::string>("--encryped_ftp_user");
             auto encryped_ftp_pwd  = cmd.get<std::string>("--encryped_ftp_pwd");
+			auto png = cmd.get<std::string>("--png");
 
             bool verbose = verb.size() > 0 ? true : false;
             bool keeping = keep.size() > 0 ? true : false;
 			bool bgmp = gmp.size() > 0 ? true : false;
 			bool bauto = autoon.size() > 0 ? true : false;
+			bool bconverter = png.size() > 0 ? true : false;
 
             if (output_path.size() == 0)
             {
@@ -907,7 +936,8 @@ int main_crypto(int argc, char **argv)
                 encryped_ftp_pwd,
                 known_ftp_server,
 				bgmp,
-				bauto);
+				bauto,
+				bconverter); // only PNG support for now
 
             if (decr.decrypt() == true)
             {
