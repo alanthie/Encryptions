@@ -17,15 +17,49 @@
 namespace WBAES
 {
 
-class wbaes512
+class wbaes_vbase
 {
 public:
-	int Nk = 16;
-	int Nr = 22;
-	std::array< std::array< std::array< std::array<uint8_t, 16>, 16>, 96>, 21> Xor;
-	std::array< std::array< std::array< uint32_t, 256>, 16>, 21> Tyboxes;
-	std::array< std::array< uint8_t,  256>, 16> TboxesLast;
-	std::array< std::array< std::array< uint32_t, 256>, 16>, 21> MBL;
+	wbaes_vbase() {}
+	virtual ~wbaes_vbase() {}
+	
+	virtual void setXor(int r, int n, int i, int j, uint8_t v) = 0;
+	virtual void setTyboxes(int r, int i, int x, uint32_t v) = 0;
+	virtual void setTboxesLast(int i, int x, uint8_t v) = 0;
+	virtual void setMBL(int r, int i, int x, uint32_t v) = 0;
+
+	virtual void write_xor(std::ofstream& out) = 0;
+	virtual void write_tyboxes(std::ofstream& out) = 0;
+	virtual void write_tboxesLast(std::ofstream& out) = 0;
+	virtual void write_mbl(std::ofstream& out) = 0;
+};
+
+template <int NR, int NK>
+class wbaes_base : public wbaes_vbase
+{
+public:
+
+	std::array< std::array< std::array< std::array<uint8_t, 16>, 16>, 96>, NR-1> 	Xor;
+	std::array< std::array< std::array< uint32_t, 256>, 16>, NR-1> 					Tyboxes;
+	std::array< std::array< uint8_t,  256>, 16> 									TboxesLast;
+	std::array< std::array< std::array< uint32_t, 256>, 16>, NR-1> 					MBL;
+
+	virtual void setXor(int r, int n, int i, int j, uint8_t v) override {Xor[r][n][i][j] = v;}
+	virtual void setTyboxes(int r, int i, int x, uint32_t v) override {Tyboxes[r][i][x] = v;}
+	virtual void setTboxesLast(int i, int x, uint8_t v) override {TboxesLast[i][x] = v;}
+	virtual void setMBL(int r, int i, int x, uint32_t v) override  {MBL[r][i][x]=v;}
+
+	virtual void write_xor(std::ofstream& ofd) override  {ofd << bits(Xor);}
+	virtual void write_tyboxes(std::ofstream& ofd) override {ofd << bits(Tyboxes);}
+	virtual void write_tboxesLast(std::ofstream& ofd) override {ofd << bits(TboxesLast);}
+	virtual void write_mbl(std::ofstream& ofd) override {ofd << bits(MBL);}
+
+	wbaes_base() {}
+	virtual ~wbaes_base() {}
+	
+	constexpr int getNr() {return NR;}
+	constexpr int getNk() {return NK;}
+	constexpr int get_get_length() {return NK*4;}
 
 	void ShiftRows(uint8_t state[16])
 	{
@@ -51,8 +85,8 @@ public:
 	  // Perform the necessary number of rounds. The round key is added first.
 	  // The last round does not perform the MixColumns step.
 
-	  std::cout << "Cipher Nr: " << Nr << std::endl;
-	  for (int r = 0; r < Nr-1; r++) {
+	  std::cout << "Cipher Nr: " << getNr() << std::endl;
+	  for (int r = 0; r < getNr()-1; r++) {
 		ShiftRows(in);
 
 		// Using T-boxes + Ty(i) Tables (single step):
@@ -126,7 +160,6 @@ public:
 	  for (int i = 0; i < 16; i++)
 		in[i] = TboxesLast[i][in[i]];
 	}
-
 
 	void aes_whitebox_encrypt_cfb(const uint8_t iv[16], const uint8_t* m, size_t len, uint8_t* c)
 	 {
@@ -204,22 +237,100 @@ public:
 		size_t len, uint8_t* m) {
 	  aes_whitebox_encrypt_ctr(nonce, c, len, m);
 	}
+};
+
+class wbaes512 : public wbaes_base<22, 16>
+{
+public:
+	wbaes512() {}
+	~wbaes512() {}
+	
+	int Nr = getNr(); // 22;
+	int Nk = getNk(); // 16;
 
 }; // class wbaes512
 
+class wbaes1024 : public wbaes_base<38, 32>
+{
+public:
+	wbaes1024() {}
+	~wbaes1024() {}
+	
+	int Nr = getNr();
+	int Nk = getNk();
+};
+
+class wbaes2048 : public wbaes_base<70, 64>
+{
+public:
+	wbaes2048() {}
+	~wbaes2048() {}
+	
+	int Nr = getNr();
+	int Nk = getNk();
+};
+
+class wbaes4096 : public wbaes_base<134, 128>
+{
+public:
+	wbaes4096() {}
+	~wbaes4096() {}
+	
+	int Nr = getNr();
+	int Nk = getNk();
+};
 
 class wbaes_mgr
 {
 public:
-	std::string aes_name; // aes512
+	~wbaes_mgr()
+	{
+		// delete...
+	}
+
+	wbaes_vbase* get_aes()
+	{
+		if (strcmp(aes_name.data(), "aes512") == 0) {
+			return i512;
+		}
+		else if (strcmp(aes_name.data(), "aes1024") == 0) {
+			return i1024;
+		}
+		else if (strcmp(aes_name.data(), "aes2048") == 0) {
+			return i2048;
+		}
+		else if (strcmp(aes_name.data(), "aes4096") == 0) {
+			return i4096;
+		}
+		return nullptr;
+	}
+
+	std::string aes_name;
 	std::string table_keyname;
 	int Nk = 0;
 	int Nr = 0;
 	bool table_loaded = false;
 
-	wbaes512 a512;
+	wbaes512*  i512;
+	wbaes1024* i1024;
+	wbaes2048* i2048;
+	wbaes4096* i4096;
+
+	wbaes512&  a512;
+	wbaes1024& a1024;
+	wbaes2048& a2048;
+	wbaes4096& a4096;
 
 	wbaes_mgr(const std::string& aesname, const std::string& pathtbl, const std::string& tablekeyname, bool verbose = false)
+	:
+		i512 (new wbaes512()),
+		i1024(new wbaes1024()),
+		i2048(new wbaes2048()),
+		i4096(new wbaes4096()),
+		a512(*i512),
+		a1024(*i1024),
+		a2048(*i2048),
+		a4096(*i4096)
 	{
 		aes_name = aesname;
 		table_keyname = tablekeyname;
@@ -255,17 +366,21 @@ public:
 	bool load_tables(const std::string& pathtbl, bool verbose = false)
 	{
 		bool r = true;
-		if (aes_name == std::string("aes512"))
+
 		{
-			if (verbose) std::cout << "loading aes512... " << table_keyname << std::endl;
+			if (verbose) std::cout << "loading " << aes_name  + " "  << table_keyname << std::endl;
 			{
-				std::string filename = pathtbl + "aes512_" + table_keyname + "_xor.tbl";
+				std::string filename = pathtbl + aes_name + "_" + table_keyname + "_xor.tbl";
 				if (verbose) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
 				if (ifd.bad() == false)
 				{
-					ifd >> bits(a512.Xor);
+					if      (aes_name == std::string("aes512" )) ifd >> bits(a512.Xor);
+					else if (aes_name == std::string("aes1024")) ifd >> bits(a1024.Xor);
+					else if (aes_name == std::string("aes2048")) ifd >> bits(a2048.Xor);
+					else if (aes_name == std::string("aes4096")) ifd >> bits(a4096.Xor);
+
 					ifd.close();
 					if (verbose)
 					{
@@ -277,7 +392,12 @@ public:
 							  for (int i = 0; i < 2; i++) {
 								std::cout << "      { ";
 								for (int j = 0; j < 2; j++)
-								  std::cout <<  (int)a512.Xor[r][n][i][j];
+								{
+									if      (aes_name == std::string("aes512" )) std::cout <<  (int)a512.Xor[r][n][i][j];
+									else if (aes_name == std::string("aes1024")) std::cout <<  (int)a1024.Xor[r][n][i][j];
+									else if (aes_name == std::string("aes2048")) std::cout <<  (int)a2048.Xor[r][n][i][j];
+									else if (aes_name == std::string("aes4096")) std::cout <<  (int)a4096.Xor[r][n][i][j];
+								 }
 								std::cout << "},\n";
 							  }
 							  std::cout <<  "    },\n";
@@ -297,13 +417,17 @@ public:
 
 			if (r)
 			{
-				std::string filename = pathtbl + "aes512_" + table_keyname + "_tboxesLast.tbl";
+				std::string filename = pathtbl + aes_name + "_"  + table_keyname + "_tboxesLast.tbl";
 				if (verbose) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
 				if (ifd.bad() == false)
 				{
-					ifd >> bits(a512.TboxesLast);
+					if      (aes_name == std::string("aes512" )) ifd >> bits(a512.TboxesLast);
+					else if (aes_name == std::string("aes1024")) ifd >> bits(a1024.TboxesLast);
+					else if (aes_name == std::string("aes2048")) ifd >> bits(a2048.TboxesLast);
+					else if (aes_name == std::string("aes4096")) ifd >> bits(a4096.TboxesLast);
+
 					ifd.close();
 					if (verbose) std::cout << "ok " << filename << std::endl;
 				}
@@ -317,13 +441,17 @@ public:
 
 			if (r)
 			{
-				std::string filename = pathtbl + "aes512_" + table_keyname + "_tyboxes.tbl";
+				std::string filename = pathtbl + aes_name + "_"  + table_keyname + "_tyboxes.tbl";
 				if (verbose) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
 				if (ifd.bad() == false)
 				{
-					ifd >> bits(a512.Tyboxes);
+					if      (aes_name == std::string("aes512" )) ifd >> bits(a512.Tyboxes);
+					else if (aes_name == std::string("aes1024")) ifd >> bits(a1024.Tyboxes);
+					else if (aes_name == std::string("aes2048")) ifd >> bits(a2048.Tyboxes);
+					else if (aes_name == std::string("aes4096")) ifd >> bits(a4096.Tyboxes);
+
 					ifd.close();
 					if (verbose) std::cout << "ok " << filename << std::endl;
 				}
@@ -337,13 +465,17 @@ public:
 
 			if (r)
 			{
-				std::string filename = pathtbl + "aes512_" + table_keyname + "_mbl.tbl";
+				std::string filename = pathtbl + aes_name + "_"  + table_keyname + "_mbl.tbl";
 				if (verbose) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
 				if (ifd.bad() == false)
 				{
-					ifd >> bits(a512.MBL);
+					if      (aes_name == std::string("aes512" )) ifd >> bits(a512.MBL);
+					else if (aes_name == std::string("aes1024")) ifd >> bits(a1024.MBL);
+					else if (aes_name == std::string("aes2048")) ifd >> bits(a2048.MBL);
+					else if (aes_name == std::string("aes4096")) ifd >> bits(a4096.MBL);
+
 					ifd.close();
 					if (verbose) std::cout << "ok " << filename << std::endl;
 				}
