@@ -137,6 +137,13 @@ Recursive RSA (and Elliptic Curve):
 Planned feature: WhiteBox (against compromise environment) AES
 ![Alt text](/Doc/wbaes.png?raw=true "wbaes")
 
+There are two practical methods to mitigate code lifting attacks:
+<pre>
+1.external encodings
+2.large size of implementation which is beyond an attacker's processing capacity to copy and
+distribute the software's functionality (so use many private big table keys like AES 4096)
+</pre>
+
 Example of urls.txt:
 <pre>
 ;------------------------------------------------------------------------------------------------------------
