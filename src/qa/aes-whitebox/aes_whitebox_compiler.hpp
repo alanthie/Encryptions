@@ -1,22 +1,30 @@
-// Copyright 2019 AES WBC Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+#ifndef _INCLUDES_aes_whitebox_compiler_HPP
+#define _INCLUDES_aes_whitebox_compiler_HPP
 
 #include "../../base_const.hpp"
+#include "../../c_plus_plus_serializer.h"
+//-lntl -lpthread -lgmp
 
 #ifdef _WIN32
 #else
-#ifdef HAS_WHITEBOX_AES_FEATURE 
+#ifdef HAS_WHITEBOX_AES_FEATURE
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
+#include <array>
 
 #include <NTL/mat_GF2.h>
 #include "aes_private.h"
 
-namespace {
+namespace WBAES {
+
+std::array< std::array< std::array< std::array<uint8_t, 16>, 16>, 96>, 21> aes512Xor;
+std::array< std::array< std::array< uint32_t, 256>, 16>, 21> aes512Tyboxes;
+std::array< std::array< uint8_t, 256>, 16> aes512TboxesLast;
+std::array< std::array< std::array< uint32_t, 256>, 16>, 21> aes512MBL;
+
 
 void err_quit(const char *fmt, ...) {
   va_list ap;
@@ -199,7 +207,7 @@ void CalculateTyBoxes(uint32_t roundKey[],
     }
 
     // When applying MB and inv(MB), the operation is quite easy; there is no
-    // need to safeguard the existing table, as it is a simple substitution. 
+    // need to safeguard the existing table, as it is a simple substitution.
     for (int r = 0; r < Nr-1; r++) {
       for (int x = 0; x < 256; x++) {
         for (int i = 0; i < 16; i++) {
@@ -222,7 +230,7 @@ void CalculateTyBoxes(uint32_t roundKey[],
     // non-linear substitutions, the original table has to be copied before
     // being updated.
     for (int r = 0; r < Nr-1; r++) {
-      
+
       if (r > 0) {
         // Rounds 1 to Nr-1 are reversed here.
         for (int i = 0; i < 16; i++) {
@@ -233,7 +241,7 @@ void CalculateTyBoxes(uint32_t roundKey[],
             Tyboxes[r][i][x] = oldTyboxes[mul<uint8_t>(NTL::inv(L[r-1][i]), x)];
         }
       }
-  
+
       // Apply the L transformation at each round.
       for (int j = 0; j < 4; ++j) {
         for (int x = 0; x < 256; x++) {
@@ -241,22 +249,22 @@ void CalculateTyBoxes(uint32_t roundKey[],
           uint32_t out1 = MBL[r][j*4 + 1][x];
           uint32_t out2 = MBL[r][j*4 + 2][x];
           uint32_t out3 = MBL[r][j*4 + 3][x];
-  
+
           MBL[r][j*4 + 0][x] = (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 0]], out0 >> 24) << 24)
                              | (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 1]], out0 >> 16) << 16)
                              | (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 2]], out0 >>  8) <<  8)
                              | (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 3]], out0 >>  0) <<  0);
-  
+
           MBL[r][j*4 + 1][x] = (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 0]], out1 >> 24) << 24)
                              | (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 1]], out1 >> 16) << 16)
                              | (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 2]], out1 >>  8) <<  8)
                              | (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 3]], out1 >>  0) <<  0);
-  
+
           MBL[r][j*4 + 2][x] = (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 0]], out2 >> 24) << 24)
                              | (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 1]], out2 >> 16) << 16)
                              | (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 2]], out2 >>  8) <<  8)
                              | (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 3]], out2 >>  0) <<  0);
-  
+
           MBL[r][j*4 + 3][x] = (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 0]], out3 >> 24) << 24)
                              | (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 1]], out3 >> 16) << 16)
                              | (mul<uint8_t>(L[r][InvShiftRowsTab[j*4 + 2]], out3 >>  8) <<  8)
@@ -264,7 +272,7 @@ void CalculateTyBoxes(uint32_t roundKey[],
         }
       }
     }
-  
+
     // The last and final round 9 is reversed here.
     for (int i = 0; i < 16; i++) {
       uint8_t oldTboxesLast[256];
@@ -276,13 +284,17 @@ void CalculateTyBoxes(uint32_t roundKey[],
   }
 }
 
-void GenerateXorTable(FILE* out, int Nr) {
+void GenerateXorTable(FILE* out, int Nr)
+{
   uint8_t Xor[Nr-1][96][16][16];
   for (int r = 0; r < Nr-1; r++)
     for (int n = 0; n < 96; n++)
       for (int i = 0; i < 16; i++)
         for (int j = 0; j < 16; j++)
+		{
           Xor[r][n][i][j] = i ^ j;
+		  aes512Xor[r][n][i][j] = Xor[r][n][i][j];
+		}
 
   fprintf(out, "constexpr uint8_t Xor[%d][96][16][16] = {\n", Nr-1);
   for (int r = 0; r < Nr-1; r++) {
@@ -309,6 +321,13 @@ void GenerateEncryptingTables(FILE* out, uint32_t* roundKey, int Nr) {
 
   CalculateTyBoxes(roundKey, Tyboxes, TboxesLast, MBL, true, true, Nr);
 
+  	for (int r = 0; r < Nr-1; r++)
+  	for (int i = 0; i < 16; i++)
+  	for (int x = 0; x < 256; x++)
+	{
+	  aes512Tyboxes[r][i][x] = Tyboxes[r][i][x];
+	}
+
   fprintf(out, "constexpr uint32_t Tyboxes[%d][16][256] = {\n", Nr-1);
   for (int r = 0; r < Nr-1; r++) {
     fprintf(out, "  {\n");
@@ -331,6 +350,12 @@ void GenerateEncryptingTables(FILE* out, uint32_t* roundKey, int Nr) {
   }
   fprintf(out, "};\n\n");
 
+  	for (int i = 0; i < 16; i++)
+  	for (int x = 0; x < 256; x++)
+	{
+        aes512TboxesLast[i][x] = TboxesLast[i][x];
+	}
+
   fprintf(out, "constexpr uint8_t TboxesLast[16][256] = {\n");
   for (int i = 0; i < 16; i++) {
     fprintf(out, "  {\n");
@@ -346,6 +371,13 @@ void GenerateEncryptingTables(FILE* out, uint32_t* roundKey, int Nr) {
     fprintf(out, "  },\n");
   }
   fprintf(out, "};\n\n");
+
+	for (int r = 0; r < Nr-1; r++)
+  	for (int i = 0; i < 16; i++)
+  	for (int x = 0; x < 256; x++)
+	{
+	  aes512MBL[r][i][x] = MBL[r][i][x];
+	}
 
   fprintf(out, "constexpr uint32_t MBL[%d][16][256] = {\n", Nr-1);
   for (int r = 0; r < Nr-1; r++) {
@@ -400,41 +432,142 @@ void syntax() {
   err_quit("Syntax: aes_whitebox_gen <aes128|aes192|aes256> <hex-key>");
 }
 
-}  // namespace
 
-int main(int argc, char* argv[]) {
-  int Nk = 0, Nr = 0;
-
-  if (argc != 3) {
-    syntax();
-  } else if (strcmp(argv[1], "aes128") == 0) {
-    Nk = 4, Nr = 10;
-  } else if (strcmp(argv[1], "aes192") == 0) {
-    Nk = 6, Nr = 12;
-  } else if (strcmp(argv[1], "aes256") == 0) {
-    Nk = 8, Nr = 14;
-  } else if (strcmp(argv[1], "aes512") == 0) {
-    Nk = 16, Nr = 22;
-  } else if (strcmp(argv[1], "aes1024") == 0) {
-    Nk = 32, Nr = 38;
-  } else if (strcmp(argv[1], "aes2048") == 0) {
-    Nk = 64, Nr = 70;
-  } else if (strcmp(argv[1], "aes4096") == 0) {
-    Nk = 128, Nr = 134;
-  } else {
-    syntax();
-  }
-
-	if (strcmp(argv[1], "aes512") == 0)
+int gen_aes(const std::string& aes, const std::string& pathtbl, bool verbose = false)
+{
+	int r = 0;
+	int Nk = 0, Nr = 0;
+	if (aes == std::string("aes512"))
 	{
-		char k[4*Nk*2] = "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4";
+        std::cout << "gen_aes " << aes << std::endl;
+
+		Nk = 16;
+		Nr = 22;
+		char k[4*Nk*2+10] = "313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4";
 		GenerateTables(k, Nk, Nr);
+
+		{
+			std::string filename = pathtbl + "aes512_name1_xor.tbl";
+			if (verbose) std::cout << "gen_aes to " << filename << std::endl;
+
+			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
+			if (ofd.bad() == false)
+			{
+				ofd << bits(aes512Xor);
+
+				if (verbose)
+				{
+					std::cout << "ok " << filename << std::endl;
+					for (int r = 0; r < 2; r++) {
+						std::cout << "  {\n";
+						for (int n = 0; n < 5; n++) {
+						  std::cout << "    {\n";
+						  for (int i = 0; i < 2; i++) {
+							std::cout << "      { ";
+							for (int j = 0; j < 16; j++)
+							  std::cout <<  (int)aes512Xor[r][n][i][j];
+							std::cout << "},\n";
+						  }
+						  std::cout <<  "    },\n";
+						}
+						std::cout <<  "  },\n";
+					  }
+					 std::cout << "};\n\n";
+				}
+			}
+			else
+			{
+				r = -1;
+				std::cerr << "ERROR writing " << filename << std::endl;
+			}
+			ofd.close();
+
+			if (verbose) std::cout << "reading " << filename << std::endl;
+			std::array< std::array< std::array< std::array<uint8_t, 16>, 16>, 96>, 21> bXor;
+			std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
+			if (ifd.bad() == false)
+			{
+				ifd >> bits(bXor);
+			}
+			else
+			{
+				r = -1;
+				std::cerr << "ERROR reading " << filename << std::endl;
+			}
+			ifd.close();
+
+			bool ok = true;
+			for (int r = 0; r < Nr-1; r++)
+			for (int n = 0; n < 96; n++)
+			for (int i = 0; i < 16; i++)
+			for (int j = 0; j < 16; j++)
+			{
+			  if (aes512Xor[r][n][i][j] != bXor[r][n][i][j])
+			  {
+					std::cerr << "ERROR not same  " << r << n << i << j << std::endl;
+					ok = false;
+					break;
+			  }
+			}
+			if (verbose)  if (ok) std::cout << "same  "  << std::endl;
+		}
+
+		{
+			std::string filename = pathtbl + "aes512_name1_tyboxes.tbl";
+			if (verbose)  std::cout << "gen_aes to " << filename << std::endl;
+
+			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
+			if (ofd.bad() == false)
+			{
+				ofd << bits(aes512Tyboxes);
+			}
+			else
+			{
+				r = -1;
+				std::cerr << "ERROR writing " << filename << std::endl;
+			}
+			ofd.close();
+		}
+		{
+			std::string filename = pathtbl + "aes512_name1_tboxesLast.tbl";
+			if (verbose)  std::cout << "gen_aes to " << filename << std::endl;
+
+			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
+			if (ofd.bad() == false)
+			{
+				ofd << bits(aes512TboxesLast);
+			}
+			else
+			{
+				r = -1;
+				std::cerr << "ERROR writing " << filename << std::endl;
+			}
+			ofd.close();
+		}
+		{
+			std::string filename = pathtbl + "aes512_name1_mbl.tbl";
+			if (verbose)  std::cout << "gen_aes to " << filename << std::endl;
+
+			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
+			if (ofd.bad() == false)
+			{
+				ofd << bits(aes512MBL);
+			}
+			else
+			{
+				r = -1;
+				std::cerr << "ERROR writing " << filename << std::endl;
+			}
+			ofd.close();
+		}
 	}
-  	else 
-		GenerateTables(argv[2], Nk, Nr);
-  return 0;
+	return r;
 }
 
+}  // namespace
+
+
+#endif
 #endif
 #endif
 

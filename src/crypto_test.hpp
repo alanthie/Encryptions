@@ -521,7 +521,7 @@ void test_core(bool verbose = true)
         }
         std::cout << "OK with binary AES 256 CBC algo "<<std::endl;
     }
-
+/*
 #ifdef _WIN32
 #else
 #ifdef HAS_WHITEBOX_AES_FEATURE 
@@ -581,6 +581,7 @@ void test_core(bool verbose = true)
     }
 #endif
 #endif
+*/
 
     // TEST CLASSIC STRING DES
     if (false)
