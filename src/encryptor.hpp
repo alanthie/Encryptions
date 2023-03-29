@@ -475,7 +475,7 @@ public:
         }
 		else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096))
 		{
-            std::cerr << "is_wbaes 1 " << std::endl;
+            
 		}
         else if (is_histo)
         {
@@ -835,7 +835,6 @@ public:
             }
             else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)  )
 			{
-                std::cout << "is_wbaes 2"  << " "<<  std::endl;
 				pointer_datafile = &no_key;
 			}
 			else if (is_local == false)
@@ -939,7 +938,6 @@ public:
 
 				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096))
 				{
-					std::cout << "vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes " << std::endl;
 					if (is_wbaes512) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes512;
 					else if (is_wbaes1024) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes1024;
 					else if (is_wbaes2048) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048;
@@ -1285,24 +1283,18 @@ public:
 		size_t n = data_temp.buffer.size();
 		uint8_t* DATAOUT = new uint8_t[n];
 
-//		for(size_t j = 0; j < n; j++)
-//		{
-//			c = data_temp.buffer.getdata()[j];
-//			DATAOUT[j] = (uint8_t)c;
-//		}
-
         const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
 
-        std::cout << "AES in message: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
-		std::cout <<std::endl;
+        if (verbose) std::cout << "AES in message: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
+		if (verbose) std::cout <<std::endl;
 
 		paes->aes_whitebox_encrypt_cfb(iv, (uint8_t*)&data_temp.buffer.getdata()[0], n, DATAOUT);
         data_temp_next.buffer.write((char*)&DATAOUT[0], (uint32_t)n, -1);
 
-		std::cout << "AES encrypt: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
-		std::cout <<std::endl;
+		if (verbose) std::cout << "AES encrypt: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
+		if (verbose) std::cout <<std::endl;
 
 		delete []DATAOUT;
 		return r;
@@ -1343,24 +1335,18 @@ public:
 		size_t n = data_temp.buffer.size();
 		uint8_t* DATAOUT = new uint8_t[n];
 
-		//for(size_t j = 0; j < n; j++)
-		//{
-		//	c = data_temp.buffer.getdata()[j];
-		//	DATAOUT[j] = (uint8_t)c;
-		//}
-
         const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
 
-		std::cout << "AES in message: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
-		std::cout <<std::endl;
+		if (verbose) std::cout << "AES in message: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
+		if (verbose) std::cout <<std::endl;
 
 		paes->aes_whitebox_encrypt_cfb(iv, (uint8_t*)&data_temp.buffer.getdata()[0], n, DATAOUT);
         data_temp_next.buffer.write((char*)&DATAOUT[0], (uint32_t)n, -1);
 
-		std::cout << "AES encrypt: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
-		std::cout <<std::endl;
+		if (verbose) std::cout << "AES encrypt: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
+		if (verbose) std::cout <<std::endl;
 
 		delete []DATAOUT;
 		return r;
@@ -1401,24 +1387,18 @@ public:
 		size_t n = data_temp.buffer.size();
 		uint8_t* DATAOUT = new uint8_t[n];
 
-//		for(size_t j = 0; j < n; j++)
-//		{
-//			c = data_temp.buffer.getdata()[j];
-//			DATAOUT[j] = (uint8_t)c;
-//		}
-
         const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
 
-        std::cout << "AES in message: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
-		std::cout <<std::endl;
+        if (verbose) std::cout << "AES in message: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
+		if (verbose) std::cout <<std::endl;
 
 		paes->aes_whitebox_encrypt_cfb(iv, (uint8_t*)&data_temp.buffer.getdata()[0], n, DATAOUT);
         data_temp_next.buffer.write((char*)&DATAOUT[0], (uint32_t)n, -1);
 
-		std::cout << "AES encrypt: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
-		std::cout <<std::endl;
+		if (verbose) std::cout << "AES encrypt: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
+		if (verbose) std::cout <<std::endl;
 
 		delete []DATAOUT;
 		return r;
@@ -1459,24 +1439,18 @@ public:
 		size_t n = data_temp.buffer.size();
 		uint8_t* DATAOUT = new uint8_t[n];
 
-//		for(size_t j = 0; j < n; j++)
-//		{
-//			c = data_temp.buffer.getdata()[j];
-//			DATAOUT[j] = (uint8_t)c;
-//		}
-
         const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
 
-        std::cout << "AES in message: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
-		std::cout <<std::endl;
+        if (verbose) std::cout << "AES in message: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
+		if (verbose) std::cout <<std::endl;
 
 		paes->aes_whitebox_encrypt_cfb(iv, (uint8_t*)&data_temp.buffer.getdata()[0], n, DATAOUT);
         data_temp_next.buffer.write((char*)&DATAOUT[0], (uint32_t)n, -1);
 
-		std::cout << "AES encrypt: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
-		std::cout <<std::endl;
+		if (verbose) std::cout << "AES encrypt: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
+		if (verbose) std::cout <<std::endl;
 
 		delete []DATAOUT;
 		return r;
@@ -1965,8 +1939,6 @@ public:
 	{
 		bool r = true;
 
-		std::cout << "ENCODE " <<  iter << " " << crypto_algo << " " << keyname <<  std::endl;
-
 		if (crypto_flags & 1)
 		{
 			cryptoshuffle sh(verbose);
@@ -2013,29 +1985,21 @@ public:
 			if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes512)
             {
 			    std::string keyfolder = wbaes_other_public_path;
-
-				std::cerr << "aes512 keyname " << keyname << std::endl;
 				return encode_wbaes512(data_temp, keyname, keyfolder, data_temp_next);
 			}
             else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes1024)
             {
 			    std::string keyfolder = wbaes_other_public_path;
-
-				std::cerr << "aes1024 keyname " << keyname << std::endl;
 				return encode_wbaes1024(data_temp, keyname, keyfolder, data_temp_next);
 			}
 			else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048)
             {
 			    std::string keyfolder = wbaes_other_public_path;
-
-				std::cerr << "aes2048 keyname " << keyname << std::endl;
 				return encode_wbaes2048(data_temp, keyname, keyfolder, data_temp_next);
 			}
 			else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096)
             {
 			    std::string keyfolder = wbaes_other_public_path;
-
-				std::cerr << "aes4096 keyname " << keyname << std::endl;
 				return encode_wbaes4096(data_temp, keyname, keyfolder, data_temp_next);
 			}
             else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH)

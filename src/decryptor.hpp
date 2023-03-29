@@ -460,7 +460,6 @@ public:
             }
 			else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096))
 			{
-				std::cerr << "is_wbaes 1 " << std::endl;
 			}
             else if (is_histo)
             {
@@ -797,7 +796,6 @@ public:
             }
 			else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)  )
 			{
-                std::cout << "is_wbaes 2"  << " "<<  std::endl;
 				pointer_datafile = &no_key;
 			}
             else if (is_histo)
@@ -1270,16 +1268,16 @@ public:
 		uint8_t* DATAOUT = new uint8_t[n];
         const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
 
-		std::cout << "AES in message: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_encrypted.buffer.getdata()[i];
-		std::cout <<std::endl;
+		if (verbose) std::cout << "AES in message: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_encrypted.buffer.getdata()[i];
+		if (verbose) std::cout <<std::endl;
 		
 		paes->aes_whitebox_decrypt_cfb(iv, (uint8_t*)&data_encrypted.buffer.getdata()[0], n, DATAOUT);
         data_decrypted.buffer.write((char*)&DATAOUT[0], (uint32_t)n, -1);
 
-		std::cout << "AES decrypt: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
-		std::cout <<std::endl;
+		if (verbose) std::cout << "AES decrypt: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
+		if (verbose) std::cout <<std::endl;
 
 		delete []DATAOUT;
 		return r;
@@ -1317,23 +1315,18 @@ public:
 
 		size_t n = data_encrypted.buffer.size();
 		uint8_t* DATAOUT = new uint8_t[n];
-		//for(size_t j = 0; j < n; j++)
-		//{
-		//	c = data_encrypted.buffer.getdata()[j];
-		//	DATAOUT[j] = (uint8_t)c;
-		//}
         const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
 
-		std::cout << "AES in message: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_encrypted.buffer.getdata()[i];
-		std::cout <<std::endl;
+		if (verbose) std::cout << "AES in message: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_encrypted.buffer.getdata()[i];
+		if (verbose) std::cout <<std::endl;
 		
 		paes->aes_whitebox_decrypt_cfb(iv, (uint8_t*)&data_encrypted.buffer.getdata()[0], n, DATAOUT);
         data_decrypted.buffer.write((char*)&DATAOUT[0], (uint32_t)n, -1);
 
-		std::cout << "AES decrypt: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
-		std::cout <<std::endl;
+		if (verbose) std::cout << "AES decrypt: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
+		if (verbose) std::cout <<std::endl;
 		
 		delete []DATAOUT;
 		return r;
@@ -1373,16 +1366,16 @@ public:
 		uint8_t* DATAOUT = new uint8_t[n];
         const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
 
-		std::cout << "AES in message: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_encrypted.buffer.getdata()[i];
-		std::cout <<std::endl;
+		if (verbose) std::cout << "AES in message: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_encrypted.buffer.getdata()[i];
+		if (verbose) std::cout <<std::endl;
 		
 		paes->aes_whitebox_decrypt_cfb(iv, (uint8_t*)&data_encrypted.buffer.getdata()[0], n, DATAOUT);
         data_decrypted.buffer.write((char*)&DATAOUT[0], (uint32_t)n, -1);
 
-		std::cout << "AES decrypt: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
-		std::cout <<std::endl;
+		if (verbose) std::cout << "AES decrypt: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
+		if (verbose) std::cout <<std::endl;
 
 		delete []DATAOUT;
 		return r;
@@ -1422,16 +1415,16 @@ public:
 		uint8_t* DATAOUT = new uint8_t[n];
         const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
 
-		std::cout << "AES in message: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_encrypted.buffer.getdata()[i];
-		std::cout <<std::endl;
+		if (verbose) std::cout << "AES in message: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_encrypted.buffer.getdata()[i];
+		if (verbose) std::cout <<std::endl;
 		
 		paes->aes_whitebox_decrypt_cfb(iv, (uint8_t*)&data_encrypted.buffer.getdata()[0], n, DATAOUT);
         data_decrypted.buffer.write((char*)&DATAOUT[0], (uint32_t)n, -1);
 
-		std::cout << "AES decrypt: ";
-		for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
-		std::cout <<std::endl;
+		if (verbose) std::cout << "AES decrypt: ";
+		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
+		if (verbose) std::cout <<std::endl;
 
 		delete []DATAOUT;
 		return r;
