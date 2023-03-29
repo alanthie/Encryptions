@@ -278,7 +278,7 @@ std::string generate_base64_random_string(long long N)
                 n = gen() % LIM;
 
             digit = (int)(n % 64);
-            if ((i==0) && (BASEDIGIT64[i]=='0')) digit = 1;
+            if ((i==0) && (BASEDIGIT64[digit]=='0')) digit = 1;
             r += BASEDIGIT64[digit];
 
             t = (long long)(rd.get_rand() * 3);
@@ -320,6 +320,9 @@ std::string generate_base16_random_string(long long N)
 
     rng::tsc_seed seed;
     rng::rng128 gen(seed());
+	
+	n = (uint32_t)(rd.get_rand() * LIM);
+	n = gen() % LIM;
 
     {
         for(long long i=0;i<N;i++)
@@ -330,7 +333,10 @@ std::string generate_base16_random_string(long long N)
                 n = gen() % LIM;
 
             digit = (int)(n % 16);
-            if ((i==0) && (BASEDIGIT16[i]=='0')) digit = 1;
+            if ((i==0) && (BASEDIGIT16[digit]=='0'))
+			{
+				digit = 1;
+			}
             r += BASEDIGIT16[digit];
 
             t = (long long)(rd.get_rand() * 3);
