@@ -190,6 +190,9 @@ Example of urls.txt:
 [mode]recur;[e]MY_ECCKEY_1024_2023-03-18_12:20:21;[e]MY_ECCKEY_360_2023-03-25_14:33:22
 [e:]last=10,first=1,random=15;[r:]last=10,first=26,random=22;
 [e:]last=10,first=2,random=35;[r:]last=13,first=16,random=13;
+
+;Whitebox AES
+[aes16384]z_20230329163702
 </pre>
  
 Example of config file:
