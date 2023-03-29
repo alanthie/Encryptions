@@ -15,7 +15,6 @@
 #else
 #ifdef HAS_WHITEBOX_AES_FEATURE
 #include "qa/aes-whitebox/aes_whitebox.h"
-// aes_whitebox.cc => #include "aes_whitebox_tables.cc"
 #endif
 #endif
 

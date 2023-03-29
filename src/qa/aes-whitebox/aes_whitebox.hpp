@@ -2,13 +2,9 @@
 #define _INCLUDES_aes_whitebox_HPP
 
 #include "../../crypto_const.hpp"
+#include "../../crypto_file.hpp"
 #include "aes_whitebox_base.hpp"
-
-#ifdef _WIN32
-#else
-#ifdef HAS_WHITEBOX_AES_FEATURE
 #include "../../c_plus_plus_serializer.h"
-//-lntl -lpthread -lgmp
 
 namespace WBAES
 {
@@ -40,6 +36,21 @@ public:
 	~wbaes4096() {}
 };
 
+class wbaes8192 : public wbaes_base<262, 256>
+{
+public:
+	wbaes8192() {}
+	~wbaes8192() {}
+};
+
+class wbaes16384 : public wbaes_base<526, 512>
+{
+public:
+	wbaes16384() {}
+	~wbaes16384() {}
+};
+
+
 class wbaes_instance_mgr
 {
 public:
@@ -49,6 +60,8 @@ public:
 		if (i1024 != nullptr) {delete i1024;i1024=nullptr;}
 		if (i2048 != nullptr) {delete i2048;i2048=nullptr;}
 		if (i4096 != nullptr) {delete i4096;i4096=nullptr;}
+		if (i8192 != nullptr) {delete i8192;i8192=nullptr;}
+		if (i16384 != nullptr) {delete i16384;i16384=nullptr;}
 	}
 
 	wbaes_vbase* get_aes()
@@ -73,6 +86,20 @@ public:
 			if (i4096 == nullptr) i4096 = new wbaes4096();
 			return i4096;
 		}
+		else if (strcmp(aes_name.data(), "aes8192") == 0)
+		{
+			if (i8192 == nullptr) i8192 = new wbaes8192();
+			return i8192;
+		}
+		else if (strcmp(aes_name.data(), "aes16384") == 0)
+		{
+			if (i16384 == nullptr) i16384 = new wbaes16384();
+			return i16384;
+		}
+		else
+		{
+			std::cerr << "Name not found " << aes_name << std::endl;
+		}
 		return nullptr;
 	}
 
@@ -87,6 +114,8 @@ public:
 	wbaes1024* i1024 = nullptr;
 	wbaes2048* i2048 = nullptr;
 	wbaes4096* i4096 = nullptr;
+	wbaes8192* i8192 = nullptr;
+	wbaes16384* i16384 = nullptr;
 
 	wbaes_instance_mgr(	const std::string& aesname,
 						const std::string& pathtbl,
@@ -120,6 +149,12 @@ public:
 		else if (strcmp(aes_name.data(), "aes4096") == 0) {
 			Nk = 128, Nr = 134;
 		}
+		else if (strcmp(aes_name.data(), "aes8192") == 0) {
+			Nk = 256, Nr = 262;
+		}
+        else if (strcmp(aes_name.data(), "aes16384") == 0) {
+			Nk = 512, Nr = 526;
+		}
 
 		if (do_loading)
 			table_loaded = load_tables(pathtbl, verbose);
@@ -131,9 +166,17 @@ public:
 		wbaes_vbase* p = get_aes(); // new
 
 		{
-			if (verbose) std::cout << "loading " << aes_name  + " "  << table_keyname << std::endl;
+			if (verbose) std::cout << "loading aes: " << aes_name  + ", keyname: "  << table_keyname << std::endl;
 			{
 				std::string filename = pathtbl + aes_name + "_" + table_keyname + "_xor.tbl";
+
+				if (cryptoAL::fileexists(filename)==false)
+				{
+					std::cerr << "ERROR file not found " << filename << std::endl;
+					r = false;
+					table_error = true;
+					return false;
+				}
 				if (verbose) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
@@ -143,6 +186,8 @@ public:
 					else if (aes_name == std::string("aes1024")) ifd >> bits( ((wbaes1024*)p)->Xor);
 					else if (aes_name == std::string("aes2048")) ifd >> bits( ((wbaes2048*)p)->Xor);
 					else if (aes_name == std::string("aes4096")) ifd >> bits( ((wbaes4096*)p)->Xor);
+					else if (aes_name == std::string("aes8192")) ifd >> bits( ((wbaes8192*)p)->Xor);
+					else if (aes_name == std::string("aes16384")) ifd >> bits( ((wbaes16384*)p)->Xor);
 
 					ifd.close();
 					if (verbose)
@@ -160,6 +205,8 @@ public:
 									else if (aes_name == std::string("aes1024")) std::cout <<  (int)((wbaes1024*)p)->Xor[r][n][i][j];
 									else if (aes_name == std::string("aes2048")) std::cout <<  (int)((wbaes2048*)p)->Xor[r][n][i][j];
 									else if (aes_name == std::string("aes4096")) std::cout <<  (int)((wbaes4096*)p)->Xor[r][n][i][j];
+									else if (aes_name == std::string("aes8192")) std::cout <<  (int)((wbaes8192*)p)->Xor[r][n][i][j];
+									else if (aes_name == std::string("aes16384")) std::cout <<  (int)((wbaes16384*)p)->Xor[r][n][i][j];
 								 }
 								std::cout << "},\n";
 							  }
@@ -182,6 +229,14 @@ public:
 			if (r)
 			{
 				std::string filename = pathtbl + aes_name + "_"  + table_keyname + "_tboxesLast.tbl";
+
+				if (cryptoAL::fileexists(filename)==false)
+				{
+					std::cerr << "ERROR file not found " << filename << std::endl;
+					r = false;
+					table_error = true;
+					return false;
+				}
 				if (verbose) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
@@ -191,6 +246,8 @@ public:
 					else if (aes_name == std::string("aes1024")) ifd >> bits(((wbaes1024*)p)->TboxesLast);
 					else if (aes_name == std::string("aes2048")) ifd >> bits(((wbaes2048*)p)->TboxesLast);
 					else if (aes_name == std::string("aes4096")) ifd >> bits(((wbaes4096*)p)->TboxesLast);
+					else if (aes_name == std::string("aes8192")) ifd >> bits(((wbaes8192*)p)->TboxesLast);
+					else if (aes_name == std::string("aes16384")) ifd >> bits(((wbaes16384*)p)->TboxesLast);
 
 					ifd.close();
 					if (verbose) std::cout << "ok " << filename << std::endl;
@@ -207,6 +264,14 @@ public:
 			if (r)
 			{
 				std::string filename = pathtbl + aes_name + "_"  + table_keyname + "_tyboxes.tbl";
+
+				if (cryptoAL::fileexists(filename)==false)
+				{
+					std::cerr << "ERROR file not found " << filename << std::endl;
+					r = false;
+					table_error = true;
+					return false;
+				}
 				if (verbose) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
@@ -216,6 +281,8 @@ public:
 					else if (aes_name == std::string("aes1024")) ifd >> bits(((wbaes1024*)p)->Tyboxes);
 					else if (aes_name == std::string("aes2048")) ifd >> bits(((wbaes2048*)p)->Tyboxes);
 					else if (aes_name == std::string("aes4096")) ifd >> bits(((wbaes4096*)p)->Tyboxes);
+					else if (aes_name == std::string("aes8192")) ifd >> bits(((wbaes8192*)p)->Tyboxes);
+					else if (aes_name == std::string("aes16384")) ifd >> bits(((wbaes16384*)p)->Tyboxes);
 
 					ifd.close();
 					if (verbose) std::cout << "ok " << filename << std::endl;
@@ -232,6 +299,14 @@ public:
 			if (r)
 			{
 				std::string filename = pathtbl + aes_name + "_"  + table_keyname + "_mbl.tbl";
+
+				if (cryptoAL::fileexists(filename)==false)
+				{
+					std::cerr << "ERROR file not found " << filename << std::endl;
+					r = false;
+					table_error = true;
+					return false;
+				}
 				if (verbose) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
@@ -241,6 +316,8 @@ public:
 					else if (aes_name == std::string("aes1024")) ifd >> bits(((wbaes1024*)p)->MBL);
 					else if (aes_name == std::string("aes2048")) ifd >> bits(((wbaes2048*)p)->MBL);
 					else if (aes_name == std::string("aes4096")) ifd >> bits(((wbaes4096*)p)->MBL);
+					else if (aes_name == std::string("aes8192")) ifd >> bits(((wbaes8192*)p)->MBL);
+					else if (aes_name == std::string("aes16384")) ifd >> bits(((wbaes16384*)p)->MBL);
 
 					ifd.close();
 					if (verbose) std::cout << "ok " << filename << std::endl;
@@ -337,6 +414,4 @@ public:
 
 }  // namespace
 
-#endif
-#endif
 #endif

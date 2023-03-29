@@ -1147,6 +1147,7 @@ namespace keymgr
 						const std::string& folder_my_private_ecc,
 						bool verbose = false)
 	{
+        verbose=verbose;
 		std::vector<std::string> vmapkeyname;
 
 		std::map<std::string, generate_rsa::rsa_key> map_rsa_public;
@@ -1225,7 +1226,7 @@ namespace keymgr
 			{
                 size_t cnt=0;
 				if (n > vmapkeyname.size()) n = vmapkeyname.size();
-				for(size_t i = vmapkeyname.size() - 1; i >= 0; i--)
+				for(long long i = (long long)vmapkeyname.size() - 1; i >= 0; i--)
 				{
                     if (cnt < n)
                     {
@@ -1250,9 +1251,9 @@ namespace keymgr
 			{
 				random_engine rd;
 
-				for(size_t i = 0; i< n; i++)
+				for(long long i = 0; i< (long long)n; i++)
 				{
-					uint32_t t = (uint32_t) (rd.get_rand() * vmapkeyname.size());
+					long long t = (long long) (rd.get_rand() * vmapkeyname.size());
 					if ( (t>=0) && (t < vmapkeyname.size()) )
 					{
 						vkeys_out.push_back(vmapkeyname[t]);

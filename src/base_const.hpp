@@ -10,7 +10,6 @@ namespace cryptoAL
 {
 const bool USE_AUTO_FEATURE = true;
 const bool USE_KEYURL_FEATURE = true;
-#define HAS_WHITEBOX_AES_FEATURE 1;
 
 const std::string BASEDIGIT10 = "0123456789";
 const std::string BASEDIGIT64 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+="; // NOT STANDARD

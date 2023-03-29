@@ -346,6 +346,8 @@ public:
 		else if (strutil::has_token("[aes1024]",  std::string(url), 0)) r = std::string(url).substr(std::string("[aes1024]").size());
 		else if (strutil::has_token("[aes2048]",  std::string(url), 0)) r = std::string(url).substr(std::string("[aes2048]").size());
 		else if (strutil::has_token("[aes4096]",  std::string(url), 0)) r = std::string(url).substr(std::string("[aes4096]").size());
+		else if (strutil::has_token("[aes8192]",  std::string(url), 0)) r = std::string(url).substr(std::string("[aes8192]").size());
+		else if (strutil::has_token("[aes16384]",  std::string(url), 0)) r = std::string(url).substr(std::string("[aes16384]").size());
 		return r;
 	}
 
@@ -377,6 +379,8 @@ public:
 		bool is_wbaes1024 = false;
 		bool is_wbaes2048 = false;
 		bool is_wbaes4096 = false;
+		bool is_wbaes8192 = false;
+		bool is_wbaes16384 = false;
 
 		if (vurlkey[i].url[0]=='[')
 		{
@@ -412,6 +416,8 @@ public:
 			else if (strutil::has_token("[aes1024]",  std::string(vurlkey[i].url), 0)) is_wbaes1024 = true;
 			else if (strutil::has_token("[aes2048]",  std::string(vurlkey[i].url), 0)) is_wbaes2048 = true;
 			else if (strutil::has_token("[aes4096]",  std::string(vurlkey[i].url), 0)) is_wbaes4096 = true;
+			else if (strutil::has_token("[aes8192]",  std::string(vurlkey[i].url), 0)) is_wbaes8192 = true;
+			else if (strutil::has_token("[aes16384]",  std::string(vurlkey[i].url), 0)) is_wbaes16384 = true;
 		}
 
 		int pos_url = 0;
@@ -426,6 +432,8 @@ public:
 		else if (is_wbaes1024)    pos_url = std::string("[aes1024]").size()+2;
 		else if (is_wbaes2048)    pos_url = std::string("[aes2048]").size()+2;
 		else if (is_wbaes4096)    pos_url = std::string("[aes4096]").size()+2;
+		else if (is_wbaes8192)    pos_url = std::string("[aes8192]").size()+2;
+		else if (is_wbaes16384)   pos_url = std::string("[aes16384]").size()+2;
         int rc = 0;
 
         cryptodata dataout_local;
@@ -473,9 +481,9 @@ public:
                 r = false;
             }
         }
-		else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096))
+		else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)|| (is_wbaes8192)|| (is_wbaes16384))
 		{
-            
+
 		}
         else if (is_histo)
         {
@@ -833,7 +841,7 @@ public:
             {
                 pointer_datafile = &histo_key_data;
             }
-            else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)  )
+            else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096) || (is_wbaes8192) || (is_wbaes16384))
 			{
 				pointer_datafile = &no_key;
 			}
@@ -851,7 +859,7 @@ public:
 
 			if (r)
 			{
-				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096) )
+				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096) || (is_wbaes8192) || (is_wbaes16384))
 				{
 				}
 				else
@@ -936,12 +944,14 @@ public:
 					}
 				}
 
-				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096))
+				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)|| (is_wbaes8192) || (is_wbaes16384))
 				{
 					if (is_wbaes512) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes512;
 					else if (is_wbaes1024) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes1024;
 					else if (is_wbaes2048) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048;
 					else if (is_wbaes4096) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096;
+					else if (is_wbaes8192) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192;
+					else if (is_wbaes16384) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384;
 				}
 				else
 				{
@@ -959,7 +969,7 @@ public:
 				if (verbose)
                     std::cout << "crypto_algo: " << vurlkey[i].crypto_algo << std::endl;
 
-				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096))
+				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)|| (is_wbaes8192) || (is_wbaes16384))
 				{
 				}
 				else
@@ -1248,14 +1258,14 @@ public:
 		return r;
 	}
 
-    bool encode_wbaes512(cryptodata& data_temp, const std::string& keyname, const std::string& folder, cryptodata& data_temp_next)
+
+	bool encode_wbaes(cryptodata& data_temp, const std::string& aesname, const std::string& keyname, const std::string& folder, cryptodata& data_temp_next)
 	{
 		bool r = true;
-		char c;
 
 		if (data_temp.buffer.size() == 0)
 		{
-            std::cerr << "ERROR encode_wbaes512 - data size is 0 " << std::endl;
+            std::cerr << "ERROR encode_wbaes - data size is 0 " << aesname << std::endl;
             return false;
         }
 
@@ -1265,18 +1275,17 @@ public:
 		if (verbose)
 		{
             std::cout.flush();
-            std::cout <<    "Encryptor encode() encode_wbaes512                   " <<
+            std::cout <<    "Encryptor encode() encode_wbaes " << aesname <<
                             ", number of rounds : " << nround <<
                             ", block (size)     : " << data_temp.buffer.size() <<
 							", number of blocks : " << nblock <<
                             ", shuffling: " << shufflePerc <<  "%" << std::endl;
         }
 
-		WBAES::wbaes_pool aes_pool;
-		WBAES::wbaes_vbase* paes = aes_pool.get_aes_instance("aes512", keyname, folder, verbose);
+		WBAES::wbaes_vbase* paes = aes_pool.get_aes_instance(aesname, keyname, folder, verbose);
 		if (paes == nullptr)
 		{
-			std::cerr << "ERROR wbaes512 tables not found in " << keyname << " " << folder << std::endl;
+			std::cerr << "ERROR wbaes tables not found in aes: " << aesname << " key: " << keyname << " folder: " << folder << std::endl;
 			return false;
 		}
 
@@ -1286,170 +1295,16 @@ public:
         const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
 
         if (verbose) std::cout << "AES in message: ";
-		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
+		if (verbose) for(size_t i=0;i<16;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
+		if (verbose) std::cout << "...";
 		if (verbose) std::cout <<std::endl;
 
 		paes->aes_whitebox_encrypt_cfb(iv, (uint8_t*)&data_temp.buffer.getdata()[0], n, DATAOUT);
         data_temp_next.buffer.write((char*)&DATAOUT[0], (uint32_t)n, -1);
 
 		if (verbose) std::cout << "AES encrypt: ";
-		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
-		if (verbose) std::cout <<std::endl;
-
-		delete []DATAOUT;
-		return r;
-	}
-
-    bool encode_wbaes1024(cryptodata& data_temp, const std::string& keyname, const std::string& folder, cryptodata& data_temp_next)
-	{
-		bool r = true;
-		char c;
-
-		if (data_temp.buffer.size() == 0)
-		{
-            std::cerr << "ERROR encode_wbaes1024 - data size is 0 " << std::endl;
-            return false;
-        }
-
-		uint32_t nround = 1;
-		uint32_t nblock = 1;
-
-		if (verbose)
-		{
-            std::cout.flush();
-            std::cout <<    "Encryptor encode() encode_wbaes1024                   " <<
-                            ", number of rounds : " << nround <<
-                            ", block (size)     : " << data_temp.buffer.size() <<
-							", number of blocks : " << nblock <<
-                            ", shuffling: " << shufflePerc <<  "%" << std::endl;
-        }
-
-		WBAES::wbaes_pool aes_pool;
-		WBAES::wbaes_vbase* paes = aes_pool.get_aes_instance("aes1024", keyname, folder, verbose);
-		if (paes == nullptr)
-		{
-			std::cerr << "ERROR wbaes1024 tables not found in " << keyname << " " << folder << std::endl;
-			return false;
-		}
-
-		size_t n = data_temp.buffer.size();
-		uint8_t* DATAOUT = new uint8_t[n];
-
-        const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
-
-		if (verbose) std::cout << "AES in message: ";
-		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
-		if (verbose) std::cout <<std::endl;
-
-		paes->aes_whitebox_encrypt_cfb(iv, (uint8_t*)&data_temp.buffer.getdata()[0], n, DATAOUT);
-        data_temp_next.buffer.write((char*)&DATAOUT[0], (uint32_t)n, -1);
-
-		if (verbose) std::cout << "AES encrypt: ";
-		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
-		if (verbose) std::cout <<std::endl;
-
-		delete []DATAOUT;
-		return r;
-	}
-
-	bool encode_wbaes2048(cryptodata& data_temp, const std::string& keyname, const std::string& folder, cryptodata& data_temp_next)
-	{
-		bool r = true;
-		char c;
-
-		if (data_temp.buffer.size() == 0)
-		{
-            std::cerr << "ERROR encode_wbaes2048 - data size is 0 " << std::endl;
-            return false;
-        }
-
-		uint32_t nround = 1;
-		uint32_t nblock = 1;
-
-		if (verbose)
-		{
-            std::cout.flush();
-            std::cout <<    "Encryptor encode() encode_wbaes2048                   " <<
-                            ", number of rounds : " << nround <<
-                            ", block (size)     : " << data_temp.buffer.size() <<
-							", number of blocks : " << nblock <<
-                            ", shuffling: " << shufflePerc <<  "%" << std::endl;
-        }
-
-		WBAES::wbaes_pool aes_pool;
-		WBAES::wbaes_vbase* paes = aes_pool.get_aes_instance("aes2048", keyname, folder, verbose);
-		if (paes == nullptr)
-		{
-			std::cerr << "ERROR wbaes2048 tables not found in " << keyname << " " << folder << std::endl;
-			return false;
-		}
-
-		size_t n = data_temp.buffer.size();
-		uint8_t* DATAOUT = new uint8_t[n];
-
-        const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
-
-        if (verbose) std::cout << "AES in message: ";
-		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
-		if (verbose) std::cout <<std::endl;
-
-		paes->aes_whitebox_encrypt_cfb(iv, (uint8_t*)&data_temp.buffer.getdata()[0], n, DATAOUT);
-        data_temp_next.buffer.write((char*)&DATAOUT[0], (uint32_t)n, -1);
-
-		if (verbose) std::cout << "AES encrypt: ";
-		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
-		if (verbose) std::cout <<std::endl;
-
-		delete []DATAOUT;
-		return r;
-	}
-
-	bool encode_wbaes4096(cryptodata& data_temp, const std::string& keyname, const std::string& folder, cryptodata& data_temp_next)
-	{
-		bool r = true;
-		char c;
-
-		if (data_temp.buffer.size() == 0)
-		{
-            std::cerr << "ERROR encode_wbaes4096 - data size is 0 " << std::endl;
-            return false;
-        }
-
-		uint32_t nround = 1;
-		uint32_t nblock = 1;
-
-		if (verbose)
-		{
-            std::cout.flush();
-            std::cout <<    "Encryptor encode() encode_wbaes4096                   " <<
-                            ", number of rounds : " << nround <<
-                            ", block (size)     : " << data_temp.buffer.size() <<
-							", number of blocks : " << nblock <<
-                            ", shuffling: " << shufflePerc <<  "%" << std::endl;
-        }
-
-		WBAES::wbaes_pool aes_pool;
-		WBAES::wbaes_vbase* paes = aes_pool.get_aes_instance("aes4096", keyname, folder, verbose);
-		if (paes == nullptr)
-		{
-			std::cerr << "ERROR wbaes4096 tables not found in " << keyname << " " << folder << std::endl;
-			return false;
-		}
-
-		size_t n = data_temp.buffer.size();
-		uint8_t* DATAOUT = new uint8_t[n];
-
-        const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
-
-        if (verbose) std::cout << "AES in message: ";
-		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
-		if (verbose) std::cout <<std::endl;
-
-		paes->aes_whitebox_encrypt_cfb(iv, (uint8_t*)&data_temp.buffer.getdata()[0], n, DATAOUT);
-        data_temp_next.buffer.write((char*)&DATAOUT[0], (uint32_t)n, -1);
-
-		if (verbose) std::cout << "AES encrypt: ";
-		if (verbose) for(size_t i=0;i<64;i++) std::cout << (int)(uint8_t)DATAOUT[i];
+		if (verbose) for(size_t i=0;i<16;i++) std::cout << (int)(uint8_t)DATAOUT[i];
+		if (verbose) std::cout << "...";
 		if (verbose) std::cout <<std::endl;
 
 		delete []DATAOUT;
@@ -1976,7 +1831,9 @@ public:
 					 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes512) &&
 					 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes1024) &&
 					 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048) &&
-					 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096)
+					 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) &&
+					 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192)&&
+                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384)
                      )
             {
                 std::cerr << "WARNING mismatch algo at iter (using default) " <<  iter-1 << std::endl;
@@ -1985,22 +1842,32 @@ public:
 			if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes512)
             {
 			    std::string keyfolder = wbaes_other_public_path;
-				return encode_wbaes512(data_temp, keyname, keyfolder, data_temp_next);
+				return encode_wbaes(data_temp, "aes512", keyname, keyfolder, data_temp_next);
 			}
             else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes1024)
             {
 			    std::string keyfolder = wbaes_other_public_path;
-				return encode_wbaes1024(data_temp, keyname, keyfolder, data_temp_next);
+				return encode_wbaes(data_temp, "aes1024", keyname, keyfolder, data_temp_next);
 			}
 			else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048)
             {
 			    std::string keyfolder = wbaes_other_public_path;
-				return encode_wbaes2048(data_temp, keyname, keyfolder, data_temp_next);
+				return encode_wbaes(data_temp, "aes2048", keyname, keyfolder, data_temp_next);
 			}
 			else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096)
             {
 			    std::string keyfolder = wbaes_other_public_path;
-				return encode_wbaes4096(data_temp, keyname, keyfolder, data_temp_next);
+				return encode_wbaes(data_temp, "aes4096", keyname, keyfolder, data_temp_next);
+			}
+			else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192)
+            {
+			    std::string keyfolder = wbaes_other_public_path;
+				return encode_wbaes(data_temp, "aes8192", keyname, keyfolder, data_temp_next);
+			}
+			else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384)
+            {
+			    std::string keyfolder = wbaes_other_public_path;
+				return encode_wbaes(data_temp, "aes16384", keyname, keyfolder, data_temp_next);
 			}
             else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH)
             {
@@ -2221,18 +2088,47 @@ public:
 
 			if (i==0)
 			{
-                std::string keyname;
                 bool is_aes=false;
+                std::string keyname;
                 if 		(vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes512)  {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
                 else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes1024) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
                 else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
                 else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
+				else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
+				else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
 
                 if (is_aes)
                 {
                     // TODO - overriden...
                     std::cerr << "ERROR " << " whitebox aes cannot be the first key" << std::endl;
                     return false;
+                }
+            }
+            // TODO -No 2 consecutive same key...
+            if (i > 0)
+            {
+                bool is_aes=false;
+                std::string keyname;
+                if 		(vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes512)  {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
+                else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes1024) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
+                else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
+                else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
+				else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
+				else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
+
+                std::string keyname2;
+                bool is_aes2 = false;
+                if 		(vurlkey[i-1].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes512)  {keyname2 = get_keyname_aes(vurlkey[i-1].url);is_aes2=true;}
+                else if (vurlkey[i-1].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes1024) {keyname2 = get_keyname_aes(vurlkey[i-1].url);is_aes2=true;}
+                else if (vurlkey[i-1].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048) {keyname2 = get_keyname_aes(vurlkey[i-1].url);is_aes2=true;}
+                else if (vurlkey[i-1].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) {keyname2 = get_keyname_aes(vurlkey[i-1].url);is_aes2=true;}
+				else if (vurlkey[i-1].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192) {keyname2 = get_keyname_aes(vurlkey[i-1].url);is_aes2=true;}
+				else if (vurlkey[i-1].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384) {keyname2 = get_keyname_aes(vurlkey[i-1].url);is_aes2=true;}
+
+                if (is_aes && is_aes2 && (keyname==keyname2))
+                {
+					if (vurlkey[i-1].crypto_algo == vurlkey[i].crypto_algo)
+                    	std::cerr << "WARNING " << " should not use same aes key consecutively: " << keyname2 << std::endl;
                 }
             }
         }
@@ -2342,6 +2238,8 @@ public:
 			else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes1024) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
 			else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
 			else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
+			else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
+			else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
 
             if ((i==0) && is_aes)
             {
@@ -2544,6 +2442,7 @@ public:
 
 	uint32_t converter = 0; // 1==PNG
 	cryptodata_list datalist;
+	WBAES::wbaes_pool aes_pool;
 
 	bool post_encode(cryptodata& indata, const std::string& filename, cryptodata& out_encrypted_data, std::string& new_output_filename)
 	{

@@ -3,10 +3,6 @@
 
 #include "../../crypto_const.hpp"
 
-#ifdef _WIN32
-#else
-#ifdef HAS_WHITEBOX_AES_FEATURE
-
 namespace WBAES
 {
 
@@ -251,6 +247,4 @@ public:
 
 }  // namespace
 
-#endif
-#endif
 #endif

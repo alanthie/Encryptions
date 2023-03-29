@@ -6,28 +6,28 @@
 #include "../../c_plus_plus_serializer.h"
 
 #ifdef _WIN32
+// need NTL for windows- TODO
 #else
-#ifdef HAS_WHITEBOX_AES_FEATURE
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
 #include <array>
+//Original code: https://github.com/balena/aes-whitebox
 #include <NTL/mat_GF2.h>
 #include "aes_private.h"
 #include "aes_whitebox.hpp"
-//-lntl -lpthread -lgmp
+//LINKER LIB: -lntl -lpthread -lgmp
 
-namespace WBAES {
-
+namespace WBAES
+{
 
 bool read_key(const char *in, uint8_t* key, size_t size)
 {
 	bool r = true;
   	if (strlen(in) != size << 1)
 	{
-    	//err_quit("Invalid key (should be a valid %d-bits hexadecimal string)", (size == 16) ? 128 : ((size == 24) ? 192 : 256));
 		std::cerr << "ERROR invalid key size, need hexadecimal string of size " << (size << 1) << std::endl;
 	}
 	else
@@ -113,10 +113,14 @@ NTL::mat_GF2 GenerateRandomGF2InvertibleMatrix(int dimension) {
 
 // Calculate the T-boxes, which is a combination of the AddRoundKeyAfterShift
 // and the SubBytes functions.
-void CalculateTboxes(const uint32_t roundKey[],
-    uint8_t Tboxes[][16][256], int Nr) {
-  for (int r = 0; r < Nr; r++) {
-    for (int x = 0; x < 256; x++) {
+void CalculateTboxes(   const uint32_t roundKey[],
+                        std::vector<std::vector<std::vector<uint8_t>>>& Tboxes,
+                        int Nr)
+{
+  for (int r = 0; r < Nr; r++)
+  {
+    for (int x = 0; x < 256; x++)
+     {
       uint8_t state[16] = {
         (uint8_t)x, (uint8_t)x, (uint8_t)x, (uint8_t)x,
         (uint8_t)x, (uint8_t)x, (uint8_t)x, (uint8_t)x,
@@ -160,16 +164,28 @@ void CalculateTy(uint8_t Ty[4][256][4]) {
 }
 
 void CalculateTyBoxes(	uint32_t roundKey[],
-						uint32_t Tyboxes[][16][256], uint8_t TboxesLast[16][256],
-						uint32_t MBL[][16][256], bool enableL, bool enableMB, int Nr)
+						std::vector<std::vector<std::vector<uint32_t>>>& Tyboxes, 	//uint32_t Tyboxes[][16][256],
+						uint8_t TboxesLast[16][256],
+						std::vector<std::vector<std::vector<uint32_t>>>& MBL, 		//uint32_t MBL[][16][256],
+						bool enableL,
+						bool enableMB, int Nr)
 {
-  uint8_t Tboxes[Nr][16][256];
-  uint8_t Ty[4][256][4];
+    uint8_t Ty[4][256][4];
 
-  CalculateTboxes(roundKey, Tboxes, Nr);
-  CalculateTy(Ty);
+    //uint8_t Tboxes[Nr][16][256];
+	std::vector<std::vector<std::vector<uint8_t>>>* pTboxes = new std::vector<std::vector<std::vector<uint8_t>>>(Nr);
+	std::vector<std::vector<std::vector<uint8_t>>>& Tboxes = *pTboxes;
+	for(int i=0;i<Nr;i++)
+	{
+        Tboxes[i].resize(16);
+        for(int j=0;j<16;j++)
+            Tboxes[i][j].resize(256);
+	}
 
-  for (int r = 0; r < Nr-1; r++) {
+    CalculateTboxes(roundKey, Tboxes, Nr);
+    CalculateTy(Ty);
+
+    for (int r = 0; r < Nr-1; r++) {
     for (int x = 0; x < 256; x++) {
       for (int j = 0; j < 4; j++) {
         for (int i = 0; i < 4; i++) {
@@ -274,29 +290,74 @@ void CalculateTyBoxes(	uint32_t roundKey[],
         TboxesLast[i][x] = oldTboxesLast[mul<uint8_t>(NTL::inv(L[Nr-2][i]), x)];
     }
   }
+
+  delete pTboxes;
 }
 
-void GenerateXorTable(FILE* out, int Nr, wbaes_vbase* instance_aes)
+void GenerateXorTable(int Nr, wbaes_vbase* instance_aes, bool verbose = false)
 {
-	out = out;
-  	uint8_t Xor[Nr-1][96][16][16];
+    if (verbose) std::cout << "GenerateXorTable..." << std::endl;
+
+  	//uint8_t Xor[Nr-1][96][16][16];
+    std::vector<std::vector<std::vector<std::vector<uint8_t>>>>* pXor = new std::vector<std::vector<std::vector<std::vector<uint8_t>>>>(Nr-1);
+	std::vector<std::vector<std::vector<std::vector<uint8_t>>>>& Xor = *pXor;
+	for(int i=0;i<Nr-1;i++)
+	{
+        Xor[i].resize(96);
+        for(int j=0;j<96;j++)
+        {
+            Xor[i][j].resize(16);
+            for(int k=0;k<16;k++)
+                Xor[i][j][k].resize(16);
+        }
+	}
+
+
   	for (int r = 0; r < Nr-1; r++)
     for (int n = 0; n < 96; n++)
       for (int i = 0; i < 16; i++)
+	  {
+	  	auto s1 = cryptoAL::generate_base16_random_string(16+1);
+	  	auto s2 = cryptoAL::generate_base16_random_string(16+1);
         for (int j = 0; j < 16; j++)
 		{
-          	Xor[r][n][i][j] = i ^ j;
+			// EXTERNAL ENCODING here - default to random
+          	// Xor[r][n][i][j] = i ^ j;
+			Xor[r][n][i][j] = (uint8_t)( ((uint8_t)s1[j]) + 16*((uint8_t)s2[j]) );
 		  	instance_aes->setXor(r, n, j, i, Xor[r][n][i][j]);
 		}
+	}
+
+    delete pXor;
 }
 
-void GenerateEncryptingTables(FILE* out, uint32_t* roundKey, int Nr, wbaes_vbase* instance_aes)
+void GenerateEncryptingTables(uint32_t* roundKey, int Nr, wbaes_vbase* instance_aes, bool verbose = false)
 {
-	out = out;
-  	uint32_t Tyboxes[Nr-1][16][256];
-  	uint8_t TboxesLast[16][256];
-  	uint32_t MBL[Nr-1][16][256];
+    if (verbose) std::cout << "GenerateEncryptingTables..." << std::endl;
+    uint8_t TboxesLast[16][256];
+    
+	//uint32_t Tyboxes[Nr-1][16][256];
+    std::vector<std::vector<std::vector<uint32_t>>>* pTyboxes = new std::vector<std::vector<std::vector<uint32_t>>>(Nr-1);
+	std::vector<std::vector<std::vector<uint32_t>>>& Tyboxes = *pTyboxes;
+	for(int i=0;i<Nr-1;i++)
+	{
+        Tyboxes[i].resize(16);
+        for(int j=0;j<16;j++)
+            Tyboxes[i][j].resize(256);
+	}
 
+	//uint32_t MBL[Nr-1][16][256];
+    std::vector<std::vector<std::vector<uint32_t>>>* pMBL = new std::vector<std::vector<std::vector<uint32_t>>>(Nr-1);
+	std::vector<std::vector<std::vector<uint32_t>>>& MBL = *pMBL;
+	for(int i=0;i<Nr-1;i++)
+	{
+        MBL[i].resize(16);
+        for(int j=0;j<16;j++)
+            MBL[i][j].resize(256);
+	}
+
+
+    // all stack variable! moving them to heap...
   	CalculateTyBoxes(roundKey, Tyboxes, TboxesLast, MBL, true, true, Nr);
 
   	for (int r = 0; r < Nr-1; r++)
@@ -318,9 +379,12 @@ void GenerateEncryptingTables(FILE* out, uint32_t* roundKey, int Nr, wbaes_vbase
 	{
 	  	instance_aes->setMBL(r,i,x, MBL[r][i][x]);
 	}
+
+	delete pTyboxes ;
+	delete pMBL;
 }
 
-bool GenerateTables(const char* hexKey, int Nk, int Nr, wbaes_vbase* instance_aes)
+bool GenerateTables(const char* hexKey, int Nk, int Nr, wbaes_vbase* instance_aes, bool verbose = false)
 {
 	bool r  = true;
   	uint8_t key[Nk*4];
@@ -329,11 +393,10 @@ bool GenerateTables(const char* hexKey, int Nk, int Nr, wbaes_vbase* instance_ae
   	r = read_key(hexKey, key, Nk*4);
   	if (r)
   	{
-  		FILE* out = NULL;
-
-	  	ExpandKeys(key, roundKey, Nk, Nr);
-	  	GenerateXorTable(out, Nr, instance_aes);
-	  	GenerateEncryptingTables(out, roundKey, Nr, instance_aes);
+  		if (verbose) std::cout << "GenerateTables..." << std::endl;
+	  	ExpandKeys(key, roundKey, Nk, Nr, verbose);
+	  	GenerateXorTable(Nr, instance_aes, verbose);
+	  	GenerateEncryptingTables(roundKey, Nr, instance_aes, verbose);
   	}
 	return r;
 }
@@ -367,22 +430,37 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 	else if (strcmp(aes.data(), "aes4096") == 0) {
 		Nk = 128, Nr = 134;
 	}
-
+	else if (strcmp(aes.data(), "aes8192") == 0) {
+		Nk = 128*2, Nr = 134*2 - 6;
+	}
+	else if (strcmp(aes.data(), "aes16384") == 0) {
+		Nk = 512, Nr = 526;
+	}
+	else
 	{
-        if (verbose) std::cout << "generate_aes " << aes << std::endl;
+		// TODO - do code template for unlimited size
+	}
+
+	// TODO - May only need 2 tbl (one for external encoding Xor and merging the 3 others)
+	{
+        if (verbose) std::cout << "generate whitebox aes... " << aes << std::endl;
 
 		long long N = 4*Nk*2;
 		std::string skey = cryptoAL::generate_base16_random_string(N);
-		if (verbose) std::cout << "key " << skey << std::endl;
+		if (verbose) std::cout << "key (random) " << skey << std::endl;
 
 		wbaes_instance_mgr aes_instance(aes, pathtbl, tablekeyname, false, true);
 		wbaes_vbase* p = aes_instance.get_aes(); // new
-		if (p==nullptr) return -1;
+		if (p==nullptr)
+		{
+            std::cerr << "ERROR in  aes_instance.get_aes() " << std::endl;
+            return -1;
+		}
 
-		ok = GenerateTables(skey.data(), Nk, Nr, p);
+		ok = GenerateTables(skey.data(), Nk, Nr, p, verbose);
 
 		if (ok)
-		{
+		 {
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_xor.tbl";
 			if (verbose) std::cout << "generate_aes to " << filename << std::endl;
 
@@ -447,6 +525,10 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 			}
 			ofd.close();
 		}
+		else
+		{
+            std::cerr << "ERROR in GenerateTables " << std::endl;
+		}
 
 		if (ok)
 		{
@@ -510,8 +592,6 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 
 }  // namespace
 
-
-#endif
 #endif
 #endif
 

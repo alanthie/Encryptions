@@ -323,11 +323,11 @@ int main_crypto(int argc, char **argv)
 				
 			encode_command.add_argument("-wbaespv", "--wbaespv")
                 .default_value(std::string(""))
-                .help("specify the private folder for whitbox aes 512-4096 bits tables");
+                .help("specify the private folder for whitebox aes 512-8192 bits tables");
 
 			encode_command.add_argument("-wbaespu", "--wbaespu")
                 .default_value(std::string(""))
-                .help("specify the other public folder for whitbox aes 512-4096 bits tables");
+                .help("specify the other public folder for whitebox aes 512-8192 bits tables");
 
             encode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
@@ -429,11 +429,11 @@ int main_crypto(int argc, char **argv)
 				
 			decode_command.add_argument("-wbaespv", "--wbaespv")
                 .default_value(std::string(""))
-                .help("specify the private folder for whitbox aes 512-4096 bits tables");
+                .help("specify the private folder for whitebox aes 512-8192 bits tables");
 
 			decode_command.add_argument("-wbaespu", "--wbaespu")
                 .default_value(std::string(""))
-                .help("specify the other public folder for whitbox aes 512-4096 bits tables");
+                .help("specify the other public folder for whitebox aes 512-8192 bits tables");
 
             decode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))

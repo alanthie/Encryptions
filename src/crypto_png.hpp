@@ -72,7 +72,7 @@ public:
         }
         return false;
     }
-	
+
 	static std::string remove_ext_png(const std::string& filename)
     {
 		std::string::size_type idx;
@@ -157,8 +157,12 @@ public:
             pngData = (unsigned char *) malloc(imageSize * imageSize * 4);
 
             // Read binary file to buffer
-            fread(fileBuff, fileSize, 1, binaryFile);
+            size_t sz =fread(fileBuff, fileSize, 1, binaryFile);
 
+            if (sz == 0)
+            {
+                puts("WARNING PNG file empty...");
+            }
             if (verbose)
                 puts("Starting conversion to PNG file...");
 
@@ -235,7 +239,7 @@ public:
     int pngToBinary(const::std::string& PNG_FILE, const::std::string& BIN_OUT_FILE)
     {
         FILE* binaryFile;
-        int i, x, y;
+        unsigned int i, x, y;
         unsigned int error;
 
         // Decode PNG file to pngData array
