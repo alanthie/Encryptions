@@ -18,7 +18,11 @@ enum keyspec_type
 	VideoFile	= 24,
 	RSA			= 30,
 	ECC			= 40,
-	HH			= 50
+	HH			= 50,
+	wbaes_512	= 100,
+	wbaes_1024	= 200,
+	wbaes_2048	= 300,
+	wbaes_4096	= 400
 };
 
 enum keyspec_composition_mode
@@ -110,6 +114,10 @@ struct keyspec_composite
 							else if (vkeyspec[i].ktype == RSA) 			start_token = "[r]";
 							else if (vkeyspec[i].ktype == ECC) 			start_token = "[e]";
 							else if (vkeyspec[i].ktype == HH) 			start_token = "[h]";
+							else if (vkeyspec[i].ktype == wbaes_512) 	start_token = "[aes512]";
+							else if (vkeyspec[i].ktype == wbaes_1024) 	start_token = "[aes1024]";
+							else if (vkeyspec[i].ktype == wbaes_2048) 	start_token = "[aes2048]";
+							else if (vkeyspec[i].ktype == wbaes_4096) 	start_token = "[aes4096]";
 							else
 							{
 								//...
@@ -144,6 +152,10 @@ struct keyspec_composite
 					else if (vkeyspec[i].ktype == RSA) 			start_token = "[r]";
 					else if (vkeyspec[i].ktype == ECC) 			start_token = "[e]";
 					else if (vkeyspec[i].ktype == HH) 			start_token = "[h]";
+					else if (vkeyspec[i].ktype == wbaes_512) 	start_token = "[aes512]";
+					else if (vkeyspec[i].ktype == wbaes_1024) 	start_token = "[aes1024]";
+					else if (vkeyspec[i].ktype == wbaes_2048) 	start_token = "[aes2048]";
+					else if (vkeyspec[i].ktype == wbaes_4096) 	start_token = "[aes4096]";
 					else
 					{
 						//...
@@ -290,6 +302,10 @@ public:
 			else if (has_token("[v:]", v[i], 0)) k = parse_key("[v:]",0, keyspec_type::VideoFile, true,  v[i]);
 			else if (has_token("[f]",  v[i], 0)) k = parse_key("[f]", 0, keyspec_type::FTPFile, false, v[i]);
 			else if (has_token("[f:]", v[i], 0)) k = parse_key("[f:]",0, keyspec_type::FTPFile, true,  v[i]);
+			else if (has_token("[aes512]", v[i], 0))  k = parse_key("[aes512]" ,0, keyspec_type::wbaes_512,  false,  v[i]);
+			else if (has_token("[aes1024]", v[i], 0)) k = parse_key("[aes1024]",0, keyspec_type::wbaes_1024, false,  v[i]);
+			else if (has_token("[aes2048]", v[i], 0)) k = parse_key("[aes2048]",0, keyspec_type::wbaes_2048, false,  v[i]);
+			else if (has_token("[aes4096]", v[i], 0)) k = parse_key("[aes4096]",0, keyspec_type::wbaes_4096, false,  v[i]);
 
 			if (k.ktype != keyspec_type::Unknown)
 			{

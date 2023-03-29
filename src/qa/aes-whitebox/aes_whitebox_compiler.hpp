@@ -1,9 +1,9 @@
 #ifndef _INCLUDES_aes_whitebox_compiler_HPP
 #define _INCLUDES_aes_whitebox_compiler_HPP
 
-#include "../../base_const.hpp"
+#include "../../crypto_const.hpp"
+#include "../../random_engine.hpp"
 #include "../../c_plus_plus_serializer.h"
-//-lntl -lpthread -lgmp
 
 #ifdef _WIN32
 #else
@@ -14,40 +14,30 @@
 #include <string.h>
 #include <stdarg.h>
 #include <array>
-
 #include <NTL/mat_GF2.h>
 #include "aes_private.h"
 #include "aes_whitebox.hpp"
+//-lntl -lpthread -lgmp
 
 namespace WBAES {
 
-//std::array< std::array< std::array< std::array<uint8_t, 16>, 16>, 96>, 21> aes512Xor;
-//std::array< std::array< std::array< uint32_t, 256>, 16>, 21> aes512Tyboxes;
-//std::array< std::array< uint8_t, 256>, 16> aes512TboxesLast;
-//std::array< std::array< std::array< uint32_t, 256>, 16>, 21> aes512MBL;
 
-
-void err_quit(const char *fmt, ...) {
-  va_list ap;
-  char buf[1024];
-
-  va_start(ap, fmt);
-  vsprintf(buf, fmt, ap);
-  strcat(buf, "\n");
-  fputs(buf, stderr);
-  fflush(stderr);
-  va_end(ap);
-
-  exit(1);
-}
-
-void read_key(const char *in, uint8_t* key, size_t size) {
-  if (strlen(in) != size << 1)
-    err_quit("Invalid key (should be a valid %d-bits hexadecimal string)",
-        (size == 16) ? 128 : ((size == 24) ? 192 : 256));
-  for (size_t i = 0; i < size; i++) {
-    sscanf(in + i * 2, "%2hhx", key + i);
-  }
+bool read_key(const char *in, uint8_t* key, size_t size)
+{
+	bool r = true;
+  	if (strlen(in) != size << 1)
+	{
+    	//err_quit("Invalid key (should be a valid %d-bits hexadecimal string)", (size == 16) ? 128 : ((size == 24) ? 192 : 256));
+		std::cerr << "ERROR invalid key size, need hexadecimal string of size " << (size << 1) << std::endl;
+	}
+	else
+	{
+		for (size_t i = 0; i < size; i++)
+		{
+			sscanf(in + i * 2, "%2hhx", key + i);
+		}
+	}
+	return r;
 }
 
 template<typename T>
@@ -169,9 +159,10 @@ void CalculateTy(uint8_t Ty[4][256][4]) {
   }
 }
 
-void CalculateTyBoxes(uint32_t roundKey[],
-    uint32_t Tyboxes[][16][256], uint8_t TboxesLast[16][256],
-    uint32_t MBL[][16][256], bool enableL, bool enableMB, int Nr) {
+void CalculateTyBoxes(	uint32_t roundKey[],
+						uint32_t Tyboxes[][16][256], uint8_t TboxesLast[16][256],
+						uint32_t MBL[][16][256], bool enableL, bool enableMB, int Nr)
+{
   uint8_t Tboxes[Nr][16][256];
   uint8_t Ty[4][256][4];
 
@@ -287,70 +278,33 @@ void CalculateTyBoxes(uint32_t roundKey[],
 
 void GenerateXorTable(FILE* out, int Nr, wbaes_vbase* instance_aes)
 {
-  uint8_t Xor[Nr-1][96][16][16];
-  for (int r = 0; r < Nr-1; r++)
+	out = out;
+  	uint8_t Xor[Nr-1][96][16][16];
+  	for (int r = 0; r < Nr-1; r++)
     for (int n = 0; n < 96; n++)
       for (int i = 0; i < 16; i++)
         for (int j = 0; j < 16; j++)
 		{
-          Xor[r][n][i][j] = i ^ j;
-		  instance_aes->setXor(r, n, j, i, Xor[r][n][i][j]);
+          	Xor[r][n][i][j] = i ^ j;
+		  	instance_aes->setXor(r, n, j, i, Xor[r][n][i][j]);
 		}
-
-  fprintf(out, "constexpr uint8_t Xor[%d][96][16][16] = {\n", Nr-1);
-  for (int r = 0; r < Nr-1; r++) {
-    fprintf(out, "  {\n");
-    for (int n = 0; n < 96; n++) {
-      fprintf(out, "    {\n");
-      for (int i = 0; i < 16; i++) {
-        fprintf(out, "      { ");
-        for (int j = 0; j < 16; j++)
-          fprintf(out, "0x%02x, ", Xor[r][n][i][j]);
-        fprintf(out, "},\n");
-      }
-      fprintf(out, "    },\n");
-    }
-    fprintf(out, "  },\n");
-  }
-  fprintf(out, "};\n\n");
 }
 
 void GenerateEncryptingTables(FILE* out, uint32_t* roundKey, int Nr, wbaes_vbase* instance_aes)
 {
-  uint32_t Tyboxes[Nr-1][16][256];
-  uint8_t TboxesLast[16][256];
-  uint32_t MBL[Nr-1][16][256];
+	out = out;
+  	uint32_t Tyboxes[Nr-1][16][256];
+  	uint8_t TboxesLast[16][256];
+  	uint32_t MBL[Nr-1][16][256];
 
-  CalculateTyBoxes(roundKey, Tyboxes, TboxesLast, MBL, true, true, Nr);
+  	CalculateTyBoxes(roundKey, Tyboxes, TboxesLast, MBL, true, true, Nr);
 
   	for (int r = 0; r < Nr-1; r++)
   	for (int i = 0; i < 16; i++)
   	for (int x = 0; x < 256; x++)
 	{
-	  instance_aes->setTyboxes(r, i, x, Tyboxes[r][i][x]);
+	  	instance_aes->setTyboxes(r, i, x, Tyboxes[r][i][x]);
 	}
-
-  fprintf(out, "constexpr uint32_t Tyboxes[%d][16][256] = {\n", Nr-1);
-  for (int r = 0; r < Nr-1; r++) {
-    fprintf(out, "  {\n");
-    for (int i = 0; i < 16; i++) {
-      fprintf(out, "    {\n");
-      for (int x = 0; x < 256; x++) {
-        if ((x % 8) == 0) {
-          fprintf(out, "      ");
-        }
-        fprintf(out, "0x%08x,", Tyboxes[r][i][x]);
-        if (x > 0 && (x % 8) == 7) {
-          fprintf(out, "\n");
-        } else {
-          fprintf(out, " ");
-        }
-      }
-      fprintf(out, "    },\n");
-    }
-    fprintf(out, "  },\n");
-  }
-  fprintf(out, "};\n\n");
 
   	for (int i = 0; i < 16; i++)
   	for (int x = 0; x < 256; x++)
@@ -358,87 +312,37 @@ void GenerateEncryptingTables(FILE* out, uint32_t* roundKey, int Nr, wbaes_vbase
         instance_aes->setTboxesLast(i,x,TboxesLast[i][x]);
 	}
 
-  fprintf(out, "constexpr uint8_t TboxesLast[16][256] = {\n");
-  for (int i = 0; i < 16; i++) {
-    fprintf(out, "  {\n");
-    for (int x = 0; x < 256; x++) {
-      if (x % 16 == 0) {
-        fprintf(out, "    ");
-      }
-      fprintf(out, "0x%02x, ", TboxesLast[i][x]);
-      if (x % 16 == 15) {
-        fprintf(out, "\n");
-      }
-    }
-    fprintf(out, "  },\n");
-  }
-  fprintf(out, "};\n\n");
-
 	for (int r = 0; r < Nr-1; r++)
   	for (int i = 0; i < 16; i++)
   	for (int x = 0; x < 256; x++)
 	{
-	  instance_aes->setMBL(r,i,x, MBL[r][i][x]);
+	  	instance_aes->setMBL(r,i,x, MBL[r][i][x]);
 	}
-
-  fprintf(out, "constexpr uint32_t MBL[%d][16][256] = {\n", Nr-1);
-  for (int r = 0; r < Nr-1; r++) {
-    fprintf(out, "  {\n");
-    for (int i = 0; i < 16; i++) {
-      fprintf(out, "    {\n");
-      for (int x = 0; x < 256; x++) {
-        if ((x % 8) == 0) {
-          fprintf(out, "      ");
-        }
-        fprintf(out, "0x%08x,", MBL[r][i][x]);
-        if (x > 0 && (x % 8) == 7) {
-          fprintf(out, "\n");
-        } else {
-          fprintf(out, " ");
-        }
-      }
-      fprintf(out, "    },\n");
-    }
-    fprintf(out, "  },\n");
-  }
-  fprintf(out, "};\n\n");
 }
 
-void GenerateTables(const char* hexKey, int Nk, int Nr, wbaes_vbase* instance_aes)
+bool GenerateTables(const char* hexKey, int Nk, int Nr, wbaes_vbase* instance_aes)
 {
-  uint8_t key[Nk*4];
-  uint32_t roundKey[(Nr+1)*4];
+	bool r  = true;
+  	uint8_t key[Nk*4];
+  	uint32_t roundKey[(Nr+1)*4];
 
-  read_key(hexKey, key, Nk*4);
-  ExpandKeys(key, roundKey, Nk, Nr);
+  	r = read_key(hexKey, key, Nk*4);
+  	if (r)
+  	{
+  		FILE* out = NULL;
 
-  FILE* out = fopen("aes_whitebox_tables.cc", "w");
-
-  fprintf(out,
-      "// This file is generated, do not edit.\n"
-      "\n"
-      "namespace {\n"
-      "\n"
-      "constexpr int Nr = %d;\n"
-      "\n", Nr);
-
-  GenerateXorTable(out, Nr, instance_aes);
-  GenerateEncryptingTables(out, roundKey, Nr, instance_aes);
-
-  fprintf(out, "}  // namespace");
-
-  fflush(out);
-  fclose(out);
-}
-
-void syntax() {
-  err_quit("Syntax: aes_whitebox_gen <aes128|aes192|aes256> <hex-key>");
+	  	ExpandKeys(key, roundKey, Nk, Nr);
+	  	GenerateXorTable(out, Nr, instance_aes);
+	  	GenerateEncryptingTables(out, roundKey, Nr, instance_aes);
+  	}
+	return r;
 }
 
 
-int gen_aes(const std::string& aes, const std::string& pathtbl, const std::string& tablekeyname, bool verbose = false)
+int generate_aes(const std::string& aes, const std::string& pathtbl, const std::string& tablekeyname, bool verbose = false)
 {
 	int r = 0;
+	bool ok = true;
 	int Nk = 0, Nr = 0;
 	if (strcmp(aes.data(), "aes128") == 0)
 	{
@@ -464,36 +368,54 @@ int gen_aes(const std::string& aes, const std::string& pathtbl, const std::strin
 		Nk = 128, Nr = 134;
 	}
 
-	//TODO random keys...
-
 	{
-        std::cout << "gen_aes " << aes << std::endl;
+        if (verbose) std::cout << "generate_aes " << aes << std::endl;
 
-		char k512[4*16*2+10]  = "313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4";
-		char k1024[4*32*2+10] = "313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4";
-		char k2048[4*64*2+10] = "313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4";
-		//char k4096[4*64*2+10] = "313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4313deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4";
+		long long N = 4*Nk*2;
+		std::string skey = cryptoAL::generate_base16_random_string(N);
+		if (verbose) std::cout << "key " << skey << std::endl;
 
-		wbaes_mgr mgr(aes, pathtbl, tablekeyname, true);
-		wbaes_vbase* p = mgr.get_aes();
-		//p = new wbaes512();
-		//p = new wbaes1024();
-		//p = new wbaes2048();
-		//p = new wbaes4096();
-
+		wbaes_instance_mgr aes_instance(aes, pathtbl, tablekeyname, false, true);
+		wbaes_vbase* p = aes_instance.get_aes(); // new
 		if (p==nullptr) return -1;
 
-		GenerateTables(k1024, Nk, Nr, p);
+		ok = GenerateTables(skey.data(), Nk, Nr, p);
 
+		if (ok)
 		{
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_xor.tbl";
-			if (verbose) std::cout << "gen_aes to " << filename << std::endl;
+			if (verbose) std::cout << "generate_aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
 			{
 				p->write_xor(ofd);
-/*
+
+				int cnt_zero=0;
+				int cnt=0;
+				{
+					for (int r = 0; r < 2; r++)
+					{
+						for (int n = 0; n < 5; n++)
+						{
+						  for (int i = 0; i < 2; i++)
+						  {
+							for (int j = 0; j < 16; j++)
+							{
+								if (p->getXor(r,n,i,j) == 0) cnt_zero++;
+								cnt++;
+							}
+						  }
+						}
+					}
+					if (cnt_zero == cnt)
+					{
+						r = -1;
+						ok = false;
+						std::cerr << "ERROR aes xor table seem empty " << filename << std::endl;
+					}
+				}
+
 				if (verbose)
 				{
 					std::cout << "ok " << filename << std::endl;
@@ -505,7 +427,7 @@ int gen_aes(const std::string& aes, const std::string& pathtbl, const std::strin
 							std::cout << "      { ";
 							for (int j = 0; j < 16; j++)
 							{
-								std::cout <<  (int)p->Xor[r][n][i][j];
+								std::cout <<  (int)p->getXor(r,n,i,j); //  [r][n][i][j];
 							}
 							std::cout << "},\n";
 						  }
@@ -515,50 +437,21 @@ int gen_aes(const std::string& aes, const std::string& pathtbl, const std::strin
 					  }
 					 std::cout << "};\n\n";
 				}
-*/
+
 			}
 			else
 			{
 				r = -1;
+				ok = false;
 				std::cerr << "ERROR writing " << filename << std::endl;
 			}
 			ofd.close();
-/*
-			if (verbose) std::cout << "reading " << filename << std::endl;
-			//std::array< std::array< std::array< std::array<uint8_t, 16>, 16>, 96>, 21> bXor512;
-			std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
-			if (ifd.bad() == false)
-			{
-				ifd >> bits(p->Xor);
-				//ifd >> bits(bXor);
-			}
-			else
-			{
-				r = -1;
-				std::cerr << "ERROR reading " << filename << std::endl;
-			}
-			ifd.close();
-
-			bool ok = true;
-			for (int r = 0; r < Nr-1; r++)
-			for (int n = 0; n < 96; n++)
-			for (int i = 0; i < 16; i++)
-			for (int j = 0; j < 16; j++)
-			{
-			  if (aes512Xor[r][n][i][j] != bXor[r][n][i][j])
-			  {
-					std::cerr << "ERROR not same  " << r << n << i << j << std::endl;
-					ok = false;
-					break;
-			  }
-			}
-			if (verbose)  if (ok) std::cout << "same  "  << std::endl;
-*/
 		}
 
+		if (ok)
 		{
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_tyboxes.tbl";
-			if (verbose)  std::cout << "gen_aes to " << filename << std::endl;
+			if (verbose)  std::cout << "generate_aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
@@ -568,13 +461,16 @@ int gen_aes(const std::string& aes, const std::string& pathtbl, const std::strin
 			else
 			{
 				r = -1;
+				ok = false;
 				std::cerr << "ERROR writing " << filename << std::endl;
 			}
 			ofd.close();
 		}
+
+		if (ok)
 		{
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_tboxesLast.tbl";
-			if (verbose)  std::cout << "gen_aes to " << filename << std::endl;
+			if (verbose)  std::cout << "generate_aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
@@ -584,13 +480,16 @@ int gen_aes(const std::string& aes, const std::string& pathtbl, const std::strin
 			else
 			{
 				r = -1;
+				ok = false;
 				std::cerr << "ERROR writing " << filename << std::endl;
 			}
 			ofd.close();
 		}
+
+		if (ok)
 		{
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_mbl.tbl";
-			if (verbose)  std::cout << "gen_aes to " << filename << std::endl;
+			if (verbose)  std::cout << "generate_aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
@@ -600,6 +499,7 @@ int gen_aes(const std::string& aes, const std::string& pathtbl, const std::strin
 			else
 			{
 				r = -1;
+				ok = false;
 				std::cerr << "ERROR writing " << filename << std::endl;
 			}
 			ofd.close();

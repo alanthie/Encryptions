@@ -320,6 +320,14 @@ int main_crypto(int argc, char **argv)
 			encode_command.add_argument("-hpu", "--histopub")
                 .default_value(std::string(""))
                 .help("specify the other public folder for historical hashes");
+				
+			encode_command.add_argument("-wbaespv", "--wbaespv")
+                .default_value(std::string(""))
+                .help("specify the private folder for whitbox aes 512-4096 bits tables");
+
+			encode_command.add_argument("-wbaespu", "--wbaespu")
+                .default_value(std::string(""))
+                .help("specify the other public folder for whitbox aes 512-4096 bits tables");
 
             encode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
@@ -418,6 +426,14 @@ int main_crypto(int argc, char **argv)
 			decode_command.add_argument("-hpu", "--histopub")
                 .default_value(std::string(""))
                 .help("specify the other public folder for historical hashes");
+				
+			decode_command.add_argument("-wbaespv", "--wbaespv")
+                .default_value(std::string(""))
+                .help("specify the private folder for whitbox aes 512-4096 bits tables");
+
+			decode_command.add_argument("-wbaespu", "--wbaespu")
+                .default_value(std::string(""))
+                .help("specify the other public folder for whitbox aes 512-4096 bits tables");
 
             decode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
@@ -761,6 +777,8 @@ int main_crypto(int argc, char **argv)
             auto ecc_other_public_path = cmd.get<std::string>("--eccpub");
 			auto hh_my_private_path = cmd.get<std::string>("--histopriv");
             auto hh_other_public_path = cmd.get<std::string>("--histopub");
+			auto wbaes_my_private_path = cmd.get<std::string>("--wbaespv");
+            auto wbaes_other_public_path = cmd.get<std::string>("--wbaespu");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
             auto gmp = cmd.get<std::string>("--gmp");
@@ -772,7 +790,7 @@ int main_crypto(int argc, char **argv)
             auto encryped_ftp_pwd  = cmd.get<std::string>("--encryped_ftp_pwd");
             auto shuffle  = cmd.get<std::string>("--shuffle");
 			auto png = cmd.get<std::string>("--png");
-
+			
             if (qa_puzzle_path.size() == 0)
             {
                 if (puzzle_path.size() > 0)
@@ -850,6 +868,8 @@ int main_crypto(int argc, char **argv)
                 ecc_other_public_path,
                 hh_my_private_path,
 				hh_other_public_path,
+				wbaes_my_private_path,
+				wbaes_other_public_path,
                 verbose,
                 keeping,
                 encryped_ftp_user,
@@ -895,6 +915,8 @@ int main_crypto(int argc, char **argv)
             auto ecc_other_public_path = cmd.get<std::string>("--eccpub");
             auto hh_my_private_path = cmd.get<std::string>("--histopriv");
             auto hh_other_public_path = cmd.get<std::string>("--histopub");
+			auto wbaes_my_private_path = cmd.get<std::string>("--wbaespv");
+            auto wbaes_other_public_path = cmd.get<std::string>("--wbaespu");
             auto verb = cmd.get<std::string>("--verbose");
             auto keep = cmd.get<std::string>("--keep");
 			auto gmp = cmd.get<std::string>("--gmp");
@@ -930,6 +952,8 @@ int main_crypto(int argc, char **argv)
                 ecc_other_public_path,
                 hh_my_private_path,
 				hh_other_public_path,
+				wbaes_my_private_path,
+				wbaes_other_public_path,
                 verbose,
                 keeping,
                 encryped_ftp_user,

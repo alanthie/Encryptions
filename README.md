@@ -52,6 +52,8 @@ Optional arguments:
   -epu, --eccpub          	specify the other public folder for public ecc*.db [default: ""]
   -hpv, --histopriv       	specify the private folder for historical hashes [default: ""]
   -hpu, --histopub        	specify the other public folder for historical hashes [default: ""]
+  -wbaespv, --wbaespv     	specify the private folder for whitbox aes 512-4096 bits tables [default: ""]
+  -wbaespu, --wbaespu     	specify the other public folder for whitbox aes 512-4096 bits tables [default: ""]
   -v, --verbose           	specify the verbose [default: ""]
   -k, --keep              	specify if keeping staging file [default: ""]
   -x, --keyfactor         	specify a key_size_factor, this multiply the key size by the factor [default: "1"]
@@ -61,6 +63,7 @@ Optional arguments:
   -g, --gmp               	use gmp [default: ""]
   -t, --selftest          	encryption selftest [default: ""]
   -sh, --shuffle          	specify pre encryption shuffling percentage of data 0-100 [default: "0"]
+
 
 Output example:
 MESSAGE is 128437 bytes
@@ -123,7 +126,8 @@ Current set of encryption algorithms
     Shuffling
     Elliptic Curve
     Recursive Elliptic Curve
-    Future: WhiteBox (against compromise environment) AES 512, AES 1024, AES 2048, AES 4096
+    WhiteBox (against compromise environment) AES 512, AES 1024, AES 2048, AES 4096
+    
     Future: Multiple primes (3+) RSA [the security of Multi-prime RSA is undeniably better than the standard RSA]
     Future: Cascading auto generated embedded key protected by multiple RSA/ECC keys
 </pre>
@@ -134,7 +138,7 @@ Overview:
 Recursive RSA (and Elliptic Curve):
 ![Alt text](/Doc/RecursiveRSA.png?raw=true "Recursive RSA")
 
-Planned feature: WhiteBox (against compromise environment) AES
+Now available (Linux, Windows soon): WhiteBox AES 512 bits to 4096 bits
 ![Alt text](/Doc/wbaes.png?raw=true "wbaes")
 
 There are two practical methods to mitigate code lifting attacks:
@@ -269,7 +273,7 @@ Select a task:
 3. HEX(file, position, keysize)
 4. Puzzle: Make random puzzle from shared binary (like USB keys) data
 5. Puzzle: Resolve puzzle
-6. Futur usage
+6. WhiteBox keys AES 512-4096 bits - create key table (Linux only for now)
 7.  RSA Key: View my private RSA key
 8.  RSA Key: View my public RSA key (also included in the private db)
 81. RSA Key: View other public RSA key

@@ -339,7 +339,7 @@ public:
         return r;
     }
 
-
+/*
     // Convert a binary file to PNG
     int binaryToPng() {
         FILE *binaryFile;
@@ -369,9 +369,9 @@ public:
             imageSize = (int)ceil(sqrt((double) fileSize));
 
             // Print various informations
-            printf("Size of file : %d bytes\n", fileSize);
-            printf("Size of final image : %d x %d px\n", imageSize, imageSize);
-            puts("\n");
+            //printf("Size of file : %d bytes\n", fileSize);
+            //printf("Size of final image : %d x %d px\n", imageSize, imageSize);
+            //puts("\n");
 
             // Allocate memory for the PNG data array
             pngData = (unsigned char *) malloc(imageSize * imageSize * 4);
@@ -496,7 +496,7 @@ public:
             return 1;
         }
     }
-
+*/
 
 
 };

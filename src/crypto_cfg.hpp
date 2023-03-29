@@ -49,6 +49,8 @@ struct cfg_cmdparam
     std::string folder_other_public_ecc;
     std::string folder_my_private_hh;
     std::string folder_other_public_hh;
+	std::string wbaes_my_private_path;
+	std::string wbaes_other_public_path;
 
     std::string keeping;
     std::string encryped_ftp_user;
@@ -214,6 +216,8 @@ public:
 		cmdparam.folder_other_public_ecc       	= apply_var(ini.get_string("folder_other_public_ecc", CFG_cmdparam_section));
 		cmdparam.folder_my_private_hh           = apply_var(ini.get_string("folder_my_private_hh", CFG_cmdparam_section));
 		cmdparam.folder_other_public_hh        	= apply_var(ini.get_string("folder_other_public_hh", CFG_cmdparam_section));
+		cmdparam.wbaes_my_private_path          = apply_var(ini.get_string("wbaes_my_private_path", CFG_cmdparam_section));
+		cmdparam.wbaes_other_public_path        = apply_var(ini.get_string("wbaes_other_public_path", CFG_cmdparam_section));
 
         cmdparam.encryped_ftp_user 				= apply_var(ini.get_string("encryped_ftp_user", CFG_cmdparam_section));
         cmdparam.encryped_ftp_pwd  				= apply_var(ini.get_string("encryped_ftp_pwd", CFG_cmdparam_section));
@@ -247,6 +251,8 @@ public:
         std::cout << "folder_other_public_ecc: " << cmdparam.folder_other_public_ecc << std::endl;
         std::cout << "folder_my_private_hh:    " << cmdparam.folder_my_private_hh << std::endl;
         std::cout << "folder_other_public_hh:  " << cmdparam.folder_other_public_hh << std::endl;
+		std::cout << "wbaes_my_private_path:    " << cmdparam.wbaes_my_private_path << std::endl;
+        std::cout << "wbaes_other_public_path:  " << cmdparam.wbaes_other_public_path << std::endl;
 
         std::cout << "keeping:     " << cmdparam.keeping << std::endl;
         std::cout << "use_gmp:     " << cmdparam.use_gmp << std::endl;

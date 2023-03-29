@@ -80,6 +80,8 @@
 		<Unit filename="../src/qa/SimpleECC/src/point.hpp" />
 		<Unit filename="../src/qa/SimpleECC/src/simple_ecc_test.cpp" />
 		<Unit filename="../src/qa/SimpleECC/src/test_simple_ecc.hpp" />
+		<Unit filename="../src/qa/aes-whitebox/aes_whitebox.hpp" />
+		<Unit filename="../src/qa/aes-whitebox/aes_whitebox_compiler.hpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_curve.cpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_curve.hpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_elgamal.cpp" />

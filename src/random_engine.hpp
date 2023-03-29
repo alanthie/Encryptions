@@ -300,6 +300,59 @@ std::string generate_base64_random_string(long long N)
     }
     return r;
 }
+
+std::string generate_base16_random_string(long long N)
+{
+    std::string r;
+    int digit;
+
+#ifdef _WIN32
+    uint32_t LIM = UINT_MAX;
+#else
+    uint32_t LIM = std::numeric_limits<uint32_t>::max();
+#endif
+
+    srand ((unsigned int)time(NULL));
+    srand ((unsigned int)random_engine::getTickCount());
+    uint32_t n;
+    random_engine rd;
+    long long t;
+
+    rng::tsc_seed seed;
+    rng::rng128 gen(seed());
+
+    {
+        for(long long i=0;i<N;i++)
+        {
+            if (i%2 == 0)
+                n = (uint32_t)(rd.get_rand() * LIM);
+            else
+                n = gen() % LIM;
+
+            digit = (int)(n % 16);
+            if ((i==0) && (BASEDIGIT16[i]=='0')) digit = 1;
+            r += BASEDIGIT16[digit];
+
+            t = (long long)(rd.get_rand() * 3);
+            for(long long j=0;j<t;j++)
+            {
+                rd.get_rand();
+                gen();
+            }
+            if (i%20 == 0)
+               srand ((unsigned int)random_engine::getTickCount());
+
+            t = rand() % 5;
+           	for(long long j=0;j<t;j++)
+            {
+                rd.get_rand();
+                gen();
+            }
+        }
+    }
+    return r;
+}
+
 }
 #endif
 

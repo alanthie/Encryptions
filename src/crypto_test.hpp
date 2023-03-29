@@ -13,7 +13,7 @@
 
 #ifdef _WIN32
 #else
-#ifdef HAS_WHITEBOX_AES_FEATURE 
+#ifdef HAS_WHITEBOX_AES_FEATURE
 #include "qa/aes-whitebox/aes_whitebox.h"
 // aes_whitebox.cc => #include "aes_whitebox_tables.cc"
 #endif
@@ -88,7 +88,7 @@ void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false,
                         BASE_FOLDER + file_msg_encrypted,
                         "",
                         "",
-                         "", "",
+                         "", "","", "",
                         "", "","",
                         "",
                         verb);
@@ -101,7 +101,7 @@ void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false,
                             FOLDER + TESTCASE + "/" + TEST + file_msg_decrypted,
                             "",
                             "","", "",
-                            "", "","",
+                            "", "","","", "",
                             "",
                             verb
                           );
@@ -524,7 +524,7 @@ void test_core(bool verbose = true)
 /*
 #ifdef _WIN32
 #else
-#ifdef HAS_WHITEBOX_AES_FEATURE 
+#ifdef HAS_WHITEBOX_AES_FEATURE
 	if (true)
     {
         unsigned char plain[] = { 	0x51, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xf,
@@ -543,7 +543,7 @@ void test_core(bool verbose = true)
 									0x88, 0x21, 0x22, 0x23, 0x24, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
 									0x77, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
 									0x88, 0x21, 0x22, 0x23, 0x24, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,}; //key example
-        
+
 		unsigned int plainLen = 64 * sizeof(unsigned char);  //bytes in plaintext
         const unsigned char iv[16] = {
                         0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};

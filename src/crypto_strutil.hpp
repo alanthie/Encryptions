@@ -132,6 +132,19 @@ namespace strutil
        return r;
     }
 
+	bool has_token(const std::string& token, const std::string& line, size_t pos)
+	{
+		bool r = false;
+		if (line.size() >= token.size() + pos)
+		{
+			std::string s = line.substr(pos, token.size());
+			if (s == token)
+			{
+				r = true;
+			}
+		}
+		return r;
+	}
 
 }
 }

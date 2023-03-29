@@ -40,28 +40,29 @@ void Cipher(const uint8_t in[16], uint8_t out[16], const uint32_t roundKey[],
 
 extern "C" {
 
-void aes128_expand_keys(const uint8_t key[16],
-    uint32_t w[44]) {
+void aes128_expand_keys(const uint8_t key[16],uint32_t w[44])  // (Nr=10+1)*4
+//The AES key expansion algorithm takes as input a four-word (16-byte) key and produces a linear array of 44 words (176 bytes).
+{
   ExpandKeys(key, w, 4, 10);
 }
 
-void aes128_encrypt(const uint8_t in[16], uint8_t out[16],
-    const uint32_t roundKey[44]) {
+void aes128_encrypt(const uint8_t in[16], uint8_t out[16], const uint32_t roundKey[44]) 
+{
   Cipher(in, out, roundKey, 10);
 }
 
-void aes192_expand_keys(const uint8_t key[16],
-    uint32_t w[52]) {
+void aes192_expand_keys(const uint8_t key[16],uint32_t w[52])
+{
   ExpandKeys(key, w, 6, 12);
 }
 
-void aes192_encrypt(const uint8_t in[16], uint8_t out[16],
-    const uint32_t roundKey[52]) {
+void aes192_encrypt(const uint8_t in[16], uint8_t out[16], const uint32_t roundKey[52]) 
+{
   Cipher(in, out, roundKey, 12);
 }
 
-void aes256_expand_keys(const uint8_t key[16],
-    uint32_t w[60]) {
+void aes256_expand_keys(const uint8_t key[16],uint32_t w[60])
+{
   ExpandKeys(key, w, 8, 14);
 }
 
