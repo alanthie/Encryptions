@@ -22,7 +22,7 @@ const std::string RSA_OTHER_PUBLIC_DB           = "rsa_other_public.db";	// (n,e
 
 const std::string HHKEY_MY_PRIVATE_ENCODE_DB    = "hhkey_my_private_encode.db";		// when encoding SHA[0,1,2,...], when confirmed become keys
 const std::string HHKEY_MY_PRIVATE_DECODE_DB    = "hhkey_my_private_decode.db";		// when decoding
-const std::string HHKEY_MY_PUBLIC_DECODE_DB     = "hhke y_my_public_decode.db";		// export
+const std::string HHKEY_MY_PUBLIC_DECODE_DB     = "hhkey_my_public_decode.db";		// export
 const std::string HHKEY_OTHER_PUBLIC_DECODE_DB  = "hhkey_other_public_decode.db";	// recipient short name of HHKEY_MY_PUBLIC_DECODE_DB
 
 const std::string RSA_MY_STATUS_DB     			= "rsa_my_status.db";		// export confirmed/deleted
