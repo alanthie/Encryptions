@@ -416,7 +416,7 @@ public:
 				else if (strutil::has_token("[aes16384]",  std::string(u), 0)) is_wbaes16384 = true;
 			}
 
-            int pos_url = 0;
+            size_t pos_url = 0;
             if      (is_video)   pos_url = 3;
             else if (is_ftp)     pos_url = 3;
             else if (is_local)   pos_url = 3;

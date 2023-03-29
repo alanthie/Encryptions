@@ -5,9 +5,8 @@
 #include "../../random_engine.hpp"
 #include "../../c_plus_plus_serializer.h"
 
-#ifdef _WIN32
-// need NTL for windows- TODO
-#else
+//#ifdef _WIN32
+//#else
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -72,7 +71,7 @@ inline uint8_t to_scalar(const NTL::vec_GF2& in) {
   for (int i = 0; i < 2; i++) {
     long i0 = NTL::rep(in[i*4+0]), i1 = NTL::rep(in[i*4+1]),
          i2 = NTL::rep(in[i*4+2]), i3 = NTL::rep(in[i*4+3]);
-    result = (result << 4) | (i0 << 3) | (i1 << 2) | (i2 << 1) | (i3 << 0);
+    result = (uint8_t) ( (result << 4) | (i0 << 3) | (i1 << 2) | (i2 << 1) | (i3 << 0) );
   }
   return result;
 }
@@ -206,8 +205,16 @@ void CalculateTyBoxes(	uint32_t roundKey[],
     }
   }
 
-  if (enableMB) {
-    NTL::mat_GF2 MB[Nr-1][4];
+  //NTL::mat_GF2 MB[Nr-1][4];
+  std::vector< std::vector<NTL::mat_GF2> >* pMB = new std::vector<std::vector<NTL::mat_GF2 >>(Nr - 1);
+  if (enableMB) 
+  {
+	  std::vector< std::vector<NTL::mat_GF2> >& MB = *pMB;
+	  for (int i = 0; i < Nr-1; i++)
+	  {
+		  MB[i].resize(4);
+	  }
+
     for (int r = 0; r < Nr-1; r++) {
       for (int i = 0; i < 4; i++) {
         MB[r][i] = GenerateRandomGF2InvertibleMatrix(32);
@@ -226,8 +233,16 @@ void CalculateTyBoxes(	uint32_t roundKey[],
     }
   }
 
-  if (enableL) {
-    NTL::mat_GF2 L[Nr-1][16];
+  //NTL::mat_GF2 L[Nr-1][16];
+  std::vector< std::vector<NTL::mat_GF2> >* pL = new std::vector<std::vector<NTL::mat_GF2 >>(Nr - 1);
+  if (enableL) 
+  {
+	std::vector< std::vector<NTL::mat_GF2> >& L = *pL;
+	for (int i = 0; i < Nr - 1; i++)
+	{
+		L[i].resize(16);
+	}
+
     for (int r = 0; r < Nr-1; r++) {
       for (int i = 0; i < 16; i++) {
         L[r][i] = GenerateRandomGF2InvertibleMatrix(8);
@@ -292,6 +307,9 @@ void CalculateTyBoxes(	uint32_t roundKey[],
   }
 
   delete pTboxes;
+
+  if (enableMB) delete pMB;
+  if (enableL) delete pL;
 }
 
 void GenerateXorTable(int Nr, wbaes_vbase* instance_aes, bool verbose = false)
@@ -312,7 +330,7 @@ void GenerateXorTable(int Nr, wbaes_vbase* instance_aes, bool verbose = false)
         }
 	}
 
-
+	if (verbose) std::cout << "GenerateEncryptingTables...1" << std::endl;
   	for (int r = 0; r < Nr-1; r++)
     for (int n = 0; n < 96; n++)
       for (int i = 0; i < 16; i++)
@@ -327,6 +345,7 @@ void GenerateXorTable(int Nr, wbaes_vbase* instance_aes, bool verbose = false)
 		  	instance_aes->setXor(r, n, j, i, Xor[r][n][i][j]);
 		}
 	}
+	if (verbose) std::cout << "GenerateXorTable done" << std::endl;
 
     delete pXor;
 }
@@ -387,16 +406,21 @@ void GenerateEncryptingTables(uint32_t* roundKey, int Nr, wbaes_vbase* instance_
 bool GenerateTables(const char* hexKey, int Nk, int Nr, wbaes_vbase* instance_aes, bool verbose = false)
 {
 	bool r  = true;
-  	uint8_t key[Nk*4];
-  	uint32_t roundKey[(Nr+1)*4];
+  	//uint8_t key[Nk*4];
+	std::vector<uint8_t>* pkey = new std::vector<uint8_t>(Nk * 4);
+	std::vector<uint8_t>& key = *pkey;
 
-  	r = read_key(hexKey, key, Nk*4);
+  	//uint32_t roundKey[(Nr+1)*4];
+	std::vector<uint32_t>* proundKey = new std::vector<uint32_t>( (Nr + 1) * 4 );
+	std::vector<uint32_t>& roundKey = *proundKey;
+
+  	r = read_key(hexKey, key.data(), Nk * 4);
   	if (r)
   	{
   		if (verbose) std::cout << "GenerateTables..." << std::endl;
-	  	ExpandKeys(key, roundKey, Nk, Nr, verbose);
+	  	ExpandKeys(key.data(), roundKey.data(), Nk, Nr, verbose);
 	  	GenerateXorTable(Nr, instance_aes, verbose);
-	  	GenerateEncryptingTables(roundKey, Nr, instance_aes, verbose);
+	  	GenerateEncryptingTables(roundKey.data(), Nr, instance_aes, verbose);
   	}
 	return r;
 }
@@ -592,6 +616,6 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 
 }  // namespace
 
-#endif
+//#endif
 #endif
 

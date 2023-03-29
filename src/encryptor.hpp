@@ -167,9 +167,9 @@ public:
 		if (self_test == false) 				if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.self_test) == 1) self_test = true;
 		if (auto_flag == false) 				if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.auto_flag) == 1) auto_flag = true;
 
-		if (shufflePerc == 0) 					{if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.shufflePerc) > 0) shufflePerc = cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.shufflePerc);}
-		if (key_size_factor <= 1) 				{if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.key_size_factor) >= 1) key_size_factor = cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.key_size_factor);}
-		if (converter <= 1) 					{if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.converter) >= 1) converter = cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.converter);}
+		if (shufflePerc == 0) 					{if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.shufflePerc) > 0) shufflePerc = (uint32_t)cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.shufflePerc);}
+		if (key_size_factor <= 1) 				{if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.key_size_factor) >= 1) key_size_factor = (long)cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.key_size_factor);}
+		if (converter <= 1) 					{if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.converter) >= 1) converter = (uint32_t)cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.converter);}
 	}
 
 	void show_param()
@@ -420,7 +420,7 @@ public:
 			else if (strutil::has_token("[aes16384]",  std::string(vurlkey[i].url), 0)) is_wbaes16384 = true;
 		}
 
-		int pos_url = 0;
+		size_t pos_url = 0;
 		if      (is_video)  pos_url = 3;
 		else if (is_ftp)    pos_url = 3;
 		else if (is_local)  pos_url = 3;

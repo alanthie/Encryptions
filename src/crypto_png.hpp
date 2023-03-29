@@ -87,7 +87,7 @@ public:
 
 	static uint32_t get_require_padding(uint32_t input_size)
 	{
-		uint32_t sz = (uint64_t)ceil(sqrt((double) input_size));
+        uint64_t sz = (uint64_t)ceil(sqrt((double) input_size));
 		uint64_t t = sz*sz;
 		if (t >= input_size)
 			return (uint32_t) (t - input_size);

@@ -370,25 +370,25 @@ public:
 				{
 					if (eq[0] == "last")
 					{
-						if (eq[1].size()>0)	n = strutil::str_to_ll(eq[1]);
+						if (eq[1].size()>0)	n = (long)strutil::str_to_ll(eq[1]);
 						if (n<0) n = 0;
 						r.last_n = n;
 					}
 					else if (eq[0] == "first")
 					{
-						if (eq[1].size()>0)	n = strutil::str_to_ll(eq[1]);
+						if (eq[1].size()>0)	n = (long)strutil::str_to_ll(eq[1]);
 						if (n<0) n = 0;
 						r.first_n = n;
 					}
 					else if (eq[0] == "random")
 					{
-						if (eq[1].size()>0)	n = strutil::str_to_ll(eq[1]);
+						if (eq[1].size()>0)	n = (long)strutil::str_to_ll(eq[1]);
 						if (n<0) n = 0;
 						r.random_n = n;
 					}
 					else if (eq[0] == "new")
 					{
-						if (eq[1].size()>0)	n = strutil::str_to_ll(eq[1]);
+						if (eq[1].size()>0)	n = (long)strutil::str_to_ll(eq[1]);
 						if (n<0) n = 0;
 						r.new_n = n;
 					}

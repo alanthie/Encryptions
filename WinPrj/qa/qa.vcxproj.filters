@@ -170,5 +170,8 @@
     <ClInclude Include="..\..\src\qa\Bin2PNG\lodepng.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\qa\aes-whitebox\aes_whitebox_compiler.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

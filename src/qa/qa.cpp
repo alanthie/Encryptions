@@ -81,7 +81,7 @@ void  menu()
         std::cout << "3. HEX(file, position, keysize)" << std::endl;
         std::cout << "4. Puzzle: Make random puzzle from shared binary (like USB keys) data" << std::endl;
         std::cout << "5. Puzzle: Resolve puzzle" << std::endl;
-        std::cout << "6. WhiteBox keys AES 512-16384 bits - create new key tables (Linux only, Windows soon but can copy *.tbl manually)" << std::endl;
+        std::cout << "6. WhiteBox keys AES 512-16384 bits - create new key tables" << std::endl;
         std::cout << "7.  RSA Key: View my private RSA key" << std::endl;
         std::cout << "8.  RSA Key: View my public RSA key (also included in the private db)" << std::endl;
 		std::cout << "81. RSA Key: View other public RSA key" << std::endl;
@@ -280,8 +280,8 @@ void  menu()
 
    		else if (choice == 6)
         {
-#ifdef _WIN32
-#else
+//#ifdef _WIN32
+//#else
 			if (true)
 			{
 			    std::cout << "Select one 1=AES512, 2=AES1024, 3=AES2048, 4=AES4096, 5=AES8192, 6=AES16384 ";
@@ -322,8 +322,10 @@ void  menu()
 				std::string splaincopy 	= splain;
 				size_t plainLen = splain.size();
 
-				uint8_t eout[plainLen] = {0};
-				uint8_t dout[plainLen] = {0};
+				//uint8_t eout[plainLen] = {0};
+				//uint8_t dout[plainLen] = {0};
+				std::vector<uint8_t> eout(plainLen, 0);
+				std::vector<uint8_t> dout(plainLen, 0);
 
 				//NO KEY!!!!!!!!!!!!!!!!!! but BIG *.tbl
 				const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
@@ -333,12 +335,12 @@ void  menu()
 				for(size_t i=0;i<plainLen;i++) std::cout << (int)splain[i];
 				std::cout <<std::endl;
 
-				paes->aes_whitebox_encrypt_cfb(iv, (uint8_t*)splaincopy.data(), plainLen, eout);
+				paes->aes_whitebox_encrypt_cfb(iv, (uint8_t*)splaincopy.data(), plainLen, eout.data());
 				std::cout << "AES encrypt: ";
 				for(size_t i=0;i<plainLen;i++) std::cout << (int)eout[i];
 				std::cout <<std::endl;
 
-				paes->aes_whitebox_decrypt_cfb(iv, eout, plainLen, dout);
+				paes->aes_whitebox_decrypt_cfb(iv, eout.data(), plainLen, dout.data());
 				std::cout << "AES decrypt: ";
 				for(size_t i=0;i<plainLen;i++) std::cout << (int)dout[i];
 				std::cout <<std::endl;
@@ -356,7 +358,7 @@ void  menu()
 				std::cout << "TEST OK with binary AES cfb algo "<<std::endl;
 
 			}
-#endif
+//#endif
             //qaclass qa;
             //qa.binaryToPng();
             //qa.pngToBinary();

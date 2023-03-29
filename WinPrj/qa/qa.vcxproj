@@ -70,6 +70,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>D:\000DEV\Encryptions\src\qa\WinNTL-11_5_1\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>D:\000DEV\Encryptions\src\qa\WinNTL-11_5_1\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -110,8 +116,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;gmp.lib;libgmp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;D:\000Lib\libgmp_6.2.1-4_msvc17\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winNTL.lib;libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;gmp.lib;libgmp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;D:\000Lib\libgmp_6.2.1-4_msvc17\lib\x64;D:\000DEV\Encryptions\WinPrj\winNTL\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <StackReserveSize>20000000</StackReserveSize>
     </Link>
     <PostBuildEvent>
@@ -134,8 +140,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;gmp.lib;libgmp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;D:\000Lib\libgmp_6.2.1-4_msvc17\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winNTL.lib;libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;gmp.lib;libgmp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;D:\000Lib\libgmp_6.2.1-4_msvc17\lib\x64;D:\000DEV\Encryptions\WinPrj\winNTL\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <StackReserveSize>20000000</StackReserveSize>
     </Link>
     <PostBuildEvent>
@@ -169,6 +175,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\Base64.h" />
     <ClInclude Include="..\..\src\base_const.hpp" />
+    <ClInclude Include="..\..\src\qa\aes-whitebox\aes_whitebox_compiler.hpp" />
     <ClInclude Include="..\..\src\qa\atomic_bitvector.hpp" />
     <ClInclude Include="..\..\src\qa\Bin2PNG\lodepng.h" />
     <ClInclude Include="..\..\src\qa\ecc_point\ecc_curve.hpp" />

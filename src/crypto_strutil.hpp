@@ -100,14 +100,14 @@ namespace strutil
 										unsigned& last_delim_pos,
 										unsigned& end_pos_of_first_delim)
 	{
-		first_delim_pos = s.find(start_delim);
+		first_delim_pos = (unsigned int)s.find(start_delim);
 
 		if (first_delim_pos != std::string::npos)
 		{
-			end_pos_of_first_delim = first_delim_pos + start_delim.length();
+			end_pos_of_first_delim = first_delim_pos + (unsigned int)start_delim.length();
 			if (end_pos_of_first_delim < s.size())
 			{
-				last_delim_pos = s.find(stop_delim, end_pos_of_first_delim+1);
+				last_delim_pos = (unsigned int)s.find(stop_delim, end_pos_of_first_delim+1);
 				if (last_delim_pos != std::string::npos)
 				{
                     if (last_delim_pos > first_delim_pos)

@@ -1131,8 +1131,8 @@ namespace keymgr
 
 	bool sortkey(const std::string& a, const std::string& b)
 	{
-		int na = a.size() - 19; if (na < 1) na = 0;
-		int nb = b.size() - 19; if (nb < 1) nb = 0;
+		int na = (int)a.size() - 19; if (na < 1) na = 0;
+		int nb = (int)b.size() - 19; if (nb < 1) nb = 0;
 		std::string ta = a.substr(na);
 		std::string tb = b.substr(nb);
 		return (ta<tb);
@@ -1213,10 +1213,10 @@ namespace keymgr
 
 			if (first)
 			{
-				if (n > vmapkeyname.size()) n = vmapkeyname.size();
-				for(size_t i = 0; i< n; i++)
+				if (n > (uint32_t)vmapkeyname.size()) n = (uint32_t)vmapkeyname.size();
+				for(uint32_t i = 0; i< n; i++)
 				{
-					if (i < vmapkeyname.size())
+					if (i < (uint32_t)vmapkeyname.size())
 						vkeys_out.push_back(vmapkeyname[i]);
 					else
 						{std::cerr << "error " << i << std::endl; return false;}
@@ -1225,12 +1225,12 @@ namespace keymgr
 			else if (last)
 			{
                 size_t cnt=0;
-				if (n > vmapkeyname.size()) n = vmapkeyname.size();
+				if (n > vmapkeyname.size()) n = (uint32_t)vmapkeyname.size();
 				for(long long i = (long long)vmapkeyname.size() - 1; i >= 0; i--)
 				{
                     if (cnt < n)
                     {
-                        if (i < vmapkeyname.size())
+                        if (i < (long long)vmapkeyname.size())
 						{
 							cnt++;
                             vkeys_out.push_back(vmapkeyname[i]);
@@ -1254,7 +1254,7 @@ namespace keymgr
 				for(long long i = 0; i< (long long)n; i++)
 				{
 					long long t = (long long) (rd.get_rand() * vmapkeyname.size());
-					if ( (t>=0) && (t < vmapkeyname.size()) )
+					if ( (t>=0) && (t < (long long)vmapkeyname.size()) )
 					{
 						vkeys_out.push_back(vmapkeyname[t]);
 					}

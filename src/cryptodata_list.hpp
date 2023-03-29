@@ -57,7 +57,7 @@ struct cryptodata_list_header
 			r+=4; // data_type
 			r+=4; // data_size
 			r+=4; // recipient_short_filename.size()
-			r+=vitem[i].recipient_short_filename.size();
+			r+= (uint32_t)vitem[i].recipient_short_filename.size();
 		}
 		return r;
 	}
@@ -119,13 +119,13 @@ struct cryptodata_list_header
 		bout.writeUInt32(version, -1);
 		bout.writeUInt32(padding, -1);
 		bout.writeUInt32(converter, -1);
-		bout.writeUInt32(vitem.size(), -1);
+		bout.writeUInt32((uint32_t)vitem.size(), -1);
 		for(size_t i=0;i<vitem.size();i++)
 		{
 			bout.writeUInt32((uint32_t)vitem[i].data_type, -1);
 			bout.writeUInt32(vitem[i].data_size, -1);
-			bout.writeUInt32(vitem[i].recipient_short_filename.size(), -1);
-			bout.write(vitem[i].recipient_short_filename.data(),vitem[i].recipient_short_filename.size(), -1);
+			bout.writeUInt32((uint32_t)vitem[i].recipient_short_filename.size(), -1);
+			bout.write(vitem[i].recipient_short_filename.data(), (uint32_t)vitem[i].recipient_short_filename.size(), -1);
 		}
 		return r;
 	}

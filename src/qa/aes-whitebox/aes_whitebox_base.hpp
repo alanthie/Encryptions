@@ -55,6 +55,12 @@ public:
 
 	virtual void write_xor(std::ofstream& ofd) override  {ofd << bits(Xor);}
 	virtual void write_tyboxes(std::ofstream& ofd) override {ofd << bits(Tyboxes);}
+
+	//1 > D:\000DEV\Encryptions\src\c_plus_plus_serializer.h(295, 1) : warning C4267 : 'initializing' : conversion from 'size_t' to 'my_size_t', possible loss of data
+	//	1 > D:\000DEV\Encryptions\src\qa\aes - whitebox\aes_whitebox_base.hpp(58, 1) : message: see reference to function template instantiation 'std::ostream &operator <<<std::array<uint8_t,256>,16,std::array>(std::ostream &,const Bits<std::array<std::array<uint8_t,256>,16> &>)' being compiled
+	//	1 > D:\000DEV\Encryptions\src\qa\aes - whitebox\aes_whitebox_base.hpp(58, 1) : message: while compiling class template member function 'void WBAES::wbaes_base<526,512>::write_tboxesLast(std::ofstream &)'
+	//	1 > D:\000DEV\Encryptions\src\qa\aes - whitebox\aes_whitebox.hpp(47, 1) : message: see reference to class template instantiation 'WBAES::wbaes_base<526,512>' being compiled
+
 	virtual void write_tboxesLast(std::ofstream& ofd) override {ofd << bits(TboxesLast);}
 	virtual void write_mbl(std::ofstream& ofd) override {ofd << bits(MBL);}
 
