@@ -460,6 +460,9 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 	else if (strcmp(aes.data(), "aes16384") == 0) {
 		Nk = 512, Nr = 526;
 	}
+	else if (strcmp(aes.data(), "aes32768") == 0) {
+		Nk = 1024, Nr = 1038;
+	}
 	else
 	{
 		// TODO - do code template for unlimited size

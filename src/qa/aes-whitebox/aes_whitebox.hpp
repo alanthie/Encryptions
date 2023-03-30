@@ -50,6 +50,14 @@ public:
 	~wbaes16384() {}
 };
 
+class wbaes32768 : public wbaes_base<1038, 1024>
+{
+public:
+	wbaes32768() {}
+	~wbaes32768() {}
+};
+
+
 
 class wbaes_instance_mgr
 {
@@ -62,6 +70,7 @@ public:
 		if (i4096 != nullptr) {delete i4096;i4096=nullptr;}
 		if (i8192 != nullptr) {delete i8192;i8192=nullptr;}
 		if (i16384 != nullptr) {delete i16384;i16384=nullptr;}
+		if (i32768 != nullptr) {delete i32768;i32768=nullptr;}
 	}
 
 	wbaes_vbase* get_aes()
@@ -96,6 +105,11 @@ public:
 			if (i16384 == nullptr) i16384 = new wbaes16384();
 			return i16384;
 		}
+		else if (strcmp(aes_name.data(), "aes32768") == 0)
+		{
+			if (i32768 == nullptr) i32768 = new wbaes32768();
+			return i32768;
+		}
 		else
 		{
 			std::cerr << "Name not found " << aes_name << std::endl;
@@ -116,6 +130,7 @@ public:
 	wbaes4096* i4096 = nullptr;
 	wbaes8192* i8192 = nullptr;
 	wbaes16384* i16384 = nullptr;
+	wbaes32768* i32768 = nullptr;
 
 	wbaes_instance_mgr(	const std::string& aesname,
 						const std::string& pathtbl,
@@ -155,6 +170,9 @@ public:
         else if (strcmp(aes_name.data(), "aes16384") == 0) {
 			Nk = 512, Nr = 526;
 		}
+		else if (strcmp(aes_name.data(), "aes32768") == 0) {
+			Nk = 1024, Nr = 1038;
+		}
 
 		if (do_loading)
 			table_loaded = load_tables(pathtbl, verbose);
@@ -188,6 +206,7 @@ public:
 					else if (aes_name == std::string("aes4096")) ifd >> bits( ((wbaes4096*)p)->Xor);
 					else if (aes_name == std::string("aes8192")) ifd >> bits( ((wbaes8192*)p)->Xor);
 					else if (aes_name == std::string("aes16384")) ifd >> bits( ((wbaes16384*)p)->Xor);
+					else if (aes_name == std::string("aes32768")) ifd >> bits( ((wbaes32768*)p)->Xor);
 
 					ifd.close();
 					if (verbose)
@@ -207,6 +226,7 @@ public:
 									else if (aes_name == std::string("aes4096")) std::cout <<  (int)((wbaes4096*)p)->Xor[r][n][i][j];
 									else if (aes_name == std::string("aes8192")) std::cout <<  (int)((wbaes8192*)p)->Xor[r][n][i][j];
 									else if (aes_name == std::string("aes16384")) std::cout <<  (int)((wbaes16384*)p)->Xor[r][n][i][j];
+									else if (aes_name == std::string("aes32768")) std::cout <<  (int)((wbaes32768*)p)->Xor[r][n][i][j];
 								 }
 								std::cout << "},\n";
 							  }
@@ -248,6 +268,7 @@ public:
 					else if (aes_name == std::string("aes4096")) ifd >> bits(((wbaes4096*)p)->TboxesLast);
 					else if (aes_name == std::string("aes8192")) ifd >> bits(((wbaes8192*)p)->TboxesLast);
 					else if (aes_name == std::string("aes16384")) ifd >> bits(((wbaes16384*)p)->TboxesLast);
+					else if (aes_name == std::string("aes32768")) ifd >> bits(((wbaes32768*)p)->TboxesLast);
 
 					ifd.close();
 					if (verbose) std::cout << "ok " << filename << std::endl;
@@ -283,6 +304,7 @@ public:
 					else if (aes_name == std::string("aes4096")) ifd >> bits(((wbaes4096*)p)->Tyboxes);
 					else if (aes_name == std::string("aes8192")) ifd >> bits(((wbaes8192*)p)->Tyboxes);
 					else if (aes_name == std::string("aes16384")) ifd >> bits(((wbaes16384*)p)->Tyboxes);
+					else if (aes_name == std::string("aes32768")) ifd >> bits(((wbaes32768*)p)->Tyboxes);
 
 					ifd.close();
 					if (verbose) std::cout << "ok " << filename << std::endl;
@@ -318,6 +340,7 @@ public:
 					else if (aes_name == std::string("aes4096")) ifd >> bits(((wbaes4096*)p)->MBL);
 					else if (aes_name == std::string("aes8192")) ifd >> bits(((wbaes8192*)p)->MBL);
 					else if (aes_name == std::string("aes16384")) ifd >> bits(((wbaes16384*)p)->MBL);
+					else if (aes_name == std::string("aes32768")) ifd >> bits(((wbaes32768*)p)->MBL);
 
 					ifd.close();
 					if (verbose) std::cout << "ok " << filename << std::endl;

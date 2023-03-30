@@ -195,7 +195,8 @@ public:
 			(out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048) &&
 			(out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) &&
 			(out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192) &&
-			(out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384)
+			(out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384)&&
+			(out_uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes32768)
            )
         {
             std::cerr << "ERROR wrong algo in url info "  << out_uk.crypto_algo << std::endl;
@@ -373,6 +374,7 @@ public:
 		bool is_wbaes4096 = false;
 		bool is_wbaes8192 = false;
 		bool is_wbaes16384 = false;
+		bool is_wbaes32768 = false;
 
 		if (r)
 		{
@@ -414,6 +416,7 @@ public:
 				else if (strutil::has_token("[aes4096]",  std::string(u), 0)) is_wbaes4096 = true;
 				else if (strutil::has_token("[aes8192]",  std::string(u), 0)) is_wbaes8192 = true;
 				else if (strutil::has_token("[aes16384]",  std::string(u), 0)) is_wbaes16384 = true;
+				else if (strutil::has_token("[aes32768]",  std::string(u), 0)) is_wbaes32768 = true;
 			}
 
             size_t pos_url = 0;
@@ -430,6 +433,7 @@ public:
 			else if (is_wbaes4096)    pos_url = std::string("[aes4096]").size()+2;
 			else if (is_wbaes8192)    pos_url = std::string("[aes8192]").size()+2;
 			else if (is_wbaes16384)   pos_url = std::string("[aes16384]").size()+2;
+			else if (is_wbaes32768)   pos_url = std::string("[aes32768]").size()+2;
             int rc = 0;
 
             if (is_video)
@@ -466,7 +470,7 @@ public:
                     r = false;
                 }
             }
-			else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096) || (is_wbaes8192) || (is_wbaes16384))
+			else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096) || (is_wbaes8192) || (is_wbaes16384) || (is_wbaes32768))
 			{
 			}
             else if (is_histo)
@@ -802,7 +806,7 @@ public:
             {
                 pointer_datafile = &ecc_key_data;
             }
-			else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)   || (is_wbaes8192) || (is_wbaes16384))
+			else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)   || (is_wbaes8192) || (is_wbaes16384) || (is_wbaes32768))
 			{
 				pointer_datafile = &no_key;
 			}
@@ -823,7 +827,7 @@ public:
 
 			if (r)
 			{
-				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)  || (is_wbaes8192) || (is_wbaes16384))
+				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)  || (is_wbaes8192) || (is_wbaes16384) || (is_wbaes32768))
 				{
 				}
 				else
@@ -1241,6 +1245,7 @@ public:
 		else if (strutil::has_token("[aes4096]",  std::string(url), 0)) r = std::string(url).substr(std::string("[aes4096]").size());
 		else if (strutil::has_token("[aes8192]",  std::string(url), 0)) r = std::string(url).substr(std::string("[aes8192]").size());
 		else if (strutil::has_token("[aes16384]",  std::string(url), 0)) r = std::string(url).substr(std::string("[aes16384]").size());
+		else if (strutil::has_token("[aes32768]",  std::string(url), 0)) r = std::string(url).substr(std::string("[aes32768]").size());
 		return r;
 	}
 
@@ -1767,6 +1772,11 @@ public:
 			std::string keyfolder = wbaes_my_private_path;
             r = decode_wbaes(data_encrypted, "aes16384",  keyname, keyfolder, data_decrypted);
         }
+		else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_wbaes32768)
+        {
+			std::string keyfolder = wbaes_my_private_path;
+            r = decode_wbaes(data_encrypted, "aes32768",  keyname, keyfolder, data_decrypted);
+        }
         else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_TWOFISH)
         {
             r = decode_twofish(data_encrypted, key, key_size, data_decrypted);
@@ -2231,7 +2241,8 @@ public:
 						(uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048) &&
 						(uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) &&
 						(uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192)  &&
-						(uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384)
+						(uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384) &&
+						(uk.crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes32768)
                        )
                     {
                         std::cerr << "WARNING mismatch algo at url iter: " <<  iter << std::endl;
@@ -2244,6 +2255,7 @@ public:
 					else if (uk.crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) {keyname = get_keyname_aes(uk.url);}
 					else if (uk.crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192) {keyname = get_keyname_aes(uk.url);}
 					else if (uk.crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384) {keyname = get_keyname_aes(uk.url);}
+					else if (uk.crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes32768) {keyname = get_keyname_aes(uk.url);}
 
                     // decode(DataN, keyN) => DataN-1+urlkeyN-1     urlkeyN-1=>keyN-1
                     if (decode( iter+1, NITER+1, uk.crypto_algo,

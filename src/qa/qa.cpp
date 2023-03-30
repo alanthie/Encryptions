@@ -81,7 +81,7 @@ void  menu()
         std::cout << "3. HEX(file, position, keysize)" << std::endl;
         std::cout << "4. Puzzle: Make random puzzle from shared binary (like USB keys) data" << std::endl;
         std::cout << "5. Puzzle: Resolve puzzle" << std::endl;
-        std::cout << "6. WhiteBox keys AES 512-16384 bits - create new key tables" << std::endl;
+        std::cout << "6. WhiteBox keys AES 512-32768 bits - create new key tables" << std::endl;
         std::cout << "7.  RSA Key: View my private RSA key" << std::endl;
         std::cout << "8.  RSA Key: View my public RSA key (also included in the private db)" << std::endl;
 		std::cout << "81. RSA Key: View other public RSA key" << std::endl;
@@ -284,12 +284,12 @@ void  menu()
 //#else
 			if (true)
 			{
-			    std::cout << "Select one 1=AES512, 2=AES1024, 3=AES2048, 4=AES4096, 5=AES8192, 6=AES16384 ";
+			    std::cout << "Select one 1=AES512, 2=AES1024, 3=AES2048, 4=AES4096, 5=AES8192, 6=AES16384, 7=AES32768 ";
 				std::string spos;
 				std::cin >> spos;
 				long long pos = cryptoAL::str_to_ll(spos);
 				if (pos<1) pos = 1;
-				if (pos>6) pos = 6;
+				if (pos>7) pos = 6;
 
 				std::string aes;
 				if (pos==1) aes = "aes512";
@@ -298,6 +298,7 @@ void  menu()
 				else if (pos==4) aes = "aes4096";
 				else if (pos==5) aes = "aes8192";
 				else if (pos==6) aes = "aes16384";
+				else if (pos==7) aes = "aes32768";
 
 				std::cout << "Enter key name (4 *.tbl files are generated in current directory, you can move them): ";
 				std::string kn;

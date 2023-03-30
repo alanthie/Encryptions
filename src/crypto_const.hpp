@@ -32,6 +32,7 @@ enum class CRYPTO_ALGO : uint16_t
 	ALGO_wbaes4096,
 	ALGO_wbaes8192,
 	ALGO_wbaes16384,
+	ALGO_wbaes32768
 };
 enum class CRYPTO_ALGO_AES
 {

@@ -24,7 +24,8 @@ enum keyspec_type
 	wbaes_2048	= 300,
 	wbaes_4096	= 400,
 	wbaes_8192	= 500,
-	wbaes_16384	= 600
+	wbaes_16384	= 600,
+	wbaes_32768	= 700
 };
 
 enum keyspec_composition_mode
@@ -122,6 +123,7 @@ struct keyspec_composite
 							else if (vkeyspec[i].ktype == wbaes_4096) 	start_token = "[aes4096]";
 							else if (vkeyspec[i].ktype == wbaes_8192) 	start_token = "[aes8192]";
 							else if (vkeyspec[i].ktype == wbaes_16384) 	start_token = "[aes16384]";
+							else if (vkeyspec[i].ktype == wbaes_32768) 	start_token = "[aes32768]";
 							else
 							{
 								//...
@@ -162,6 +164,7 @@ struct keyspec_composite
 					else if (vkeyspec[i].ktype == wbaes_4096) 	start_token = "[aes4096]";
 					else if (vkeyspec[i].ktype == wbaes_8192) 	start_token = "[aes8192]";
 					else if (vkeyspec[i].ktype == wbaes_16384) 	start_token = "[aes16384]";
+					else if (vkeyspec[i].ktype == wbaes_32768) 	start_token = "[aes32768]";
 					else
 					{
 						//...
@@ -314,6 +317,7 @@ public:
 			else if (has_token("[aes4096]", v[i], 0)) k = parse_key("[aes4096]",0, keyspec_type::wbaes_4096, false,  v[i]);
 			else if (has_token("[aes8192]", v[i], 0)) k = parse_key("[aes8192]",0, keyspec_type::wbaes_8192, false,  v[i]);
 			else if (has_token("[aes16384]", v[i], 0)) k = parse_key("[aes16384]",0, keyspec_type::wbaes_16384, false,  v[i]);
+			else if (has_token("[aes32768]", v[i], 0)) k = parse_key("[aes32768]",0, keyspec_type::wbaes_32768, false,  v[i]);
 
 			if (k.ktype != keyspec_type::Unknown)
 			{

@@ -348,6 +348,7 @@ public:
 		else if (strutil::has_token("[aes4096]",  std::string(url), 0)) r = std::string(url).substr(std::string("[aes4096]").size());
 		else if (strutil::has_token("[aes8192]",  std::string(url), 0)) r = std::string(url).substr(std::string("[aes8192]").size());
 		else if (strutil::has_token("[aes16384]",  std::string(url), 0)) r = std::string(url).substr(std::string("[aes16384]").size());
+		else if (strutil::has_token("[aes32768]",  std::string(url), 0)) r = std::string(url).substr(std::string("[aes32768]").size());
 		return r;
 	}
 
@@ -381,6 +382,7 @@ public:
 		bool is_wbaes4096 = false;
 		bool is_wbaes8192 = false;
 		bool is_wbaes16384 = false;
+		bool is_wbaes32768 = false;
 
 		if (vurlkey[i].url[0]=='[')
 		{
@@ -418,6 +420,7 @@ public:
 			else if (strutil::has_token("[aes4096]",  std::string(vurlkey[i].url), 0)) is_wbaes4096 = true;
 			else if (strutil::has_token("[aes8192]",  std::string(vurlkey[i].url), 0)) is_wbaes8192 = true;
 			else if (strutil::has_token("[aes16384]",  std::string(vurlkey[i].url), 0)) is_wbaes16384 = true;
+			else if (strutil::has_token("[aes32768]",  std::string(vurlkey[i].url), 0)) is_wbaes32768 = true;
 		}
 
 		size_t pos_url = 0;
@@ -434,6 +437,7 @@ public:
 		else if (is_wbaes4096)    pos_url = std::string("[aes4096]").size()+2;
 		else if (is_wbaes8192)    pos_url = std::string("[aes8192]").size()+2;
 		else if (is_wbaes16384)   pos_url = std::string("[aes16384]").size()+2;
+		else if (is_wbaes32768)   pos_url = std::string("[aes32768]").size()+2;
         int rc = 0;
 
         cryptodata dataout_local;
@@ -481,7 +485,7 @@ public:
                 r = false;
             }
         }
-		else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)|| (is_wbaes8192)|| (is_wbaes16384))
+		else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)|| (is_wbaes8192)|| (is_wbaes16384)|| (is_wbaes32768))
 		{
 
 		}
@@ -841,7 +845,7 @@ public:
             {
                 pointer_datafile = &histo_key_data;
             }
-            else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096) || (is_wbaes8192) || (is_wbaes16384))
+            else if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096) || (is_wbaes8192) || (is_wbaes16384)|| (is_wbaes32768))
 			{
 				pointer_datafile = &no_key;
 			}
@@ -859,7 +863,7 @@ public:
 
 			if (r)
 			{
-				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096) || (is_wbaes8192) || (is_wbaes16384))
+				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096) || (is_wbaes8192) || (is_wbaes16384)|| (is_wbaes32768))
 				{
 				}
 				else
@@ -944,7 +948,7 @@ public:
 					}
 				}
 
-				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)|| (is_wbaes8192) || (is_wbaes16384))
+				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)|| (is_wbaes8192) || (is_wbaes16384) || (is_wbaes32768))
 				{
 					if (is_wbaes512) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes512;
 					else if (is_wbaes1024) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes1024;
@@ -952,6 +956,7 @@ public:
 					else if (is_wbaes4096) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096;
 					else if (is_wbaes8192) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192;
 					else if (is_wbaes16384) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384;
+					else if (is_wbaes32768) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes32768;
 				}
 				else
 				{
@@ -969,7 +974,7 @@ public:
 				if (verbose)
                     std::cout << "crypto_algo: " << vurlkey[i].crypto_algo << std::endl;
 
-				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)|| (is_wbaes8192) || (is_wbaes16384))
+				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)|| (is_wbaes8192) || (is_wbaes16384) || (is_wbaes32768))
 				{
 				}
 				else
@@ -1833,7 +1838,8 @@ public:
 					 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048) &&
 					 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) &&
 					 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192)&&
-                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384)
+                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384)&&
+                     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_wbaes32768)
                      )
             {
                 std::cerr << "WARNING mismatch algo at iter (using default) " <<  iter-1 << std::endl;
@@ -1868,6 +1874,11 @@ public:
             {
 			    std::string keyfolder = wbaes_other_public_path;
 				return encode_wbaes(data_temp, "aes16384", keyname, keyfolder, data_temp_next);
+			}
+			else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes32768)
+            {
+			    std::string keyfolder = wbaes_other_public_path;
+				return encode_wbaes(data_temp, "aes32768", keyname, keyfolder, data_temp_next);
 			}
             else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH)
             {
@@ -2096,6 +2107,7 @@ public:
                 else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
 				else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
 				else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
+				else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes32768) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
 
                 if (is_aes)
                 {
@@ -2115,6 +2127,7 @@ public:
                 else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
 				else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
 				else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
+				else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes32768) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
 
                 std::string keyname2;
                 bool is_aes2 = false;
@@ -2124,6 +2137,7 @@ public:
                 else if (vurlkey[i-1].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) {keyname2 = get_keyname_aes(vurlkey[i-1].url);is_aes2=true;}
 				else if (vurlkey[i-1].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192) {keyname2 = get_keyname_aes(vurlkey[i-1].url);is_aes2=true;}
 				else if (vurlkey[i-1].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384) {keyname2 = get_keyname_aes(vurlkey[i-1].url);is_aes2=true;}
+				else if (vurlkey[i-1].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes32768) {keyname2 = get_keyname_aes(vurlkey[i-1].url);is_aes2=true;}
 
                 if (is_aes && is_aes2 && (keyname==keyname2))
                 {
@@ -2240,6 +2254,7 @@ public:
 			else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
 			else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes8192) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
 			else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes16384) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
+			else if (vurlkey[i].crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_wbaes32768) {keyname = get_keyname_aes(vurlkey[i].url);is_aes=true;}
 
             if ((i==0) && is_aes)
             {
