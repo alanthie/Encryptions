@@ -16,6 +16,8 @@ namespace cryptoAL
 
 enum class CRYPTO_ALGO : uint16_t
 {
+    ALGO_NONE = 0,
+
     ALGO_BIN_DES = 1,
     ALGO_BIN_AES_16_16_ecb,
     ALGO_BIN_AES_16_16_cbc,
@@ -32,7 +34,9 @@ enum class CRYPTO_ALGO : uint16_t
 	ALGO_wbaes4096,
 	ALGO_wbaes8192,
 	ALGO_wbaes16384,
-	ALGO_wbaes32768
+	ALGO_wbaes32768,
+
+	ALGO_LIMIT_MARKER
 };
 enum class CRYPTO_ALGO_AES
 {
@@ -40,6 +44,61 @@ enum class CRYPTO_ALGO_AES
     CBC,
     CFB
 };
+
+inline std::string aes_subtype(uint16_t t)
+{
+    if      (t==(uint16_t)CRYPTO_ALGO_AES::ECB) return "ECB";
+    else if (t==(uint16_t)CRYPTO_ALGO_AES::CBC) return "CBC";
+    else if (t==(uint16_t)CRYPTO_ALGO_AES::CFB) return "CFB";
+    return "";
+}
+
+inline CRYPTO_ALGO wbaes_algo_first() {return CRYPTO_ALGO::ALGO_wbaes512;}
+inline CRYPTO_ALGO wbaes_algo_last()  {return CRYPTO_ALGO::ALGO_wbaes32768;}
+
+inline std::string algo_wbaes_name(CRYPTO_ALGO t)
+{
+    if      (t==CRYPTO_ALGO::ALGO_wbaes512)   return "aes512";
+    else if (t==CRYPTO_ALGO::ALGO_wbaes1024)  return "aes1024";
+    else if (t==CRYPTO_ALGO::ALGO_wbaes2048)  return "aes2048";
+    else if (t==CRYPTO_ALGO::ALGO_wbaes4096)  return "aes4096";
+    else if (t==CRYPTO_ALGO::ALGO_wbaes8192)  return "aes8192";
+    else if (t==CRYPTO_ALGO::ALGO_wbaes16384) return "aes16384";
+    else if (t==CRYPTO_ALGO::ALGO_wbaes32768) return "aes32768";
+    return "";
+}
+inline CRYPTO_ALGO wbaes_algo(const std::string& s)
+{
+    if      (s == algo_wbaes_name(CRYPTO_ALGO::ALGO_wbaes512))  return CRYPTO_ALGO::ALGO_wbaes512;
+    else if (s == algo_wbaes_name(CRYPTO_ALGO::ALGO_wbaes1024)) return CRYPTO_ALGO::ALGO_wbaes1024;
+    else if (s == algo_wbaes_name(CRYPTO_ALGO::ALGO_wbaes2048)) return CRYPTO_ALGO::ALGO_wbaes2048;
+    else if (s == algo_wbaes_name(CRYPTO_ALGO::ALGO_wbaes4096)) return CRYPTO_ALGO::ALGO_wbaes4096;
+    else if (s == algo_wbaes_name(CRYPTO_ALGO::ALGO_wbaes8192)) return CRYPTO_ALGO::ALGO_wbaes8192;
+    else if (s == algo_wbaes_name(CRYPTO_ALGO::ALGO_wbaes16384)) return CRYPTO_ALGO::ALGO_wbaes16384;
+    else if (s == algo_wbaes_name(CRYPTO_ALGO::ALGO_wbaes32768)) return CRYPTO_ALGO::ALGO_wbaes32768;
+    return CRYPTO_ALGO::ALGO_NONE;
+}
+inline CRYPTO_ALGO wbaes_algo_from_uint16(uint16_t t)
+{
+    if      (t==(uint16_t)CRYPTO_ALGO::ALGO_wbaes512) return CRYPTO_ALGO::ALGO_wbaes512;
+    else if (t==(uint16_t)CRYPTO_ALGO::ALGO_wbaes1024) return CRYPTO_ALGO::ALGO_wbaes1024;
+    else if (t==(uint16_t)CRYPTO_ALGO::ALGO_wbaes2048) return CRYPTO_ALGO::ALGO_wbaes2048;
+    else if (t==(uint16_t)CRYPTO_ALGO::ALGO_wbaes4096) return CRYPTO_ALGO::ALGO_wbaes4096;
+    else if (t==(uint16_t)CRYPTO_ALGO::ALGO_wbaes8192) return CRYPTO_ALGO::ALGO_wbaes8192;
+    else if (t==(uint16_t)CRYPTO_ALGO::ALGO_wbaes16384) return CRYPTO_ALGO::ALGO_wbaes16384;
+    else if (t==(uint16_t)CRYPTO_ALGO::ALGO_wbaes32768) return CRYPTO_ALGO::ALGO_wbaes32768;
+    return CRYPTO_ALGO::ALGO_NONE;
+}
+inline std::string token_wbaes_algo(CRYPTO_ALGO t)
+{
+    std::string s = algo_wbaes_name(t);
+    if (s.size() > 0)
+    {
+        return "[" + s + "]";
+    }
+    return "";
+}
+
 
 enum class CRYPTO_FILE_TYPE : uint32_t
 {
@@ -103,7 +162,7 @@ constexpr static uint32_t URLINFO_SIZE      =   URL_LEN_ENCODESIZE + URL_MAX_SIZ
 
 constexpr static int16_t PADDING_MULTIPLE       = 64; // data should be at least 64x with Salsa20 requirement
 constexpr static int16_t PADDING_KEY_MULTIPLE   = 32; //  key should be at least 32x with Salsa20 requirement
-constexpr static int16_t NITER_LIM              = 256;
+constexpr static int16_t NITER_LIM              = 2048;
 constexpr static uint32_t FILE_SIZE_LIM         = 256*1024*1024;
 
 const std::string QA_TOKEN              = "QA";

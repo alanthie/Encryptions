@@ -54,7 +54,7 @@ namespace cryptoAL
 		return sz;
 	}
 
-	int getvideo(std::string url, std::string outfile, std::string options = "", bool verbose=false)
+	int getvideo(std::string url, std::string outfile, std::string options = "", [[maybe_unused]] bool verbose=false)
 	{
 		// youtube-dl 'https://www.bitchute.com/video/JjqRgjv5GJmW/'
 #ifdef _WIN32
@@ -62,7 +62,7 @@ namespace cryptoAL
 #else
 		std::string cmd = std::string("youtube-dl ") + std::string("'") + url + std::string("'") + std::string(" -o ") + outfile + options;
 #endif
-		if (verbose)
+		if (VERBOSE_DEBUG)
 		{
 			std::cout << "getvideo in:  " << url << std::endl;
 			std::cout << "getvideo out: " << outfile << std::endl;
@@ -219,7 +219,7 @@ namespace cryptoAL
 		if (r)
 		{
 			decoded_ecc_data = out_msg;
-			if (verbose)
+			if (VERBOSE_DEBUG)
 			{
                 std::cout << "ecc decoded data: " << decoded_ecc_data << std::endl;
 			}
@@ -297,7 +297,7 @@ namespace cryptoAL
 
 		// smsg maybe less or bigger than ecc capacity
 		std::string msg_to_encrypt;
-		
+
 		//	MSG_BYTES_MAX = bits_len/8;
 		//	MSG_BYTES_MAX -= 1;             // space to find a valid message on curve x+0, 1,...255 - 50% of x are on curve
 		//	MSG_BYTES_PAD = 1;
@@ -330,7 +330,7 @@ namespace cryptoAL
 				encoded_ecc_data += std::to_string(out_rG_x.size()) + ";" + out_rG_x + ";";
 				encoded_ecc_data += std::to_string(out_rG_y.size()) + ";" + out_rG_y + ";";
 
-				if (verbose)
+				if (VERBOSE_DEBUG)
 				{
                     std::cout << "ecc encoded data [Cm+rG]: " << encoded_ecc_data << std::endl;
                     std::cout << "ecc encoded data [Cm+rG] size: " << encoded_ecc_data.size() << std::endl;
@@ -346,7 +346,7 @@ namespace cryptoAL
 		if (msg_to_encrypt.size() < smsg.size())
 		{
 			encoded_ecc_data += smsg.substr(msg_to_encrypt.size());
-			if (verbose)
+			if (VERBOSE_DEBUG)
             {
                 std::cout << "ecc recursive encoded data: " << encoded_ecc_data << std::endl;
                 std::cout << "ecc recursive encoded data size: " << encoded_ecc_data.size() << std::endl;
@@ -420,10 +420,10 @@ namespace cryptoAL
 
 	static std::string s_last_local_file = "";
 	static bool s_use_last = false;
-	int getlocal(std::string url, cryptodata& dataout, std::string options = "", bool verbose=false)
+	int getlocal(std::string url, cryptodata& dataout, std::string options = "", [[maybe_unused]] bool verbose=false)
 	{
 		options=options;
-		if (verbose)
+		if (VERBOSE_DEBUG)
 		{
 			std::cout << "getlocal input:  " << url << std::endl;
 		}
@@ -469,7 +469,7 @@ namespace cryptoAL
 		bool r = dataout.read_from_file(nfile);
 		auto sz = dataout.buffer.size();
 
-		if (verbose)
+		if (VERBOSE_DEBUG)
 		{
 			std::cout << "reading local file: "  << nfile << " " << sz << std::endl;
 		}
@@ -589,9 +589,9 @@ namespace cryptoAL
 		return fwrite(ptr, size, nmemb, stream);
 	}
 
-	int wget(const char *in, const char *out, bool verbose=false)
+	int wget(const char *in, const char *out, [[maybe_unused]] bool verbose=false)
 	{
-		if (verbose)
+		if (VERBOSE_DEBUG)
 		{
 			std::cout << "wget in:  " << in << std::endl;
 			std::cout << "wget out: " << out << std::endl;

@@ -253,7 +253,7 @@ constexpr uint32_t RotWord(uint32_t x) {
 // schedule.
 inline void ExpandKeys(const uint8_t* key, uint32_t* w, int Nk, int Nr, bool verbose = false)
 {
-    if (verbose) std::cout << "ExpandKeys..." << std::endl;
+    if (VERBOSE_DEBUG) std::cout << "ExpandKeys..." << std::endl;
 
   constexpr int Nb = 4;
   constexpr uint32_t Rcon[] = {

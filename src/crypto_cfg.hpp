@@ -13,6 +13,7 @@ const std::string CFG_var_section  		= "var";
 const std::string CFG_cmdparam_section  = "cmdparam";
 const std::string CFG_keymgr_section    = "keymgr";
 const std::string CFG_keygen_section    = "keygen";
+const std::string CFG_algo_section    	= "algo";
 
 // *.ini file
 // [var]
@@ -28,6 +29,44 @@ const std::string CFG_keygen_section    = "keygen";
 // [keygen]
 // policy1 		= keytype:rsa, pool_first:10, pool_random:30, pool_last:10, pool_new:20, pool_max:100
 //
+// [algo]
+//  ALGO_BIN_AES_16_16_ecb	= 1
+//  ALGO_BIN_AES_16_16_cbc	= 1
+//  ALGO_BIN_AES_16_16_cfb	= 1
+//	ALGO_BIN_AES_32_32_ecb	= 1
+//  ALGO_BIN_AES_32_32_cbc	= 1
+//  ALGO_BIN_AES_32_32_cfb	= 1
+//  ALGO_TWOFISH	= 1
+//  ALGO_Salsa20	= 1
+//  ALGO_IDEA		= 1
+//	ALGO_wbaes512	= 1
+//	ALGO_wbaes1024	= 1
+//	ALGO_wbaes2048	= 1
+//	ALGO_wbaes4096	= 1
+//	ALGO_wbaes8192	= 1
+//	ALGO_wbaes16384	= 1
+//	ALGO_wbaes32768	= 1
+
+// [algo]
+struct cfg_algo
+{
+	std::string ALGO_BIN_AES_16_16_ecb;
+	std::string ALGO_BIN_AES_16_16_cbc;
+	std::string ALGO_BIN_AES_16_16_cfb;
+	std::string ALGO_BIN_AES_32_32_ecb;
+	std::string ALGO_BIN_AES_32_32_cbc;
+	std::string ALGO_BIN_AES_32_32_cfb;
+	std::string ALGO_TWOFISH;
+	std::string ALGO_Salsa20;
+	std::string ALGO_IDEA;
+	std::string ALGO_wbaes512;
+	std::string ALGO_wbaes1024;
+	std::string ALGO_wbaes2048;
+	std::string ALGO_wbaes4096;
+	std::string ALGO_wbaes8192;
+	std::string ALGO_wbaes16384;
+	std::string ALGO_wbaes32768;
+};
 
 // [cmdparam]
 struct cfg_cmdparam
@@ -93,7 +132,8 @@ public:
 	ini_parser  ini;
 
 	std::map<std::string, std::map<std::string, std::string>> map_sections;
-	cfg_cmdparam cmdparam;
+	cfg_cmdparam 	cmdparam;
+	cfg_algo 		algo;
 	std::map<std::string,std::string> map_var;
 
 	long long get_positive_value_negative_if_invalid(const std::string& s)
@@ -140,6 +180,7 @@ public:
 
 		read_var();
 		read_cmdparam();
+		read_algo();
 
 		return r;
 	}
@@ -232,6 +273,32 @@ public:
 		cmdparam.check_converter       			= apply_var(ini.get_string("check_converter", CFG_cmdparam_section));
 	}
 
+	void read_algo()
+	{
+	    if (map_sections.find(CFG_algo_section) == map_sections.end())
+		{
+			std::cerr << "WARNING no algo section in config file: " << filecfg << std::endl;
+			return;
+		}
+		
+		algo.ALGO_BIN_AES_16_16_ecb  = apply_var(ini.get_string("ALGO_BIN_AES_16_16_ecb", CFG_algo_section));
+	 	algo.ALGO_BIN_AES_16_16_cbc  = apply_var(ini.get_string("ALGO_BIN_AES_16_16_cbc", CFG_algo_section));
+	 	algo.ALGO_BIN_AES_16_16_cfb  = apply_var(ini.get_string("ALGO_BIN_AES_16_16_cfb", CFG_algo_section));
+	 	algo.ALGO_BIN_AES_32_32_ecb  = apply_var(ini.get_string("ALGO_BIN_AES_32_32_ecb", CFG_algo_section));
+	 	algo.ALGO_BIN_AES_32_32_cbc  = apply_var(ini.get_string("ALGO_BIN_AES_32_32_cbc", CFG_algo_section));
+	 	algo.ALGO_BIN_AES_32_32_cfb  = apply_var(ini.get_string("ALGO_BIN_AES_32_32_cfb", CFG_algo_section));
+	 	algo.ALGO_TWOFISH  			= apply_var(ini.get_string("ALGO_TWOFISH", CFG_algo_section));
+	 	algo.ALGO_Salsa20  			= apply_var(ini.get_string("ALGO_Salsa20", CFG_algo_section));
+	 	algo.ALGO_IDEA  			= apply_var(ini.get_string("ALGO_IDEA", CFG_algo_section));
+	 	algo.ALGO_wbaes512  		= apply_var(ini.get_string("ALGO_wbaes512", CFG_algo_section));
+	 	algo.ALGO_wbaes1024  		= apply_var(ini.get_string("ALGO_wbaes1024", CFG_algo_section));
+	 	algo.ALGO_wbaes2048  		= apply_var(ini.get_string("ALGO_wbaes2048", CFG_algo_section));
+	 	algo.ALGO_wbaes4096  		= apply_var(ini.get_string("ALGO_wbaes4096", CFG_algo_section));
+	 	algo.ALGO_wbaes8192  		= apply_var(ini.get_string("ALGO_wbaes8192", CFG_algo_section));
+		algo.ALGO_wbaes16384  		= apply_var(ini.get_string("ALGO_wbaes16384", CFG_algo_section));
+		algo.ALGO_wbaes32768  		= apply_var(ini.get_string("ALGO_wbaes32768", CFG_algo_section));
+	}
+	
 	void show()
 	{
 		std::cout << "-------------------------------------------------" << std::endl;
@@ -264,8 +331,28 @@ public:
 		std::cout << "check_converter: " << cmdparam.check_converter << std::endl;
 		std::cout << "verbose:     " << cmdparam.verbose << std::endl;
 		std::cout << "-------------------------------------------------" << std::endl<< std::endl;
+		
+		std::cout << "-------------------------------------------------" << std::endl;
+		std::cout << "algo section:" << std::endl;
+		std::cout << "-------------------------------------------------" << std::endl;
+		std::cout << "ALGO_AES_128_ecb:           " << algo.ALGO_BIN_AES_16_16_ecb  << std::endl;
+		std::cout << "ALGO_AES_128_cbc:           " << algo.ALGO_BIN_AES_16_16_cbc  << std::endl;
+		std::cout << "ALGO_AES_128_cfb:           " << algo.ALGO_BIN_AES_16_16_cfb  << std::endl;
+		std::cout << "ALGO_AES_256_ecb:           " << algo.ALGO_BIN_AES_32_32_ecb  << std::endl;
+		std::cout << "ALGO_AES_256_cbc:           " << algo.ALGO_BIN_AES_32_32_cbc  << std::endl;
+		std::cout << "ALGO_AES_256_cfb:           " << algo.ALGO_BIN_AES_32_32_cfb  << std::endl;	
+		std::cout << "ALGO_TWOFISH:               " << algo.ALGO_TWOFISH  << std::endl;
+		std::cout << "ALGO_Salsa20:               " << algo.ALGO_Salsa20  << std::endl;
+		std::cout << "ALGO_IDEA:                  " << algo.ALGO_IDEA  << std::endl;
+		std::cout << "ALGO_wbAES_512:             " << algo.ALGO_wbaes512  << std::endl;
+		std::cout << "ALGO_wbAES_1024:            " << algo.ALGO_wbaes1024  << std::endl;
+		std::cout << "ALGO_wbAES_2048:            " << algo.ALGO_wbaes2048  << std::endl;
+		std::cout << "ALGO_wbAES_4096:            " << algo.ALGO_wbaes4096  << std::endl;
+		std::cout << "ALGO_wbAES_8192:            " << algo.ALGO_wbaes8192  << std::endl;
+		std::cout << "ALGO_wbAES_16384:           " << algo.ALGO_wbaes16384  << std::endl;
+		std::cout << "ALGO_wbAES_32768:           " << algo.ALGO_wbaes32768  << std::endl;
+		std::cout << "-------------------------------------------------" << std::endl<< std::endl;
 	}
-
 
 };
 

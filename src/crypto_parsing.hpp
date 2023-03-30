@@ -44,14 +44,14 @@ std::string get_current_date()
    return ss.str();
 }
 
-int find_string(std::string url, char delim, std::string vlist, bool verbose = false)
+int find_string(std::string url, char delim, std::string vlist, [[maybe_unused]] bool verbose = false)
 {
    size_t pos_start = 0;
    size_t pos_end = 0;
    std::string  token;
    int cnt = 0;
 
-   if (verbose)
+   if (VERBOSE_DEBUG)
        std::cout << "searching for match of "<< url << " in list " << vlist << std::endl;
 
    for(size_t i=0;i<vlist.size();i++)
@@ -60,7 +60,7 @@ int find_string(std::string url, char delim, std::string vlist, bool verbose = f
        else
        {
            token = vlist.substr(pos_start, pos_end-pos_start);
-           if (verbose)
+           if (VERBOSE_DEBUG)
                std::cout << "token "<< token << std::endl;
            if (url.find(token, 0) != std::string::npos)
            {
@@ -73,7 +73,7 @@ int find_string(std::string url, char delim, std::string vlist, bool verbose = f
    return -1;
 }
 
-std::string get_string_by_index(std::string vlist, char delim, int idx, bool verbose = false)
+std::string get_string_by_index(std::string vlist, char delim, int idx, [[maybe_unused]] bool verbose = false)
 {
    size_t pos_start = 0;
    size_t pos_end = 0;
@@ -86,7 +86,7 @@ std::string get_string_by_index(std::string vlist, char delim, int idx, bool ver
        else
        {
            token = vlist.substr(pos_start, pos_end-pos_start);
-           if (verbose)
+           if (VERBOSE_DEBUG)
                std::cout << "token "<< token << std::endl;
            if (idx == cnt)
                return token;

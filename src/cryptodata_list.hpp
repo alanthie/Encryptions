@@ -143,13 +143,13 @@ struct cryptodata_list_header
 							const std::string&  folder_my_private_rsa,
                             const std::string&  folder_my_private_ecc,
                             const std::string&  folder_my_private_hh,
-                            bool verbose = false)
+                            [[maybe_unused]] bool verbose = false)
 	{
 		bool r = true;
 		uint32_t pos=0;
 		uint32_t sz_in = in_data.size();
 
-		if (verbose)
+		if (VERBOSE_DEBUG)
 			std::cout << "read_from_buffer " << in_data.size() << std::endl;
 
 		if (sz_in < 8+8) {error(2, sz_in, 8+8); return false;}
@@ -165,19 +165,19 @@ struct cryptodata_list_header
 		if (magic_number[7] != 'n') {error(1);return false;}
 		pos+=8;
 
-		if (verbose)
+		if (VERBOSE_DEBUG)
 			std::cout << "read_from_buffer magic_number OK" << std::endl;
 
 		version = in_data.readUInt32(pos);pos+=4;
 		padding = in_data.readUInt32(pos);pos+=4;
 		converter = in_data.readUInt32(pos);pos+=4;
 
-		if (verbose) std::cout << "version   " << version << std::endl;
-		if (verbose) std::cout << "padding   " << padding << std::endl;
-		if (verbose) std::cout << "converter " << converter << std::endl;
+		if (VERBOSE_DEBUG) std::cout << "version   " << version << std::endl;
+		if (VERBOSE_DEBUG) std::cout << "padding   " << padding << std::endl;
+		if (VERBOSE_DEBUG) std::cout << "converter " << converter << std::endl;
 
 		uint32_t sz = in_data.readUInt32(pos);pos+=4;
-		if (verbose) std::cout << "file count " << sz << std::endl;
+		if (VERBOSE_DEBUG) std::cout << "file count " << sz << std::endl;
 
 		for(size_t i=0;i<sz;i++)
 		{
@@ -186,13 +186,13 @@ struct cryptodata_list_header
 			auto t = in_data.readUInt32(pos);pos+=4;
 			CRYPTO_FILE_TYPE data_type = to_enum<CRYPTO_FILE_TYPE>(t);
 
-			if (verbose) std::cout << "data_type " << (int)data_type << std::endl;
+			if (VERBOSE_DEBUG) std::cout << "data_type " << (int)data_type << std::endl;
 
 			uint32_t data_size = in_data.readUInt32(pos);pos+=4;
 			uint32_t filename_size = in_data.readUInt32(pos);pos+=4;
 
-			if (verbose) std::cout << "data_size " << data_size << std::endl;
-			if (verbose) std::cout << "filename_size " << filename_size << std::endl;
+			if (VERBOSE_DEBUG) std::cout << "data_size " << data_size << std::endl;
+			if (VERBOSE_DEBUG) std::cout << "filename_size " << filename_size << std::endl;
 
 			int8_t c;
 			std::string shortfilename;
@@ -205,7 +205,7 @@ struct cryptodata_list_header
 				pos+=1;
 			}
 
-			if (verbose)
+			if (VERBOSE_DEBUG)
 				std::cout << "read_from_buffer shortfilename " << shortfilename <<  std::endl;
 
             std::string filename;
@@ -222,7 +222,7 @@ struct cryptodata_list_header
 			add_item(filename, shortfilename, data_size, data_type);
 		}
 
-		if (verbose) show();
+		if (VERBOSE_DEBUG) show();
 		return r;
 	}
 };
@@ -313,9 +313,9 @@ public:
             int cntRAW = 0;
 			uint32_t posdata = header.get_total_size();
 
-			if (verbose) std::cout << "------------------------------------ " <<  std:: endl;
-			if (verbose) std::cout << " Saving files: " << std:: endl;
-			if (verbose) std::cout << "------------------------------------ " <<  std:: endl;
+			if (VERBOSE_DEBUG) std::cout << "------------------------------------ " <<  std:: endl;
+			if (VERBOSE_DEBUG) std::cout << " Saving files: " << std:: endl;
+			if (VERBOSE_DEBUG) std::cout << "------------------------------------ " <<  std:: endl;
 			for(size_t i=0;i<vitem.size();i++)
 			{
                 if ( (cntRAW==0) && (header.vitem[i].data_type == CRYPTO_FILE_TYPE::RAW))
@@ -330,7 +330,7 @@ public:
 
 				// bck...
 
-				if (verbose)
+				if (VERBOSE_DEBUG)
 				{
 					std::cout << "saving... " << vitem[i].filename << std:: endl;
 				}
@@ -338,7 +338,7 @@ public:
 
 				posdata += header.vitem[i].data_size;
 			}
-			if (verbose) std::cout << "------------------------------------ "  << std:: endl<< std:: endl;
+			if (VERBOSE_DEBUG) std::cout << "------------------------------------ "  << std:: endl<< std:: endl;
 		}
 		else
 		{
@@ -372,9 +372,9 @@ public:
 
 	bool read_data_from_file_or_buffer()
 	{
-		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
-		if (verbose) std::cout << "Reading files: "<< std::endl;
-		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
+		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- "<< std::endl;
+		if (VERBOSE_DEBUG) std::cout << "Reading files: "<< std::endl;
+		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- "<< std::endl;
 	 	bool r = true;
 		for(size_t i=0;i<vitem.size();i++)
 		{
@@ -386,7 +386,7 @@ public:
 
 			if (read_from_file)
 			{
-				if (verbose) std::cout << "reading from file: "<< vitem[i].filename << std::endl;
+				if (VERBOSE_DEBUG) std::cout << "reading from file: "<< vitem[i].filename << std::endl;
 				vitem[i].b->buffer.seek_begin();
 				r = vitem[i].b->read_from_file(vitem[i].filename);
 				if (r == false)
@@ -397,10 +397,10 @@ public:
 			}
 			else
 			{
-				if (verbose) std::cout << "reading from memory buffer: " << vitem[i].filename << std::endl;
+				if (VERBOSE_DEBUG) std::cout << "reading from memory buffer: " << vitem[i].filename << std::endl;
 			}
 		}
-		if (verbose) std::cout << "-------------------------------------- "<< std::endl << std::endl;
+		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- "<< std::endl << std::endl;
 		return r;
 	}
 
@@ -414,7 +414,7 @@ public:
 		update_data_size_in_header();
 
 		uint32_t sz = header.get_total_size(); // header size
-		if (verbose) header.show();
+		if (VERBOSE_DEBUG) header.show();
 
 		Buffer temp_header(sz);
 		Buffer temp_footer;
@@ -452,7 +452,7 @@ public:
 			{
 				if (header.padding > 0)
 				{
-					if (verbose)
+					if (VERBOSE_DEBUG)
 						std::cout << "Data padding... : " << header.padding << std::endl;
 					char c[1] = {0};
 					for(size_t i=0;i<header.padding;i++)
@@ -463,7 +463,7 @@ public:
 			}
 
 			bout.buffer.increase_size(temp_header.size() + temp_footer.size());
-			if (verbose)
+			if (VERBOSE_DEBUG)
 			{
 				if (header.padding > 0)
 				{

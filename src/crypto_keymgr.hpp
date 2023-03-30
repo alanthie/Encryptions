@@ -252,9 +252,10 @@ namespace keymgr
 		return r;
 	}
 
-	bool merge_other_ecc_domain(const std::string& path_ecc_private_db, const std::string& path_ecc_other_db, bool& key_merged, bool verbose=false)
+	bool merge_other_ecc_domain(const std::string& path_ecc_private_db, const std::string& path_ecc_other_db, bool& key_merged, [[maybe_unused]] bool verbose=false)
 	{
 		bool r = true;
+		//verbose=verbose;
 
 		std::string filePrivateECCDB = path_ecc_private_db  + ECC_DOMAIN_DB;
   		std::string fileStatusECCDB  = path_ecc_other_db    + ECC_DOMAIN_OTHER_DB;
@@ -312,7 +313,7 @@ namespace keymgr
 							key_merged = true;
 							map_eccdom_private.insert(std::make_pair(keyname, key_public));
 
-							if (verbose)
+							if (VERBOSE_DEBUG)
 							{
 								std::cout << "New ECC DOMAIN key has been ADDED: " << keyname << std::endl;
 							}
@@ -348,9 +349,10 @@ namespace keymgr
 		return r;
 	}
 
-	bool status_confirm_or_delete(const std::string& path_private_db, CRYPTO_FILE_TYPE t, bool& key_updated, bool verbose=false)
+	bool status_confirm_or_delete(const std::string& path_private_db, CRYPTO_FILE_TYPE t, bool& key_updated, [[maybe_unused]] bool verbose=false)
 	{
 		bool r = true;
+		//verbose=verbose;
 		key_updated = false;
 		uint32_t cnt_deleted 	= 0;
 		uint32_t cnt_confirmed 	= 0;
@@ -408,7 +410,7 @@ namespace keymgr
 								mykey.dt_confirmed = cryptoAL::get_current_time_and_date();
 								cnt_confirmed++;
 
-								if (verbose)
+								if (VERBOSE_DEBUG)
                                 {
                                     std::cout << "My RSA public key has been CONFIRMED: " << keyname << std::endl;
                                 }
@@ -425,7 +427,7 @@ namespace keymgr
 								map_rsa_private.erase(keyname);
 								cnt_deleted++;
 
-								if (verbose)
+								if (VERBOSE_DEBUG)
                                 {
                                     std::cout << "My RSA public key has been DELETED: " << keyname << std::endl;
                                 }
@@ -510,7 +512,7 @@ namespace keymgr
 								mykey.dt_confirmed = cryptoAL::get_current_time_and_date();
 								cnt_confirmed++;
 
-								if (verbose)
+								if (VERBOSE_DEBUG)
                                 {
                                     std::cout << "My ECC public key has been CONFIRMED: " << keyname << std::endl;
                                 }
@@ -527,7 +529,7 @@ namespace keymgr
 								map_ecc_private.erase(keyname);
 								cnt_deleted++;
 
-								if (verbose)
+								if (VERBOSE_DEBUG)
                                 {
                                     std::cout << "My ECC public key has been DELETED: " << keyname << std::endl;
                                 }
@@ -608,7 +610,7 @@ namespace keymgr
 								mykey.dt_confirmed = cryptoAL::get_current_time_and_date();
 								cnt_confirmed++;
 
-								if (verbose)
+								if (VERBOSE_DEBUG)
                                 {
                                     std::cout << "My ECC DOMAIN key has been CONFIRMED: " << keyname << std::endl;
                                 }
@@ -625,7 +627,7 @@ namespace keymgr
 								map_ecc_private.erase(keyname);
 								cnt_deleted++;
 
-								if (verbose)
+								if (VERBOSE_DEBUG)
                                 {
                                     std::cout << "My ECC DOMAIN key has been DELETED: " << keyname << std::endl;
                                 }
@@ -659,7 +661,7 @@ namespace keymgr
 			//...
 		}
 
-		if (verbose)
+		if (VERBOSE_DEBUG)
 		{
 			if (cnt_confirmed > 0) 	std::cout << "Number of public keys CONFIRMED: " << cnt_confirmed << std::endl;
 			if (cnt_deleted > 0)	std::cout << "Number of public keys DELETED:   " << cnt_deleted << std::endl;
@@ -669,11 +671,12 @@ namespace keymgr
 	}
 
 	// my ((k.confirmed == false) || (k.deleted == true)) - resending until confirmed
-	bool export_public_status_key(const std::string& path_public_db, CRYPTO_FILE_TYPE t, bool& key_exist, bool verbose=false)
+	bool export_public_status_key(const std::string& path_public_db, CRYPTO_FILE_TYPE t, bool& key_exist, [[maybe_unused]] bool verbose=false)
     {
         bool r 		= true;
 		key_exist 	= false;
 		uint32_t cnt = 0;
+		//verbose=verbose;
 
 		if (t == CRYPTO_FILE_TYPE::RSA_KEY_STATUS)
         {
@@ -718,7 +721,7 @@ namespace keymgr
 
                    		map_rsa_status.insert(std::make_pair(keyname,  key_public));
 
-						if (verbose)
+						if (VERBOSE_DEBUG)
 						{
 							if (k.confirmed == false)
 								std::cout << "My RSA public key with status [confirmed == false] will be EXPORTED: " << keyname << std::endl;
@@ -774,7 +777,7 @@ namespace keymgr
 
                    		map_ecc_status.insert(std::make_pair(keyname,  key_public));
 
-						if (verbose)
+						if (VERBOSE_DEBUG)
 						{
 							if (k.confirmed == false)
 								std::cout << "My ECC public key with status [confirmed == false] will be EXPORTED: " << keyname << std::endl;
@@ -831,7 +834,7 @@ namespace keymgr
 
                    		map_ecc_status.insert(std::make_pair(keyname,  key_public));
 
-						if (verbose)
+						if (VERBOSE_DEBUG)
 						{
 							if (k.confirmed == false)
 								std::cout << "The other ECC DOMAIN key with status [confirmed == false] will be EXPORTED: " << keyname << std::endl;
@@ -860,11 +863,12 @@ namespace keymgr
 
 	// FULL copy of my public keys send to recipient (on encoding) - not incremental...TODO
 	// We maintain a quota of maximum keys, creating new ones and deleting confirmed old ones
-    bool export_public_key(const std::string& path_private_db, CRYPTO_FILE_TYPE t, bool& key_exist, bool verbose=false)
+    bool export_public_key(const std::string& path_private_db, CRYPTO_FILE_TYPE t, bool& key_exist, [[maybe_unused]] bool verbose=false)
     {
         bool r = true;
 		key_exist = false;
 		uint32_t cnt = 0;
+		//verbose=verbose;
 
         if (t == CRYPTO_FILE_TYPE::RSA_PUBLIC)
         {
@@ -911,7 +915,7 @@ namespace keymgr
 					out.close();
 				}
 
-				if (verbose)
+				if (VERBOSE_DEBUG)
 				{
 					std::cout << "Number of RSA public keys to export: " << cnt << std::endl;
 				}
@@ -961,7 +965,7 @@ namespace keymgr
 					out.close();
 				}
 
-				if (verbose)
+				if (VERBOSE_DEBUG)
 				{
 					std::cout << "Number of ECC public keys to export: " << cnt << std::endl;
 				}
@@ -1012,7 +1016,7 @@ namespace keymgr
 					out.close();
 				}
 
-				if (verbose)
+				if (VERBOSE_DEBUG)
 				{
 					std::cout << "Number of ECC DOMAIN keys to export: " << cnt << std::endl;
 				}
@@ -1059,7 +1063,7 @@ namespace keymgr
 					outstream.close();
 				}
 
-				if (verbose)
+				if (VERBOSE_DEBUG)
 				{
 					std::cout << "Number of HH public keys to export: " << cnt << std::endl;
 				}
@@ -1081,9 +1085,9 @@ namespace keymgr
 		bool key_exist[4] = {false};
         bool r = true;
 
-		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
-		if (verbose) std::cout << "Exporting public keys: "<< std::endl;
-		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
+		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- "<< std::endl;
+		if (VERBOSE_DEBUG) std::cout << "Exporting public keys: "<< std::endl;
+		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- "<< std::endl;
 
         if (r) r = export_public_key(folder_my_private_rsa  , CRYPTO_FILE_TYPE::RSA_PUBLIC, key_exist[0], verbose);
         if (r) r = export_public_key(folder_my_private_ecc  , CRYPTO_FILE_TYPE::ECC_PUBLIC, key_exist[1], verbose);
@@ -1097,7 +1101,7 @@ namespace keymgr
 			if (key_exist[2]) vout.emplace_back(folder_my_private_ecc  , CRYPTO_FILE_TYPE::ECC_DOMAIN);
             if (key_exist[3]) vout.emplace_back(folder_my_private_hh   , CRYPTO_FILE_TYPE::HH_PUBLIC);
         }
-		if (verbose) std::cout << "-------------------------------------- " << std::endl << std::endl;
+		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- " << std::endl << std::endl;
         return r;
 	}
 
@@ -1109,9 +1113,9 @@ namespace keymgr
 	{
 		bool key_exist[4] = {false};
         bool r = true;
-		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
-		if (verbose) std::cout << "Exporting other status keys: "<< std::endl;
-		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
+		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- "<< std::endl;
+		if (VERBOSE_DEBUG) std::cout << "Exporting other status keys: "<< std::endl;
+		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- "<< std::endl;
 
         if (r) r = export_public_status_key(folder_other_public_rsa  , CRYPTO_FILE_TYPE::RSA_KEY_STATUS, key_exist[0], verbose);
         if (r) r = export_public_status_key(folder_other_public_ecc  , CRYPTO_FILE_TYPE::ECC_KEY_STATUS, key_exist[1], verbose);
@@ -1125,7 +1129,7 @@ namespace keymgr
 			if (key_exist[2]) vout.emplace_back(folder_other_public_ecc  , CRYPTO_FILE_TYPE::ECC_DOM_STATUS);
             if (key_exist[3]) vout.emplace_back(folder_other_public_hh   , CRYPTO_FILE_TYPE::HH_KEY_STATUS);
         }
-		if (verbose) std::cout << "-------------------------------------- "<< std::endl<< std::endl;
+		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- "<< std::endl<< std::endl;
         return r;
 	}
 
@@ -1145,7 +1149,7 @@ namespace keymgr
                        	const std::string& folder_other_public_ecc,
                        	const std::string& folder_my_private_hh,
 						const std::string& folder_my_private_ecc,
-						bool verbose = false)
+						[[maybe_unused]] bool verbose = false)
 	{
         verbose=verbose;
 		std::vector<std::string> vmapkeyname;

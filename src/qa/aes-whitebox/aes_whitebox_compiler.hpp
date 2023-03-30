@@ -312,7 +312,7 @@ void CalculateTyBoxes(	uint32_t roundKey[],
 
 void GenerateXorTable(int Nr, wbaes_vbase* instance_aes, bool verbose = false)
 {
-    if (verbose) std::cout << "GenerateXorTable..." << std::endl;
+    if (VERBOSE_DEBUG) std::cout << "GenerateXorTable..." << std::endl;
 
   	//uint8_t Xor[Nr-1][96][16][16];
     std::vector<std::vector<std::vector<std::vector<uint8_t>>>>* pXor = new std::vector<std::vector<std::vector<std::vector<uint8_t>>>>(Nr-1);
@@ -328,7 +328,7 @@ void GenerateXorTable(int Nr, wbaes_vbase* instance_aes, bool verbose = false)
         }
 	}
 
-	if (verbose) std::cout << "GenerateEncryptingTables..." << std::endl;
+	if (VERBOSE_DEBUG) std::cout << "GenerateEncryptingTables..." << std::endl;
   	for (int r = 0; r < Nr-1; r++)
     for (int n = 0; n < 96; n++)
       for (int i = 0; i < 16; i++)
@@ -343,14 +343,14 @@ void GenerateXorTable(int Nr, wbaes_vbase* instance_aes, bool verbose = false)
 		  	instance_aes->setXor(r, n, j, i, Xor[r][n][i][j]);
 		}
 	}
-	if (verbose) std::cout << "GenerateXorTable done" << std::endl;
+	if (VERBOSE_DEBUG) std::cout << "GenerateXorTable done" << std::endl;
 
     delete pXor;
 }
 
 void GenerateEncryptingTables(uint32_t* roundKey, int Nr, wbaes_vbase* instance_aes, bool verbose = false)
 {
-    if (verbose) std::cout << "GenerateEncryptingTables..." << std::endl;
+    if (VERBOSE_DEBUG) std::cout << "GenerateEncryptingTables..." << std::endl;
     uint8_t TboxesLast[16][256];
     
 	//uint32_t Tyboxes[Nr-1][16][256];
@@ -558,7 +558,7 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 		if (ok)
 		{
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_tyboxes.tbl";
-			if (verbose)  std::cout << "generate_aes to " << filename << std::endl;
+			if (VERBOSE_DEBUG)  std::cout << "generate_aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
@@ -577,7 +577,7 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 		if (ok)
 		{
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_tboxesLast.tbl";
-			if (verbose)  std::cout << "generate_aes to " << filename << std::endl;
+			if (VERBOSE_DEBUG)  std::cout << "generate_aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
@@ -596,7 +596,7 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 		if (ok)
 		{
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_mbl.tbl";
-			if (verbose)  std::cout << "generate_aes to " << filename << std::endl;
+			if (VERBOSE_DEBUG)  std::cout << "generate_aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)

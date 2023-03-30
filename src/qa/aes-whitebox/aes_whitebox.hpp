@@ -75,37 +75,37 @@ public:
 
 	wbaes_vbase* get_aes()
 	{
-		if (strcmp(aes_name.data(), "aes512") == 0)
+		if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes512) )
 		{
 			if (i512== nullptr) i512 =  new wbaes512();
 			return i512;
 		}
-		else if (strcmp(aes_name.data(), "aes1024") == 0)
+		else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes1024) )
 		{
 			if (i1024 == nullptr) i1024 = new wbaes1024();
 			return i1024;
 		}
-		else if (strcmp(aes_name.data(), "aes2048") == 0)
+		else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes2048) )
 		{
 			if (i2048 == nullptr) i2048 = new wbaes2048();
 			return i2048;
 		}
-		else if (strcmp(aes_name.data(), "aes4096") == 0)
+		else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes4096) )
 		{
 			if (i4096 == nullptr) i4096 = new wbaes4096();
 			return i4096;
 		}
-		else if (strcmp(aes_name.data(), "aes8192") == 0)
+		else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes8192) )
 		{
 			if (i8192 == nullptr) i8192 = new wbaes8192();
 			return i8192;
 		}
-		else if (strcmp(aes_name.data(), "aes16384") == 0)
+		else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes16384) )
 		{
 			if (i16384 == nullptr) i16384 = new wbaes16384();
 			return i16384;
 		}
-		else if (strcmp(aes_name.data(), "aes32768") == 0)
+		else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes32768) )
 		{
 			if (i32768 == nullptr) i32768 = new wbaes32768();
 			return i32768;
@@ -119,8 +119,6 @@ public:
 
 	std::string aes_name;
 	std::string table_keyname;
-	int Nk = 0;
-	int Nr = 0;
 	bool table_loaded = false;
 	bool table_error = false;
 
@@ -141,50 +139,17 @@ public:
 		aes_name = aesname;
 		table_keyname = tablekeyname;
 
-	  	if (strcmp(aes_name.data(), "aes128") == 0)
-		{
-			Nk = 4, Nr = 10;
-		}
-		else if (strcmp(aes_name.data(), "aes192") == 0)
-		{
-			Nk = 6, Nr = 12;
-		}
-		else if (strcmp(aes_name.data(), "aes256") == 0) {
-			Nk = 8, Nr = 14;
-		}
-		else if (strcmp(aes_name.data(), "aes512") == 0) {
-			Nk = 16, Nr = 22;
-		}
-		else if (strcmp(aes_name.data(), "aes1024") == 0) {
-			Nk = 32, Nr = 38;
-		}
-		else if (strcmp(aes_name.data(), "aes2048") == 0) {
-			Nk = 64, Nr = 70;
-		}
-		else if (strcmp(aes_name.data(), "aes4096") == 0) {
-			Nk = 128, Nr = 134;
-		}
-		else if (strcmp(aes_name.data(), "aes8192") == 0) {
-			Nk = 256, Nr = 262;
-		}
-        else if (strcmp(aes_name.data(), "aes16384") == 0) {
-			Nk = 512, Nr = 526;
-		}
-		else if (strcmp(aes_name.data(), "aes32768") == 0) {
-			Nk = 1024, Nr = 1038;
-		}
-
 		if (do_loading)
 			table_loaded = load_tables(pathtbl, verbose);
 	}
 
-	bool load_tables(const std::string& pathtbl, bool verbose = false)
+	bool load_tables(const std::string& pathtbl, [[maybe_unused]]bool verbose = false)
 	{
 		bool r = true;
 		wbaes_vbase* p = get_aes(); // new
 
 		{
-			//if (verbose) std::cout << "loading wbaes: " << aes_name  + ", keyname: "  << table_keyname << std::endl;
+			if (cryptoAL::VERBOSE_DEBUG) std::cout << "loading wbaes: " << aes_name  + ", keyname: "  << table_keyname << std::endl;
 			{
 				std::string filename = pathtbl + aes_name + "_" + table_keyname + "_xor.tbl";
 
@@ -195,23 +160,22 @@ public:
 					table_error = true;
 					return false;
 				}
-				//if (verbose) std::cout << "reading " << filename << std::endl;
+				if (cryptoAL::VERBOSE_DEBUG) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
 				if (ifd.bad() == false)
 				{
-					if      (aes_name == std::string("aes512" )) ifd >> bits( ((wbaes512*)p)->Xor);
-					else if (aes_name == std::string("aes1024")) ifd >> bits( ((wbaes1024*)p)->Xor);
-					else if (aes_name == std::string("aes2048")) ifd >> bits( ((wbaes2048*)p)->Xor);
-					else if (aes_name == std::string("aes4096")) ifd >> bits( ((wbaes4096*)p)->Xor);
-					else if (aes_name == std::string("aes8192")) ifd >> bits( ((wbaes8192*)p)->Xor);
-					else if (aes_name == std::string("aes16384")) ifd >> bits( ((wbaes16384*)p)->Xor);
-					else if (aes_name == std::string("aes32768")) ifd >> bits( ((wbaes32768*)p)->Xor);
+					if      (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes512))  ifd >> bits( ((wbaes512*)p)->Xor);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes1024)) ifd >> bits( ((wbaes1024*)p)->Xor);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes2048)) ifd >> bits( ((wbaes2048*)p)->Xor);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes4096)) ifd >> bits( ((wbaes4096*)p)->Xor);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes8192)) ifd >> bits( ((wbaes8192*)p)->Xor);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes16384)) ifd >> bits( ((wbaes16384*)p)->Xor);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes32768)) ifd >> bits( ((wbaes32768*)p)->Xor);
 
 					ifd.close();
-					
-					/*
-					if (verbose)
+
+					if (cryptoAL::VERBOSE_DEBUG)
 					{
 						std::cout << "ok " << filename << std::endl;
 						for (int r = 0; r < 2; r++) {
@@ -222,13 +186,13 @@ public:
 								std::cout << "      { ";
 								for (int j = 0; j < 16; j++)
 								{
-									if      (aes_name == std::string("aes512" )) std::cout <<  (int)((wbaes512*)p)->Xor[r][n][i][j];
-									else if (aes_name == std::string("aes1024")) std::cout <<  (int)((wbaes1024*)p)->Xor[r][n][i][j];
-									else if (aes_name == std::string("aes2048")) std::cout <<  (int)((wbaes2048*)p)->Xor[r][n][i][j];
-									else if (aes_name == std::string("aes4096")) std::cout <<  (int)((wbaes4096*)p)->Xor[r][n][i][j];
-									else if (aes_name == std::string("aes8192")) std::cout <<  (int)((wbaes8192*)p)->Xor[r][n][i][j];
-									else if (aes_name == std::string("aes16384")) std::cout <<  (int)((wbaes16384*)p)->Xor[r][n][i][j];
-									else if (aes_name == std::string("aes32768")) std::cout <<  (int)((wbaes32768*)p)->Xor[r][n][i][j];
+									if      (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes512))  std::cout <<  (int)((wbaes512*)p)->Xor[r][n][i][j];
+									else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes1024)) std::cout <<  (int)((wbaes1024*)p)->Xor[r][n][i][j];
+									else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes2048)) std::cout <<  (int)((wbaes2048*)p)->Xor[r][n][i][j];
+									else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes4096)) std::cout <<  (int)((wbaes4096*)p)->Xor[r][n][i][j];
+									else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes8192)) std::cout <<  (int)((wbaes8192*)p)->Xor[r][n][i][j];
+									else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes16384)) std::cout <<  (int)((wbaes16384*)p)->Xor[r][n][i][j];
+									else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes32768)) std::cout <<  (int)((wbaes32768*)p)->Xor[r][n][i][j];
 								 }
 								std::cout << "},\n";
 							  }
@@ -238,7 +202,7 @@ public:
 						  }
 						 std::cout << "};\n\n";
 					 }
-					 */
+
 				}
 				else
 				{
@@ -260,21 +224,21 @@ public:
 					table_error = true;
 					return false;
 				}
-				//if (verbose) std::cout << "reading " << filename << std::endl;
+				if (cryptoAL::VERBOSE_DEBUG) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
 				if (ifd.bad() == false)
 				{
-					if      (aes_name == std::string("aes512" )) ifd >> bits(((wbaes512*)p)->TboxesLast);
-					else if (aes_name == std::string("aes1024")) ifd >> bits(((wbaes1024*)p)->TboxesLast);
-					else if (aes_name == std::string("aes2048")) ifd >> bits(((wbaes2048*)p)->TboxesLast);
-					else if (aes_name == std::string("aes4096")) ifd >> bits(((wbaes4096*)p)->TboxesLast);
-					else if (aes_name == std::string("aes8192")) ifd >> bits(((wbaes8192*)p)->TboxesLast);
-					else if (aes_name == std::string("aes16384")) ifd >> bits(((wbaes16384*)p)->TboxesLast);
-					else if (aes_name == std::string("aes32768")) ifd >> bits(((wbaes32768*)p)->TboxesLast);
+					if      (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes512)) ifd >> bits(((wbaes512*)p)->TboxesLast);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes1024)) ifd >> bits(((wbaes1024*)p)->TboxesLast);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes2048)) ifd >> bits(((wbaes2048*)p)->TboxesLast);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes4096)) ifd >> bits(((wbaes4096*)p)->TboxesLast);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes8192)) ifd >> bits(((wbaes8192*)p)->TboxesLast);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes16384))ifd >> bits(((wbaes16384*)p)->TboxesLast);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes32768)) ifd >> bits(((wbaes32768*)p)->TboxesLast);
 
 					ifd.close();
-					//if (verbose) std::cout << "ok " << filename << std::endl;
+					if (cryptoAL::VERBOSE_DEBUG) std::cout << "ok " << filename << std::endl;
 				}
 				else
 				{
@@ -296,21 +260,21 @@ public:
 					table_error = true;
 					return false;
 				}
-				//if (verbose) std::cout << "reading " << filename << std::endl;
+				if (cryptoAL::VERBOSE_DEBUG) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
 				if (ifd.bad() == false)
 				{
-					if      (aes_name == std::string("aes512" )) ifd >> bits(((wbaes512*)p)->Tyboxes);
-					else if (aes_name == std::string("aes1024")) ifd >> bits(((wbaes1024*)p)->Tyboxes);
-					else if (aes_name == std::string("aes2048")) ifd >> bits(((wbaes2048*)p)->Tyboxes);
-					else if (aes_name == std::string("aes4096")) ifd >> bits(((wbaes4096*)p)->Tyboxes);
-					else if (aes_name == std::string("aes8192")) ifd >> bits(((wbaes8192*)p)->Tyboxes);
-					else if (aes_name == std::string("aes16384")) ifd >> bits(((wbaes16384*)p)->Tyboxes);
-					else if (aes_name == std::string("aes32768")) ifd >> bits(((wbaes32768*)p)->Tyboxes);
+					if      (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes512))  ifd >> bits(((wbaes512*)p)->Tyboxes);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes1024)) ifd >> bits(((wbaes1024*)p)->Tyboxes);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes2048)) ifd >> bits(((wbaes2048*)p)->Tyboxes);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes4096)) ifd >> bits(((wbaes4096*)p)->Tyboxes);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes8192)) ifd >> bits(((wbaes8192*)p)->Tyboxes);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes16384)) ifd >> bits(((wbaes16384*)p)->Tyboxes);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes32768)) ifd >> bits(((wbaes32768*)p)->Tyboxes);
 
 					ifd.close();
-					//if (verbose) std::cout << "ok " << filename << std::endl;
+					if (cryptoAL::VERBOSE_DEBUG) std::cout << "ok " << filename << std::endl;
 				}
 				else
 				{
@@ -332,21 +296,21 @@ public:
 					table_error = true;
 					return false;
 				}
-				//if (verbose) std::cout << "reading " << filename << std::endl;
+				if (cryptoAL::VERBOSE_DEBUG) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
 				if (ifd.bad() == false)
 				{
-					if      (aes_name == std::string("aes512" )) ifd >> bits(((wbaes512*)p)->MBL);
-					else if (aes_name == std::string("aes1024")) ifd >> bits(((wbaes1024*)p)->MBL);
-					else if (aes_name == std::string("aes2048")) ifd >> bits(((wbaes2048*)p)->MBL);
-					else if (aes_name == std::string("aes4096")) ifd >> bits(((wbaes4096*)p)->MBL);
-					else if (aes_name == std::string("aes8192")) ifd >> bits(((wbaes8192*)p)->MBL);
-					else if (aes_name == std::string("aes16384")) ifd >> bits(((wbaes16384*)p)->MBL);
-					else if (aes_name == std::string("aes32768")) ifd >> bits(((wbaes32768*)p)->MBL);
+					if      (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes512))  ifd >> bits(((wbaes512*)p)->MBL);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes1024)) ifd >> bits(((wbaes1024*)p)->MBL);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes2048)) ifd >> bits(((wbaes2048*)p)->MBL);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes4096)) ifd >> bits(((wbaes4096*)p)->MBL);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes8192))  ifd >> bits(((wbaes8192*)p)->MBL);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes16384)) ifd >> bits(((wbaes16384*)p)->MBL);
+					else if (aes_name == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes32768)) ifd >> bits(((wbaes32768*)p)->MBL);
 
 					ifd.close();
-					//if (verbose) std::cout << "ok " << filename << std::endl;
+					if (cryptoAL::VERBOSE_DEBUG) std::cout << "ok " << filename << std::endl;
 				}
 				else
 				{
