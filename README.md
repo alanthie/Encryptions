@@ -79,7 +79,7 @@ Encryptor encode() salsa20 32_64             , number of rounds : 1, number of b
 Encryptor encode() idea 8_16                 , number of rounds : 1, number of blocks (8 bytes): 17248, number of keys (16 bytes): 1332, shuffling: 0%
 Encryptor encode() binAES 16_16 - aes_type: 1, number of rounds : 1, number of blocks (16 bytes): 8704, number of keys (16 bytes): 1332, shuffling: 0%
 Encryptor encode() encode_wbaes aes1024      , number of rounds : 1, block (size)     : 140544, number of blocks : 1, shuffling: 0%
-Encryptor encode() encode_wbaes aes1638,     , number of rounds : 1, block (size)     : 141824, number of blocks : 1, shuffling: 0%
+Encryptor encode() encode_wbaes aes16384,    , number of rounds : 1, block (size)     : 141824, number of blocks : 1, shuffling: 0%
 Encryptor encode() binAES 32_32 - aes_type: 1, number of rounds : 1, number of blocks (32 bytes): 4472, number of keys (32 bytes): 666, shuffling: 0%
 Encryptor encode() binAES 32_32 - aes_type: 0, number of rounds : 1, number of blocks (32 bytes): 4512, number of keys (32 bytes): 666, shuffling: 0%
 Encryptor encode() binAES 32_32 - aes_type: 2, number of rounds : 1, number of blocks (32 bytes): 4552, number of keys (32 bytes): 666, shuffling: 0%
