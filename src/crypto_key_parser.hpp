@@ -197,12 +197,16 @@ public:
     keyspec_parser() {}
     ~keyspec_parser() {}
 
+	// Accept global parameters
+	// REPEAT all keys generation n times if have [repeat]n
+	long repeat = 0;
     std::vector<keyspec_composite> vkeyspec_composite;
 
 	void show()
 	{
 		std::cout << "--------------------------------------" << std::endl;
-        std::cout << "key lines: "  << vkeyspec_composite.size() << std::endl;
+		std::cout << "global repeat: "  << repeat << std::endl;
+        std::cout << "key lines:     "  << vkeyspec_composite.size() << std::endl;
 		std::cout << "--------------------------------------" << std::endl;
         for(size_t i=0;i<vkeyspec_composite.size();i++)
 		{
@@ -212,6 +216,30 @@ public:
 		std::cout << "--------------------------------------" << std::endl;
 	}
 
+	bool parse_global_param(const std::string& line)
+	{
+		bool r = false;
+		std::vector<std::string> v = split(line, ";");
+		for(size_t i=0;i<v.size();i++)
+		{
+			if (has_token("[repeat]",v[i], 0))
+			{
+				size_t sz = std::string("[repeat]").size();
+				if (v[i].size() > sz)
+				{
+					std::string s = v[i].substr(sz);
+					if (s.size() > 0)
+					{
+						repeat = (long)strutil::str_to_ll(s);
+						if (repeat<0) repeat = 0;
+					}
+				}
+				r = true;
+			}
+		}
+		return r;
+	}
+
     bool parse(cryptodata& data)
     {
         std::vector<std::string> vlines;
@@ -219,9 +247,15 @@ public:
         parse_lines(data, vlines);
 		for(size_t i=0;i<vlines.size();i++)
 		{
-			keyspec_composite c = parse_keyspec_composite(vlines[i]);
-			if (c.vkeyspec.size() > 0)
-                vkeyspec_composite.push_back( c);
+			if (parse_global_param(vlines[i]) == true)
+			{
+			}
+			else
+			{
+				keyspec_composite c = parse_keyspec_composite(vlines[i]);
+				if (c.vkeyspec.size() > 0)
+					vkeyspec_composite.push_back( c);
+			}
 		}
 		return true;
     }

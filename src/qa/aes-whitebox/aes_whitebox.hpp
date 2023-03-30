@@ -184,7 +184,7 @@ public:
 		wbaes_vbase* p = get_aes(); // new
 
 		{
-			if (verbose) std::cout << "loading aes: " << aes_name  + ", keyname: "  << table_keyname << std::endl;
+			//if (verbose) std::cout << "loading wbaes: " << aes_name  + ", keyname: "  << table_keyname << std::endl;
 			{
 				std::string filename = pathtbl + aes_name + "_" + table_keyname + "_xor.tbl";
 
@@ -195,7 +195,7 @@ public:
 					table_error = true;
 					return false;
 				}
-				if (verbose) std::cout << "reading " << filename << std::endl;
+				//if (verbose) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
 				if (ifd.bad() == false)
@@ -209,6 +209,8 @@ public:
 					else if (aes_name == std::string("aes32768")) ifd >> bits( ((wbaes32768*)p)->Xor);
 
 					ifd.close();
+					
+					/*
 					if (verbose)
 					{
 						std::cout << "ok " << filename << std::endl;
@@ -236,6 +238,7 @@ public:
 						  }
 						 std::cout << "};\n\n";
 					 }
+					 */
 				}
 				else
 				{
@@ -257,7 +260,7 @@ public:
 					table_error = true;
 					return false;
 				}
-				if (verbose) std::cout << "reading " << filename << std::endl;
+				//if (verbose) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
 				if (ifd.bad() == false)
@@ -271,7 +274,7 @@ public:
 					else if (aes_name == std::string("aes32768")) ifd >> bits(((wbaes32768*)p)->TboxesLast);
 
 					ifd.close();
-					if (verbose) std::cout << "ok " << filename << std::endl;
+					//if (verbose) std::cout << "ok " << filename << std::endl;
 				}
 				else
 				{
@@ -293,7 +296,7 @@ public:
 					table_error = true;
 					return false;
 				}
-				if (verbose) std::cout << "reading " << filename << std::endl;
+				//if (verbose) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
 				if (ifd.bad() == false)
@@ -307,7 +310,7 @@ public:
 					else if (aes_name == std::string("aes32768")) ifd >> bits(((wbaes32768*)p)->Tyboxes);
 
 					ifd.close();
-					if (verbose) std::cout << "ok " << filename << std::endl;
+					//if (verbose) std::cout << "ok " << filename << std::endl;
 				}
 				else
 				{
@@ -329,7 +332,7 @@ public:
 					table_error = true;
 					return false;
 				}
-				if (verbose) std::cout << "reading " << filename << std::endl;
+				//if (verbose) std::cout << "reading " << filename << std::endl;
 
 				std::ifstream ifd(filename.data(), std::ios::in | std::ios::binary);
 				if (ifd.bad() == false)
@@ -343,7 +346,7 @@ public:
 					else if (aes_name == std::string("aes32768")) ifd >> bits(((wbaes32768*)p)->MBL);
 
 					ifd.close();
-					if (verbose) std::cout << "ok " << filename << std::endl;
+					//if (verbose) std::cout << "ok " << filename << std::endl;
 				}
 				else
 				{

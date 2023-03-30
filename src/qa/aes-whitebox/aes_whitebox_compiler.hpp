@@ -5,8 +5,6 @@
 #include "../../random_engine.hpp"
 #include "../../c_plus_plus_serializer.h"
 
-//#ifdef _WIN32
-//#else
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -330,7 +328,7 @@ void GenerateXorTable(int Nr, wbaes_vbase* instance_aes, bool verbose = false)
         }
 	}
 
-	if (verbose) std::cout << "GenerateEncryptingTables...1" << std::endl;
+	if (verbose) std::cout << "GenerateEncryptingTables..." << std::endl;
   	for (int r = 0; r < Nr-1; r++)
     for (int n = 0; n < 96; n++)
       for (int i = 0; i < 16; i++)
@@ -619,6 +617,5 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 
 }  // namespace
 
-//#endif
 #endif
 

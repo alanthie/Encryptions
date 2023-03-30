@@ -66,27 +66,35 @@ Optional arguments:
 
 
 Output example:
-MESSAGE is 128437 bytes
-Padding msg with bytes: 11
-Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 2007, number of keys (32 bytes): 1008, shuffling: 0%
-Encryptor encode() binAES 16_16 - aes_type: 0, number of rounds : 1, number of blocks (16 bytes): 8108, number of keys (16 bytes): 2016, shuffling: 0%
-Encryptor encode() binAES 16_16 - aes_type: 2, number of rounds : 1, number of blocks (16 bytes): 8188, number of keys (16 bytes): 2016, shuffling: 0%
-Encryptor encode() binAES 32_32 - aes_type: 1, number of rounds : 1, number of blocks (32 bytes): 4134, number of keys (32 bytes): 1008, shuffling: 0%
-Encryptor encode() binAES 32_32 - aes_type: 0, number of rounds : 1, number of blocks (32 bytes): 4174, number of keys (32 bytes): 1008, shuffling: 0%
-Encryptor encode() binAES 32_32 - aes_type: 2, number of rounds : 1, number of blocks (32 bytes): 4214, number of keys (32 bytes): 1008, shuffling: 0%
-Encryptor encode() twofish 16_16             , number of rounds : 1, number of blocks (16 bytes): 8508, number of keys (16 bytes): 2016, shuffling: 0%
-Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 2147, number of keys (32 bytes): 1008, shuffling: 0%
-Encryptor encode() idea 8_16                 , number of rounds : 1, number of blocks (8 bytes): 17560, number of keys (16 bytes): 2016, shuffling: 0%
-Encryptor encode() binAES 16_16 - aes_type: 1, number of rounds : 1, number of blocks (16 bytes): 8888, number of keys (16 bytes): 2016, shuffling: 0%
-Encryptor encode() binAES 16_16 - aes_type: 0, number of rounds : 1, number of blocks (16 bytes): 9108, number of keys (16 bytes): 2016, shuffling: 0%
-Encryptor encode() binAES 16_16 - aes_type: 2, number of rounds : 1, number of blocks (16 bytes): 9344, number of keys (16 bytes): 2016, shuffling: 0%
-Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 2364, number of keys (32 bytes): 4, shuffling: 0%
-data encrypted size: 151300
+MESSAGE is 127724 bytes
+Padding msg with bytes: 20
+Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 1996, number of keys (32 bytes): 666, shuffling: 0%
+Encryptor encode() binAES 16_16 - aes_type: 0, number of rounds : 1, number of blocks (16 bytes): 8064, number of keys (16 bytes): 1332, shuffling: 0%
+Encryptor encode() binAES 16_16 - aes_type: 2, number of rounds : 1, number of blocks (16 bytes): 8144, number of keys (16 bytes): 1332, shuffling: 0%
+Encryptor encode() binAES 32_32 - aes_type: 1, number of rounds : 1, number of blocks (32 bytes): 4112, number of keys (32 bytes): 666, shuffling: 0%
+Encryptor encode() encode_wbaes aes1024      , number of rounds : 1, block (size)     : 132864, number of blocks : 1, shuffling: 0%
+Encryptor encode() encode_wbaes aes16384     , number of rounds : 1, block (size)     : 134144, number of blocks : 1, shuffling: 0%
+Encryptor encode() twofish 16_16             , number of rounds : 1, number of blocks (16 bytes): 8464, number of keys (16 bytes): 1332, shuffling: 0%
+Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 2136, number of keys (32 bytes): 666, shuffling: 0%
+Encryptor encode() idea 8_16                 , number of rounds : 1, number of blocks (8 bytes): 17248, number of keys (16 bytes): 1332, shuffling: 0%
+Encryptor encode() binAES 16_16 - aes_type: 1, number of rounds : 1, number of blocks (16 bytes): 8704, number of keys (16 bytes): 1332, shuffling: 0%
+Encryptor encode() encode_wbaes aes1024      , number of rounds : 1, block (size)     : 140544, number of blocks : 1, shuffling: 0%
+Encryptor encode() encode_wbaes aes1638,     , number of rounds : 1, block (size)     : 141824, number of blocks : 1, shuffling: 0%
+Encryptor encode() binAES 32_32 - aes_type: 1, number of rounds : 1, number of blocks (32 bytes): 4472, number of keys (32 bytes): 666, shuffling: 0%
+Encryptor encode() binAES 32_32 - aes_type: 0, number of rounds : 1, number of blocks (32 bytes): 4512, number of keys (32 bytes): 666, shuffling: 0%
+Encryptor encode() binAES 32_32 - aes_type: 2, number of rounds : 1, number of blocks (32 bytes): 4552, number of keys (32 bytes): 666, shuffling: 0%
+Encryptor encode() twofish 16_16             , number of rounds : 1, number of blocks (16 bytes): 9184, number of keys (16 bytes): 1332, shuffling: 0%
+Encryptor encode() encode_wbaes aes1024      , number of rounds : 1, block (size)     : 148224, number of blocks : 1, shuffling: 0%
+Encryptor encode() encode_wbaes aes16384     , number of rounds : 1, block (size)     : 149504, number of blocks : 1, shuffling: 0%
+Encryptor encode() salsa20 32_64             , number of rounds : 1, number of blocks (64 bytes): 2357, number of keys (32 bytes): 4, shuffling: 0%
+data encrypted size: 150852
 qa_puz_key size:     128
-crypto ENCODING SUCCESS
+saved to msg.zip.encrypted
+history sequence saved: 97
+CRYPTO ENCODING SUCCESS
 Encrypted file: msg.zip.encrypted
-Puzzle file   : (default)
-Elapsed time in seconds: 38 sec
+Puzzle file   : default
+Elapsed time in seconds: 47 sec
 </pre>
 
 Example of msg.crypto:

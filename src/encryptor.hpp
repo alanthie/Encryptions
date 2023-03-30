@@ -239,24 +239,36 @@ public:
 				if (verbose)
 					kp.show();
 
-				for(size_t i=0;i<kp.vkeyspec_composite.size();i++)
+				// REPEAT n times if have [repeat]n
+				long repeat = kp.repeat;
+				if (repeat<=1) repeat=1;
+				if (repeat > 1)
 				{
-					std::string s = kp.vkeyspec_composite[i].format_key_line(1, verbose);
-					if (verbose) std::cout << "url[]: " << s << std::endl;
-
-					if ((s.size() >= URL_MIN_SIZE ) && (s.size() < URL_MAX_SIZE ))
+					if (verbose) std::cout << "REPEAT: " << repeat << std::endl;
+				}
+				
+				for (long r = 0; r < repeat; r++)
+				{
+					for(size_t i=0;i<kp.vkeyspec_composite.size();i++)
 					{
-						urlkey uk;
-						for(uint32_t ii=0;ii<URL_MAX_SIZE;ii++) uk.url[ii] = 0;
-						uint32_t idx2 = 0;
-						for (uint32_t ii = 0; ii < s.size(); ii++)
+						// LINEAR FORMAT (old way)
+						std::string s = kp.vkeyspec_composite[i].format_key_line(1, verbose);
+						if ((s.size() >= URL_MIN_SIZE ) && (s.size() < URL_MAX_SIZE ))
 						{
-							if ((s[ii] != '\n') && (s[ii] != '\r'))
-								uk.url[idx2] = s[ii];
-							idx2++;
+							if (verbose) std::cout << "url[]: " << s << std::endl;
+						
+							urlkey uk;
+							for(uint32_t ii=0;ii<URL_MAX_SIZE;ii++) uk.url[ii] = 0;
+							uint32_t idx2 = 0;
+							for (uint32_t ii = 0; ii < s.size(); ii++)
+							{
+								if ((s[ii] != '\n') && (s[ii] != '\r'))
+									uk.url[idx2] = s[ii];
+								idx2++;
+							}
+							uk.url_size = idx2;
+							vurlkey.push_back(uk);
 						}
-						uk.url_size = idx2;
-						vurlkey.push_back(uk);;
 					}
 				}
 			}
@@ -1298,20 +1310,20 @@ public:
 		uint8_t* DATAOUT = new uint8_t[n];
 
         const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
-
+/*
         if (verbose) std::cout << "AES in message: ";
 		if (verbose) for(size_t i=0;i<16;i++) std::cout << (int)(uint8_t)data_temp.buffer.getdata()[i];
 		if (verbose) std::cout << "...";
 		if (verbose) std::cout <<std::endl;
-
+*/
 		paes->aes_whitebox_encrypt_cfb(iv, (uint8_t*)&data_temp.buffer.getdata()[0], n, DATAOUT);
         data_temp_next.buffer.write((char*)&DATAOUT[0], (uint32_t)n, -1);
-
+/*
 		if (verbose) std::cout << "AES encrypt: ";
 		if (verbose) for(size_t i=0;i<16;i++) std::cout << (int)(uint8_t)DATAOUT[i];
 		if (verbose) std::cout << "...";
 		if (verbose) std::cout <<std::endl;
-
+*/
 		delete []DATAOUT;
 		return r;
 	}
