@@ -766,6 +766,8 @@ public:
             rc = wget(s.data(), file.data(), verbose);
             if (rc!= 0)
             {
+				// TODO
+				// if detach from web allow access to copy of web file...
                 std::cerr << "ERROR with wget, error code: " << rc << " url: " << s <<  " file: " << file << std::endl;
                 r = false;
             }
@@ -810,6 +812,7 @@ public:
 			{
 				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096) || (is_wbaes8192) || (is_wbaes16384)|| (is_wbaes32768))
 				{
+					// NO KEY to generate - it is already embedding in tables
 				}
 				else
 				{
@@ -895,6 +898,8 @@ public:
 
 				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)|| (is_wbaes8192) || (is_wbaes16384) || (is_wbaes32768))
 				{
+					// TODO
+					// if using a cfg file, some algo may be disabled...
 					if      (is_wbaes512)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes512;
 					else if (is_wbaes1024) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes1024;
 					else if (is_wbaes2048) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048;
@@ -905,12 +910,14 @@ public:
 				}
 				else
 				{
-					if      (i%9==0)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc;
-					else if (i%9==1)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb;
-					else if (i%9==2)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb;
-					else if (i%9==3)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_32_32_cbc;
-					else if (i%9==4)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_32_32_ecb;
-					else if (i%9==5)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_32_32_cfb;
+					// TODO
+					// if using a cfg file, some algo may be disabled...
+					if      (i%9==0)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_cbc;
+					else if (i%9==1)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_ecb;
+					else if (i%9==2)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_cfb;
+					else if (i%9==3)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_cbc;
+					else if (i%9==4)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_ecb;
+					else if (i%9==5)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_cfb;
 					else if (i%9==6)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH;
 					else if (i%9==7)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_Salsa20;
 					else              vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_IDEA;
@@ -921,6 +928,7 @@ public:
 
 				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)|| (is_wbaes8192) || (is_wbaes16384) || (is_wbaes32768))
 				{
+					// No key - no checksum of a key
 				}
 				else
                 {
@@ -933,12 +941,12 @@ public:
             }
             else
             {
-                std::cerr << "ERROR reading file z : " << file << std::endl;
+                std::cerr << "ERROR reading file : " << file << std::endl;
             }
 		}
 
-		//if (r)
 		{
+			// Do we still have staging files? - TODO
 			if (keeping == false)
 			{
 				if (fileexists(file))
@@ -1404,7 +1412,7 @@ public:
 		return r;
 	}
 
-	bool encode_binaes16_16(cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next,
+	bool encode_binaes128(cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next,
                             CRYPTO_ALGO_AES aes_type)
 	{
 		bool r = true;
@@ -1413,23 +1421,23 @@ public:
 		if (data_temp.buffer.size() % 16 != 0)
 		{
             r = false;
-            std::cerr << "ERROR encode_binaes16_16 " << "encoding file must be multiple of 16 bytes: " << data_temp.buffer.size() << std::endl;
+            std::cerr << "ERROR encode_binaes128 " << "encoding file must be multiple of 16 bytes: " << data_temp.buffer.size() << std::endl;
 			return false;
 		}
         if (data_temp.buffer.size() == 0)
 		{
-            std::cerr << "ERROR encode_binaes16_16 - data size is 0 " << std::endl;
+            std::cerr << "ERROR encode_binaes128 - data size is 0 " << std::endl;
             return false;
         }
 
         if (key_size == 0)
 		{
-            std::cerr << "ERROR encode_binaes16_16 - key_size = 0 " <<  "" << std::endl;
+            std::cerr << "ERROR encode_binaes128 - key_size = 0 " <<  "" << std::endl;
             return false;
         }
         if (key_size % 16 != 0)
 		{
-            std::cerr << "ERROR encode_binaes16_16 - key_size must be 16x: " <<  key_size << std::endl;
+            std::cerr << "ERROR encode_binaes128 - key_size must be 16x: " <<  key_size << std::endl;
             return false;
         }
 
@@ -1547,7 +1555,7 @@ public:
 		return r;
 	}
 
-	bool encode_binaes32_32(cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next,
+	bool encode_binaes256(cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next,
                             CRYPTO_ALGO_AES aes_type)
 	{
 		bool r = true;
@@ -1556,23 +1564,23 @@ public:
 		if (data_temp.buffer.size() % 32 != 0)
 		{
             r = false;
-            std::cerr << "ERROR encode_binaes32_32 " << "encoding file must be multiple of 32 bytes: " << data_temp.buffer.size() << std::endl;
+            std::cerr << "ERROR encode_binaes256 " << "encoding file must be multiple of 32 bytes: " << data_temp.buffer.size() << std::endl;
 			return false;
 		}
         if (data_temp.buffer.size() == 0)
 		{
-            std::cerr << "ERROR encode_binaes32_32 - data size is 0 " << std::endl;
+            std::cerr << "ERROR encode_binaes256 - data size is 0 " << std::endl;
             return false;
         }
 
         if (key_size == 0)
 		{
-            std::cerr << "ERROR encode_binaes32_32 - key_size = 0 " <<  "" << std::endl;
+            std::cerr << "ERROR encode_binaes256 - key_size = 0 " <<  "" << std::endl;
             return false;
         }
         if (key_size % 32 != 0)
 		{
-            std::cerr << "ERROR encode_binaes32_32 - key_size must be 32x: " <<  key_size << std::endl;
+            std::cerr << "ERROR encode_binaes256 - key_size must be 32x: " <<  key_size << std::endl;
             return false;
         }
 
@@ -1765,7 +1773,7 @@ public:
 	//------------------------------------------
     bool encode( size_t iter, size_t NITER, uint16_t crypto_algo, uint32_t crypto_flags, uint32_t shufflePerc,
                  cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next,
-				 const std::string keyname = "")
+				 const std::string wbaes_keyname = "")
 	{
 		bool r = true;
 
@@ -1802,7 +1810,7 @@ public:
             if (wbaes_algo_name.size() > 0)
             {
                 std::string keyfolder = wbaes_other_public_path;
-                return encode_wbaes(data_temp, wbaes_algo_name, keyname, keyfolder, data_temp_next);
+                return encode_wbaes(data_temp, wbaes_algo_name, wbaes_keyname, keyfolder, data_temp_next);
             }
             else if (crypto_algo == (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH)
             {
@@ -1820,14 +1828,14 @@ public:
             {
 				bool b16=true;
                 CRYPTO_ALGO_AES aes_type = CRYPTO_ALGO_AES::ECB;
-				if      (crypto_algo  == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb)  aes_type = CRYPTO_ALGO_AES::ECB;
-				else if (crypto_algo  == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_32_32_ecb) {aes_type = CRYPTO_ALGO_AES::ECB;b16=false;}
-                else if (crypto_algo  == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc)  aes_type = CRYPTO_ALGO_AES::CBC;
-				else if (crypto_algo  == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_32_32_cbc) {aes_type = CRYPTO_ALGO_AES::CBC;b16=false;}
-                else if (crypto_algo  == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb)  aes_type = CRYPTO_ALGO_AES::CFB;
-				else if (crypto_algo  == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_32_32_cfb) {aes_type = CRYPTO_ALGO_AES::CFB;b16=false;}
-                if (b16) return encode_binaes16_16(data_temp, key, key_size, data_temp_next, aes_type);
-				return encode_binaes32_32(data_temp, key, key_size, data_temp_next, aes_type);
+				if      (crypto_algo  == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_128_ecb)  aes_type = CRYPTO_ALGO_AES::ECB;
+				else if (crypto_algo  == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_256_ecb) {aes_type = CRYPTO_ALGO_AES::ECB;b16=false;}
+                else if (crypto_algo  == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_128_cbc)  aes_type = CRYPTO_ALGO_AES::CBC;
+				else if (crypto_algo  == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_256_cbc) {aes_type = CRYPTO_ALGO_AES::CBC;b16=false;}
+                else if (crypto_algo  == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_128_cfb)  aes_type = CRYPTO_ALGO_AES::CFB;
+				else if (crypto_algo  == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_256_cfb) {aes_type = CRYPTO_ALGO_AES::CFB;b16=false;}
+                if (b16) return encode_binaes128(data_temp, key, key_size, data_temp_next, aes_type);
+				return encode_binaes256(data_temp, key, key_size, data_temp_next, aes_type);
             }
         }
 
@@ -2036,11 +2044,11 @@ public:
                 if (is_aes)
                 {
                     // TODO - overriden...
-                    std::cerr << "ERROR " << " whitebox aes cannot be the first key" << std::endl;
+                    std::cerr << "ERROR " << " whitebox AES cannot be the first key" << std::endl;
                     return false;
                 }
             }
-            // TODO -No 2 consecutive same key...
+            // TODO -No 2 consecutive AES same key...
             if (i > 0)
             {
                 bool is_aes=false;
@@ -2066,7 +2074,7 @@ public:
                 if (is_aes && is_aes2 && (keyname==keyname2))
                 {
 					if (vurlkey[i-1].crypto_algo == vurlkey[i].crypto_algo)
-                    	std::cerr << "WARNING " << " should not use same aes key consecutively: " << keyname2 << std::endl;
+                    	std::cerr << "WARNING " << " should not use same AES key consecutively: " << keyname2 << std::endl;
                 }
             }
         }
@@ -2211,7 +2219,7 @@ public:
             }
 
 
-			// RSA DATA
+			// RSA/ECC DATA
 			vurlkey[vurlkey.size()-1].rsa_ecc_encoded_data_pos = data_temp.buffer.size();
 			if (vurlkey[vurlkey.size()-1].rsa_ecc_encoded_data_len > 0)
 			{
@@ -2238,7 +2246,7 @@ public:
 					return false;
 				}
 
-				// APPEND RSA_ENCODED_DATA
+				// APPEND RSA_ECC_ENCODED_DATA
 				data_temp.append(vurlkey[vurlkey.size()-1].sRSA_ECC_ENCODED_DATA.data(), vurlkey[vurlkey.size()-1].rsa_ecc_encoded_data_len);
 			}
 
@@ -2445,7 +2453,8 @@ public:
 
         if (!auto_flag)
         {
-			std::cout << "!auto_flag" << std::endl;
+			if (verbose)
+				std::cout << "NO auto_flag" << std::endl;
         }
         else
         {

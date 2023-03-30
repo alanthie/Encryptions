@@ -251,7 +251,7 @@ constexpr uint32_t RotWord(uint32_t x) {
 // Performs the action of generating the keys that will be used in every round
 // of encryption. "key" is the user-supplied input key, "w" is the output key
 // schedule.
-inline void ExpandKeys(const uint8_t* key, uint32_t* w, int Nk, int Nr, bool verbose = false)
+inline void ExpandKeys(const uint8_t* key, uint32_t* w, int Nk, int Nr,  [[maybe_unused]] bool verbose = false)
 {
     if (VERBOSE_DEBUG) std::cout << "ExpandKeys..." << std::endl;
 

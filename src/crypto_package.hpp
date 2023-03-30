@@ -476,17 +476,21 @@ public:
         return r;
     }
 
-
+	//int16_t crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH;
     bool encode(uint16_t crypto_algo, cryptodata& data_temp, const char* key, uint32_t key_size, cryptodata& data_temp_next)
 	{
         encryptor e;
 
-        if (     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
-                 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
-                 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) &&
+        if (     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_ecb) &&
+                 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_cbc) &&
+                 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_cfb) &&
+	//			 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_ecb) &&
+    //             (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_cbc) &&
+    //             (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_cfb) &&
                  (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH) &&
                  (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_Salsa20) &&
                  (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_IDEA)
+				 //................
            )
         {
             std::cerr << "WARNING unknown algo " <<  crypto_algo << std::endl;
@@ -506,11 +510,12 @@ public:
         }
         else
         {
+			//................
             CRYPTO_ALGO_AES aes_type = CRYPTO_ALGO_AES::ECB;
-            if (crypto_algo      == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) aes_type = CRYPTO_ALGO_AES::CBC;
-            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) aes_type = CRYPTO_ALGO_AES::CFB;
+            if (crypto_algo      == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_128_cbc) aes_type = CRYPTO_ALGO_AES::CBC;
+            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_128_cfb) aes_type = CRYPTO_ALGO_AES::CFB;
 
-            return e.encode_binaes16_16(data_temp, key, key_size, data_temp_next, aes_type);
+            return e.encode_binaes128(data_temp, key, key_size, data_temp_next, aes_type);
         }
         return false;
 	}
@@ -519,12 +524,17 @@ public:
 	{
         decryptor e;
 
-        if (     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) &&
-                 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) &&
-                 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) &&
+		//................
+        if (     (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_ecb) &&
+                 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_cbc) &&
+                 (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_cfb) &&
+				 //(crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_ecb) &&
+                 //(crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_cbc) &&
+                 //(crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_cfb) &&
                  (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH) &&
                  (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_Salsa20) &&
                  (crypto_algo != (uint16_t)CRYPTO_ALGO::ALGO_IDEA)
+				 //................
            )
         {
             std::cerr << "WARNING unknown algo - reset to ALGO_TWOFISH " <<  crypto_algo << std::endl;
@@ -546,10 +556,10 @@ public:
 		else
 		{
             CRYPTO_ALGO_AES aes_type = CRYPTO_ALGO_AES::ECB;
-            if      (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) aes_type = CRYPTO_ALGO_AES::CBC;
-            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) aes_type = CRYPTO_ALGO_AES::CFB;
+            if      (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_128_cbc) aes_type = CRYPTO_ALGO_AES::CBC;
+            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_128_cfb) aes_type = CRYPTO_ALGO_AES::CFB;
 
-            return e.decode_binaes16_16(data_encrypted, key, key_size, data_decrypted, aes_type);
+            return e.decode_binaes128(data_encrypted, key, key_size, data_decrypted, aes_type);
         }
 
         return false;

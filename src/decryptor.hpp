@@ -153,16 +153,16 @@ public:
 		if (filename_encrypted_data.size() == 0)    filename_encrypted_data = cfg.cmdparam.filename_encrypted_data;
 		if (filename_decrypted_data.size() == 0)    filename_decrypted_data = cfg.cmdparam.filename_decrypted_data;
 
-		if (staging.size() == 0) 				staging 				= cfg.cmdparam.folder_staging;
-		if (folder_local.size() == 0) 			folder_local 			= cfg.cmdparam.folder_local;
-		if (folder_my_private_rsa.size() == 0) 	folder_my_private_rsa 	= cfg.cmdparam.folder_my_private_rsa;
-		if (folder_other_public_rsa.size() == 0)folder_other_public_rsa = cfg.cmdparam.folder_other_public_rsa;
-		if (folder_my_private_ecc.size() == 0) 	folder_my_private_ecc 	= cfg.cmdparam.folder_my_private_ecc;
-		if (folder_other_public_ecc.size() == 0)folder_other_public_ecc = cfg.cmdparam.folder_other_public_ecc;
-		if (folder_my_private_hh.size() == 0)	folder_my_private_hh 	= cfg.cmdparam.folder_my_private_hh;
-		if (folder_other_public_hh.size() == 0)	folder_other_public_hh 	= cfg.cmdparam.folder_other_public_hh;
-		if (wbaes_my_private_path.size() == 0)	wbaes_my_private_path 	= cfg.cmdparam.wbaes_my_private_path;
-		if (wbaes_other_public_path.size() == 0)	wbaes_other_public_path 	= cfg.cmdparam.wbaes_other_public_path;
+		if (staging.size() == 0) 					staging 				= cfg.cmdparam.folder_staging;
+		if (folder_local.size() == 0) 				folder_local 			= cfg.cmdparam.folder_local;
+		if (folder_my_private_rsa.size() == 0) 		folder_my_private_rsa 	= cfg.cmdparam.folder_my_private_rsa;
+		if (folder_other_public_rsa.size() == 0)	folder_other_public_rsa = cfg.cmdparam.folder_other_public_rsa;
+		if (folder_my_private_ecc.size() == 0) 		folder_my_private_ecc 	= cfg.cmdparam.folder_my_private_ecc;
+		if (folder_other_public_ecc.size() == 0)	folder_other_public_ecc = cfg.cmdparam.folder_other_public_ecc;
+		if (folder_my_private_hh.size() == 0)		folder_my_private_hh 	= cfg.cmdparam.folder_my_private_hh;
+		if (folder_other_public_hh.size() == 0)		folder_other_public_hh 	= cfg.cmdparam.folder_other_public_hh;
+		if (wbaes_my_private_path.size() == 0)		wbaes_my_private_path 	= cfg.cmdparam.wbaes_my_private_path;
+		if (wbaes_other_public_path.size() == 0)	wbaes_other_public_path = cfg.cmdparam.wbaes_other_public_path;
 
 		if (verbose == false) 					if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.verbose) == 1) verbose = true;
 		if (keeping == false) 					if (cfg.get_positive_value_negative_if_invalid(cfg.cmdparam.keeping) == 1) keeping = true;
@@ -753,6 +753,7 @@ public:
 				rc = wget(s.data(), file.data(), verbose);
 				if (rc != 0)
 				{
+					// TODO - If detach ask local copy of web file...
 					std::cerr << "ERROR " << "unable to read web url contents " << "URL " << s << std::endl;
 					r = false;
 				}
@@ -896,6 +897,7 @@ public:
             }
 		}
 
+		// TODO no staging file
 		if (keeping == false)
 		{
             if (fileexists(file))
@@ -1427,7 +1429,7 @@ public:
         return r;
 	}
 
-	bool decode_binaes16_16(cryptodata& data_encrypted,
+	bool decode_binaes128(cryptodata& data_encrypted,
                             const char* key, uint32_t key_size,
                             cryptodata& data_decrypted,
                             CRYPTO_ALGO_AES aes_type)
@@ -1437,23 +1439,23 @@ public:
 
         if (key_size == 0)
 		{
-            std::cerr << "ERROR decode_binaes16_16 - key_size = 0 " <<  "" << std::endl;
+            std::cerr << "ERROR decode_binaes128 - key_size = 0 " <<  "" << std::endl;
             return false;
         }
         if (data_encrypted.buffer.size() == 0)
 		{
-            std::cerr << "ERROR decode_binaes16_16 - data file is empty " << std::endl;
+            std::cerr << "ERROR decode_binaes128 - data file is empty " << std::endl;
             return false;
         }
 
         if (key_size % 16 != 0)
 		{
-            std::cerr << "ERROR decode_binaes16_16 - key_size must be 16x " <<  key_size << std::endl;
+            std::cerr << "ERROR decode_binaes128 - key_size must be 16x " <<  key_size << std::endl;
             return false;
         }
         if (data_encrypted.buffer.size() % 16 != 0)
 		{
-            std::cerr << "ERROR decode_binaes16_16 - data size must be 16x " <<  data_encrypted.buffer.size() << std::endl;
+            std::cerr << "ERROR decode_binaes128 - data size must be 16x " <<  data_encrypted.buffer.size() << std::endl;
             return false;
         }
 
@@ -1578,7 +1580,7 @@ public:
         return r;
 	}
 
-	bool decode_binaes32_32(cryptodata& data_encrypted,
+	bool decode_binaes256(cryptodata& data_encrypted,
                             const char* key, uint32_t key_size,
                             cryptodata& data_decrypted,
                             CRYPTO_ALGO_AES aes_type)
@@ -1588,23 +1590,23 @@ public:
 
         if (key_size == 0)
 		{
-            std::cerr << "ERROR decode_binaes32_32 - key_size = 0 " <<  "" << std::endl;
+            std::cerr << "ERROR decode_binaes256 - key_size = 0 " <<  "" << std::endl;
             return false;
         }
         if (data_encrypted.buffer.size() == 0)
 		{
-            std::cerr << "ERROR decode_binaes32_32 - data file is empty " << std::endl;
+            std::cerr << "ERROR decode_binaes256 - data file is empty " << std::endl;
             return false;
         }
 
         if (key_size % 32 != 0)
 		{
-            std::cerr << "ERROR decode_binaes32_32 - key_size must be 32x " <<  key_size << std::endl;
+            std::cerr << "ERROR decode_binaes256 - key_size must be 32x " <<  key_size << std::endl;
             return false;
         }
         if (data_encrypted.buffer.size() % 32 != 0)
 		{
-            std::cerr << "ERROR decode_binaes32_32 - data size must be 32x " <<  data_encrypted.buffer.size() << std::endl;
+            std::cerr << "ERROR decode_binaes256 - data size must be 32x " <<  data_encrypted.buffer.size() << std::endl;
             return false;
         }
 
@@ -1769,15 +1771,15 @@ public:
 		{
 			bool bin16=true;
             CRYPTO_ALGO_AES aes_type = CRYPTO_ALGO_AES::ECB;
-            if      (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_ecb) aes_type = CRYPTO_ALGO_AES::ECB;
-            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cfb) aes_type = CRYPTO_ALGO_AES::CFB;
-			else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_16_16_cbc) aes_type = CRYPTO_ALGO_AES::CBC;
-            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_32_32_ecb) {aes_type = CRYPTO_ALGO_AES::ECB;bin16=false;}
-            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_32_32_cfb) {aes_type = CRYPTO_ALGO_AES::CFB;bin16=false;}
-			else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_32_32_cbc) {aes_type = CRYPTO_ALGO_AES::CBC;bin16=false;}
+            if      (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_128_ecb) aes_type = CRYPTO_ALGO_AES::ECB;
+            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_128_cfb) aes_type = CRYPTO_ALGO_AES::CFB;
+			else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_128_cbc) aes_type = CRYPTO_ALGO_AES::CBC;
+            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_256_ecb) {aes_type = CRYPTO_ALGO_AES::ECB;bin16=false;}
+            else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_256_cfb) {aes_type = CRYPTO_ALGO_AES::CFB;bin16=false;}
+			else if (crypto_algo == (uint16_t) CRYPTO_ALGO::ALGO_BIN_AES_256_cbc) {aes_type = CRYPTO_ALGO_AES::CBC;bin16=false;}
 
-			if (bin16)  r = decode_binaes16_16(data_encrypted, key, key_size, data_decrypted, aes_type);
-			else		r = decode_binaes32_32(data_encrypted, key, key_size, data_decrypted, aes_type);
+			if (bin16)  r = decode_binaes128(data_encrypted, key, key_size, data_decrypted, aes_type);
+			else		r = decode_binaes256(data_encrypted, key, key_size, data_decrypted, aes_type);
         }
 
 		if (r)
@@ -2422,7 +2424,8 @@ public:
 
 		if (!auto_flag)
         {
-			//std::cout << "!auto_flag" << std::endl;
+			if (verbose)
+				std::cout << "!auto_flag" << std::endl;
         }
 
         r = datalist.read_write_from(   decrypted_data, filename_decrypted_data,

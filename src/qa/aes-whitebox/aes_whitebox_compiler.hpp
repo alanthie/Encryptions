@@ -205,7 +205,7 @@ void CalculateTyBoxes(	uint32_t roundKey[],
 
   //NTL::mat_GF2 MB[Nr-1][4];
   std::vector< std::vector<NTL::mat_GF2> >* pMB = new std::vector<std::vector<NTL::mat_GF2 >>(Nr - 1);
-  if (enableMB) 
+  if (enableMB)
   {
 	  std::vector< std::vector<NTL::mat_GF2> >& MB = *pMB;
 	  for (int i = 0; i < Nr-1; i++)
@@ -233,7 +233,7 @@ void CalculateTyBoxes(	uint32_t roundKey[],
 
   //NTL::mat_GF2 L[Nr-1][16];
   std::vector< std::vector<NTL::mat_GF2> >* pL = new std::vector<std::vector<NTL::mat_GF2 >>(Nr - 1);
-  if (enableL) 
+  if (enableL)
   {
 	std::vector< std::vector<NTL::mat_GF2> >& L = *pL;
 	for (int i = 0; i < Nr - 1; i++)
@@ -310,7 +310,7 @@ void CalculateTyBoxes(	uint32_t roundKey[],
   if (enableL) delete pL;
 }
 
-void GenerateXorTable(int Nr, wbaes_vbase* instance_aes, bool verbose = false)
+void GenerateXorTable(int Nr, wbaes_vbase* instance_aes,  [[maybe_unused]] bool verbose = false)
 {
     if (VERBOSE_DEBUG) std::cout << "GenerateXorTable..." << std::endl;
 
@@ -348,11 +348,11 @@ void GenerateXorTable(int Nr, wbaes_vbase* instance_aes, bool verbose = false)
     delete pXor;
 }
 
-void GenerateEncryptingTables(uint32_t* roundKey, int Nr, wbaes_vbase* instance_aes, bool verbose = false)
+void GenerateEncryptingTables(uint32_t* roundKey, int Nr, wbaes_vbase* instance_aes,  [[maybe_unused]] bool verbose = false)
 {
     if (VERBOSE_DEBUG) std::cout << "GenerateEncryptingTables..." << std::endl;
     uint8_t TboxesLast[16][256];
-    
+
 	//uint32_t Tyboxes[Nr-1][16][256];
     std::vector<std::vector<std::vector<uint32_t>>>* pTyboxes = new std::vector<std::vector<std::vector<uint32_t>>>(Nr-1);
 	std::vector<std::vector<std::vector<uint32_t>>>& Tyboxes = *pTyboxes;
@@ -429,7 +429,35 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 	int r = 0;
 	bool ok = true;
 	int Nk = 0, Nr = 0;
-	if (strcmp(aes.data(), "aes128") == 0)
+	if (aes == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes512) )
+	{
+		Nk = 16, Nr = 22;
+	}
+	else if (aes == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes1024) )
+	{
+		Nk = 32, Nr = 38;
+	}
+	else if (aes == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes2048) )
+	{
+		Nk = 64, Nr = 70;
+	}
+	else if (aes == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes4096) )
+	{
+		Nk = 128, Nr = 134;
+	}
+	else if (aes == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes8192) )
+	{
+		Nk = 128*2, Nr = 134*2 - 6;
+	}
+	else if (aes == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes16384) )
+	{
+		Nk = 512, Nr = 526;
+	}
+	else if (aes == algo_wbaes_name(cryptoAL::CRYPTO_ALGO::ALGO_wbaes32768) )
+	{
+		Nk = 1024, Nr = 1038;
+	}
+	else if (strcmp(aes.data(), "aes128") == 0)
 	{
 		Nk = 4, Nr = 10;
 	}
@@ -440,30 +468,9 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 	else if (strcmp(aes.data(), "aes256") == 0) {
 		Nk = 8, Nr = 14;
 	}
-	else if (strcmp(aes.data(), "aes512") == 0) {
-		Nk = 16, Nr = 22;
-	}
-	else if (strcmp(aes.data(), "aes1024") == 0) {
-		Nk = 32, Nr = 38;
-	}
-	else if (strcmp(aes.data(), "aes2048") == 0) {
-		Nk = 64, Nr = 70;
-	}
-	else if (strcmp(aes.data(), "aes4096") == 0) {
-		Nk = 128, Nr = 134;
-	}
-	else if (strcmp(aes.data(), "aes8192") == 0) {
-		Nk = 128*2, Nr = 134*2 - 6;
-	}
-	else if (strcmp(aes.data(), "aes16384") == 0) {
-		Nk = 512, Nr = 526;
-	}
-	else if (strcmp(aes.data(), "aes32768") == 0) {
-		Nk = 1024, Nr = 1038;
-	}
 	else
 	{
-		// TODO - do code template for unlimited size
+		// TODO
 	}
 
 	// TODO - May only need 2 tbl (one for external encoding Xor and merging the 3 others)
@@ -487,7 +494,7 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 		if (ok)
 		 {
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_xor.tbl";
-			if (verbose) std::cout << "generate_aes to " << filename << std::endl;
+			if (verbose) std::cout << "generate aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
@@ -558,7 +565,7 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 		if (ok)
 		{
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_tyboxes.tbl";
-			if (VERBOSE_DEBUG)  std::cout << "generate_aes to " << filename << std::endl;
+			if (VERBOSE_DEBUG)  std::cout << "generate aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
@@ -577,7 +584,7 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 		if (ok)
 		{
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_tboxesLast.tbl";
-			if (VERBOSE_DEBUG)  std::cout << "generate_aes to " << filename << std::endl;
+			if (VERBOSE_DEBUG)  std::cout << "generate aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
@@ -596,7 +603,7 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 		if (ok)
 		{
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_mbl.tbl";
-			if (VERBOSE_DEBUG)  std::cout << "generate_aes to " << filename << std::endl;
+			if (VERBOSE_DEBUG)  std::cout << "generate aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
