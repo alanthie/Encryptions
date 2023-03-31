@@ -308,7 +308,20 @@ void  menu()
 				kn = kn + std::string("_") + cryptoAL::get_current_time_and_date_short();
 				std::cerr << "key name is: " << kn << std::endl;
 
-				int r = WBAES::generate_aes(aes, "./", kn, true);		// CREATE
+				std::string file_for_key;
+				std::string file_for_xor;
+
+				std::cout << "Enter file to use to generate the key (0 = ./binary.dat.1) : ";
+				std::cin >> file_for_key;
+				if (file_for_key.size()==0) continue;
+				if (file_for_key == "0") file_for_key = "./binary.dat.1";
+
+				std::cout << "Enter file to use to generate the xor (0 = ./binary.dat.2) : ";
+				std::cin >> file_for_xor;
+				if (file_for_xor.size()==0) continue;
+				if (file_for_xor == "0") file_for_xor = "./binary.dat.2";
+
+				int r = WBAES::generate_aes(file_for_key, file_for_xor, aes, "./", kn, true);		// CREATE
 				if (r!=0)
 				{
 					std::cerr << "ERROR creating aes" << std::endl;

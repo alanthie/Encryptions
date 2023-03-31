@@ -3,6 +3,8 @@
 
 #include "../../crypto_const.hpp"
 #include "../../random_engine.hpp"
+#include "../../data.hpp"
+#include "../../crypto_file.hpp"
 #include "../../c_plus_plus_serializer.h"
 
 #include <stdio.h>
@@ -310,7 +312,7 @@ void CalculateTyBoxes(	uint32_t roundKey[],
   if (enableL) delete pL;
 }
 
-void GenerateXorTable(int Nr, wbaes_vbase* instance_aes,  [[maybe_unused]] bool verbose = false)
+void GenerateXorTable(const char* rndKey, uint32_t rndsize, int Nr, wbaes_vbase* instance_aes,  [[maybe_unused]] bool verbose = false)
 {
     if (VERBOSE_DEBUG) std::cout << "GenerateXorTable..." << std::endl;
 
@@ -329,17 +331,19 @@ void GenerateXorTable(int Nr, wbaes_vbase* instance_aes,  [[maybe_unused]] bool 
 	}
 
 	if (VERBOSE_DEBUG) std::cout << "GenerateEncryptingTables..." << std::endl;
+	uint32_t idx = 0; char a; char b;
   	for (int r = 0; r < Nr-1; r++)
     for (int n = 0; n < 96; n++)
       for (int i = 0; i < 16; i++)
 	  {
-	  	auto s1 = cryptoAL::generate_base16_random_string(16+1);
-	  	auto s2 = cryptoAL::generate_base16_random_string(16+1);
         for (int j = 0; j < 16; j++)
 		{
 			// EXTERNAL ENCODING here - default to random
           	// Xor[r][n][i][j] = i ^ j;
-			Xor[r][n][i][j] = (uint8_t)( ((uint8_t)s1[j]) + 16*((uint8_t)s2[j]) );
+			a = rndKey[idx % rndsize];
+			b = rndKey[(idx+1) % rndsize];
+			Xor[r][n][i][j] = (uint8_t)( ((uint8_t)a) + 16*((uint8_t)b) );
+			idx+=2;
 		  	instance_aes->setXor(r, n, j, i, Xor[r][n][i][j]);
 		}
 	}
@@ -401,7 +405,7 @@ void GenerateEncryptingTables(uint32_t* roundKey, int Nr, wbaes_vbase* instance_
 	delete pMBL;
 }
 
-bool GenerateTables(const char* hexKey, int Nk, int Nr, wbaes_vbase* instance_aes, bool verbose = false)
+bool GenerateTables(const char* hexKey, const char* rndKey, uint32_t rndsize, int Nk, int Nr, wbaes_vbase* instance_aes, bool verbose = false)
 {
 	bool r  = true;
   	//uint8_t key[Nk*4];
@@ -417,15 +421,46 @@ bool GenerateTables(const char* hexKey, int Nk, int Nr, wbaes_vbase* instance_ae
   	{
   		if (verbose) std::cout << "GenerateTables..." << std::endl;
 	  	ExpandKeys(key.data(), roundKey.data(), Nk, Nr, verbose);
-	  	GenerateXorTable(Nr, instance_aes, verbose);
+	  	GenerateXorTable(rndKey, rndsize, Nr, instance_aes, verbose);
 	  	GenerateEncryptingTables(roundKey.data(), Nr, instance_aes, verbose);
   	}
 	return r;
 }
 
 
-int generate_aes(const std::string& aes, const std::string& pathtbl, const std::string& tablekeyname, bool verbose = false)
+int generate_aes(	const std::string& file_for_key,
+					const std::string& file_for_xor,
+					const std::string& aes, const std::string& pathtbl, const std::string& tablekeyname, bool verbose = false)
 {
+	if (cryptoAL::fileexists(file_for_key) == false)
+	{
+		std::cerr << "ERROR missing file for key: " << file_for_key <<  std::endl;
+		return -1;
+	}
+	if (cryptoAL::fileexists(file_for_xor) == false)
+	{
+		std::cerr << "ERROR missing file for xor: " << file_for_xor <<  std::endl;
+		return -1;
+	}
+	
+	cryptoAL::cryptodata data_file_for_key;
+	bool rr = data_file_for_key.read_from_file(file_for_key);
+	auto sz = data_file_for_key.buffer.size();
+	if (rr == false)
+	{
+		std::cerr << "ERROR reading file for key " <<  " file: " << file_for_key << std::endl;
+		return -1;
+	}
+	
+	cryptodata data_file_for_xor;
+	rr = data_file_for_xor.read_from_file(file_for_xor);
+	auto sz2 = data_file_for_xor.buffer.size();
+	if (rr == false)
+	{
+		std::cerr << "ERROR reading file for xor " <<  " file: " << file_for_xor << std::endl;
+		return -1;
+	}
+		
 	int r = 0;
 	bool ok = true;
 	int Nk = 0, Nr = 0;
@@ -473,13 +508,32 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 		// TODO
 	}
 
-	// TODO - May only need 2 tbl (one for external encoding Xor and merging the 3 others)
+	// TODO - merge tbl
 	{
         if (verbose) std::cout << "generate whitebox aes... " << aes << std::endl;
 
 		long long N = 4*Nk*2;
-		std::string skey = cryptoAL::generate_base16_random_string(N);
-		if (verbose) std::cout << "key (random) " << skey << std::endl;
+
+		if (sz < N)
+		{
+            std::cerr << "ERROR file less than required key length " << N << std::endl;
+            return -1;
+		}
+		
+		int n;
+		int digit;
+		std::string skey;// = cryptoAL::generate_base16_random_string(N);
+		for(long long i=0;i<N;i++)
+        {
+			n = (int)(unsigned char)data_file_for_key.buffer.getdata()[i];
+            digit = (int)(n % 16);
+            if ((i==0) && (cryptoAL::BASEDIGIT16[digit]=='0'))
+			{
+				digit = 1;
+			}
+            skey += BASEDIGIT16[digit];
+        }
+		if (verbose) std::cout << "key " << skey << std::endl;
 
 		wbaes_instance_mgr aes_instance(aes, pathtbl, tablekeyname, false, true);
 		wbaes_vbase* p = aes_instance.get_aes(); // new
@@ -489,12 +543,12 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
             return -1;
 		}
 
-		ok = GenerateTables(skey.data(), Nk, Nr, p, verbose);
+		ok = GenerateTables(skey.data(), data_file_for_xor.buffer.getdata(), data_file_for_xor.buffer.size(), Nk, Nr, p, verbose);
 
 		if (ok)
 		 {
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_xor.tbl";
-			if (verbose) std::cout << "generate aes to " << filename << std::endl;
+			if (VERBOSE_DEBUG) std::cout << "generate aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
@@ -526,7 +580,7 @@ int generate_aes(const std::string& aes, const std::string& pathtbl, const std::
 					}
 				}
 
-				if (verbose)
+				if (VERBOSE_DEBUG)
 				{
 					std::cout << "ok " << filename << std::endl;
 					for (int r = 0; r < 2; r++) {
