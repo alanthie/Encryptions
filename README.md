@@ -344,6 +344,9 @@ Auto transmission of public keys implemented:
 Feature implemented: Transform encrypted data to another format (ex: png image):
 ![Alt text](/Doc/png.png?raw=true "png")
 
+Setup
+![Alt text](/Doc/sec.png?raw=true "sec")
+
 License
 <pre>
 Free for personal usage
