@@ -105,7 +105,7 @@ public:
 
 	void reset_cfg(const std::string& file)
 	{
-		// reentry allowed?
+		// reentry allowed!
 		filecfg = file;
 		ini.reset(file);
 		map_sections.clear();

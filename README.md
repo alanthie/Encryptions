@@ -257,6 +257,24 @@ max_usage2	= keytype:rsa,bits:1024,max_usage_count:16
 
 [keygen]
 policy1     = keytype:rsa, pool_first:10, pool_random:30, pool_last:10, pool_new:20, pool_max:100
+
+[algo]
+ALGO_BIN_AES_128_ecb = 0           
+ALGO_BIN_AES_128_cbc = 0           
+ALGO_BIN_AES_128_cfb = 1           
+ALGO_BIN_AES_256_ecb = 1            
+ALGO_BIN_AES_256_cbc = 1           
+ALGO_BIN_AES_256_cfb = 1            
+ALGO_TWOFISH = 1               
+ALGO_Salsa20 = 1                
+ALGO_IDEA = 1           
+ALGO_wbaes512      = 1             
+ALGO_wbaes1024     = 1            
+ALGO_wbaes2048     = 1             
+ALGO_wbaes4096     = 1            
+ALGO_wbaes8192     = 1            
+ALGO_wbaes16384    = 1           
+ALGO_wbaes32768    = 1 
 </pre>
 
 Regular upload of Elliptic Curves of increasing number of bits
