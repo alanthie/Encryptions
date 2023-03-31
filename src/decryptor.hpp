@@ -91,6 +91,12 @@ public:
             if (cfg_parse_result)
             {
                 process_cfg_param();
+				
+				cfg.get_active_algos(vAlgo);
+				if (vAlgo.size() > 0)
+				{
+					has_cfg_algo=true;
+				}
             }
         }
 
@@ -2346,6 +2352,9 @@ public:
 
     cryptodata_list datalist;
 	WBAES::wbaes_pool aes_pool;
+	
+	bool has_cfg_algo = false;
+	std::vector<CRYPTO_ALGO> vAlgo;
 
 	bool pre_decode(uint32_t converterid, const std::string& filename_encrypted_data, cryptodata& output_encrypted_data, std::string& new_output_filename)
 	{

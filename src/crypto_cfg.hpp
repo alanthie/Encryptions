@@ -45,13 +45,14 @@ struct cfg_algo
 	std::string ALGO_TWOFISH;
 	std::string ALGO_Salsa20;
 	std::string ALGO_IDEA;
-	std::string ALGO_wbAES_512;
-	std::string ALGO_wbAES_1024;
-	std::string ALGO_wbAES_2048;
-	std::string ALGO_wbAES_4096;
-	std::string ALGO_wbAES_8192;
-	std::string ALGO_wbAES_16384;
-	std::string ALGO_wbAES_32768;
+
+	std::string ALGO_wbaes512;
+	std::string ALGO_wbaes1024;
+	std::string ALGO_wbaes2048;
+	std::string ALGO_wbaes4096;
+	std::string ALGO_wbaes8192;
+	std::string ALGO_wbaes16384;
+	std::string ALGO_wbaes32768;
 };
 
 // [cmdparam]
@@ -126,6 +127,32 @@ public:
 	{
         if (s.size() == 0) return -1;
         return strutil::str_to_ll(s);
+	}
+
+	void get_active_algos(std::vector<CRYPTO_ALGO>& v)
+	{
+		if (get_positive_value_negative_if_invalid(algo.ALGO_BIN_AES_128_ecb) > 0) v.push_back(CRYPTO_ALGO::ALGO_BIN_AES_128_ecb);
+		if (get_positive_value_negative_if_invalid(algo.ALGO_BIN_AES_128_cfb) > 0) v.push_back(CRYPTO_ALGO::ALGO_BIN_AES_128_cfb);
+		if (get_positive_value_negative_if_invalid(algo.ALGO_BIN_AES_128_cbc) > 0) v.push_back(CRYPTO_ALGO::ALGO_BIN_AES_128_cbc);
+
+		if (get_positive_value_negative_if_invalid(algo.ALGO_BIN_AES_256_ecb) > 0) v.push_back(CRYPTO_ALGO::ALGO_BIN_AES_256_ecb);
+		if (get_positive_value_negative_if_invalid(algo.ALGO_BIN_AES_256_cbc) > 0) v.push_back(CRYPTO_ALGO::ALGO_BIN_AES_256_cbc);
+		if (get_positive_value_negative_if_invalid(algo.ALGO_BIN_AES_256_cfb) > 0) v.push_back(CRYPTO_ALGO::ALGO_BIN_AES_256_cfb);
+
+		if (get_positive_value_negative_if_invalid(algo.ALGO_TWOFISH) > 0) v.push_back(CRYPTO_ALGO::ALGO_TWOFISH);
+		if (get_positive_value_negative_if_invalid(algo.ALGO_Salsa20) > 0) v.push_back(CRYPTO_ALGO::ALGO_Salsa20);
+		if (get_positive_value_negative_if_invalid(algo.ALGO_IDEA) > 0) v.push_back(CRYPTO_ALGO::ALGO_IDEA);
+	}
+
+	void get_active_wbaes_algos(std::vector<CRYPTO_ALGO>& v)
+	{
+		if (get_positive_value_negative_if_invalid(algo.ALGO_wbaes512) > 0) v.push_back(CRYPTO_ALGO::ALGO_wbaes512);
+		if (get_positive_value_negative_if_invalid(algo.ALGO_wbaes1024) > 0) v.push_back(CRYPTO_ALGO::ALGO_wbaes1024);
+		if (get_positive_value_negative_if_invalid(algo.ALGO_wbaes2048) > 0) v.push_back(CRYPTO_ALGO::ALGO_wbaes2048);
+		if (get_positive_value_negative_if_invalid(algo.ALGO_wbaes4096) > 0) v.push_back(CRYPTO_ALGO::ALGO_wbaes4096);
+		if (get_positive_value_negative_if_invalid(algo.ALGO_wbaes8192) > 0) v.push_back(CRYPTO_ALGO::ALGO_wbaes8192);
+		if (get_positive_value_negative_if_invalid(algo.ALGO_wbaes16384) > 0) v.push_back(CRYPTO_ALGO::ALGO_wbaes8192);
+		if (get_positive_value_negative_if_invalid(algo.ALGO_wbaes32768) > 0) v.push_back(CRYPTO_ALGO::ALGO_wbaes32768);
 	}
 
     bool parse()
@@ -276,13 +303,14 @@ public:
 	 	algo.ALGO_TWOFISH  			= apply_var(ini.get_string("ALGO_TWOFISH", CFG_algo_section));
 	 	algo.ALGO_Salsa20  			= apply_var(ini.get_string("ALGO_Salsa20", CFG_algo_section));
 	 	algo.ALGO_IDEA  			= apply_var(ini.get_string("ALGO_IDEA", CFG_algo_section));
-	 	algo.ALGO_wbAES_512  		= apply_var(ini.get_string("ALGO_wbAES_512", CFG_algo_section));
-	 	algo.ALGO_wbAES_1024  		= apply_var(ini.get_string("ALGO_wbAES_1024", CFG_algo_section));
-	 	algo.ALGO_wbAES_2048  		= apply_var(ini.get_string("ALGO_wbAES_2048", CFG_algo_section));
-	 	algo.ALGO_wbAES_4096  		= apply_var(ini.get_string("ALGO_wbAES_4096", CFG_algo_section));
-	 	algo.ALGO_wbAES_8192  		= apply_var(ini.get_string("ALGO_wbAES_8192", CFG_algo_section));
-		algo.ALGO_wbAES_16384  		= apply_var(ini.get_string("ALGO_wbAES_16384", CFG_algo_section));
-		algo.ALGO_wbAES_32768  		= apply_var(ini.get_string("ALGO_wbAES_32768", CFG_algo_section));
+
+	 	algo.ALGO_wbaes512  		= apply_var(ini.get_string("ALGO_wbaes512", CFG_algo_section));
+	 	algo.ALGO_wbaes1024  		= apply_var(ini.get_string("ALGO_wbaes1024", CFG_algo_section));
+	 	algo.ALGO_wbaes2048  		= apply_var(ini.get_string("ALGO_wbaes2048", CFG_algo_section));
+	 	algo.ALGO_wbaes4096  		= apply_var(ini.get_string("ALGO_wbaes4096", CFG_algo_section));
+	 	algo.ALGO_wbaes8192  		= apply_var(ini.get_string("ALGO_wbaes8192", CFG_algo_section));
+		algo.ALGO_wbaes16384  		= apply_var(ini.get_string("ALGO_wbaes16384", CFG_algo_section));
+		algo.ALGO_wbaes32768  		= apply_var(ini.get_string("ALGO_wbaes32768", CFG_algo_section));
 	}
 
 	void show()
@@ -330,13 +358,14 @@ public:
 		std::cout << "ALGO_TWOFISH:               " << algo.ALGO_TWOFISH  << std::endl;
 		std::cout << "ALGO_Salsa20:               " << algo.ALGO_Salsa20  << std::endl;
 		std::cout << "ALGO_IDEA:                  " << algo.ALGO_IDEA  << std::endl;
-		std::cout << "ALGO_wbAES_512:             " << algo.ALGO_wbAES_512  << std::endl;
-		std::cout << "ALGO_wbAES_1024:            " << algo.ALGO_wbAES_1024  << std::endl;
-		std::cout << "ALGO_wbAES_2048:            " << algo.ALGO_wbAES_2048  << std::endl;
-		std::cout << "ALGO_wbAES_4096:            " << algo.ALGO_wbAES_4096  << std::endl;
-		std::cout << "ALGO_wbAES_8192:            " << algo.ALGO_wbAES_8192  << std::endl;
-		std::cout << "ALGO_wbAES_16384:           " << algo.ALGO_wbAES_16384  << std::endl;
-		std::cout << "ALGO_wbAES_32768:           " << algo.ALGO_wbAES_32768  << std::endl;
+
+		std::cout << "ALGO_wbaes512:             " << algo.ALGO_wbaes512  << std::endl;
+		std::cout << "ALGO_wbaes1024:            " << algo.ALGO_wbaes1024  << std::endl;
+		std::cout << "ALGO_wbaes2048:            " << algo.ALGO_wbaes2048  << std::endl;
+		std::cout << "ALGO_wbaes4096:            " << algo.ALGO_wbaes4096  << std::endl;
+		std::cout << "ALGO_wbaes8192:            " << algo.ALGO_wbaes8192  << std::endl;
+		std::cout << "ALGO_wbaes16384:           " << algo.ALGO_wbaes16384  << std::endl;
+		std::cout << "ALGO_wbaes32768:           " << algo.ALGO_wbaes32768  << std::endl;
 		std::cout << "-------------------------------------------------" << std::endl<< std::endl;
 	}
 

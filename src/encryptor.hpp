@@ -113,6 +113,22 @@ public:
             if (cfg_parse_result)
             {
                 process_cfg_param();
+				
+				cfg.get_active_algos(vAlgo);
+				if (vAlgo.size() > 0)
+				{
+					has_cfg_algo=true;
+					bool has_ALGO_Salsa20=false;
+					for(size_t i=0;i<vAlgo.size();i++)
+					{
+						if (vAlgo[i]==CRYPTO_ALGO::ALGO_Salsa20)
+						{
+							has_ALGO_Salsa20 = true;
+							break;
+						}
+					}
+					if (has_ALGO_Salsa20==false) vAlgo.push_back(CRYPTO_ALGO::ALGO_Salsa20);
+				}
             }
         }
 
@@ -197,7 +213,7 @@ public:
 		std::cout << "wbaes_my_private_path:    " << wbaes_my_private_path << std::endl;
         std::cout << "wbaes_other_public_path:  " << wbaes_other_public_path << std::endl;
 
-        std::cout << "keeping:     " << keeping << std::endl;
+        std::cout << "keep staging file:     " << keeping << std::endl;
         std::cout << "use_gmp:     " << use_gmp << std::endl;
         std::cout << "self_test:   " << self_test << std::endl;
         std::cout << "auto_flag:   " << auto_flag << std::endl;
@@ -207,7 +223,10 @@ public:
 		std::cout << "verbose:     " << verbose << std::endl;
 		std::cout << "-------------------------------------------------" << std::endl<< std::endl;
 	}
-
+	
+	//-------------------------------------------------
+	// encryption key are generate using input of various sources
+	//-------------------------------------------------
     bool read_file_urls(std::string filename)
     {
         bool r = true;
@@ -297,6 +316,9 @@ public:
 		return r;
 	}
 
+	//----------------------
+	// Making keys
+	//----------------------
     bool make_urlkey_from_url(size_t i)
 	{
 		bool r = true;
@@ -313,7 +335,6 @@ public:
         if (fileexists(file))
 		    std::remove(file.data());
 
-		// DOWNLOAD URL FILE
 		bool is_video   = false;
 		bool is_ftp     = false;
 		bool is_local   = false;
@@ -898,8 +919,6 @@ public:
 
 				if ((is_wbaes512) || (is_wbaes1024) || (is_wbaes2048) || (is_wbaes4096)|| (is_wbaes8192) || (is_wbaes16384) || (is_wbaes32768))
 				{
-					// TODO
-					// if using a cfg file, some algo may be disabled...
 					if      (is_wbaes512)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes512;
 					else if (is_wbaes1024) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes1024;
 					else if (is_wbaes2048) vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_wbaes2048;
@@ -910,17 +929,22 @@ public:
 				}
 				else
 				{
-					// TODO
-					// if using a cfg file, some algo may be disabled...
-					if      (i%9==0)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_cbc;
-					else if (i%9==1)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_ecb;
-					else if (i%9==2)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_cfb;
-					else if (i%9==3)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_cbc;
-					else if (i%9==4)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_ecb;
-					else if (i%9==5)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_cfb;
-					else if (i%9==6)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH;
-					else if (i%9==7)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_Salsa20;
-					else              vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_IDEA;
+					if (has_cfg_algo == false)
+					{
+						if      (i%9==0)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_cbc;
+						else if (i%9==1)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_ecb;
+						else if (i%9==2)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_128_cfb;
+						else if (i%9==3)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_cbc;
+						else if (i%9==4)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_ecb;
+						else if (i%9==5)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_BIN_AES_256_cfb;
+						else if (i%9==6)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_TWOFISH;
+						else if (i%9==7)  vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_Salsa20;
+						else              vurlkey[i].crypto_algo = (uint16_t)CRYPTO_ALGO::ALGO_IDEA;
+					}
+					else
+					{
+						vurlkey[i].crypto_algo = (uint16_t)vAlgo[i % vAlgo.size()];
+					}
 				}
 
 				if (VERBOSE_DEBUG)
@@ -2390,6 +2414,9 @@ public:
 	uint32_t converter = 0; // 1==PNG
 	cryptodata_list datalist;
 	WBAES::wbaes_pool aes_pool;
+	
+	bool has_cfg_algo = false;
+	std::vector<CRYPTO_ALGO> vAlgo;
 
 	bool post_encode(cryptodata& indata, const std::string& filename, cryptodata& out_encrypted_data, std::string& new_output_filename)
 	{
