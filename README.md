@@ -320,13 +320,10 @@ Select a task:
 Man-In-The-Middle Attack prevention now implemented
 ![Alt text](/Doc/ManInTheMiddleAttack.png?raw=true "ManInTheMiddleAttack")
 
-Planned feature:
-![Alt text](/Doc/planned1.png?raw=true "planned1")
-
-Auto transmission of public keys now implemented:
+Auto transmission of public keys implemented:
 ![Alt text](/Doc/autokeys.png?raw=true "autokeys")
 
-Feature now implemented: Transform encrypted data to another format (ex: png image):
+Feature implemented: Transform encrypted data to another format (ex: png image):
 ![Alt text](/Doc/png.png?raw=true "png")
 
 License
