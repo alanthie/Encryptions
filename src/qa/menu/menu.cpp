@@ -5,109 +5,102 @@
 namespace ns_menu
 {
 
-std::optional<std::string> menu_getline(std::istream& is, const std::string& def)
-{
-	for (auto no = is.rdbuf()->in_avail(); no && is && std::isspace(is.peek()); is.ignore(), --no);
-	std::string ln;
-	return std::getline(is, ln) ? (ln.empty() && !def.empty() ? def : ln) : (is.clear(), std::optional<std::string> {});
-}
-
-auto menu_getline(const std::string& prm, const std::string& def)
-{
-	std::optional<std::string> o;
-	do {
-		std::cout << prm;
-		if (!def.empty())
-			std::cout << " [" << def << "]";
-
-		std::cout << " :";
-		o = menu_getline(std::cin, def);
-	} while (!o.has_value() && (std::cout << "Invalid input" << std::endl));
-	return *o;
-}
-
-std::optional<char> getchr(std::istream& is, char def, bool wholeline)
-{
-	if (wholeline)
+	std::optional<std::string> menu_getline(std::istream& is, const std::string& def)
 	{
-		if (auto o = menu_getline(is); o.has_value())
-			return (o->empty() && def ? def : ((o->size() == 1) ? o->front() : std::optional<char> {}));
-		else
-			return {};
-    }
-	return getdata<char>(is);
-}
+		for (auto no = is.rdbuf()->in_avail(); no && is && std::isspace(is.peek()); is.ignore(), --no);
+		std::string ln;
+		return std::getline(is, ln) ? (ln.empty() && !def.empty() ? def : ln) : (is.clear(), std::optional<std::string> {});
+	}
+
+	auto menu_getline(const std::string& prm, const std::string& def)
+	{
+		std::optional<std::string> o;
+		do {
+			std::cout << prm;
+			if (!def.empty())
+				std::cout << " [" << def << "]";
+
+			std::cout << " :";
+			o = menu_getline(std::cin, def);
+		} while (!o.has_value() && (std::cout << "Invalid input" << std::endl));
+		return *o;
+	}
+
+	std::optional<char> getchr(std::istream& is, char def, bool wholeline)
+	{
+		if (wholeline)
+		{
+			if (auto o = menu_getline(is); o.has_value())
+				return (o->empty() && def ? def : ((o->size() == 1) ? o->front() : std::optional<char> {}));
+			else
+				return {};
+		}
+		return getdata<char>(is);
+	}
+
+	auto getchr(const std::string& prm, const std::string& valid, char def, bool wholeline)
+	{
+		const auto showopt = [&valid, def]() {
+			std::cout << " (";
+			for (size_t i = 0, s = valid.size(); i < s; ++i)
+				std::cout << (i ? "/" : "") << valid[i];
+			if (std::cout << ")"; def)
+				std::cout << " [" << def << "]";
+		};
+
+		std::optional<char> o;
+
+		do {
+			if (std::cout << prm; !valid.empty())
+				showopt();
+
+			std::cout << " :";
+			o = getchr(std::cin, def, wholeline);
+		} while ((!o.has_value() || ((!valid.empty()) && (valid.find(*o) == std::string::npos))) && (std::cout << "Invalid input" << std::endl));
+
+		return *o;
+	}
 
 
-// Obtains a char from the console. First displays prompt text
-// prm - optional prompt text to display first
-// valid - optional string containing valid values for the char. Displayed within (...)
-// def - optional default char to use if none entered. Displayed within [...]
-// wholeline - true if only one char per line (default), false if can have multiple chars per line
-// returns valid char. No error conditions. Only returns when valid char entered
-auto getchr(const std::string& prm, const std::string& valid, char def, bool wholeline)
-{
-	const auto showopt = [&valid, def]() {
-		std::cout << " (";
-		for (size_t i = 0, s = valid.size(); i < s; ++i)
-			std::cout << (i ? "/" : "") << valid[i];
-		if (std::cout << ")"; def)
-			std::cout << " [" << def << "]";
-	};
+	Menu::Menu() {}
+	Menu::Menu(const std::string& t, const vmi& vm) : stitle(t), mitems(vm) {}
 
-	std::optional<char> o;
+	std::string Menu::title() const noexcept
+	{
+		return stitle;
+	}
+	void Menu::title(const std::string& t)
+	{
+		stitle = t;
+	}
 
-	do {
-		if (std::cout << prm; !valid.empty())
-			showopt();
+	void Menu::menu(std::any& param)
+	{
+		menu(*this, param);
+	}
 
-		std::cout << " :";
-		o = getchr(std::cin, def, wholeline);
-	} while ((!o.has_value() || ((!valid.empty()) && (valid.find(*o) == std::string::npos))) && (std::cout << "Invalid input" << std::endl));
+	bool Menu::erase(size_t indx)
+	{
+		if (indx < mitems.size()) {
+			mitems.erase(mitems.begin() + indx);
+			return true;
+		}
+		return false;
+	}
+	bool Menu::append(const menu_item& mi)
+	{
+		mitems.emplace_back(mi);
+		return true;
+	}
+	bool Menu::insert(size_t indx, const menu_item& mi)
+	{
+		if (indx < mitems.size()) {
+			mitems.insert(mitems.begin() + indx, mi);
+			return true;
+		}
 
-	return *o;
-}
-
-
-Menu::Menu() {}
-Menu::Menu(const std::string& t, const vmi& vm) : stitle(t), mitems(vm) {}
-
-std::string Menu::title() const noexcept
-{
-    return stitle;
-}
-void Menu::title(const std::string& t)
-{
-    stitle = t;
-}
-
-void Menu::menu(std::any& param)
-{
-    menu(*this, param);
-}
-
-bool Menu::erase(size_t indx)
-{
-    if (indx < mitems.size()) {
-        mitems.erase(mitems.begin() + indx);
-        return true;
-    }
-    return false;
-}
-bool Menu::append(const menu_item& mi)
-{
-    mitems.emplace_back(mi);
-    return true;
-}
-bool Menu::insert(size_t indx, const menu_item& mi)
-{
-    if (indx < mitems.size()) {
-        mitems.insert(mitems.begin() + indx, mi);
-        return true;
-    }
-
-    return false;
-}
+		return false;
+	}
 
 	//---------------------------------------------------------------------------
 	//Params = std::vector<std::variant<size_t, int, double, char, std::string>>;
