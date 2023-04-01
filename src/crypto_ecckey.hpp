@@ -375,7 +375,7 @@ namespace cryptoAL
 		bool generate_private_public_key(bool verb = false)
 		{
 			long long Nbytes = (long long) 1.33 * dom.key_size_bits / 8;
-			s_k = generate_base64_random_string(Nbytes);
+			s_k = cryptoAL::random::generate_base64_random_string(Nbytes);
 
 			if (verb) std::cout << "private key:  " << s_k << std::endl;
 

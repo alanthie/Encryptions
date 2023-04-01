@@ -153,7 +153,7 @@ public:
 			{
 				std::string filename = pathtbl + aes_name + "_" + table_keyname + "_xor.tbl";
 
-				if (cryptoAL::fileexists(filename)==false)
+				if (file_util::fileexists(filename)==false)
 				{
 					std::cerr << "ERROR file not found " << filename << std::endl;
 					r = false;
@@ -217,7 +217,7 @@ public:
 			{
 				std::string filename = pathtbl + aes_name + "_"  + table_keyname + "_tboxesLast.tbl";
 
-				if (cryptoAL::fileexists(filename)==false)
+				if (file_util::fileexists(filename)==false)
 				{
 					std::cerr << "ERROR file not found " << filename << std::endl;
 					r = false;
@@ -253,7 +253,7 @@ public:
 			{
 				std::string filename = pathtbl + aes_name + "_"  + table_keyname + "_tyboxes.tbl";
 
-				if (cryptoAL::fileexists(filename)==false)
+				if (file_util::fileexists(filename)==false)
 				{
 					std::cerr << "ERROR file not found " << filename << std::endl;
 					r = false;
@@ -289,7 +289,7 @@ public:
 			{
 				std::string filename = pathtbl + aes_name + "_"  + table_keyname + "_mbl.tbl";
 
-				if (cryptoAL::fileexists(filename)==false)
+				if (file_util::fileexists(filename)==false)
 				{
 					std::cerr << "ERROR file not found " << filename << std::endl;
 					r = false;

@@ -2,6 +2,8 @@
 #define _INCLUDES_decryptor
 
 #include "crypto_const.hpp"
+#include "file_util.hpp"
+#include "ecc_util.hpp"
 #include <iostream>
 #include <fstream>
 #include "DES.h"
@@ -206,9 +208,9 @@ public:
 		{
             std::string s(out_uk.url);
             if ((s.size() >= 3) && (s[0]=='[') && (s[1]=='r') && (s[2]==']'))
-                std::cout << "url: [r]" << get_summary_hex(s.data()+3, (uint32_t) s.size()-3) << " "<< std::endl;
+                std::cout << "url: [r]" << key_util::get_summary_hex(s.data()+3, (uint32_t) s.size()-3) << " "<< std::endl;
             else if ((s.size() >= 3) && (s[0]=='[') && (s[1]=='e') && (s[2]==']'))
-                std::cout << "url: [r]" << get_summary_hex(s.data()+3, (uint32_t) s.size()-3) << " "<< std::endl;
+                std::cout << "url: [r]" << key_util::get_summary_hex(s.data()+3, (uint32_t) s.size()-3) << " "<< std::endl;
             else
                 std::cout << "url: " << s << " "<< std::endl;
         }
@@ -311,7 +313,7 @@ public:
         std::string file = staging + "decode_staging_url_file_" + std::to_string(staging_cnt) + ".dat";
         staging_cnt++;
 
-        if (fileexists(file))
+        if (file_util::fileexists(file))
 		    std::remove(file.data());
 
         if ( (uk.url_size < URL_MIN_SIZE) || (uk.url_size > URL_MAX_SIZE))
@@ -413,14 +415,14 @@ public:
                 std::string s(&u[pos_url]);
                 std::cout << "video URL: " << s << std::endl;
 
-                rc = getvideo(s, file.data(), "", verbose);
+                rc = key_util::getvideo(s, file.data(), "", verbose);
             }
             else if (is_local)
             {
                 std::string s(&u[pos_url]);
                 std::string local_url = folder_local + s;
 
-                rc = getlocal(local_url.data(), dataout_local, "", verbose);
+                rc = key_util::getlocal(local_url.data(), dataout_local, "", verbose);
 
                 if (rc!= 0)
                 {
@@ -431,7 +433,7 @@ public:
             else if (is_ftp)
             {
                 std::string s(&u[pos_url]);
-                rc = getftp(s.data(), file.data(),
+                rc = key_util::getftp(s.data(), file.data(),
                             encryped_ftp_user,
                             encryped_ftp_pwd,
                             known_ftp_server,
@@ -476,7 +478,7 @@ public:
                         if (VERBOSE_DEBUG)
                         {
                             std::cout << "histo key: " << histo_key << " size:" << histo_key.size() << std::endl;
-                            std::cout << "histo key: " << get_summary_hex(histo_key.data(), (uint32_t)histo_key.size()) << " size:" << histo_key.size() << std::endl;
+                            std::cout << "histo key: " << key_util::get_summary_hex(histo_key.data(), (uint32_t)histo_key.size()) << " size:" << histo_key.size() << std::endl;
                         }
                     }
                     else
@@ -582,14 +584,14 @@ public:
 					{
                         std::string rsa_key_at_iter = v[riter];
 						generate_rsa::rsa_key kout;
-						bool r = get_rsa_key(rsa_key_at_iter, local_rsa_db, kout);
+						bool r = key_util::get_rsa_key(rsa_key_at_iter, local_rsa_db, kout);
 						if (r)
 						{
 							if (riter != 0)
 							{
 								uint32_t msg_size_produced;
 								std::string d = uk.sRSA_ECC_ENCODED_DATA.substr(0, v_encoded_size[riter]);
-								std::string t = rsa_decode_string(d, kout, (uint32_t)d.size(), msg_size_produced, use_gmp);
+								std::string t = key_util::rsa_decode_string(d, kout, (uint32_t)d.size(), msg_size_produced, use_gmp);
 
 								// may reduce size
 								uk.sRSA_ECC_ENCODED_DATA = t + uk.sRSA_ECC_ENCODED_DATA.substr(d.size());
@@ -599,7 +601,7 @@ public:
 							else
 							{
 								uint32_t msg_size_produced;
-								embedded_rsa_key = rsa_decode_string(uk.sRSA_ECC_ENCODED_DATA, kout, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced, use_gmp);
+								embedded_rsa_key = key_util::rsa_decode_string(uk.sRSA_ECC_ENCODED_DATA, kout, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced, use_gmp);
 							}
 						}
 						else
@@ -705,7 +707,7 @@ public:
                         std::string ecc_key_at_iter = v[riter];
 						ecc_key ek_mine;
 
-						bool r = get_ecc_key(ecc_key_at_iter, local_private_ecc_db, ek_mine);
+						bool r = ecc_util::get_ecc_key(ecc_key_at_iter, local_private_ecc_db, ek_mine);
 						if (r)
 						{
                             if (VERBOSE_DEBUG)
@@ -723,7 +725,7 @@ public:
                                 }
 
                                 uint32_t msg_size_produced;
-								std::string t = ecc_decode_string(d, ek_mine, (uint32_t)d.size(), msg_size_produced, verbose);
+								std::string t = key_util::ecc_decode_string(d, ek_mine, (uint32_t)d.size(), msg_size_produced, verbose);
 								if (VERBOSE_DEBUG)
                                 {
                                     std::cerr << "ecc data decoded: " << t << " size: " << t.size() << std::endl;
@@ -734,13 +736,13 @@ public:
 							else
 							{
 								uint32_t msg_size_produced;
-								embedded_ecc_key = ecc_decode_string(uk.sRSA_ECC_ENCODED_DATA, ek_mine, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced, verbose);
+								embedded_ecc_key = key_util::ecc_decode_string(uk.sRSA_ECC_ENCODED_DATA, ek_mine, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced, verbose);
 								if (VERBOSE_DEBUG)
                                 {
                                     std::cout << "ecc encoded data:        " << uk.sRSA_ECC_ENCODED_DATA << " size: " << uk.sRSA_ECC_ENCODED_DATA.size() << std::endl;
-                                    std::cout << "ecc encoded data:        " << get_summary_hex(uk.sRSA_ECC_ENCODED_DATA.data(), (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size()) << " size:" << uk.sRSA_ECC_ENCODED_DATA.size() << std::endl;
+                                    std::cout << "ecc encoded data:        " << key_util::get_summary_hex(uk.sRSA_ECC_ENCODED_DATA.data(), (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size()) << " size:" << uk.sRSA_ECC_ENCODED_DATA.size() << std::endl;
                                     std::cout << "ecc embedded random key: " << embedded_ecc_key << " size: " << embedded_ecc_key.size() << std::endl;
-                                    std::cout << "ecc embedded random key: " << get_summary_hex(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size()) << " size:" << embedded_ecc_key.size() << std::endl;
+                                    std::cout << "ecc embedded random key: " << key_util::get_summary_hex(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size()) << " size:" << embedded_ecc_key.size() << std::endl;
                                     std::cout << "ecc msg_size_produced:   " << msg_size_produced << std::endl;
                                 }
 							}
@@ -756,7 +758,7 @@ public:
             {
 				int pos_url = 3;
 				std::string s(&u[pos_url]);
-				rc = wget(s.data(), file.data(), verbose);
+				rc = key_util::wget(s.data(), file.data(), verbose);
 				if (rc != 0)
 				{
 					// TODO - If detach ask local copy of web file...
@@ -863,7 +865,7 @@ public:
 						if (VERBOSE_DEBUG)
 						{
 							std::cout << "key: ";
-							show_summary(b->getdata(), key_size);
+							key_util::show_summary(b->getdata(), key_size);
 						}
 
 						//if (is_rsa == false)
@@ -906,7 +908,7 @@ public:
 		// TODO no staging file
 		if (keeping == false)
 		{
-            if (fileexists(file))
+            if (file_util::fileexists(file))
                 std::remove(file.data());
         }
 		return r;
@@ -1823,13 +1825,13 @@ public:
 
         if (empty_puzzle == false)
         {
-            if (fileexists(filename_puzzle) == false)
+            if (file_util::fileexists(filename_puzzle) == false)
             {
                 std::cout << "ERROR missing puzzle file " << filename_puzzle <<  std::endl;
                 return false;
             }
         }
-        if (fileexists(filename_encrypted_data) == false)
+        if (file_util::fileexists(filename_encrypted_data) == false)
         {
             std::cout << "ERROR missing encrypted_data file " << filename_encrypted_data <<  std::endl;
             return false;
@@ -1918,9 +1920,9 @@ public:
                     }
                 }
 
-                if (fileexists(staging + "staging_temp_preqa.txt"))
+                if (file_util::fileexists(staging + "staging_temp_preqa.txt"))
                     std::remove(std::string(staging + "staging_temp_preqa.txt").data());
-                if (fileexists(staging + "staging_temp_qa.txt"))
+                if (file_util::fileexists(staging + "staging_temp_qa.txt"))
                     std::remove(std::string(staging + "staging_temp_qa.txt").data());
 			}
 		}
@@ -1963,7 +1965,7 @@ public:
 						if (filename_encrypted_data != new_filename_encrypted_data)
 						{
 							// new_filename_encrypted_data file not use anymore, data in memory
-							if (fileexists(new_filename_encrypted_data))
+							if (file_util::fileexists(new_filename_encrypted_data))
 								std::remove(new_filename_encrypted_data.data());
 						}
 						filename_encrypted_data = new_filename_encrypted_data; // override
@@ -2385,7 +2387,7 @@ public:
 				r = false;
 			}
 
-			if (fileexists(filename_tmp_envelop))
+			if (file_util::fileexists(filename_tmp_envelop))
 				std::remove(filename_tmp_envelop.data());
 
 			if (r)
@@ -2454,9 +2456,9 @@ public:
 			std::string fileHistoPrivateEncodeDB = folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
 			std::string importfile = folder_other_public_hh + HHKEY_OTHER_PUBLIC_DECODE_DB;
 
-			if (cryptoAL::fileexists(fileHistoPrivateEncodeDB) == true)
+			if (file_util::fileexists(fileHistoPrivateEncodeDB) == true)
 			{
-				if (cryptoAL::fileexists(importfile) == true)
+				if (file_util::fileexists(importfile) == true)
 				{
 					uint32_t cnt;
 					uint32_t n;
@@ -2479,7 +2481,7 @@ public:
             }
 			else
 			{
-				if (cryptoAL::fileexists(importfile) == true)
+				if (file_util::fileexists(importfile) == true)
 				{
 					std::cerr << "WARNING no file to update HH keys confirmation: " << fileHistoPrivateEncodeDB << std:: endl;
 				}

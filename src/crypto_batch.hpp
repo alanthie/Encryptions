@@ -23,7 +23,7 @@ namespace cryptoAL
 
 bool batch(std::string mode, std::string inifile, bool verbose)
 {
-    if (fileexists(inifile) == false)
+    if (file_util::fileexists(inifile) == false)
     {
         std::cout << "ERROR config file not found:" << inifile << std::endl;
         return false;

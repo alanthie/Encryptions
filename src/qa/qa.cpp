@@ -138,7 +138,7 @@ void  menu()
 				}
 
 				if (sfile == "0") sfile = "./cfg.ini";
-				if (cryptoAL::fileexists(sfile) == true)
+				if (file_util::fileexists(sfile) == true)
 				{
 					cfg_file = sfile;
 					cfg.reset_cfg(cfg_file);
@@ -331,7 +331,7 @@ void  menu()
 				if (paes == nullptr) continue;
 				int N = 2 * paes->key_length(); // 2x test
 
-				std::string splain 		= cryptoAL::generate_base16_random_string(2*N); // 2 * for base16
+				std::string splain 		= cryptoAL::random::generate_base16_random_string(2*N); // 2 * for base16
 				std::string splaincopy 	= splain;
 				size_t plainLen = splain.size();
 
@@ -400,7 +400,7 @@ void  menu()
 			std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
 
 			// View
-			if (cryptoAL::fileexists(fileRSADB) == true)
+			if (file_util::fileexists(fileRSADB) == true)
 			{
 				std::ifstream infile;
 				infile.open (fileRSADB, std::ios_base::in);
@@ -465,7 +465,7 @@ void  menu()
 			std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
 
 			// View
-          	if (cryptoAL::fileexists(fileRSADB) == true)
+          	if (file_util::fileexists(fileRSADB) == true)
       		{
  				std::ifstream infile;
               	infile.open (fileRSADB, std::ios_base::in);
@@ -532,7 +532,7 @@ void  menu()
 			std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
 
 			// View
-          	if (cryptoAL::fileexists(fileRSADB) == true)
+          	if (file_util::fileexists(fileRSADB) == true)
       		{
  				std::ifstream infile;
               	infile.open (fileRSADB, std::ios_base::in);
@@ -604,7 +604,7 @@ void  menu()
 			std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
 			std::map< std::string, generate_rsa::rsa_key > map_RSA_public;
 
-			if (cryptoAL::fileexists(fileRSADB) == true)
+			if (file_util::fileexists(fileRSADB) == true)
 			{
 				std::ifstream infile;
 				infile.open (fileRSADB, std::ios_base::in);
@@ -697,7 +697,7 @@ void  menu()
 				key.to_rsa_key(rkey, n, e, d, (uint32_t)klen);
 
 				std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
-				if (cryptoAL::fileexists(fileRSADB) == true)
+				if (file_util::fileexists(fileRSADB) == true)
 				{
 					std::ifstream infile;
 					infile.open (fileRSADB, std::ios_base::in);
@@ -845,14 +845,14 @@ void  menu()
 				// READ
 				std::map< std::string, generate_rsa::rsa_key> map_rsa_private;
 
-				if (cryptoAL::fileexists(fileRSADB) == false)
+				if (file_util::fileexists(fileRSADB) == false)
 				{
 					std::ofstream outfile;
 					outfile.open(fileRSADB, std::ios_base::out);
 					outfile.close();
 				}
 
-				if (cryptoAL::fileexists(fileRSADB) == true)
+				if (file_util::fileexists(fileRSADB) == true)
 				{
 					std::ifstream infile;
 					infile.open (fileRSADB, std::ios_base::in);
@@ -914,7 +914,7 @@ void  menu()
                 fileHistoDB = pathdb + cryptoAL::HHKEY_MY_PRIVATE_ENCODE_DB;
 			}
 
-			if (cryptoAL::fileexists(fileHistoDB) == true)
+			if (file_util::fileexists(fileHistoDB) == true)
 			{
 				cryptoAL::show_history_key(fileHistoDB);
 			}
@@ -941,7 +941,7 @@ void  menu()
                 fileHistoDB = pathdb + cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB;
 			}
 
-			if (cryptoAL::fileexists(fileHistoDB) == true)
+			if (file_util::fileexists(fileHistoDB) == true)
 			{
 				cryptoAL::show_history_key(fileHistoDB);
 			}
@@ -972,7 +972,7 @@ void  menu()
                 fileHistoPublicDB  = pathdb + cryptoAL::HHKEY_MY_PUBLIC_DECODE_DB;
             }
 
-			if (cryptoAL::fileexists(fileHistoPrivateDB) == true)
+			if (file_util::fileexists(fileHistoPrivateDB) == true)
 			{
 				bool r = cryptoAL::export_public_history_key(fileHistoPrivateDB, fileHistoPublicDB);
 				if (r==false)
@@ -1024,9 +1024,9 @@ void  menu()
                 importfile = pathreaddb + cryptoAL::HHKEY_OTHER_PUBLIC_DECODE_DB;
             }
 
-			if (cryptoAL::fileexists(fileHistoPrivateEncodeDB) == true)
+			if (file_util::fileexists(fileHistoPrivateEncodeDB) == true)
 			{
-				if (cryptoAL::fileexists(importfile) == true)
+				if (file_util::fileexists(importfile) == true)
 				{
 					uint32_t cnt;
 					uint32_t n;
@@ -1075,7 +1075,7 @@ void  menu()
                 fileECCDOMDB = pathdb + cryptoAL::ECC_DOMAIN_DB;
 			}
 
-			if (cryptoAL::fileexists(eccfile) == true)
+			if (file_util::fileexists(eccfile) == true)
 			{
                 int klen = 0;
 				typeuinteger a; typeuinteger b; typeuinteger p;
@@ -1091,14 +1091,14 @@ void  menu()
 					// READ
 					std::map< std::string, cryptoAL::ecc_domain > map_ecc_domain;
 
-					if (cryptoAL::fileexists(fileECCDOMDB) == false)
+					if (file_util::fileexists(fileECCDOMDB) == false)
 					{
 						std::ofstream outfile;
 						outfile.open(fileECCDOMDB, std::ios_base::out);
 						outfile.close();
 					}
 
-					if (cryptoAL::fileexists(fileECCDOMDB) == true)
+					if (file_util::fileexists(fileECCDOMDB) == true)
 					{
 						std::ifstream infile;
 						infile.open (fileECCDOMDB, std::ios_base::in);
@@ -1192,7 +1192,7 @@ void  menu()
 			std::map< std::string, cryptoAL::ecc_domain > map_ecc_domain;
 
 			// View
-			if (cryptoAL::fileexists(fileECCDOMDB) == true)
+			if (file_util::fileexists(fileECCDOMDB) == true)
 			{
 				std::ifstream infile;
 				infile.open (fileECCDOMDB, std::ios_base::in);
@@ -1263,12 +1263,12 @@ void  menu()
                 std::cerr << "ERROR paths should be different" << std::endl;
                 continue;
             }
-            if (cryptoAL::fileexists(fileECCDOMDB) == false)
+            if (file_util::fileexists(fileECCDOMDB) == false)
 			{
                 std::cerr << "ERROR no file: " << fileECCDOMDB << std::endl;
                 continue;
 			}
-            if (cryptoAL::fileexists(fileECCDOMOTHERDB) == false)
+            if (file_util::fileexists(fileECCDOMOTHERDB) == false)
 			{
                 std::cerr << "ERROR no file: " << fileECCDOMOTHERDB << std::endl;
                 continue;
@@ -1350,7 +1350,7 @@ void  menu()
 			std::map< std::string, cryptoAL::ecc_domain > map_ecc_domain;
 
 			// View
-			if (cryptoAL::fileexists(fileECCDOMDB) == true)
+			if (file_util::fileexists(fileECCDOMDB) == true)
 			{
 				std::ifstream infile;
 				infile.open (fileECCDOMDB, std::ios_base::in);
@@ -1410,14 +1410,14 @@ void  menu()
                     // READ
                     std::map< std::string, cryptoAL::ecc_key > map_ecckey_private;
 
-                    if (cryptoAL::fileexists(fileECCKEYDB) == false)
+                    if (file_util::fileexists(fileECCKEYDB) == false)
                     {
                         std::ofstream outfile;
                         outfile.open(fileECCKEYDB, std::ios_base::out);
                         outfile.close();
                     }
 
-                    if (cryptoAL::fileexists(fileECCKEYDB) == true)
+                    if (file_util::fileexists(fileECCKEYDB) == true)
                     {
                         std::ifstream infile;
                         infile.open (fileECCKEYDB, std::ios_base::in);
@@ -1488,7 +1488,7 @@ void  menu()
 			std::map< std::string, cryptoAL::ecc_key > map_ecckey_private;
 
 			// View
-			if (cryptoAL::fileexists(fileECCKEYDB) == true)
+			if (file_util::fileexists(fileECCKEYDB) == true)
 			{
 				std::ifstream infile;
 				infile.open (fileECCKEYDB, std::ios_base::in);
@@ -1553,7 +1553,7 @@ void  menu()
 			std::map< std::string, cryptoAL::ecc_key > map_ecc_private;
 			std::map< std::string, cryptoAL::ecc_key > map_ecc_public;
 
-			if (cryptoAL::fileexists(fileECCKEYDB) == true)
+			if (file_util::fileexists(fileECCKEYDB) == true)
 			{
 				std::ifstream infile;
 				infile.open (fileECCKEYDB, std::ios_base::in);
@@ -1616,7 +1616,7 @@ void  menu()
 			std::map< std::string, cryptoAL::ecc_key > map_ecc_public;
 
 			// View
-          	if (cryptoAL::fileexists(fileECCKEYDB) == true)
+          	if (file_util::fileexists(fileECCKEYDB) == true)
       		{
  				std::ifstream infile;
               	infile.open (fileECCKEYDB, std::ios_base::in);
@@ -1685,7 +1685,7 @@ void  menu()
 			std::map< std::string, cryptoAL::ecc_key > map_ecc_public;
 
 			// View
-          	if (cryptoAL::fileexists(fileECCKEYDB) == true)
+          	if (file_util::fileexists(fileECCKEYDB) == true)
       		{
  				std::ifstream infile;
               	infile.open (fileECCKEYDB, std::ios_base::in);

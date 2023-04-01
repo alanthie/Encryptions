@@ -96,7 +96,7 @@ namespace keymgr
 			std::map< std::string, generate_rsa::rsa_key > map_rsa_public;
 
 			bool ok = true;
-			if (cryptoAL::fileexists(fileDB) == false)
+			if (file_util::fileexists(fileDB) == false)
 			{
 				std::cerr << "WARNING no file: " << fileDB << std:: endl;
 				ok = false;
@@ -148,7 +148,7 @@ namespace keymgr
 			std::map< std::string, ecc_key > map_ecc_public;
 
 			bool ok = true;
-			if (cryptoAL::fileexists(fileDB) == false)
+			if (file_util::fileexists(fileDB) == false)
 			{
 				std::cerr << "WARNING no file: " << fileDB << std:: endl;
 				ok = false;
@@ -203,7 +203,7 @@ namespace keymgr
 			std::map< std::string, ecc_key > map_hh_public;
 
 			bool ok = true;
-			if (cryptoAL::fileexists(fileDB) == false)
+			if (file_util::fileexists(fileDB) == false)
 			{
 				std::cerr << "WARNING no file: " << fileDB << std:: endl;
 				ok = false;
@@ -264,18 +264,18 @@ namespace keymgr
 		std::map< std::string, ecc_domain > map_eccdom_other;
 
 		bool ok = true;
-		if (cryptoAL::fileexists(fileStatusECCDB) == false)
+		if (file_util::fileexists(fileStatusECCDB) == false)
 		{
 			ok = false;
 		}
-		else if (cryptoAL::fileexists(filePrivateECCDB) == false)
+		else if (file_util::fileexists(filePrivateECCDB) == false)
 		{
 			// ok will create one...
 		}
 
 		if (ok)
 		{
-			if (cryptoAL::fileexists(filePrivateECCDB) == true)
+			if (file_util::fileexists(filePrivateECCDB) == true)
 			{
 				std::ifstream infile;
 				infile.open(filePrivateECCDB, std::ios_base::in);
@@ -329,7 +329,7 @@ namespace keymgr
 			if (key_merged == true)
 			{
 				// backup
-				if (cryptoAL::fileexists(filePrivateECCDB) == true)
+				if (file_util::fileexists(filePrivateECCDB) == true)
 				{
 					std::ofstream outfile;
 					outfile.open(filePrivateECCDB + ".bck", std::ios_base::out);
@@ -366,11 +366,11 @@ namespace keymgr
 			std::map< std::string, generate_rsa::rsa_key > map_rsa_status;
 
 			bool ok = true;
-			if (cryptoAL::fileexists(fileStatusRSADB) == false)
+			if (file_util::fileexists(fileStatusRSADB) == false)
 			{
 				ok = false;
 			}
-			else if (cryptoAL::fileexists(filePrivateRSADB) == false)
+			else if (file_util::fileexists(filePrivateRSADB) == false)
 			{
 				std::cerr << "WARNING no file: " << filePrivateRSADB << std:: endl;
 				ok = false;
@@ -469,11 +469,11 @@ namespace keymgr
 			std::map< std::string, ecc_key > map_ecc_status;
 
 			bool ok = true;
-			if (cryptoAL::fileexists(fileStatusECCDB) == false)
+			if (file_util::fileexists(fileStatusECCDB) == false)
 			{
 				ok = false;
 			}
-			else if (cryptoAL::fileexists(filePrivateECCDB) == false)
+			else if (file_util::fileexists(filePrivateECCDB) == false)
 			{
 				std::cerr << "WARNING no file: " << filePrivateECCDB << std:: endl;
 				ok = false;
@@ -567,11 +567,11 @@ namespace keymgr
 			std::map< std::string, ecc_domain > map_ecc_status;
 
 			bool ok = true;
-			if (cryptoAL::fileexists(fileStatusECCDB) == false)
+			if (file_util::fileexists(fileStatusECCDB) == false)
 			{
 				ok = false;
 			}
-			else if (cryptoAL::fileexists(filePrivateECCDB) == false)
+			else if (file_util::fileexists(filePrivateECCDB) == false)
 			{
 				std::cerr << "WARNING no file: " << filePrivateECCDB << std:: endl;
 				ok = false;
@@ -687,7 +687,7 @@ namespace keymgr
 			std::map< std::string, generate_rsa::rsa_key > map_rsa_status;
 
 			bool ok = true;
-			if (cryptoAL::fileexists(filePublicDB) == false)
+			if (file_util::fileexists(filePublicDB) == false)
 			{
 				//std::cerr << "WARNING no file: " << filePublicDB << std:: endl;
 				ok = false;
@@ -749,7 +749,7 @@ namespace keymgr
 			std::map< std::string, ecc_key > map_ecc_status;
 
 			bool ok = true;
-			if (cryptoAL::fileexists(filePublicDB) == false)
+			if (file_util::fileexists(filePublicDB) == false)
 			{
 				//std::cerr << "WARNING no file: " << filePublicDB << std:: endl;
 				ok = false;
@@ -805,7 +805,7 @@ namespace keymgr
 			std::map< std::string, ecc_domain > map_ecc_status;
 
 			bool ok = true;
-			if (cryptoAL::fileexists(filePublicDB) == false)
+			if (file_util::fileexists(filePublicDB) == false)
 			{
 				//std::cerr << "WARNING no file: " << filePublicDB << std:: endl;
 				ok = false;
@@ -878,7 +878,7 @@ namespace keymgr
 			std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
 			std::map< std::string, generate_rsa::rsa_key > map_rsa_public;
 
-			if (cryptoAL::fileexists(filePrivateRSADB) == true)
+			if (file_util::fileexists(filePrivateRSADB) == true)
 			{
 				std::ifstream infile;
 				infile.open(filePrivateRSADB, std::ios_base::in);
@@ -933,7 +933,7 @@ namespace keymgr
 			std::map< std::string, ecc_key > map_ecc_private;
 			std::map< std::string, ecc_key > map_ecc_public;
 
-			if (cryptoAL::fileexists(filePrivateECCDB) == true)
+			if (file_util::fileexists(filePrivateECCDB) == true)
 			{
 				std::ifstream infile;
 				infile.open (filePrivateECCDB, std::ios_base::in);
@@ -983,7 +983,7 @@ namespace keymgr
 			std::map< std::string, ecc_domain > map_my_eccdomain;
 			std::map< std::string, ecc_domain > map_public_eccdomain;
 
-			if (cryptoAL::fileexists(fileMyDomainDB) == true)
+			if (file_util::fileexists(fileMyDomainDB) == true)
 			{
 				std::ifstream infile;
 				infile.open (fileMyDomainDB, std::ios_base::in);
@@ -1031,7 +1031,7 @@ namespace keymgr
             std::string filePrivateHistoDB = path_private_db + HHKEY_MY_PRIVATE_DECODE_DB;
             std::string filePublicHistoDB  = path_private_db + HHKEY_MY_PUBLIC_DECODE_DB;
 
-			if (cryptoAL::fileexists(filePrivateHistoDB) == true)
+			if (file_util::fileexists(filePrivateHistoDB) == true)
 			{
                 std::map<uint32_t, history_key> map_histo;
                 std::map<std::string, history_key_public> map_histo_pub;
@@ -1162,7 +1162,7 @@ namespace keymgr
 		{
 			//std::cout << "get_n_keys RSA in " << folder_other_public_rsa + RSA_OTHER_PUBLIC_DB << std::endl;
 			std::string filePublicOtherDB = folder_other_public_rsa + RSA_OTHER_PUBLIC_DB;
-			if (cryptoAL::fileexists(filePublicOtherDB) == true)
+			if (file_util::fileexists(filePublicOtherDB) == true)
 			{
 				std::ifstream infile;
 				infile.open (filePublicOtherDB, std::ios_base::in);
@@ -1179,7 +1179,7 @@ namespace keymgr
 		{
 			//std::cout << "get_n_keys ECC in " << folder_other_public_ecc + ECCKEY_OTHER_PUBLIC_DB << std::endl;
 			std::string filePublicOtherDB = folder_other_public_ecc + ECCKEY_OTHER_PUBLIC_DB;
-			if (cryptoAL::fileexists(filePublicOtherDB) == true)
+			if (file_util::fileexists(filePublicOtherDB) == true)
 			{
 				std::ifstream infile;
 				infile.open (filePublicOtherDB, std::ios_base::in);
@@ -1196,7 +1196,7 @@ namespace keymgr
 		{
 			//std::cout << "get_n_keys HH in " << folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB << std::endl;
 			std::string fileMyPrivaterDB = folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
-			if (cryptoAL::fileexists(fileMyPrivaterDB) == true)
+			if (file_util::fileexists(fileMyPrivaterDB) == true)
 			{
 				std::ifstream infile;
 				infile.open (fileMyPrivaterDB, std::ios_base::in);

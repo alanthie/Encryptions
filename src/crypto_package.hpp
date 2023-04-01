@@ -31,7 +31,7 @@ public:
 
         bool r = true;
 
-        if (fileexists(input_crypto_file) == false)
+        if (file_util::fileexists(input_crypto_file) == false)
         {
             std::cerr << "ERROR missing crypto file " << input_crypto_file <<  std::endl;
             return false;
@@ -250,13 +250,13 @@ public:
         bool empty_puzzle = false;
         bool r = true;
 
-        if (fileexists(qa_puzzle_file) == false)
+        if (file_util::fileexists(qa_puzzle_file) == false)
         {
             std::cerr << "WARNING missing qa puzzle file (using default puzzle)" <<  std::endl;
             empty_puzzle = true;
         }
 
-        if (fileexists(enc_data_file) == false)
+        if (file_util::fileexists(enc_data_file) == false)
         {
             std::cerr << "ERROR missing encrypted data file " << enc_data_file <<  std::endl;
             return false;
@@ -334,7 +334,7 @@ public:
         header.sig[5]= 'O';
         header.version = 1;
 
-        if (fileexists(enc_data_file) == false)
+        if (file_util::fileexists(enc_data_file) == false)
         {
             std::cerr << "ERROR missing encrypted data file " << enc_data_file <<  std::endl;
             return false;
@@ -570,7 +570,7 @@ public:
         bool r = true;
         std::string s;
 
-        if (fileexists(input_crypto_file) == false)
+        if (file_util::fileexists(input_crypto_file) == false)
         {
             std::cerr << "ERROR missing crypto file " << input_crypto_file <<  std::endl;
             return "";

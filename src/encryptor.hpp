@@ -23,6 +23,7 @@
 #include "crypto_key_parser.hpp"
 #include "crypto_cfg.hpp"
 #include "crypto_png.hpp"
+#include "ecc_util.hpp"
 #include "qa/aes-whitebox/aes_whitebox.hpp"
 
 namespace cryptoAL
@@ -332,7 +333,7 @@ public:
         std::string file = staging + "encode_staging_url_file_" + std::to_string(staging_cnt) + ".dat";
         staging_cnt++;
 
-        if (fileexists(file))
+        if (file_util::fileexists(file))
 		    std::remove(file.data());
 
 		bool is_video   = false;
@@ -421,7 +422,7 @@ public:
 
         if (is_video)
         {
-            rc = getvideo(s.data(), file.data(), "", verbose);
+            rc = key_util::getvideo(s.data(), file.data(), "", verbose);
             if (rc!= 0)
             {
                 std::cerr << "ERROR with getvideo using youtube-dl, error code: " << rc << " url: " << s <<  " file: " << file << std::endl;
@@ -431,7 +432,7 @@ public:
         else if (is_local)
         {
             std::string local_url = folder_local + s;
-            rc = getlocal(local_url.data(), dataout_local, "", verbose);
+            rc = key_util::getlocal(local_url.data(), dataout_local, "", verbose);
             if (rc!= 0)
             {
                 std::cerr << "ERROR with get local file, error code: " << rc << " url: " << local_url <<  " file: " << file << std::endl;
@@ -440,7 +441,7 @@ public:
         }
         else if (is_ftp)
         {
-            rc = getftp(s.data(), file.data(),
+            rc = key_util::getftp(s.data(), file.data(),
                         encryped_ftp_user,
                         encryped_ftp_pwd,
                         known_ftp_server,
@@ -490,7 +491,7 @@ public:
                         if (VERBOSE_DEBUG)
                         {
                             std::cout << "histo key: " << histo_key << " size:" << histo_key.size() << std::endl;
-                            std::cout << "histo key: " << get_summary_hex(histo_key.data(), (uint32_t)histo_key.size()) << " size:" << histo_key.size() << std::endl;
+                            std::cout << "histo key: " << key_util::get_summary_hex(histo_key.data(), (uint32_t)histo_key.size()) << " size:" << histo_key.size() << std::endl;
                         }
                     }
                     else
@@ -545,7 +546,7 @@ public:
 				 	std::string rsa_key_at_iter = v[riter];
 
 					generate_rsa::rsa_key kout;
-					r = get_rsa_key(rsa_key_at_iter, local_rsa_db, kout);
+					r = key_util::get_rsa_key(rsa_key_at_iter, local_rsa_db, kout);
 
                     if (r)
                     {
@@ -554,18 +555,18 @@ public:
                         {
 							// generate random embedded_rsa_key
 							uint32_t key_len_in_bytes = kout.key_size_in_bits/8;
-							embedded_rsa_key = generate_base64_random_string(key_len_in_bytes - 11);
+							embedded_rsa_key = cryptoAL::random::generate_base64_random_string(key_len_in_bytes - 11);
 							vurlkey[i].sRSA_ECC_ENCODED_DATA = embedded_rsa_key;
 							if (VERBOSE_DEBUG)
 							{
 								std::cout << "rsa key_len_in_bytes: " << key_len_in_bytes << std::endl;
-								std::cout << "rsa_data: " << get_summary_hex(embedded_rsa_key.data(), (uint32_t)embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
+								std::cout << "rsa_data: " << key_util::get_summary_hex(embedded_rsa_key.data(), (uint32_t)embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
 							}
 						}
 
 						uint32_t msg_input_size_used = 0;
 						uint32_t msg_size_produced = 0;
-						std::string t = rsa_encode_string(vurlkey[i].sRSA_ECC_ENCODED_DATA, kout, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
+						std::string t = key_util::rsa_encode_string(vurlkey[i].sRSA_ECC_ENCODED_DATA, kout, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
 
 						// t may grow
 						vurlkey[i].sRSA_ECC_ENCODED_DATA = t;
@@ -673,7 +674,7 @@ public:
 					ecc_key key_other;
 					ecc_key key_mine;
 
-					r = get_ecc_key(ecc_key_at_iter, local_ecc_other_db, key_other);
+					r = ecc_util::get_ecc_key(ecc_key_at_iter, local_ecc_other_db, key_other);
 					if (r==false)
 					{
                         std::cerr << "ERROR public ecc key not found: " << ecc_key_at_iter << std::endl;
@@ -685,7 +686,7 @@ public:
 
 					if (r)
 					{
-                        r = get_compatible_ecc_key(local_ecc_my_db, key_other, key_mine);
+                        r = ecc_util::get_compatible_ecc_key(local_ecc_my_db, key_other, key_mine);
                         if (r==false)
                         {
                             std::cerr << "ERROR private compatible ecc key not found for public key: " << ecc_key_at_iter << std::endl;
@@ -703,13 +704,13 @@ public:
                         {
 							// generate random embedded_ecc_key
 							uint32_t key_len_in_bytes = key_mine.dom.key_size_bits/8;
-							embedded_ecc_key = generate_base64_random_string(key_len_in_bytes - 11);
+							embedded_ecc_key = cryptoAL::random::generate_base64_random_string(key_len_in_bytes - 11);
 							vurlkey[i].sRSA_ECC_ENCODED_DATA = embedded_ecc_key;
 							if (VERBOSE_DEBUG)
 							{
 								std::cout << "ecc key len in bytes:     " << key_len_in_bytes << std::endl;
 								std::cout << "ecc embedded random data: " << embedded_ecc_key << " size:" << embedded_ecc_key.size() << std::endl;
-								std::cout << "ecc embedded random key: " << get_summary_hex(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size())
+								std::cout << "ecc embedded random key: " << key_util::get_summary_hex(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size())
 										  << " size:" << embedded_ecc_key.size() << std::endl;
 							}
 						}
@@ -717,7 +718,7 @@ public:
 						uint32_t msg_input_size_used = 0;
 						uint32_t msg_size_produced = 0;
 
-						std::string t = ecc_encode_string(	vurlkey[i].sRSA_ECC_ENCODED_DATA, key_mine,
+						std::string t = key_util::ecc_encode_string(	vurlkey[i].sRSA_ECC_ENCODED_DATA, key_mine,
                                                             key_other.s_kg_x, key_other.s_kg_y,
 															msg_input_size_used,
 															msg_size_produced, SELF_TEST, verbose);
@@ -728,7 +729,7 @@ public:
 						if (VERBOSE_DEBUG)
 						{
 							std::cout << "ecc encoded data :" << t << " size:" << t.size() << std::endl;
-                            std::cout << "ecc encoded data :" << get_summary_hex(t.data(), (uint32_t)t.size()) << " size:" << t.size() << std::endl;
+                            std::cout << "ecc encoded data :" << key_util::get_summary_hex(t.data(), (uint32_t)t.size()) << " size:" << t.size() << std::endl;
 						}
 
 						if (riter == 0)
@@ -784,7 +785,7 @@ public:
         }
         else if (is_web)
         {
-            rc = wget(s.data(), file.data(), verbose);
+            rc = key_util::wget(s.data(), file.data(), verbose);
             if (rc!= 0)
             {
 				// TODO
@@ -881,7 +882,7 @@ public:
 
 						if (VERBOSE_DEBUG)
 						{
-							show_summary(b->getdata(), perfect_key_size);
+							key_util::show_summary(b->getdata(), perfect_key_size);
 						}
 					}
 					else
@@ -912,7 +913,7 @@ public:
 
 						if (VERBOSE_DEBUG)
 						{
-							show_summary(b->getdata(), perfect_key_size);
+							key_util::show_summary(b->getdata(), perfect_key_size);
 						}
 					}
 				}
@@ -973,7 +974,7 @@ public:
 			// Do we still have staging files? - TODO
 			if (keeping == false)
 			{
-				if (fileexists(file))
+				if (file_util::fileexists(file))
 					std::remove(file.data());
 			}
 		}
@@ -1884,14 +1885,14 @@ public:
 
         if (empty_puzzle == false)
         {
-            if (fileexists(filename_puzzle) == false)
+            if (file_util::fileexists(filename_puzzle) == false)
             {
                 std::cerr << "ERROR missing puzzle file: " << filename_puzzle <<  std::endl;
                 return false;
             }
         }
 
-        if (fileexists(filename_msg_data) == false)
+        if (file_util::fileexists(filename_msg_data) == false)
         {
             std::cerr << "ERROR missing msg file: " << filename_msg_data <<  std::endl;
             return false;
@@ -1900,7 +1901,7 @@ public:
         // URLS  read
         if (filename_urls.size() > 0)
         {
-            if (fileexists(filename_urls))
+            if (file_util::fileexists(filename_urls))
             {
                 if (read_file_urls(filename_urls) == false)
                 {
@@ -2449,11 +2450,11 @@ public:
 			if (cr != 0)
 			{
 				std::cerr << "ERROR " << "converting to file: " << new_output_filename <<std::endl;
-				if (fileexists(filename_tmp_envelop))
+				if (file_util::fileexists(filename_tmp_envelop))
 					std::remove(filename_tmp_envelop.data());
 				return false;
 			}
-			if (fileexists(filename_tmp_envelop))
+			if (file_util::fileexists(filename_tmp_envelop))
 				std::remove(filename_tmp_envelop.data());
 		}
 		else

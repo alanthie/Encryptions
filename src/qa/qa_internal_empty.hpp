@@ -5,6 +5,7 @@
 #include "prime.h"
 
 #include "../../src/data.hpp"
+#include "../../src/file_util.hpp"
 #include "../../src/crypto_file.hpp"
 #include "../../src/Buffer.hpp"
 #include "../../src/crypto_const.hpp"
@@ -12,9 +13,6 @@
 #include "../../src/puzzle.hpp"
 
 #include "Bin2PNG/lodepng.h"
-#define PNG_FILE "image.png"
-#define BIN_IN_FILE "msg1.zip"
-#define BIN_OUT_FILE "msg12.zip"
 
 class qa_internal_empty
 {
@@ -38,7 +36,7 @@ public:
     virtual std::string HEX(std::string sfile, long long pos, long long keysize)
     {
         bool r = true;
-        if (cryptoAL::fileexists(sfile) == false)
+        if (file_util::fileexists(sfile) == false)
         {
              std::cerr <<  "ERROR File not found - check path " << sfile<< std::endl;
              return "";
@@ -122,7 +120,7 @@ public:
         std::cout << cmd1 << std::endl;
         std::cout << cmd2 << std::endl;
 
-		if (cryptoAL::fileexists(FILE))
+		if (file_util::fileexists(FILE))
             std::remove(FILE.data());
 
        	system_cmd(cmd1);
@@ -141,7 +139,7 @@ public:
 		d = hex_to_uinteger(s);
         std::cout << "d = " << d << " bits: " << d.bitLength() << std::endl;
 
-        if (cryptoAL::fileexists(FILE))
+        if (file_util::fileexists(FILE))
             std::remove(FILE.data());
 
          return 0;
@@ -182,9 +180,9 @@ public:
             fileno = 1 + (long long)(rd.get_rand() * N_bin_files);
             std::string f = datashortfile + "." + std::to_string(fileno);
             fullfile = folderpathdata + f;
-            if (cryptoAL::fileexists(fullfile) == true)
+            if (file_util::fileexists(fullfile) == true)
             {
-                fs = cryptoAL::filesize(fullfile);
+                fs = file_util::filesize(fullfile);
 
                 for(long long i = 0; i < N_qa; i++)
                 {
@@ -260,9 +258,9 @@ public:
                     if (v[0] == "HEX")
                     {
                         std::string f = folderpathdata + v[1];
-                        if (cryptoAL::fileexists(f) == true)
+                        if (file_util::fileexists(f) == true)
                         {
-                            auto fs = cryptoAL::filesize(f);
+                            auto fs = file_util::filesize(f);
 
                             long long pos = cryptoAL::parsing::str_to_ll(v[2]);
                             long long sz  = cryptoAL::parsing::str_to_ll(v[3]);

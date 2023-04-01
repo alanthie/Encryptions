@@ -8,7 +8,6 @@
 namespace cryptoAL
 {
 
-
 class random_engine
 {
   public:
@@ -48,6 +47,9 @@ class random_engine
     }
 
 };
+
+namespace random
+{
 
 bool generate_random_file(std::string filename, long long Nk, long num_files = 1)
 {
@@ -359,6 +361,7 @@ std::string generate_base16_random_string(long long N)
     return r;
 }
 
+}
 }
 #endif
 

@@ -87,6 +87,7 @@
 		<Unit filename="../src/qa/ecc_point/ecc_curve.hpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_elgamal.cpp" />
 		<Unit filename="../src/qa/menu/menu.cpp" />
+		<Unit filename="../src/qa/menu/menu_io.cpp" />
 		<Unit filename="../src/qa/menu/rsa_menu.cpp" />
 		<Unit filename="../src/qa/prime.h" />
 		<Unit filename="../src/qa/qa.cpp" />

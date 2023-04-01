@@ -1,20 +1,12 @@
-#include "../mathcommon.h"
+#include "../../../src/uint_util.hpp"
 #include "../../../src/crypto_const.hpp"
-#include "../rsa_gen.hpp"
+#include "../../../src/file_util.hpp"
 #include "../../../src/crypto_cfg.hpp"
+#include "../rsa_gen.hpp"
 #include "menu.h"
 
 namespace ns_menu
 {
-using namespace cryptoAL;
-
-	bool fileexists(const std::filesystem::path& p, std::filesystem::file_status s = std::filesystem::file_status{})
-	{
-		if(std::filesystem::status_known(s) ? std::filesystem::exists(s) : std::filesystem::exists(p))
-			return true;
-		else
-			return false;
-	}
 
     void main_menu::fRSA_1()
     {
@@ -25,15 +17,15 @@ using namespace cryptoAL;
         std::string fileRSADB;
         if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_rsa.size()>0))
         {
-            fileRSADB = cfg.cmdparam.folder_my_private_rsa + RSA_MY_PRIVATE_DB;
+            fileRSADB = cfg.cmdparam.folder_my_private_rsa + cryptoAL::RSA_MY_PRIVATE_DB;
         }
         else
         {
-            std::cout << "Enter path for my private rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
+            std::cout << "Enter path for my private rsa database " << cryptoAL::RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
             std::string pathdb;
             std::cin >> pathdb;
             if (pathdb == "0") pathdb = "./";
-            fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
+            fileRSADB = pathdb + cryptoAL::RSA_MY_PRIVATE_DB;
         }
 
         std::cout << "Only show summary (0 = true): ";
@@ -46,7 +38,7 @@ using namespace cryptoAL;
         std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
 
         // View
-        if (fileexists(fileRSADB) == true)
+        if (file_util::fileexists(fileRSADB) == true)
         {
             std::ifstream infile;
             infile.open (fileRSADB, std::ios_base::in);

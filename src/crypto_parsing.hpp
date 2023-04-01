@@ -2,6 +2,7 @@
 #define _INCLUDES_crypto_parsing
 
 #include "crypto_const.hpp"
+#include "file_util.hpp"
 #include <filesystem>
 #include <curl/curl.h>
 #include <chrono>
@@ -206,18 +207,9 @@ namespace parsing
         return r;
     }
 
-    namespace fs = std::filesystem;
-    [[maybe_unused]] static bool fileexists2(const std::filesystem::path& p, std::filesystem::file_status s = std::filesystem::file_status{})
-    {
-        if(std::filesystem::status_known(s) ? std::filesystem::exists(s) : std::filesystem::exists(p))
-            return true;
-        else
-            return false;
-    }
-
     [[maybe_unused]] static std::string get_block_infile(std::string FILE, std::string start, std::string last)
     {
-        if (fileexists2(FILE))
+        if (file_util::fileexists(FILE))
         {
             cryptodata d;
             bool b = d.read_from_file(FILE);

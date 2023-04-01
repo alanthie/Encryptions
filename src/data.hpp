@@ -162,27 +162,6 @@ public:
     bool verbose;
 };
 
-//static bool is_file_same(std::string filename1, std::string filename2)
-//{
-//    cryptodata data1;
-//    cryptodata data2;
-//
-//    if(data1.read_from_file(filename1)==false)
-//        return false;
-//
-//    if(data2.read_from_file(filename2)==false)
-//        return false;
-//
-//    if(data1.buffer.size() != data2.buffer.size() )
-//        return false;
-//
-//    for(size_t i=0;i< data1.buffer.size() ; i++)
-//    {
-//        if ( data1.buffer.getdata()[i] != data2.buffer.getdata()[i])
-//            return false;
-//    }
-//    return true;
-//}
 
 }
 #endif

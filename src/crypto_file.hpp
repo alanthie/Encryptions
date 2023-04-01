@@ -3,7 +3,9 @@
 
 #include "crypto_const.hpp"
 #include "../src/qa/rsa_gen.hpp"
-#include <filesystem>
+#include "file_util.hpp"
+#include "uint_util.hpp"
+
 #include <curl/curl.h>
 #include <iostream>
 #include <fstream>
@@ -13,11 +15,7 @@
 #include "crypto_parsing.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
-
-//#include "ecc_util.hpp"
 #include "../src/crypto_ecckey.hpp"
-
-#include "uint_util.hpp"
 
 #include "encrypt.h"
 
@@ -34,30 +32,10 @@
 
 namespace cryptoAL
 {
-
+namespace key_util
+{
 	std::string get_summary_hex(const char* buffer, uint32_t buf_len);
-
 	int wget(const char *in, const char *out, bool verbose);
-
-	bool fileexists(const std::filesystem::path& p, std::filesystem::file_status s = std::filesystem::file_status{})
-	{
-		if(std::filesystem::status_known(s) ? std::filesystem::exists(s) : std::filesystem::exists(p))
-			return true;
-		else
-			return false;
-	}
-
-	int32_t filesize(std::string filename)
-	{
-		int32_t sz = -1;
-		std::ifstream ifd(filename.data(), std::ios::binary | std::ios::ate);
-		if (ifd)
-		{
-			sz = (int32_t)ifd.tellg();
-		}
-		ifd.close();
-		return sz;
-	}
 
 	int getvideo(std::string url, std::string outfile, std::string options = "", [[maybe_unused]] bool verbose=false)
 	{
@@ -77,74 +55,12 @@ namespace cryptoAL
 		return r;
 	}
 
-	bool get_compatible_ecc_key(const std::string& local_ecc_mine_db, ecc_key& key_other, ecc_key& key_out_mine)
-	{
-		bool found = false;
-
-		if (fileexists(local_ecc_mine_db) == true)
-		{
-			std::map<std::string, ecc_key> map_ecc;
-
-			std::ifstream infile;
-			infile.open (local_ecc_mine_db, std::ios_base::in);
-			infile >> bits(map_ecc);
-			infile.close();
-
-			for(auto& [userkey, k] : map_ecc)
-			{
-				if ((key_other.dom.name() == k.dom.name()) &&
-					(key_other.dom.key_size_bits == k.dom.key_size_bits) )
-				{
-					found = true;
-					key_out_mine = k;
-					break;	// take first...
-				}
-			}
-		}
-		else
-		{
-			std::cout << "ERROR no ecc file: " << local_ecc_mine_db << std::endl;
-		}
-
-		return found;
-	}
-
-	bool get_ecc_key(const std::string& ecc_key_name, const std::string& local_ecc_db, ecc_key& kout)
-	{
-		bool found = false;
-
-		if (fileexists(local_ecc_db) == true)
-		{
-			std::map<std::string, ecc_key> map_ecc;
-
-			std::ifstream infile;
-			infile.open (local_ecc_db, std::ios_base::in);
-			infile >> bits(map_ecc);
-			infile.close();
-
-			for(auto& [userkey, k] : map_ecc)
-			{
-				if (userkey == ecc_key_name)
-				{
-					found = true;
-					kout = k;
-					break;
-				}
-			}
-		}
-		else
-		{
-			std::cout << "ERROR no ecc file: " << local_ecc_db << std::endl;
-		}
-
-		return found;
-	}
 
 	bool get_rsa_key(const std::string& rsa_key_name, const std::string& local_rsa_db, generate_rsa::rsa_key& kout)
 	{
 		bool found = false;
 
-		if (fileexists(local_rsa_db) == true)
+		if (file_util::fileexists(local_rsa_db) == true)
 		{
 			std::map<std::string, generate_rsa::rsa_key> map_rsa;
 
@@ -434,7 +350,7 @@ namespace cryptoAL
 		}
 
 		std::string nfile;
-		if (fileexists(url) == false) // MAY CONFLICT with current folder....
+		if (file_util::fileexists(url) == false) // MAY CONFLICT with current folder....
 		{
 			std::string token;
 			if (s_use_last == true)
@@ -458,7 +374,7 @@ namespace cryptoAL
 			}
 
 			nfile = token + url;
-			if (fileexists(nfile) == false)
+			if (file_util::fileexists(nfile) == false)
 			{
 				std::cerr << "Invalid path to the local file: "  << nfile << std::endl;
 				return -1;
@@ -559,7 +475,7 @@ namespace cryptoAL
 			}
 		}
 
-		if (fileexists(outfile))
+		if (file_util::fileexists(outfile))
 			std::remove(outfile.data());
 
 		int pos = (int)user.find('@');
@@ -633,74 +549,6 @@ namespace cryptoAL
 		return res;
 }
 
-	std::string file_checksum(std::string filename)
-	{
-		std::string s = "";
-		cryptodata temp;
-		bool r = temp.read_from_file(filename);
-		if (r==true)
-		{
-			SHA256 sha;
-			sha.update(reinterpret_cast<const uint8_t*> (temp.buffer.getdata()), temp.buffer.size() );
-			uint8_t* digest = sha.digest();
-			s = SHA256::toString(digest);
-			delete[] digest;
-		}
-		else
-		{
-			std::cerr << "ERROR reading " << filename << ", code: " << r << std::endl;
-		}
-		return s;
-	}
-
-	std::string HEX(std::string sfile, long long pos, long long keysize)
-	{
-		bool r = true;
-		if (fileexists(sfile) == false)
-		{
-			 std::cerr <<  "ERROR File not found - check the file path " << sfile<< std::endl;
-			 return "";
-		}
-		if (pos < 0)
-		{
-			 std::cerr <<  "WARNING position less than 0 - reset to 0 " << std::endl;
-			 pos = 0;
-		}
-		if (keysize < 1)
-		{
-			 std::cerr <<  "WARNING keysize less than one - reset to 1 " << std::endl;
-			 keysize = 1;
-		}
-
-		cryptodata d;
-		r = d.read_from_file(sfile);
-		if (r == false)
-		{
-			 std::cerr <<  "ERROR Unable to read file " + sfile<< std::endl;
-			 return "";
-		}
-
-		long long len = (long long)d.buffer.size();
-		if (pos + keysize >= len)
-		{
-			std::cerr << "ERROR key pos+len bigger then file size: " << len << std::endl;
-			return "";
-		}
-
-		Buffer b;
-		b.increase_size((uint32_t)keysize);
-		b.write(&d.buffer.getdata()[pos], (uint32_t)keysize, 0);
-
-		std::string hex;
-		char c;
-		for(long long i=0;i<keysize;i++)
-		{
-			c = b.getdata()[i];
-			hex += makehex((char)c, 2);
-		}
-
-		return hex;
-	}
 
 	void show_summary(const char* buffer, uint32_t buf_len)
 	{
@@ -737,6 +585,7 @@ namespace cryptoAL
 	//    curl bot.whatismyipaddress.com
 	//    curl ipecho.net/plain
 
+}
 }
 #endif
 

@@ -2,6 +2,7 @@
 #define _INCLUDES_crypto_test
 
 #include "crypto_const.hpp"
+#include "file_util.hpp"
 #include "crypto_file.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
@@ -20,28 +21,6 @@
 
 namespace cryptoAL
 {
-
-static bool is_file_same(std::string filename1, std::string filename2)
-{
-    cryptodata data1;
-    cryptodata data2;
-
-    if(data1.read_from_file(filename1)==false)
-        return false;
-
-    if(data2.read_from_file(filename2)==false)
-        return false;
-
-    if(data1.buffer.size() != data2.buffer.size() )
-        return false;
-
-    for(size_t i=0;i< data1.buffer.size() ; i++)
-    {
-        if ( data1.buffer.getdata()[i] != data2.buffer.getdata()[i])
-            return false;
-    }
-    return true;
-}
 
 // ./crypto test -i manywebkey
 void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false, bool verb = false, std::string file_msg = "/msg.txt")
@@ -79,22 +58,22 @@ void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false,
     std::string BASE_FOLDER = FOLDER + TESTCASE + "/" + TEST;
     {
         std::string file = BASE_FOLDER + file_partial_puzzle;
-        if (fileexists(file))
+        if (file_util::fileexists(file))
             std::remove(file.data());
 
 		file = BASE_FOLDER + file_msg_encrypted;
-		if (fileexists(file))
+		if (file_util::fileexists(file))
             std::remove(file.data());
 
         file = BASE_FOLDER+ file_puzzle;
-        if (fileexists(file) == false)
+        if (file_util::fileexists(file) == false)
         {
             std::cout << "ERROR missing puzzle file " << file <<  std::endl;
             return;
         }
 
         file = BASE_FOLDER + file_msg;
-        if (fileexists(file) == false)
+        if (file_util::fileexists(file) == false)
         {
             std::cout << "ERROR missing msg file " << file <<  std::endl;
             return;
@@ -129,7 +108,7 @@ void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false,
 
             if (decr.decrypt() == true)
             {
-                if( cryptoAL::is_file_same(encr.filename_msg_data, decr.filename_decrypted_data) == false)
+                if( file_util::is_file_same(encr.filename_msg_data, decr.filename_decrypted_data) == false)
                 {
                     std::cout << TESTCASE + " " + TEST + " - ERROR encrypt- decrypt failed " << std::endl;
                 }
@@ -719,21 +698,21 @@ void test_core(bool verbose = true)
         std::cout << "\nTEST wget"<< std::endl;
         std::string url = "https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz";
         std::string filename  = "./staging_Python-3.8.1.tgz";
-        if (fileexists(filename))
+        if (file_util::fileexists(filename))
 		    std::remove(filename.data());
 
-        if ( wget(url.data(), filename.data()) != 0)
+        if ( key_util::wget(url.data(), filename.data()) != 0)
         {
             std::cout << "ERROR with wget " << std::endl;
         }
         else
         {
-         if (filesize(filename) > 0)
+         if (file_util::filesize(filename) > 0)
                 std::cout << "OK with wget" << std::endl;
             else
                 std::cout << "ERROR with wget remote access, file empty " << url << std::endl;
         }
-        if (fileexists(filename))
+        if (file_util::fileexists(filename))
 		    std::remove(filename.data());
     }
 
@@ -743,21 +722,21 @@ void test_core(bool verbose = true)
         std::cout << "\nTEST wget"<< std::endl;
         std::string url = "https://github.com/alanthie/Encryptions/raw/master/modes/CBC.cpp";
         std::string filename  = "./staging_CBC.cpp";
-        if (fileexists(filename))
+        if (file_util::fileexists(filename))
 		    std::remove(filename.data());
 
-        if ( wget(url.data(), filename.data()) != 0)
+        if ( key_util::wget(url.data(), filename.data()) != 0)
         {
             std::cout << "An error occured wget " << std::endl;
         }
         else
         {
-            if (filesize(filename) > 0)
+            if (file_util::filesize(filename) > 0)
                 std::cout << "OK with wget" << std::endl;
             else
                 std::cout << "ERROR with wget remote access, file empty " << url << std::endl;
         }
-        if (fileexists(filename))
+        if (file_util::fileexists(filename))
 		    std::remove(filename.data());
     }
 
@@ -773,23 +752,23 @@ void test_core(bool verbose = true)
         std::string filename  = "./staging_video_bitchute.mp4";
         std::string options   = "";
 
-        if (fileexists(filename))
+        if (file_util::fileexists(filename))
 		    std::remove(filename.data());
 
-        int r = getvideo(url, filename, options);
+        int r = key_util::getvideo(url, filename, options);
         if (r < 0)
         {
             std::cout << "OK with getvideo, code:" << r << std::endl;
         }
         else
         {
-            if (filesize(filename) > 0)
+            if (file_util::filesize(filename) > 0)
                 std::cout << "OK with getvideo" << std::endl;
             else
                 std::cout << "ERROR with getvideo (bitchute) remote access, file empty " << url << std::endl;
         }
 
-        if (fileexists(filename))
+        if (file_util::fileexists(filename))
 		    std::remove(filename.data());
     }
 
@@ -807,23 +786,23 @@ void test_core(bool verbose = true)
         std::cin >> pwd;
 
         std::string filename  = "./staging_ftp_Buffer.hpp";
-        if (fileexists(filename))
+        if (file_util::fileexists(filename))
 		    std::remove(filename.data());
 
         std::string cmd = "ftp://" + user + ":" + pwd + "@ftp.vastserve.com/htdocs/Buffer.hpp";
-        if ( wget(cmd.data(), filename.data()) != 0)
+        if ( key_util::wget(cmd.data(), filename.data()) != 0)
         {
             std::cout << "ERROR with wget ftp://.." << std::endl;
         }
         else
         {
-            if (filesize(filename) > 0)
+            if (file_util::filesize(filename) > 0)
                 std::cout << "OK with wget ftp://.." << std::endl;
             else
                 std::cout << "ERROR with wget ftp://... remote access, file empty " << "ftp.vastserve.com/htdocs/Buffer.hpp" << std::endl;
         }
 
-        if (fileexists(filename))
+        if (file_util::fileexists(filename))
 		    std::remove(filename.data());
     }
 
@@ -845,7 +824,7 @@ void test_core(bool verbose = true)
         std::string filename  = "./staging_img_header.txt";
         std::remove(filename.data());
 
-        if ( wget(url.data(), filename.data()) != 0)
+        if ( key_util::wget(url.data(), filename.data()) != 0)
         {
             std::cout << "An error occured wget " << std::endl;
         }
@@ -853,7 +832,7 @@ void test_core(bool verbose = true)
         {
             std::cout << "OK with wget " << std::endl;
         }
-//        if (fileexists(filename))
+//        if (file_util::fileexists(filename))
 //		    std::remove(filename.data());
     }
 }

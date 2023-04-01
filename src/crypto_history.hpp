@@ -192,7 +192,7 @@ namespace cryptoAL
 	{
 		bool found = false;
 
-		if (fileexists(local_histo_db) == true)
+		if (file_util::fileexists(local_histo_db) == true)
 		{
 			std::map<uint32_t, history_key> map_histo;
 
@@ -221,7 +221,7 @@ namespace cryptoAL
 
 	void show_history_key(const std::string& local_histo_db)
 	{
-		if (fileexists(local_histo_db) == true)
+		if (file_util::fileexists(local_histo_db) == true)
 		{
 			std::map<uint32_t, history_key> map_histo;
 
@@ -249,7 +249,7 @@ namespace cryptoAL
         std::map<std::string, history_key_public> map_histo_pub;
 		std::map<uint32_t, history_key> map_histo;
 
-		if (fileexists(fileHistoPrivateDB) == true)
+		if (file_util::fileexists(fileHistoPrivateDB) == true)
 		{
 			std::ifstream infile;
 			infile.open (fileHistoPrivateDB, std::ios_base::in);
@@ -283,7 +283,7 @@ namespace cryptoAL
 		std::map<std::string, history_key_public> map_histo_pub;
 		std::map<uint32_t, history_key> map_histo;
 
-		if (fileexists(local_histo_public_db) == true)
+		if (file_util::fileexists(local_histo_public_db) == true)
 		{
 			std::ifstream infile;
 			infile.open (local_histo_public_db, std::ios_base::in);
@@ -291,7 +291,7 @@ namespace cryptoAL
 			infile.close();
 
 
-			if (fileexists(local_histo_db) == true)
+			if (file_util::fileexists(local_histo_db) == true)
 			{
 				std::ifstream infile;
 				infile.open (local_histo_db, std::ios_base::in);
@@ -299,7 +299,7 @@ namespace cryptoAL
 				infile.close();
 
                 // backup
-                if (fileexists(local_histo_db) == true)
+                if (file_util::fileexists(local_histo_db) == true)
                 {
                     std::ofstream outfile;
                     outfile.open(local_histo_db + ".bck", std::ios_base::out);
@@ -355,7 +355,7 @@ namespace cryptoAL
 	{
 		bool found = false;
 
-		if (fileexists(local_histo_db) == true)
+		if (file_util::fileexists(local_histo_db) == true)
 		{
 			std::map<uint32_t, history_key> map_histo;
 
@@ -383,7 +383,7 @@ namespace cryptoAL
 		uint32_t maxseq=0;
 		out_seq = 0;
 
-		if (fileexists(local_histo_db) == true)
+		if (file_util::fileexists(local_histo_db) == true)
 		{
 			std::map<uint32_t, history_key> map_histo;
 
@@ -417,7 +417,7 @@ namespace cryptoAL
 		bool toupdate = false;
 
 		std::map<uint32_t, history_key> map_histo;
-		if (fileexists(local_histo_db) == true)
+		if (file_util::fileexists(local_histo_db) == true)
 		{
 			std::ifstream infile;
 			infile.open (local_histo_db, std::ios_base::in);
@@ -443,7 +443,7 @@ namespace cryptoAL
         map_histo[k.sequence] = k;
 
         // backup
-        if (fileexists(local_histo_db) == true)
+        if (file_util::fileexists(local_histo_db) == true)
         {
             std::ofstream outfile;
             outfile.open(local_histo_db + ".bck", std::ios_base::out);

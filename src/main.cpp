@@ -8,7 +8,7 @@
 #endif
 
 #include "crypto_const.hpp"
-
+#include "file_util.hpp"
 #include "DES.h"
 #include "SHA256.h"
 #include "argparse.hpp"
@@ -516,7 +516,7 @@ int main_crypto(int argc, char **argv)
             auto& cmd = dump_command;
             auto filename = cmd.get<std::string>("--input");
 
-            if (fileexists(filename) == false)
+            if (file_util::fileexists(filename) == false)
             {
                 std::cerr << "ERROR File not found " << filename << std::endl;
                 return -1;
@@ -536,7 +536,7 @@ int main_crypto(int argc, char **argv)
             auto ssize = cmd.get<std::string>("--size");
             size_t sz = 0; long long pos=1; long long cnt=1;
 
-            if (fileexists(filename) == false)
+            if (file_util::fileexists(filename) == false)
             {
                 std::cerr << "ERROR File not found " << filename << std::endl;
                 return -1;
@@ -562,7 +562,7 @@ int main_crypto(int argc, char **argv)
                 std::cout << "Warning invalid size numeric value, numeric value reset to 1" << std::endl;
                 cnt = 1;
             }
-            std::string s = HEX(filename, pos, cnt);
+            std::string s = file_util::HEX(filename, pos, cnt);
             std::cout << s << std::endl;
             return 0;
         }
@@ -585,7 +585,7 @@ int main_crypto(int argc, char **argv)
                 li_dec = 1;
                 cnt = 1;
             }
-            generate_random_file(filename, li_dec, cnt);
+            cryptoAL::random::generate_random_file(filename, li_dec, cnt);
             return 0;
         }
 
@@ -607,7 +607,7 @@ int main_crypto(int argc, char **argv)
                 li_dec = 1;
                 cnt = 1;
             }
-            generate_binary_random_file(filename, li_dec, cnt);
+            cryptoAL::random::generate_binary_random_file(filename, li_dec, cnt);
             return 0;
         }
 
@@ -615,12 +615,12 @@ int main_crypto(int argc, char **argv)
         {
             auto& cmd = checksum_command;
             auto file = cmd.get<std::string>("--input");
-            if (fileexists(file) == false)
+            if (file_util::fileexists(file) == false)
             {
                 std::cerr << "ERROR File not found " << file << std::endl;
                 return -1;
             }
-            auto s = file_checksum(file);
+            auto s = file_util::file_checksum(file);
             std::cout << s << std::endl;
             return 0;
         }

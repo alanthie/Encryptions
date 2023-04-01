@@ -432,12 +432,12 @@ int generate_aes(	const std::string& file_for_key, uint32_t pos1,
 					const std::string& file_for_xor, uint32_t pos2,
 					const std::string& aes, const std::string& pathtbl, const std::string& tablekeyname, bool verbose = false)
 {
-	if (cryptoAL::fileexists(file_for_key) == false)
+	if (file_util::fileexists(file_for_key) == false)
 	{
 		std::cerr << "ERROR missing file for key: " << file_for_key <<  std::endl;
 		return -1;
 	}
-	if (cryptoAL::fileexists(file_for_xor) == false)
+	if (file_util::fileexists(file_for_xor) == false)
 	{
 		std::cerr << "ERROR missing file for xor: " << file_for_xor <<  std::endl;
 		return -1;
