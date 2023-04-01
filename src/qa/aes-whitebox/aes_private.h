@@ -5,6 +5,8 @@
 #ifndef AES_PRIVATE_H_
 #define AES_PRIVATE_H_
 
+#include "../../crypto_const.hpp"
+
 namespace {
 
 // This is the specified AES SBox. To look up a substitution value, put the first
@@ -253,7 +255,7 @@ constexpr uint32_t RotWord(uint32_t x) {
 // schedule.
 inline void ExpandKeys(const uint8_t* key, uint32_t* w, int Nk, int Nr,  [[maybe_unused]] bool verbose = false)
 {
-    if (VERBOSE_DEBUG) std::cout << "ExpandKeys..." << std::endl;
+    if (cryptoAL::VERBOSE_DEBUG) std::cout << "ExpandKeys..." << std::endl;
 
   constexpr int Nb = 4;
   constexpr uint32_t Rcon[] = {

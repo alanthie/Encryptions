@@ -113,7 +113,7 @@ public:
             if (cfg_parse_result)
             {
                 process_cfg_param();
-				
+
 				cfg.get_active_algos(vAlgo);
 				if (vAlgo.size() > 0)
 				{
@@ -223,7 +223,7 @@ public:
 		std::cout << "verbose:     " << verbose << std::endl;
 		std::cout << "-------------------------------------------------" << std::endl<< std::endl;
 	}
-	
+
 	//-------------------------------------------------
 	// encryption key are generate using input of various sources
 	//-------------------------------------------------
@@ -323,7 +323,7 @@ public:
 	{
 		bool r = true;
 
-        if(fs::is_directory(staging)==false)
+        if(std::filesystem::is_directory(staging)==false)
         {
             std::cerr << "ERROR staging is not a folder: " << staging << std::endl;
             return false;
@@ -2414,7 +2414,7 @@ public:
 	uint32_t converter = 0; // 1==PNG
 	cryptodata_list datalist;
 	WBAES::wbaes_pool aes_pool;
-	
+
 	bool has_cfg_algo = false;
 	std::vector<CRYPTO_ALGO> vAlgo;
 

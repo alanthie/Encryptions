@@ -51,7 +51,7 @@
 namespace cryptoAL
 {
 
-std::string VERSION = "0.7";
+std::string VERSION = "0.8";
 
 int main_crypto(int argc, char **argv)
 {

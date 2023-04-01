@@ -92,9 +92,9 @@ bool batch(std::string mode, std::string inifile, bool verbose)
         known_ftp_server  = ini.get_string("known_ftp_server", Config);
         key_factor        = ini.get_string("key_factor", Config);
 
-        if(fs::exists(folder_staging)==false)
+        if(std::filesystem::exists(folder_staging)==false)
         {
-            fs::create_directories(folder_staging);
+            std::filesystem::create_directories(folder_staging);
         }
     }
 
@@ -129,38 +129,38 @@ bool batch(std::string mode, std::string inifile, bool verbose)
     {
         std::cout << "crypto ENCODING..." << std::endl;
 
-        if(fs::is_directory(folder_encoder_input)==false)
+        if(std::filesystem::is_directory(folder_encoder_input)==false)
         {
             std::cerr << "ERROR folder_encoder_input is not a folder " << folder_encoder_input << std::endl;
             return false;
         }
-        if(fs::is_directory(folder_encoder_input)==false)
+        if(std::filesystem::is_directory(folder_encoder_input)==false)
         {
             std::cerr << "ERROR folder_encoder_output is not a folder " << folder_encoder_output << std::endl;
             return false;
         }
 
-        if(fs::is_regular_file(folder_encoder_input + encoding_input_urls) == false)
+        if(std::filesystem::is_regular_file(folder_encoder_input + encoding_input_urls) == false)
         {
             std::cerr << "ERROR not a regular file " << folder_encoder_input + encoding_input_urls << std::endl;
             return false;
         }
-        if(fs::is_regular_file(folder_encoder_input + encoding_input_msg) == false)
+        if(std::filesystem::is_regular_file(folder_encoder_input + encoding_input_msg) == false)
         {
             std::cerr << "ERROR not a regular file " << folder_encoder_input + encoding_input_msg<< std::endl;
             return false;
         }
-        if(fs::is_regular_file(folder_encoder_input + encoding_input_puzzle) == false)
+        if(std::filesystem::is_regular_file(folder_encoder_input + encoding_input_puzzle) == false)
         {
             std::cerr << "ERROR not a regular file " << folder_encoder_input + encoding_input_puzzle<< std::endl;
             return false;
         }
 
-        if(fs::exists(folder_encoder_output)==false)
+        if(std::filesystem::exists(folder_encoder_output)==false)
         {
-            fs::create_directories(folder_encoder_output);
+            std::filesystem::create_directories(folder_encoder_output);
         }
-        if(fs::is_directory(folder_encoder_output)==false)
+        if(std::filesystem::is_directory(folder_encoder_output)==false)
         {
             std::cerr << "ERROR folder_encoder_output is not a folder " << folder_encoder_output << std::endl;
             return false;
@@ -224,27 +224,27 @@ bool batch(std::string mode, std::string inifile, bool verbose)
     {
         std::cout << "crypto DECODING..." << std::endl;
 
-        if(fs::is_directory(folder_decoder_input)==false)
+        if(std::filesystem::is_directory(folder_decoder_input)==false)
         {
             std::cerr << "ERROR folder_decoder_input is not a folder " << folder_decoder_input << std::endl;
             return false;
         }
-        if(fs::is_regular_file(folder_decoder_input + decoding_input_qa_puzzle) == false)
+        if(std::filesystem::is_regular_file(folder_decoder_input + decoding_input_qa_puzzle) == false)
         {
             std::cerr << "ERROR not a regular file " << folder_decoder_input + decoding_input_qa_puzzle << std::endl;
             return false;
         }
-        if(fs::is_regular_file(folder_decoder_input + decoding_input_msg_encrypted) == false)
+        if(std::filesystem::is_regular_file(folder_decoder_input + decoding_input_msg_encrypted) == false)
         {
             std::cerr << "ERROR not a regular file " << folder_decoder_input + decoding_input_msg_encrypted << std::endl;
             return false;
         }
 
-        if(fs::exists(folder_decoder_output)==false)
+        if(std::filesystem::exists(folder_decoder_output)==false)
         {
-            fs::create_directories(folder_decoder_output);
+            std::filesystem::create_directories(folder_decoder_output);
         }
-        if(fs::is_directory(folder_decoder_output)==false)
+        if(std::filesystem::is_directory(folder_decoder_output)==false)
         {
             std::cerr << "ERROR folder_decoder_output is not a folder " << folder_decoder_output << std::endl;
             return false;

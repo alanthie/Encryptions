@@ -43,6 +43,7 @@
 		<Unit filename="../src/crc32a.hpp" />
 		<Unit filename="../src/crypto_const.hpp" />
 		<Unit filename="../src/crypto_file.hpp" />
+		<Unit filename="../src/crypto_key_util.hpp" />
 		<Unit filename="../src/crypto_parsing.hpp" />
 		<Unit filename="../src/data.hpp" />
 		<Unit filename="../src/qa/Bin2PNG/lodepng.cpp" />
@@ -85,6 +86,8 @@
 		<Unit filename="../src/qa/ecc_point/ecc_curve.cpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_curve.hpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_elgamal.cpp" />
+		<Unit filename="../src/qa/menu/menu.cpp" />
+		<Unit filename="../src/qa/menu/rsa_menu.cpp" />
 		<Unit filename="../src/qa/prime.h" />
 		<Unit filename="../src/qa/qa.cpp" />
 		<Unit filename="../src/qa/qa_internal.hpp" />

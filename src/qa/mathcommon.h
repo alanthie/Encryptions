@@ -1,6 +1,5 @@
-//
-#ifndef COMMON_H_INCLUDED
-#define COMMON_H_INCLUDED
+#ifndef MATH_COMMON_H_INCLUDED
+#define MATH_COMMON_H_INCLUDED
 
 #ifdef _WIN32
 //https://github.com/ckormanyos/wide-integer

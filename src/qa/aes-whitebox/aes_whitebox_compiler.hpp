@@ -314,7 +314,7 @@ void CalculateTyBoxes(	uint32_t roundKey[],
 
 void GenerateXorTable(const char* rndKey, uint32_t rndsize, int Nr, wbaes_vbase* instance_aes,  [[maybe_unused]] bool verbose = false)
 {
-    if (VERBOSE_DEBUG) std::cout << "GenerateXorTable..." << std::endl;
+    if (cryptoAL::VERBOSE_DEBUG) std::cout << "GenerateXorTable..." << std::endl;
 
   	//uint8_t Xor[Nr-1][96][16][16];
     std::vector<std::vector<std::vector<std::vector<uint8_t>>>>* pXor = new std::vector<std::vector<std::vector<std::vector<uint8_t>>>>(Nr-1);
@@ -330,7 +330,7 @@ void GenerateXorTable(const char* rndKey, uint32_t rndsize, int Nr, wbaes_vbase*
         }
 	}
 
-	if (VERBOSE_DEBUG) std::cout << "GenerateEncryptingTables..." << std::endl;
+	if (cryptoAL::VERBOSE_DEBUG) std::cout << "GenerateEncryptingTables..." << std::endl;
 	uint32_t idx = 0; char a; char b;
   	for (int r = 0; r < Nr-1; r++)
     for (int n = 0; n < 96; n++)
@@ -347,14 +347,14 @@ void GenerateXorTable(const char* rndKey, uint32_t rndsize, int Nr, wbaes_vbase*
 		  	instance_aes->setXor(r, n, j, i, Xor[r][n][i][j]);
 		}
 	}
-	if (VERBOSE_DEBUG) std::cout << "GenerateXorTable done" << std::endl;
+	if (cryptoAL::VERBOSE_DEBUG) std::cout << "GenerateXorTable done" << std::endl;
 
     delete pXor;
 }
 
 void GenerateEncryptingTables(uint32_t* roundKey, int Nr, wbaes_vbase* instance_aes,  [[maybe_unused]] bool verbose = false)
 {
-    if (VERBOSE_DEBUG) std::cout << "GenerateEncryptingTables..." << std::endl;
+    if (cryptoAL::VERBOSE_DEBUG) std::cout << "GenerateEncryptingTables..." << std::endl;
     uint8_t TboxesLast[16][256];
 
 	//uint32_t Tyboxes[Nr-1][16][256];
@@ -428,8 +428,8 @@ bool GenerateTables(const char* hexKey, const char* rndKey, uint32_t rndsize, in
 }
 
 
-int generate_aes(	const std::string& file_for_key,
-					const std::string& file_for_xor,
+int generate_aes(	const std::string& file_for_key, uint32_t pos1,
+					const std::string& file_for_xor, uint32_t pos2,
 					const std::string& aes, const std::string& pathtbl, const std::string& tablekeyname, bool verbose = false)
 {
 	if (cryptoAL::fileexists(file_for_key) == false)
@@ -442,7 +442,7 @@ int generate_aes(	const std::string& file_for_key,
 		std::cerr << "ERROR missing file for xor: " << file_for_xor <<  std::endl;
 		return -1;
 	}
-	
+
 	cryptoAL::cryptodata data_file_for_key;
 	bool rr = data_file_for_key.read_from_file(file_for_key);
 	auto sz = data_file_for_key.buffer.size();
@@ -451,16 +451,16 @@ int generate_aes(	const std::string& file_for_key,
 		std::cerr << "ERROR reading file for key " <<  " file: " << file_for_key << std::endl;
 		return -1;
 	}
-	
-	cryptodata data_file_for_xor;
+
+	cryptoAL::cryptodata data_file_for_xor;
 	rr = data_file_for_xor.read_from_file(file_for_xor);
-	auto sz2 = data_file_for_xor.buffer.size();
+	//auto sz2 = data_file_for_xor.buffer.size();
 	if (rr == false)
 	{
 		std::cerr << "ERROR reading file for xor " <<  " file: " << file_for_xor << std::endl;
 		return -1;
 	}
-		
+
 	int r = 0;
 	bool ok = true;
 	int Nk = 0, Nr = 0;
@@ -514,16 +514,22 @@ int generate_aes(	const std::string& file_for_key,
 
 		long long N = 4*Nk*2;
 
-		if (sz < N)
+		if (sz < N+pos1)
 		{
-            std::cerr << "ERROR file less than required key length " << N << std::endl;
+            std::cerr << "ERROR file for key less than required key length " << N+pos1 << std::endl;
             return -1;
 		}
-		
+
+		if (data_file_for_xor.buffer.size() <=  pos2 + N)
+		{
+		    std::cerr << "ERROR file for xor too small given he provided position  " << pos2 + N << std::endl;
+            return -1;
+		}
+
 		int n;
 		int digit;
 		std::string skey;// = cryptoAL::generate_base16_random_string(N);
-		for(long long i=0;i<N;i++)
+		for(long long i=pos1;i<pos1+N;i++)
         {
 			n = (int)(unsigned char)data_file_for_key.buffer.getdata()[i];
             digit = (int)(n % 16);
@@ -531,24 +537,24 @@ int generate_aes(	const std::string& file_for_key,
 			{
 				digit = 1;
 			}
-            skey += BASEDIGIT16[digit];
+            skey += cryptoAL::BASEDIGIT16[digit];
         }
 		if (verbose) std::cout << "key " << skey << std::endl;
 
-		wbaes_instance_mgr aes_instance(aes, pathtbl, tablekeyname, false, true);
-		wbaes_vbase* p = aes_instance.get_aes(); // new
+		WBAES::wbaes_instance_mgr aes_instance(aes, pathtbl, tablekeyname, false, true);
+		WBAES::wbaes_vbase* p = aes_instance.get_aes(); // new
 		if (p==nullptr)
 		{
             std::cerr << "ERROR in  aes_instance.get_aes() " << std::endl;
             return -1;
 		}
 
-		ok = GenerateTables(skey.data(), data_file_for_xor.buffer.getdata(), data_file_for_xor.buffer.size(), Nk, Nr, p, verbose);
+		ok = GenerateTables(skey.data(), &data_file_for_xor.buffer.getdata()[pos2], data_file_for_xor.buffer.size() - pos2, Nk, Nr, p, verbose);
 
 		if (ok)
 		 {
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_xor.tbl";
-			if (VERBOSE_DEBUG) std::cout << "generate aes to " << filename << std::endl;
+			if (cryptoAL::VERBOSE_DEBUG) std::cout << "generate aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
@@ -580,7 +586,7 @@ int generate_aes(	const std::string& file_for_key,
 					}
 				}
 
-				if (VERBOSE_DEBUG)
+				if (cryptoAL::VERBOSE_DEBUG)
 				{
 					std::cout << "ok " << filename << std::endl;
 					for (int r = 0; r < 2; r++) {
@@ -619,7 +625,7 @@ int generate_aes(	const std::string& file_for_key,
 		if (ok)
 		{
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_tyboxes.tbl";
-			if (VERBOSE_DEBUG)  std::cout << "generate aes to " << filename << std::endl;
+			if (cryptoAL::VERBOSE_DEBUG)  std::cout << "generate aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
@@ -638,7 +644,7 @@ int generate_aes(	const std::string& file_for_key,
 		if (ok)
 		{
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_tboxesLast.tbl";
-			if (VERBOSE_DEBUG)  std::cout << "generate aes to " << filename << std::endl;
+			if (cryptoAL::VERBOSE_DEBUG)  std::cout << "generate aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)
@@ -657,7 +663,7 @@ int generate_aes(	const std::string& file_for_key,
 		if (ok)
 		{
 			std::string filename = pathtbl + aes + "_" + tablekeyname + "_mbl.tbl";
-			if (VERBOSE_DEBUG)  std::cout << "generate aes to " << filename << std::endl;
+			if (cryptoAL::VERBOSE_DEBUG)  std::cout << "generate aes to " << filename << std::endl;
 
 			std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
 			if (ofd.bad() == false)

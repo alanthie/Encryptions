@@ -57,7 +57,7 @@ namespace strutil
         return ss.str();
     }
 
-    int stoi(const std::string& str)
+    static int stoi(const std::string& str)
     {
         std::stringstream ss;
         int ret;
@@ -66,7 +66,7 @@ namespace strutil
         return ret;
     }
 
-    long stol(const std::string& str)
+    static long stol(const std::string& str)
     {
         std::stringstream ss;
         long ret;
@@ -75,7 +75,7 @@ namespace strutil
         return ret;
     }
 
-    float stof(const std::string& str)
+    static float stof(const std::string& str)
     {
         std::stringstream ss;
         float ret;
@@ -84,7 +84,7 @@ namespace strutil
         return ret;
     }
 
-    double stod(const std::string& str)
+    static double stod(const std::string& str)
     {
         std::stringstream ss;
         double ret;
@@ -93,7 +93,7 @@ namespace strutil
         return ret;
     }
 
-	std::string get_str_between_two_str(const std::string& s,
+	static std::string get_str_between_two_str(const std::string& s,
 										const std::string& start_delim,
 										const std::string& stop_delim,
 										unsigned& first_delim_pos,
@@ -118,7 +118,7 @@ namespace strutil
 		return "";
 	}
 
-	long long str_to_ll(const std::string& snum)
+	static long long str_to_ll(const std::string& snum)
     {
        long long r = -1;
        try
@@ -132,7 +132,7 @@ namespace strutil
        return r;
     }
 
-	bool has_token(const std::string& token, const std::string& line, size_t pos)
+	static bool has_token(const std::string& token, const std::string& line, size_t pos)
 	{
 		bool r = false;
 		if (line.size() >= token.size() + pos)

@@ -155,6 +155,14 @@ public:
 		if (get_positive_value_negative_if_invalid(algo.ALGO_wbaes32768) > 0) v.push_back(CRYPTO_ALGO::ALGO_wbaes32768);
 	}
 
+	bool fileexists(const std::filesystem::path& p, std::filesystem::file_status s = std::filesystem::file_status{})
+	{
+		if(std::filesystem::status_known(s) ? std::filesystem::exists(s) : std::filesystem::exists(p))
+			return true;
+		else
+			return false;
+	}
+
     bool parse()
 	{
 		map_sections.clear();

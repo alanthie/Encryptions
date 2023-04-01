@@ -25,20 +25,17 @@
 #include "../../src/crypto_key_util.hpp"
 #include "../../src/crypto_ecckey.hpp"
 #include "../../src/crypto_cfg.hpp"
-using namespace cryptoAL;
+//using namespace cryptoAL;
 
 #include "ec_gmp/ec_gmp_p_mul.hpp"
-
-//#define TEST_ENCRYPT_DECRYPT true
 #include "SimpleECC/src/test_simple_ecc.hpp"
-
 #include "ecc_point/ecc_curve.hpp"
-
 #include "aes-whitebox/aes_whitebox.hpp"
 #include "aes-whitebox/aes_whitebox_compiler.hpp"
 
+#include "menu/menu.h"
 
-std::string VERSION = "v0.2";
+std::string VERSION = "v0.3";
 std::string FULLVERSION = VERSION + "_" + cryptoAL::get_current_date();
 
 long long keybits8x(long long bits)
@@ -50,8 +47,306 @@ long long keybits8x(long long bits)
 	return bits;
 }
 
+	struct qakeyutil
+    {
+        static int pos64(char c)
+        {
+            for(size_t  i=0;i<cryptoAL::BASEDIGIT64.size();i++)
+            {
+                if (c == cryptoAL::BASEDIGIT64[i])
+                {
+                    return (int)i;
+                }
+            }
+            std::cerr << "ERROR pos64v invalid base 64 char " << (int)(unsigned char)c << std::endl;
+            throw std::string("ERROR pos64() invalid base 64 char ");
+            return 0;
+        }
+
+        static int pos10(char c)
+        {
+            for(size_t i=0;i<cryptoAL::BASEDIGIT10.size();i++)
+            {
+                if (c == cryptoAL::BASEDIGIT10[i])
+                {
+                    return (int)i;
+                }
+            }
+            std::cerr << "ERROR invalid base 10 char " << (int)c << std::endl;
+            throw "ERROR invalid base 10 char ";
+            return 0;
+        }
+
+        static typeuinteger val(const std::string& s)
+        {
+            typeuinteger r = 0;
+            long long n = (long long)s.size();
+            for(long long i=0;i<n;i++)
+            {
+                r *= 64;
+                r += pos64(s[i]);
+            }
+            return r;
+        }
+        static typeuinteger val10(const std::string& s)
+        {
+            typeuinteger r = 0;
+            long long n = (long long)s.size();
+            for(long long i=0;i<n;i++)
+            {
+                r *= 10;
+                r += pos10(s[i]);
+            }
+            return r;
+        }
+
+        static typeuinteger mod_pow(typeuinteger base, typeuinteger exp, const typeuinteger& mod)
+        {
+            typeuinteger resoult = 1;
+
+            while (exp > 0)
+            {
+                if (typeuinteger(exp & 1) == 1)
+                    resoult = (base * resoult) % mod;
+                base = (base * base) % mod;
+                exp >>= 1;
+            }
+
+            return resoult;
+        }
+
+        static typeuinteger power_modulo(const typeuinteger& a, const typeuinteger& power, const typeuinteger& mod)
+        {
+            try
+            {
+                // windows stack overflow....
+                // Visual Studio uses 4KB for the stack but reserved 1MB by default. You can change this in "Configuration Properties"->Linker->System->"Stack Reserve Size" to 10MB for example.
+                // (a ⋅ b) mod m = [(a mod m) ⋅ (b mod m)] mod m
+                if (power == 0) return 1;
+                if (power % 2 == 1)
+                {
+                    return ((a % mod) * power_modulo(a, power - 1, mod)) % mod;
+                }
+
+                typeuinteger b = power_modulo(a, power / 2, mod) % mod;
+                return (b * b) % mod;
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << "ERROR exception thrown in power_modulo " << e.what() << std::endl;
+                throw e;
+            }
+            catch (...)
+            {
+                std::cerr << "ERROR exception thrown in power_modulo " << std::endl;
+                throw std::string("ERROR exception thrown in power_modulo ");
+            }
+        }
+
+        static std::string base10_to_base64(const std::string& s)
+        {
+            typeuinteger m = val10(s);
+            return to_base64(m);
+        }
+        static std::string base64_to_base10(const std::string& s)
+        {
+            typeuinteger m = val(s);
+            return to_base10(m);
+        }
+
+        static std::string to_base64(const typeuinteger& v)
+        {
+            typeuinteger r = v;
+            typeuinteger b64 = 64;
+            typeuinteger t;
+            int digit;
+            std::string s;
+            while(r > 0)
+            {
+                t = (r % b64);
+                digit = t.toInt();
+                if (digit< 0) throw std::string("to base64 bad digit < 0");
+                if (digit>63) throw std::string("to base64 bad digit > 63");
+                s += cryptoAL::BASEDIGIT64[digit];
+                r = r - digit;
+                r = r / 64;
+            }
+            std::reverse(s.begin(), s.end());
+            return s;
+        }
+
+        static std::string to_base10(const typeuinteger& v)
+        {
+            typeuinteger r = v;
+            int digit;
+            std::string s;
+            typeuinteger t;
+            typeuinteger b10 = 10;
+            while(r > 0)
+            {
+                t = (r % b10);
+                digit = t.toInt();
+                if (digit<0) throw std::string("to base10 bad digit < 0");
+                if (digit>9) throw std::string("to base10 bad digit > 9");
+                s += cryptoAL::BASEDIGIT10[digit];
+                r = r - digit;
+                r = r / 10;
+            }
+            std::reverse(s.begin(), s.end());
+            return s;
+        }
+
+		static void TEST()
+        {
+            std::string serr;
+
+            if (to_base10(1234) != "1234")
+            {
+                serr = "Error with to_base10 1234";
+                std::cerr << serr << std::endl;
+                throw serr;
+            }
+
+            if (val10("456")  != 456)
+            {
+                serr = "Error with val10 456";
+                std::cerr << serr << std::endl;
+                throw serr;
+            }
+
+            if (val10("0456") != 456)
+            {
+                serr = "Error with val10 0456";
+                std::cerr << serr << std::endl;
+                throw serr;
+            }
+
+            typeuinteger m = val10("456");
+            std::string m64 = to_base64(m);
+            if (val(m64) != m)
+            {
+                serr = "Error with to_base64/val";
+                std::cerr << serr << std::endl;
+                throw serr;
+            }
+
+            m64 = base10_to_base64("456");
+            if (val(m64) != 456)
+            {
+                serr = "Error with to_base10_to_base64";
+                std::cerr << serr << std::endl;
+                throw serr;
+            }
+        }
+
+        static typeuinteger hex_to_uinteger(std::string s)
+        {
+            typeuinteger r = 0;
+            long long n = (long long)s.size();
+            for(long long i=0;i<n;i++)
+            {
+                r *= 16;
+                if ((s[i]>= '0') && (s[i]<= '9') )
+                    r += (s[i] - '0');
+                else if ((s[i]>= 'a') && (s[i]<= 'f') )
+                    r += 10 + (s[i] - 'a');
+                else if ((s[i]>= 'A') && (s[i]<= 'F') )
+                    r +=  10 + (s[i] - 'A');
+                else
+                   throw "invalid hex";
+            }
+            return r;
+        }
+
+        static bool eccfileexists(const std::filesystem::path& p, std::filesystem::file_status s = std::filesystem::file_status{})
+        {
+            if(std::filesystem::status_known(s) ? std::filesystem::exists(s) : std::filesystem::exists(p))
+                return true;
+            else
+                return false;
+        }
+
+		static bool parse_ecc_domain(	const std::string& FILE, int& klen_inbits,
+                                        typeuinteger& a, typeuinteger& b, typeuinteger& p,
+                                        typeuinteger& n, typeuinteger& gx, typeuinteger& gy,
+                                        typeuinteger& h)
+     	{
+			if (eccfileexists(FILE) == false)
+			{
+				std::cerr << "no file: " << FILE << std::endl;
+				return false;
+			}
+
+			std::string s;
+
+			s = cryptoAL::get_block_infile(FILE, "\"p\":" , "},");
+			if (s.size() == 0) return false;
+			{
+                //std::cout << "s = " << s << std::endl;
+                std::string t = cryptoAL::remove_hex2_delim(s);
+                //std::cout << "t = " << t << std::endl;
+                p = hex_to_uinteger(t);
+			}
+			std::cout << "p = " << p << " bits: " << p.bitLength() << std::endl;
+
+			klen_inbits = p.bitLength();
+
+			s = cryptoAL::get_block_infile(FILE, "\"a\":" , ",");
+			if (s.size() == 0) return false;
+			{
+                std::string t = cryptoAL::remove_hex2_delim(s);
+                //std::cout << "t = " << t << std::endl;
+                a = hex_to_uinteger(t);
+			}
+			std::cout << "a = " << a << " bits: " << a.bitLength() << std::endl;
+
+			s = cryptoAL::get_block_infile(FILE, "\"b\":" , ",");
+			if (s.size() == 0) return false;
+			{
+                std::string t = cryptoAL::remove_hex2_delim(s);
+                //std::cout << "t = " << t << std::endl;
+                b = hex_to_uinteger(t);
+			}
+			std::cout << "b = " << b << " bits: " << b.bitLength() << std::endl;
+
+			s = cryptoAL::get_block_infile(FILE, "\"order\":" , ",");
+			if (s.size() == 0) return false;
+			{
+                std::string t = cryptoAL::remove_hex2_delim(s);
+                //std::cout << "t = " << t << std::endl;
+                n = hex_to_uinteger(t);
+			}
+			std::cout << "n = " << n << " bits: " <<n.bitLength() << std::endl;
+
+			s = cryptoAL::get_block_infile(FILE, "\"x\":" , ",");
+			if (s.size() == 0) return false;
+			{
+                std::string t = cryptoAL::remove_hex2_delim(s);
+                //std::cout << "t = " << t << std::endl;
+                gx = hex_to_uinteger(t);
+			}
+			std::cout << "gx = " << gx << " bits: " << gx.bitLength() << std::endl;
+
+			s = cryptoAL::get_block_infile(FILE, "\"y\":" , ",");
+			if (s.size() == 0) return false;
+			{
+                std::string t = cryptoAL::remove_hex2_delim(s);
+                //std::cout << "t = " << t << std::endl;
+                gy = hex_to_uinteger(t);
+			}
+			std::cout << "gy = " << gy << " bits: " << gy.bitLength() << std::endl;
+
+			h = 1;
+			return true;
+		 }
+
+    };
+
+using namespace ns_menu;;
+
 void  menu()
 {
+
     long long choice = 1;
     long long last_choice = 1;
     //long long n;
@@ -59,7 +354,11 @@ void  menu()
 	bool first_time = true;
 	bool cfg_parse_result = false;
 	std::string cfg_file;
-	crypto_cfg cfg("", false);
+	cryptoAL::crypto_cfg cfg("", false);
+
+// NEW MENU....
+//ns_menu::main_menu mm(cfg, FULLVERSION, cfg_file);
+//mm.run();
 
     std::string schoice;
     while(choice != 0)
@@ -188,21 +487,6 @@ void  menu()
 			{
 				cfg.show();
 			}
-
-
-			/*
-            std::cout << "P(n)" << std::endl;
-            std::cout << "Enter a number: ";
-            std::string snum;
-            std::cin >> snum;
-            n = cryptoAL::str_to_ll(snum);
-            if (n==-1) continue;
-
-            qaclass qa;
-            auto r = qa.P(n);
-            std::cout << "P(" << n << ") = " << r << std::endl;
-            std::cout << std::endl;
-*/
         }
 
         else if (choice == 3)
@@ -280,8 +564,6 @@ void  menu()
 
    		else if (choice == 6)
         {
-//#ifdef _WIN32
-//#else
 			if (true)
 			{
 			    std::cout << "Select one 1=AES512, 2=AES1024, 3=AES2048, 4=AES4096, 5=AES8192, 6=AES16384, 7=AES32768 ";
@@ -321,7 +603,26 @@ void  menu()
 				if (file_for_xor.size()==0) continue;
 				if (file_for_xor == "0") file_for_xor = "./binary.dat.2";
 
-				int r = WBAES::generate_aes(file_for_key, file_for_xor, aes, "./", kn, true);		// CREATE
+				std::string pos_for_key;
+				std::string pos_for_xor;
+				long long pos1;
+				long long pos2;
+
+				std::cout << "Enter file position for key (0 = first byte) : ";
+				std::cin >> pos_for_key;
+				if (pos_for_key.size()==0) continue;
+				if (pos_for_key == "0") pos1 = 0;
+				pos1 = cryptoAL::str_to_ll(pos_for_key);
+				if (pos1 < 0) pos1 = 0;
+
+				std::cout << "Enter file position for xor (0 = first byte) : ";
+				std::cin >> pos_for_xor;
+				if (pos_for_xor.size()==0) continue;
+				if (pos_for_xor == "0") pos2 = 0;
+				pos2 = cryptoAL::str_to_ll(pos_for_xor);
+				if (pos2 < 0) pos2 = 0;
+
+				int r = WBAES::generate_aes(file_for_key, (uint32_t)pos1, file_for_xor, (uint32_t)pos2, aes, "./", kn, true);		// CREATE
 				if (r!=0)
 				{
 					std::cerr << "ERROR creating aes" << std::endl;
@@ -372,10 +673,6 @@ void  menu()
 				std::cout << "TEST OK with binary AES cfb algo "<<std::endl;
 
 			}
-//#endif
-            //qaclass qa;
-            //qa.binaryToPng();
-            //qa.pngToBinary();
         }
 
 		else if (choice == 7)
@@ -384,15 +681,15 @@ void  menu()
 			std::string fileRSADB;
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_rsa.size()>0))
 			{
-				fileRSADB = cfg.cmdparam.folder_my_private_rsa + RSA_MY_PRIVATE_DB;
+				fileRSADB = cfg.cmdparam.folder_my_private_rsa + cryptoAL::RSA_MY_PRIVATE_DB;
 			}
 			else
 			{
-				std::cout << "Enter path for my private rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
+				std::cout << "Enter path for my private rsa database " << cryptoAL::RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
 				std::string pathdb;
 				std::cin >> pathdb;
 				if (pathdb == "0") pathdb = "./";
-				fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
+				fileRSADB = pathdb + cryptoAL::RSA_MY_PRIVATE_DB;
 			}
 
 			std::cout << "Only show summary (0 = true): ";
@@ -402,19 +699,19 @@ void  menu()
             if (osummary == "0") onlysummary = true;
 
 			qaclass qa;
-			std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
+			std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
 
 			// View
 			if (cryptoAL::fileexists(fileRSADB) == true)
 			{
 				std::ifstream infile;
 				infile.open (fileRSADB, std::ios_base::in);
-				infile >> bits(map_rsa_private);
+				infile >> bits(map_RSA_private);
 				infile.close();
 
                 if (onlysummary == false)
                 {
-                    for(auto& [user, k] : map_rsa_private)
+                    for(auto& [user, k] : map_RSA_private)
                     {
                         std::cout << "key name: " << user << std:: endl;
                         std::cout << "key size: " << k.key_size_in_bits << std:: endl;
@@ -437,7 +734,7 @@ void  menu()
 			std::cout << "---------------------------" << std::endl;
           	std::cout << "Summary of " << fileRSADB << std::endl;
          	std::cout << "---------------------------" << std::endl;
-          	for(auto& [user, k] : map_rsa_private)
+          	for(auto& [user, k] : map_RSA_private)
           	{
               	std::cout << "[r]" << user << std:: endl;
           	}
@@ -449,15 +746,15 @@ void  menu()
 			std::string fileRSADB;
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_rsa.size()>0))
 			{
-				fileRSADB = cfg.cmdparam.folder_my_private_rsa + RSA_MY_PUBLIC_DB;
+				fileRSADB = cfg.cmdparam.folder_my_private_rsa + cryptoAL::RSA_MY_PUBLIC_DB;
 			}
 			else
 			{
-				std::cout << "Enter path for my rsa public database " << RSA_MY_PUBLIC_DB << " (0 = current directory) : ";
+				std::cout << "Enter path for my rsa public database " << cryptoAL::RSA_MY_PUBLIC_DB << " (0 = current directory) : ";
 				std::string pathdb;
 				std::cin >> pathdb;
 				if (pathdb == "0") pathdb = "./";
-				fileRSADB = pathdb + RSA_MY_PUBLIC_DB;
+				fileRSADB = pathdb + cryptoAL::RSA_MY_PUBLIC_DB;
 			}
 
             std::cout << "Only show summary (0 = true): ";
@@ -467,19 +764,19 @@ void  menu()
             if (osummary == "0") onlysummary = true;
 
 			qaclass qa;
-			std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
+			std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
 
 			// View
           	if (cryptoAL::fileexists(fileRSADB) == true)
       		{
  				std::ifstream infile;
               	infile.open (fileRSADB, std::ios_base::in);
-          		infile >> bits(map_rsa_private);
+          		infile >> bits(map_RSA_private);
              	infile.close();
 
              	if (onlysummary == false)
                 {
-                    for(auto& [user, k] : map_rsa_private)
+                    for(auto& [user, k] : map_RSA_private)
                     {
                         std::cout << "key name: " << user << std:: endl;
                         std::cout << "key size: " << k.key_size_in_bits << std:: endl;
@@ -497,7 +794,7 @@ void  menu()
 					std::cout << "------------------------------------------------------" << std::endl;
 					std::cout << "My public keys are in file: " << fileRSADB << std::endl;
 					std::cout << "------------------------------------------------------" << std::endl;
-					for(auto& [user, k] : map_rsa_private)
+					for(auto& [user, k] : map_RSA_private)
 					{
 					  std::cout << "[r]" << user << std:: endl;
 					}
@@ -516,15 +813,15 @@ void  menu()
 			std::string fileRSADB;
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_other_public_rsa.size()>0))
 			{
-				fileRSADB = cfg.cmdparam.folder_other_public_rsa + RSA_OTHER_PUBLIC_DB;
+				fileRSADB = cfg.cmdparam.folder_other_public_rsa + cryptoAL::RSA_OTHER_PUBLIC_DB;
 			}
 			else
 			{
-				std::cout << "Enter path of other rsa public database " << RSA_OTHER_PUBLIC_DB << " (0 = current directory) : ";
+				std::cout << "Enter path of other rsa public database " << cryptoAL::RSA_OTHER_PUBLIC_DB << " (0 = current directory) : ";
 				std::string pathdb;
 				std::cin >> pathdb;
 				if (pathdb == "0") pathdb = "./";
-				fileRSADB = pathdb + RSA_OTHER_PUBLIC_DB;
+				fileRSADB = pathdb + cryptoAL::RSA_OTHER_PUBLIC_DB;
 			}
 
             std::cout << "Only show summary (0 = true): ";
@@ -534,19 +831,19 @@ void  menu()
             if (osummary == "0") onlysummary = true;
 
 			qaclass qa;
-			std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
+			std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
 
 			// View
           	if (cryptoAL::fileexists(fileRSADB) == true)
       		{
  				std::ifstream infile;
               	infile.open (fileRSADB, std::ios_base::in);
-          		infile >> bits(map_rsa_private);
+          		infile >> bits(map_RSA_private);
              	infile.close();
 
              	if (onlysummary == false)
                 {
-                    for(auto& [user, k] : map_rsa_private)
+                    for(auto& [user, k] : map_RSA_private)
                     {
                         std::cout << "key name: " << user << std:: endl;
                         std::cout << "key size: " << k.key_size_in_bits << std:: endl;
@@ -565,7 +862,7 @@ void  menu()
 					std::cout << "Other public keys are in file: " << fileRSADB << std::endl;
 					std::cout << "Links to copy paste into url file when encoding message with RSA" << std::endl;
 					std::cout << "------------------------------------------------------" << std::endl;
-					for(auto& [user, k] : map_rsa_private)
+					for(auto& [user, k] : map_RSA_private)
 					{
 					  std::cout << "[r]" << user << std:: endl;
 					}
@@ -587,36 +884,36 @@ void  menu()
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_rsa.size()>0))
 			{
                 pathdb = cfg.cmdparam.folder_my_private_rsa;
-				fileRSADB = cfg.cmdparam.folder_my_private_rsa + RSA_MY_PRIVATE_DB;
+				fileRSADB = cfg.cmdparam.folder_my_private_rsa + cryptoAL::RSA_MY_PRIVATE_DB;
 			}
 			else
 			{
-				std::cout << "Enter path of my private rsa database to read: " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
+				std::cout << "Enter path of my private rsa database to read: " << cryptoAL::RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
 				std::string pathdb;
 				std::cin >> pathdb;
 				if (pathdb == "0") pathdb = "./";
-				fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
+				fileRSADB = pathdb + cryptoAL::RSA_MY_PRIVATE_DB;
 			}
 
-			std::string outfile = pathdb + RSA_MY_PUBLIC_DB;
+			std::string outfile = pathdb + cryptoAL::RSA_MY_PUBLIC_DB;
 			std::cout << "Public rsa keys would be saved in: " << outfile << std::endl;
 
-			//std::cout << "Enter file to export to (0 = ./" + RSA_OTHER_PUBLIC_DB + "): ";
+			//std::cout << "Enter file to export to (0 = ./" + cryptoAL::RSA_OTHER_PUBLIC_DB + "): ";
 			//std::cin >> outfile;
-			//if (outfile == "0") outfile = "./" + RSA_OTHER_PUBLIC_DB;
+			//if (outfile == "0") outfile = "./" + cryptoAL::RSA_OTHER_PUBLIC_DB;
 
 			qaclass qa;
-			std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
-			std::map< std::string, generate_rsa::rsa_key > map_rsa_public;
+			std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
+			std::map< std::string, generate_rsa::rsa_key > map_RSA_public;
 
 			if (cryptoAL::fileexists(fileRSADB) == true)
 			{
 				std::ifstream infile;
 				infile.open (fileRSADB, std::ios_base::in);
-				infile >> bits(map_rsa_private);
+				infile >> bits(map_RSA_private);
 				infile.close();
 
-				for(auto& [keyname, k] : map_rsa_private)
+				for(auto& [keyname, k] : map_RSA_private)
 				{
                     generate_rsa::rsa_key key_public;
                     key_public.key_size_in_bits = k.key_size_in_bits ;
@@ -624,13 +921,13 @@ void  menu()
                     key_public.s_e = k.s_e ;
                     key_public.s_d = "" ;
 
-                    map_rsa_public.insert(std::make_pair(keyname,  key_public));
+                    map_RSA_public.insert(std::make_pair(keyname,  key_public));
 				}
 
 				std::cout << "---------------------------" << std::endl;
 				std::cout << "Summary of " << outfile << std::endl;
 				std::cout << "---------------------------" << std::endl;
-				for(auto& [keyname, k] : map_rsa_public)
+				for(auto& [keyname, k] : map_RSA_public)
 				{
 				  std::cout << keyname << std:: endl;
 				}
@@ -639,7 +936,7 @@ void  menu()
 				{
 					std::ofstream out;
 					out.open(outfile, std::ios_base::out);
-					out << bits(map_rsa_public);
+					out << bits(map_RSA_public);
 					out.close();
 				}
 			}
@@ -666,15 +963,15 @@ void  menu()
 			std::string fileRSADB;
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_rsa.size()>0))
 			{
-				fileRSADB = cfg.cmdparam.folder_my_private_rsa + RSA_MY_PRIVATE_DB;
+				fileRSADB = cfg.cmdparam.folder_my_private_rsa + cryptoAL::RSA_MY_PRIVATE_DB;
 			}
 			else
 			{
-				std::cout << "Enter path for rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
+				std::cout << "Enter path for rsa database " << cryptoAL::RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
 				std::string pathdb;
 				std::cin >> pathdb;
 				if (pathdb == "0") pathdb = "./";
-				fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
+				fileRSADB = pathdb + cryptoAL::RSA_MY_PRIVATE_DB;
 			}
 
 			std::cout << "Enter path for OPENSSL "<< " (0 = not needed, 1 = D:\\000DEV\\Encryptions\\Exec_Windows\\binOpenSSL\\ for openssl.exe) : ";
@@ -701,12 +998,12 @@ void  menu()
 				generate_rsa::rsa_key rkey;
 				key.to_rsa_key(rkey, n, e, d, (uint32_t)klen);
 
-				std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
+				std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
 				if (cryptoAL::fileexists(fileRSADB) == true)
 				{
 					std::ifstream infile;
 					infile.open (fileRSADB, std::ios_base::in);
-					infile >> bits(map_rsa_private);
+					infile >> bits(map_RSA_private);
 					infile.close();
 				}
 
@@ -714,8 +1011,8 @@ void  menu()
 				bool ok = true;
 				auto start1 = std::chrono::high_resolution_clock::now();
 
-				int r = RSAGMP::rsa_gmp_test_key(   cryptoAL::key_util::base64_to_base10(rkey.s_n) , cryptoAL::key_util::base64_to_base10(rkey.s_e),
-                                                    cryptoAL::key_util::base64_to_base10(rkey.s_d), (uint32_t)klen);
+				int r = RSAGMP::rsa_gmp_test_key(   qakeyutil::base64_to_base10(rkey.s_n) , qakeyutil::base64_to_base10(rkey.s_e),
+                                                    qakeyutil::base64_to_base10(rkey.s_d), (uint32_t)klen);
 				if (r!=0)
 				{
 					ok = false;
@@ -763,17 +1060,17 @@ void  menu()
              		{
 						std::ofstream outfile;
 						outfile.open(fileRSADB + ".bck", std::ios_base::out);
-						outfile << bits(map_rsa_private);
+						outfile << bits(map_RSA_private);
 						outfile.close();
        				 }
 
-                	std::string keyname = std::string("MY_RSAKEY_") + std::to_string(klen) + std::string("_") + get_current_time_and_date();
-                  	map_rsa_private.insert(std::make_pair(keyname,  rkey));
+                	std::string keyname = std::string("MY_RSAKEY_") + std::to_string(klen) + std::string("_") + cryptoAL::get_current_time_and_date();
+                  	map_RSA_private.insert(std::make_pair(keyname,  rkey));
 
 					{
 						std::ofstream outfile;
 						outfile.open(fileRSADB, std::ios_base::out);
-						outfile << bits(map_rsa_private);
+						outfile << bits(map_RSA_private);
 						outfile.close();
          			}
                   	std::cout << "key saved as: "  << keyname << " in " << fileRSADB << std:: endl;
@@ -815,15 +1112,15 @@ void  menu()
 			std::string fileRSADB;
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_rsa.size()>0))
 			{
-				fileRSADB = cfg.cmdparam.folder_my_private_rsa + RSA_MY_PRIVATE_DB;
+				fileRSADB = cfg.cmdparam.folder_my_private_rsa + cryptoAL::RSA_MY_PRIVATE_DB;
 			}
 			else
 			{
-				std::cout << "Enter path for rsa database " << RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
+				std::cout << "Enter path for rsa database " << cryptoAL::RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
 				std::string pathdb;
 				std::cin >> pathdb;
 				if (pathdb == "0") pathdb = "./";
-				fileRSADB = pathdb + RSA_MY_PRIVATE_DB;
+				fileRSADB = pathdb + cryptoAL::RSA_MY_PRIVATE_DB;
 			}
 
 			int nt = std::thread::hardware_concurrency();
@@ -843,12 +1140,12 @@ void  menu()
 
 				generate_rsa::rsa_key k;
 				generate_rsa::rsa_key rkey( (int)klen,
-										  cryptoAL::key_util::base10_to_base64(s_n),
-										  cryptoAL::key_util::base10_to_base64(s_e),
-										  cryptoAL::key_util::base10_to_base64(s_d));
+										  qakeyutil::base10_to_base64(s_n),
+										  qakeyutil::base10_to_base64(s_e),
+										  qakeyutil::base10_to_base64(s_d));
 
 				// READ
-				std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
+				std::map< std::string, generate_rsa::rsa_key> map_rsa_private;
 
 				if (cryptoAL::fileexists(fileRSADB) == false)
 				{
@@ -908,15 +1205,15 @@ void  menu()
       		std::string fileHistoDB;
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_hh.size()>0))
 			{
-				fileHistoDB = cfg.cmdparam.folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
+				fileHistoDB = cfg.cmdparam.folder_my_private_hh + cryptoAL::HHKEY_MY_PRIVATE_ENCODE_DB;
 			}
 			else
 			{
-                std::cout << "Enter path of encode history database " << HHKEY_MY_PRIVATE_ENCODE_DB << " (0 = current directory) : ";
+                std::cout << "Enter path of encode history database " << cryptoAL::HHKEY_MY_PRIVATE_ENCODE_DB << " (0 = current directory) : ";
                 std::string pathdb;
                 std::cin >> pathdb;
                 if (pathdb == "0") pathdb = "./";
-                fileHistoDB = pathdb + HHKEY_MY_PRIVATE_ENCODE_DB;
+                fileHistoDB = pathdb + cryptoAL::HHKEY_MY_PRIVATE_ENCODE_DB;
 			}
 
 			if (cryptoAL::fileexists(fileHistoDB) == true)
@@ -935,15 +1232,15 @@ void  menu()
             std::string fileHistoDB;
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_hh.size()>0))
 			{
-				fileHistoDB = cfg.cmdparam.folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
+				fileHistoDB = cfg.cmdparam.folder_my_private_hh + cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB;
 			}
 			else
 			{
-                std::cout << "Enter path of decode history database " << HHKEY_MY_PRIVATE_DECODE_DB << " (0 = current directory) : ";
+                std::cout << "Enter path of decode history database " << cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB << " (0 = current directory) : ";
                 std::string pathdb;
                 std::cin >> pathdb;
                 if (pathdb == "0") pathdb = "./";
-                fileHistoDB = pathdb + HHKEY_MY_PRIVATE_DECODE_DB;
+                fileHistoDB = pathdb + cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB;
 			}
 
 			if (cryptoAL::fileexists(fileHistoDB) == true)
@@ -964,17 +1261,17 @@ void  menu()
             std::string fileHistoPublicDB;
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_hh.size()>0))
 			{
-				fileHistoPrivateDB = cfg.cmdparam.folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
-				fileHistoPublicDB  = cfg.cmdparam.folder_my_private_hh + HHKEY_MY_PUBLIC_DECODE_DB;
+				fileHistoPrivateDB = cfg.cmdparam.folder_my_private_hh + cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB;
+				fileHistoPublicDB  = cfg.cmdparam.folder_my_private_hh + cryptoAL::HHKEY_MY_PUBLIC_DECODE_DB;
 			}
 			else
 			{
-                std::cout << "Enter path of private decode history database " << HHKEY_MY_PRIVATE_DECODE_DB << " (0 = current directory) : ";
+                std::cout << "Enter path of private decode history database " << cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB << " (0 = current directory) : ";
                 std::string pathdb;
                 std::cin >> pathdb;
                 if (pathdb == "0") pathdb = "./";
-                fileHistoPrivateDB = pathdb + HHKEY_MY_PRIVATE_DECODE_DB;
-                fileHistoPublicDB  = pathdb + HHKEY_MY_PUBLIC_DECODE_DB;
+                fileHistoPrivateDB = pathdb + cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB;
+                fileHistoPublicDB  = pathdb + cryptoAL::HHKEY_MY_PUBLIC_DECODE_DB;
             }
 
 			if (cryptoAL::fileexists(fileHistoPrivateDB) == true)
@@ -1005,28 +1302,28 @@ void  menu()
 
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_hh.size()>0))
 			{
-				fileHistoPrivateEncodeDB = cfg.cmdparam.folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
+				fileHistoPrivateEncodeDB = cfg.cmdparam.folder_my_private_hh + cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB;
 			}
 			else
 			{
-                std::cout << "Enter path of encode history database " << HHKEY_MY_PRIVATE_ENCODE_DB << " (0 = current directory) : ";
+                std::cout << "Enter path of encode history database " << cryptoAL::HHKEY_MY_PRIVATE_ENCODE_DB << " (0 = current directory) : ";
                 std::string pathdb;
                 std::cin >> pathdb;
                 if (pathdb == "0") pathdb = "./";
-                fileHistoPrivateEncodeDB = pathdb + HHKEY_MY_PRIVATE_DECODE_DB;
+                fileHistoPrivateEncodeDB = pathdb + cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB;
             }
 
             if ((cfg_parse_result) && (cfg.cmdparam.folder_other_public_hh.size()>0))
 			{
-				importfile = cfg.cmdparam.folder_other_public_hh + HHKEY_OTHER_PUBLIC_DECODE_DB;
+				importfile = cfg.cmdparam.folder_other_public_hh + cryptoAL::HHKEY_OTHER_PUBLIC_DECODE_DB;
 			}
 			else
 			{
-                std::cout << "Enter path to read received hh (" + HHKEY_OTHER_PUBLIC_DECODE_DB + ")" << " (0 = current directory) : ";
+                std::cout << "Enter path to read received hh (" + cryptoAL::HHKEY_OTHER_PUBLIC_DECODE_DB + ")" << " (0 = current directory) : ";
                 std::string pathreaddb;
                 std::cin >> pathreaddb;
                 if (pathreaddb == "0") pathreaddb = "./";
-                importfile = pathreaddb + HHKEY_OTHER_PUBLIC_DECODE_DB;
+                importfile = pathreaddb + cryptoAL::HHKEY_OTHER_PUBLIC_DECODE_DB;
             }
 
 			if (cryptoAL::fileexists(fileHistoPrivateEncodeDB) == true)
@@ -1035,7 +1332,7 @@ void  menu()
 				{
 					uint32_t cnt;
 					uint32_t n;
-					bool r = confirm_history_key(fileHistoPrivateEncodeDB, importfile, cnt, n);
+					bool r = cryptoAL::confirm_history_key(fileHistoPrivateEncodeDB, importfile, cnt, n);
 					if (r==false)
 					{
 						std::cerr << "ERROR confirm FAILED" << std:: endl;
@@ -1069,15 +1366,15 @@ void  menu()
 			std::string fileECCDOMDB;
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
 			{
-				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + ECC_DOMAIN_DB;
+				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + cryptoAL::ECC_DOMAIN_DB;
 			}
 			else
 			{
-                std::cout << "Enter path for ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+                std::cout << "Enter path for ecc domain database " << cryptoAL::ECC_DOMAIN_DB << " (0 = current directory) : ";
                 std::string pathdb;
                 std::cin >> pathdb;
                 if (pathdb == "0") pathdb = "./";
-                fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+                fileECCDOMDB = pathdb + cryptoAL::ECC_DOMAIN_DB;
 			}
 
 			if (cryptoAL::fileexists(eccfile) == true)
@@ -1087,7 +1384,7 @@ void  menu()
 				typeuinteger n; typeuinteger gx; typeuinteger gy;
 				typeuinteger h;
 
-				bool r = cryptoAL::key_util::parse_ecc_domain(eccfile, klen, a, b, p, n, gx, gy, h);
+				bool r = qakeyutil::parse_ecc_domain(eccfile, klen, a, b, p, n, gx, gy, h);
 				if (r)
 				{
                     cryptoAL::ecc_domain dom;
@@ -1160,14 +1457,14 @@ void  menu()
             std::string fileECCDOMDB;
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
 			{
-				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + ECC_DOMAIN_DB;
+				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + cryptoAL::ECC_DOMAIN_DB;
 			}
 			else
 			{
                 std::string pathdb;
                 std::cin >> pathdb;
                 if (pathdb == "0") pathdb = "./";
-                fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+                fileECCDOMDB = pathdb + cryptoAL::ECC_DOMAIN_DB;
             }
         }
 
@@ -1176,15 +1473,15 @@ void  menu()
             std::string fileECCDOMDB;
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
 			{
-				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + ECC_DOMAIN_DB;
+				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + cryptoAL::ECC_DOMAIN_DB;
 			}
 			else
 			{
-                std::cout << "Enter path for ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+                std::cout << "Enter path for ecc domain database " << cryptoAL::ECC_DOMAIN_DB << " (0 = current directory) : ";
                 std::string pathdb;
                 std::cin >> pathdb;
                 if (pathdb == "0") pathdb = "./";
-                fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+                fileECCDOMDB = pathdb + cryptoAL::ECC_DOMAIN_DB;
 			}
 
 			std::cout << "Only show summary (0 = true): ";
@@ -1246,22 +1543,22 @@ void  menu()
             std::string pathdb;
             if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
 			{
-				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + ECC_DOMAIN_DB;
+				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + cryptoAL::ECC_DOMAIN_DB;
 				pathdb = cfg.cmdparam.folder_my_private_ecc;
 			}
 			else
 			{
-                std::cout << "Enter path of your ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+                std::cout << "Enter path of your ecc domain database " << cryptoAL::ECC_DOMAIN_DB << " (0 = current directory) : ";
                 std::cin >> pathdb;
                 if (pathdb == "0") pathdb = "./";
-                fileECCDOMDB = pathdb + ECC_DOMAIN_DB;
+                fileECCDOMDB = pathdb + cryptoAL::ECC_DOMAIN_DB;
 			}
 
-            std::cout << "Enter path of other ecc domain database to import " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+            std::cout << "Enter path of other ecc domain database to import " << cryptoAL::ECC_DOMAIN_DB << " (0 = current directory) : ";
 			std::string pathotherdb;
 			std::cin >> pathotherdb;
 			if (pathotherdb == "0") pathotherdb = "./";
-			std::string fileECCDOMOTHERDB = pathotherdb + ECC_DOMAIN_DB;
+			std::string fileECCDOMOTHERDB = pathotherdb + cryptoAL::ECC_DOMAIN_DB;
 
             if (fileECCDOMDB == fileECCDOMOTHERDB)
             {
@@ -1340,15 +1637,15 @@ void  menu()
             std::string pathDOMdb;
             if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
 			{
-				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + ECC_DOMAIN_DB;
+				fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + cryptoAL::ECC_DOMAIN_DB;
 				pathDOMdb = cfg.cmdparam.folder_my_private_ecc;
 			}
 			else
 			{
-                std::cout << "Enter path for ecc domain database " << ECC_DOMAIN_DB << " (0 = current directory) : ";
+                std::cout << "Enter path for ecc domain database " << cryptoAL::ECC_DOMAIN_DB << " (0 = current directory) : ";
                 std::cin >> pathDOMdb;
                 if (pathDOMdb == "0") pathDOMdb = "./";
-                fileECCDOMDB = pathDOMdb + ECC_DOMAIN_DB;
+                fileECCDOMDB = pathDOMdb + cryptoAL::ECC_DOMAIN_DB;
 			}
 
 			qaclass qa;
@@ -1392,7 +1689,7 @@ void  menu()
 				std::string dom_name = vdomname[idom-1];
 				auto& domain = map_ecc_domain[dom_name];
 
-				ecc_key ek;
+				cryptoAL::ecc_key ek;
 				ek.set_domain(domain);
 				bool r = ek.generate_private_public_key(true);
 
@@ -1401,19 +1698,19 @@ void  menu()
                     std::string fileECCKEYDB;
                     if (cfg_parse_result)
                     {
-                        fileECCKEYDB = cfg.cmdparam.folder_my_private_ecc + ECCKEY_MY_PRIVATE_DB;
+                        fileECCKEYDB = cfg.cmdparam.folder_my_private_ecc + cryptoAL::ECCKEY_MY_PRIVATE_DB;
                     }
                     else
                     {
-                        std::cout << "Enter path for ecc private keys database " << ECCKEY_MY_PRIVATE_DB << " (0 = same as domain) : ";
+                        std::cout << "Enter path for ecc private keys database " << cryptoAL::ECCKEY_MY_PRIVATE_DB << " (0 = same as domain) : ";
                         std::string pathecckeydb;
                         std::cin >> pathecckeydb;
                         if (pathecckeydb == "0") pathecckeydb = pathDOMdb;
-                        fileECCKEYDB = pathecckeydb + ECCKEY_MY_PRIVATE_DB;
+                        fileECCKEYDB = pathecckeydb + cryptoAL::ECCKEY_MY_PRIVATE_DB;
                     }
 
                     // READ
-                    std::map< std::string, ecc_key > map_ecckey_private;
+                    std::map< std::string, cryptoAL::ecc_key > map_ecckey_private;
 
                     if (cryptoAL::fileexists(fileECCKEYDB) == false)
                     {
@@ -1472,15 +1769,15 @@ void  menu()
             std::string fileECCKEYDB;
             if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
 			{
-				fileECCKEYDB = cfg.cmdparam.folder_my_private_ecc + ECCKEY_MY_PRIVATE_DB;
+				fileECCKEYDB = cfg.cmdparam.folder_my_private_ecc + cryptoAL::ECCKEY_MY_PRIVATE_DB;
 			}
 			else
 			{
-                std::cout << "Enter path for my private ecc keys db " << ECCKEY_MY_PRIVATE_DB << " (0 = current directory) : ";
+                std::cout << "Enter path for my private ecc keys db " << cryptoAL::ECCKEY_MY_PRIVATE_DB << " (0 = current directory) : ";
                 std::string pathdb;
                 std::cin >> pathdb;
                 if (pathdb == "0") pathdb = "./";
-                fileECCKEYDB = pathdb + ECCKEY_MY_PRIVATE_DB;
+                fileECCKEYDB = pathdb + cryptoAL::ECCKEY_MY_PRIVATE_DB;
 			}
 
 			std::cout << "Only show summary (0 = true): ";
@@ -1490,7 +1787,7 @@ void  menu()
             if (osummary == "0") onlysummary = true;
 
 			qaclass qa;
-			std::map< std::string, ecc_key > map_ecckey_private;
+			std::map< std::string, cryptoAL::ecc_key > map_ecckey_private;
 
 			// View
 			if (cryptoAL::fileexists(fileECCKEYDB) == true)
@@ -1540,23 +1837,23 @@ void  menu()
             std::string pathdb;
             if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
 			{
-				fileECCKEYDB = cfg.cmdparam.folder_my_private_ecc + ECCKEY_MY_PRIVATE_DB;
+				fileECCKEYDB = cfg.cmdparam.folder_my_private_ecc + cryptoAL::ECCKEY_MY_PRIVATE_DB;
 				pathdb = cfg.cmdparam.folder_my_private_ecc;
 			}
 			else
 			{
-                std::cout << "Enter path for my private ecc keys db " << ECCKEY_MY_PRIVATE_DB << " (0 = current directory) : ";
+                std::cout << "Enter path for my private ecc keys db " << cryptoAL::ECCKEY_MY_PRIVATE_DB << " (0 = current directory) : ";
                 std::cin >> pathdb;
                 if (pathdb == "0") pathdb = "./";
-                fileECCKEYDB = pathdb + ECCKEY_MY_PRIVATE_DB;
+                fileECCKEYDB = pathdb + cryptoAL::ECCKEY_MY_PRIVATE_DB;
 			}
 
-			std::string outfile = pathdb + ECCKEY_MY_PUBLIC_DB;
+			std::string outfile = pathdb + cryptoAL::ECCKEY_MY_PUBLIC_DB;
 			std::cout << "Public ecc keys would be saved in: " << outfile << std::endl;;
 
 			qaclass qa;
-			std::map< std::string, ecc_key > map_ecc_private;
-			std::map< std::string, ecc_key > map_ecc_public;
+			std::map< std::string, cryptoAL::ecc_key > map_ecc_private;
+			std::map< std::string, cryptoAL::ecc_key > map_ecc_public;
 
 			if (cryptoAL::fileexists(fileECCKEYDB) == true)
 			{
@@ -1567,7 +1864,7 @@ void  menu()
 
 				for(auto& [keyname, k] : map_ecc_private)
 				{
-                    ecc_key key_public(k.dom, k.s_kg_x, k.s_kg_y, "");
+                    cryptoAL::ecc_key key_public(k.dom, k.s_kg_x, k.s_kg_y, "");
                     map_ecc_public.insert(std::make_pair(keyname,  key_public) );
 				}
 
@@ -1600,15 +1897,15 @@ void  menu()
             std::string pathdb;
             if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
 			{
-				fileECCKEYDB = cfg.cmdparam.folder_my_private_ecc + ECCKEY_MY_PUBLIC_DB;
+				fileECCKEYDB = cfg.cmdparam.folder_my_private_ecc + cryptoAL::ECCKEY_MY_PUBLIC_DB;
 				pathdb = cfg.cmdparam.folder_my_private_ecc;
 			}
 			else
 			{
-                std::cout << "Enter path for my ecc public database " << ECCKEY_MY_PUBLIC_DB << " (0 = current directory) : ";
+                std::cout << "Enter path for my ecc public database " << cryptoAL::ECCKEY_MY_PUBLIC_DB << " (0 = current directory) : ";
                 std::cin >> pathdb;
                 if (pathdb == "0") pathdb = "./";
-                fileECCKEYDB = pathdb + ECCKEY_MY_PUBLIC_DB;
+                fileECCKEYDB = pathdb + cryptoAL::ECCKEY_MY_PUBLIC_DB;
 			}
 
             std::cout << "Only show summary (0 = true): ";
@@ -1618,7 +1915,7 @@ void  menu()
             if (osummary == "0") onlysummary = true;
 
 			qaclass qa;
-			std::map< std::string, ecc_key > map_ecc_public;
+			std::map< std::string, cryptoAL::ecc_key > map_ecc_public;
 
 			// View
           	if (cryptoAL::fileexists(fileECCKEYDB) == true)
@@ -1669,15 +1966,15 @@ void  menu()
             std::string pathdb;
             if ((cfg_parse_result) && (cfg.cmdparam.folder_other_public_ecc.size()>0))
 			{
-				fileECCKEYDB = cfg.cmdparam.folder_other_public_ecc + ECCKEY_OTHER_PUBLIC_DB;
+				fileECCKEYDB = cfg.cmdparam.folder_other_public_ecc + cryptoAL::ECCKEY_OTHER_PUBLIC_DB;
 				pathdb = cfg.cmdparam.folder_my_private_ecc;
 			}
 			else
 			{
-                std::cout << "Enter path of other ecc public database " << ECCKEY_OTHER_PUBLIC_DB << " (0 = current directory) : ";
+                std::cout << "Enter path of other ecc public database " << cryptoAL::ECCKEY_OTHER_PUBLIC_DB << " (0 = current directory) : ";
                 std::cin >> pathdb;
                 if (pathdb == "0") pathdb = "./";
-                fileECCKEYDB = pathdb + ECCKEY_OTHER_PUBLIC_DB;
+                fileECCKEYDB = pathdb + cryptoAL::ECCKEY_OTHER_PUBLIC_DB;
 			}
 
             std::cout << "Only show summary (0 = true): ";
@@ -1687,7 +1984,7 @@ void  menu()
             if (osummary == "0") onlysummary = true;
 
 			qaclass qa;
-			std::map< std::string, ecc_key > map_ecc_public;
+			std::map< std::string, cryptoAL::ecc_key > map_ecc_public;
 
 			// View
           	if (cryptoAL::fileexists(fileECCKEYDB) == true)

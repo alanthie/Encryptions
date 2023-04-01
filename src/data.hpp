@@ -162,7 +162,7 @@ public:
     bool verbose;
 };
 
-bool is_file_same(std::string filename1, std::string filename2)
+static bool is_file_same(std::string filename1, std::string filename2)
 {
     cryptodata data1;
     cryptodata data2;
