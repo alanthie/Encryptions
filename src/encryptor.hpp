@@ -458,7 +458,7 @@ public:
         else if (is_histo)
         {
             std::string local_histo_db = folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
-            std::vector<std::string> v = split(s, ";");
+            std::vector<std::string> v = parsing::split(s, ";");
             if (v.size() < 1)
             {
                 std::cerr << "ERROR histo url bad format - missing histo key name: " << s << std::endl;
@@ -476,7 +476,7 @@ public:
             }
             if (r)
             {
-                long long iseq = str_to_ll(v[0]);
+                long long iseq = parsing::str_to_ll(v[0]);
                 if (iseq < 0) r = false;
                 if (r)
                 {
@@ -506,7 +506,7 @@ public:
         }
         else if (is_rsa)
         {
-            std::vector<std::string> v = split(s, ";");
+            std::vector<std::string> v = parsing::split(s, ";");
             std::vector<uint32_t> v_encoded_size(v.size(), 0 );
 
             if (v.size() < 1)
@@ -623,7 +623,7 @@ public:
         }
 		else if (is_ecc)
         {
-            std::vector<std::string> v = split(s, ";");
+            std::vector<std::string> v = parsing::split(s, ";");
             std::vector<uint32_t> v_encoded_size(v.size(), 0 );
 
             if (v.size() < 1)

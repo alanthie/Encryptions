@@ -13,39 +13,39 @@ namespace strutil
 {
 
     // trim from start (in place)
-    static inline void ltrim(std::string &s) {
+    [[maybe_unused]] static void ltrim(std::string &s) {
         s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
             return !std::isspace(ch);
         }));
     }
 
     // trim from end (in place)
-    static inline void rtrim(std::string &s) {
+    [[maybe_unused]] static void rtrim(std::string &s) {
         s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
             return !std::isspace(ch);
         }).base(), s.end());
     }
 
     // trim from both ends (in place)
-    static inline void trim(std::string &s) {
+    [[maybe_unused]] static void trim(std::string &s) {
         rtrim(s);
         ltrim(s);
     }
 
     // trim from start (copying)
-    static inline std::string ltrim_copy(std::string s) {
+    [[maybe_unused]] static  std::string ltrim_copy(std::string s) {
         ltrim(s);
         return s;
     }
 
     // trim from end (copying)
-    static inline std::string rtrim_copy(std::string s) {
+    [[maybe_unused]] static  std::string rtrim_copy(std::string s) {
         rtrim(s);
         return s;
     }
 
     // trim from both ends (copying)
-    static inline std::string trim_copy(std::string s) {
+    [[maybe_unused]] static  std::string trim_copy(std::string s) {
         trim(s);
         return s;
     }
@@ -57,7 +57,7 @@ namespace strutil
         return ss.str();
     }
 
-    static int stoi(const std::string& str)
+    [[maybe_unused]] static int stoi(const std::string& str)
     {
         std::stringstream ss;
         int ret;
@@ -66,7 +66,7 @@ namespace strutil
         return ret;
     }
 
-    static long stol(const std::string& str)
+    [[maybe_unused]] static long stol(const std::string& str)
     {
         std::stringstream ss;
         long ret;
@@ -75,7 +75,7 @@ namespace strutil
         return ret;
     }
 
-    static float stof(const std::string& str)
+    [[maybe_unused]] static float stof(const std::string& str)
     {
         std::stringstream ss;
         float ret;
@@ -84,7 +84,7 @@ namespace strutil
         return ret;
     }
 
-    static double stod(const std::string& str)
+    [[maybe_unused]] static double stod(const std::string& str)
     {
         std::stringstream ss;
         double ret;
@@ -93,7 +93,7 @@ namespace strutil
         return ret;
     }
 
-	static std::string get_str_between_two_str(const std::string& s,
+	[[maybe_unused]] static std::string get_str_between_two_str(const std::string& s,
 										const std::string& start_delim,
 										const std::string& stop_delim,
 										unsigned& first_delim_pos,
@@ -118,7 +118,7 @@ namespace strutil
 		return "";
 	}
 
-	static long long str_to_ll(const std::string& snum)
+	[[maybe_unused]] static long long str_to_ll(const std::string& snum)
     {
        long long r = -1;
        try
@@ -132,7 +132,7 @@ namespace strutil
        return r;
     }
 
-	static bool has_token(const std::string& token, const std::string& line, size_t pos)
+	[[maybe_unused]] static bool has_token(const std::string& token, const std::string& line, size_t pos)
 	{
 		bool r = false;
 		if (line.size() >= token.size() + pos)

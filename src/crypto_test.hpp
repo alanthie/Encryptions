@@ -21,6 +21,28 @@
 namespace cryptoAL
 {
 
+static bool is_file_same(std::string filename1, std::string filename2)
+{
+    cryptodata data1;
+    cryptodata data2;
+
+    if(data1.read_from_file(filename1)==false)
+        return false;
+
+    if(data2.read_from_file(filename2)==false)
+        return false;
+
+    if(data1.buffer.size() != data2.buffer.size() )
+        return false;
+
+    for(size_t i=0;i< data1.buffer.size() ; i++)
+    {
+        if ( data1.buffer.getdata()[i] != data2.buffer.getdata()[i])
+            return false;
+    }
+    return true;
+}
+
 // ./crypto test -i manywebkey
 void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false, bool verb = false, std::string file_msg = "/msg.txt")
 {
@@ -107,7 +129,7 @@ void DOTESTCASE(std::string TEST, std::string folder, bool disable_netw = false,
 
             if (decr.decrypt() == true)
             {
-                if( is_file_same(encr.filename_msg_data, decr.filename_decrypted_data) == false)
+                if( cryptoAL::is_file_same(encr.filename_msg_data, decr.filename_decrypted_data) == false)
                 {
                     std::cout << TESTCASE + " " + TEST + " - ERROR encrypt- decrypt failed " << std::endl;
                 }

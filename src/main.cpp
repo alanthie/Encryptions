@@ -55,7 +55,7 @@ std::string VERSION = "0.8";
 
 int main_crypto(int argc, char **argv)
 {
-    std::string FULLVERSION = VERSION + "_" + get_current_date();
+    std::string FULLVERSION = VERSION + "_" + parsing::get_current_date();
 
     // Argument parser
     try
@@ -320,7 +320,7 @@ int main_crypto(int argc, char **argv)
 			encode_command.add_argument("-hpu", "--histopub")
                 .default_value(std::string(""))
                 .help("specify the other public folder for historical hashes");
-				
+
 			encode_command.add_argument("-wbaespv", "--wbaespv")
                 .default_value(std::string(""))
                 .help("specify the private folder for whitebox aes 512-16384 bits tables");
@@ -426,7 +426,7 @@ int main_crypto(int argc, char **argv)
 			decode_command.add_argument("-hpu", "--histopub")
                 .default_value(std::string(""))
                 .help("specify the other public folder for historical hashes");
-				
+
 			decode_command.add_argument("-wbaespv", "--wbaespv")
                 .default_value(std::string(""))
                 .help("specify the private folder for whitebox aes 512-8192 bits tables");
@@ -790,7 +790,7 @@ int main_crypto(int argc, char **argv)
             auto encryped_ftp_pwd  = cmd.get<std::string>("--encryped_ftp_pwd");
             auto shuffle  = cmd.get<std::string>("--shuffle");
 			auto png = cmd.get<std::string>("--png");
-			
+
             if (qa_puzzle_path.size() == 0)
             {
                 if (puzzle_path.size() > 0)

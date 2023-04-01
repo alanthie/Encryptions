@@ -24,7 +24,7 @@ namespace cryptoAL
             if (seq != sequence)
             {
                 sequence = seq;
-                dt = cryptoAL::get_current_time_and_date();
+                dt = cryptoAL::parsing::get_current_time_and_date();
 			}
 		}
 
@@ -33,7 +33,7 @@ namespace cryptoAL
             if (b != confirmed)
             {
                 confirmed = b;
-                dt_confirmed = cryptoAL::get_current_time_and_date();
+                dt_confirmed = cryptoAL::parsing::get_current_time_and_date();
 			}
 		}
 
@@ -57,7 +57,7 @@ namespace cryptoAL
 			result = get_next_seq(sequence, local_histo_db);
 			if(!result) return;
 
-			dt = cryptoAL::get_current_time_and_date();
+			dt = cryptoAL::parsing::get_current_time_and_date();
 		}
 
         history_key(cryptodata& encrypted_data, const std::string& local_histo_db, bool& result)
@@ -72,7 +72,7 @@ namespace cryptoAL
             data_sha[0] = a; // hash full
             data_sha[1] = b; // hash half
             data_sha[2] = c; // hash second half
-			dt = cryptoAL::get_current_time_and_date();
+			dt = cryptoAL::parsing::get_current_time_and_date();
 			confirmed 	= false;
 			deleted 	= false;
 			usage_count = 0;

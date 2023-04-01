@@ -451,7 +451,7 @@ public:
                 std::string local_histo_db = folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
 
                 std::string s(&u[pos_url]);
-                std::vector<std::string> v = split(s, ";");
+                std::vector<std::string> v = parsing::split(s, ";");
                 if (v.size() < 1)
                 {
                     std::cerr << "ERROR histo url bad format - missing histo key name: " << s << std::endl;
@@ -521,7 +521,7 @@ public:
 				 	std::vector<std::string> v ;
 				 	std::vector<uint32_t> v_encoded_size;
 
-				 	std::vector<std::string> vv = split(sURL, ";");
+				 	std::vector<std::string> vv = parsing::split(sURL, ";");
 					if (vv.size() < 1)
 					{
 						std::cerr << "ERROR rsa url bad format - missing rsa key name: " << sURL << std::endl;
@@ -549,7 +549,7 @@ public:
 
                                 {
                                     v.push_back(vt0);
-                                    long long n = str_to_ll(vt1);
+                                    long long n = parsing::str_to_ll(vt1);
                                     if (n >= 0)
                                     {
                                         v_encoded_size.push_back((uint32_t)n);
@@ -645,7 +645,7 @@ public:
 				 	std::vector<std::string> v ;
 				 	std::vector<uint32_t> v_encoded_size;
 
-				 	std::vector<std::string> vv = split(sURL, ";");
+				 	std::vector<std::string> vv = parsing::split(sURL, ";");
 					if (vv.size() < 1)
 					{
 						std::cerr << "ERROR ecc url bad format - missing ecc key name: " << sURL << std::endl;
@@ -673,7 +673,7 @@ public:
 
                                 {
                                     v.push_back(vt0);
-                                    long long n = str_to_ll(vt1);
+                                    long long n = parsing::str_to_ll(vt1);
                                     if (n >= 0)
                                     {
                                         v_encoded_size.push_back((uint32_t)n);

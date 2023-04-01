@@ -13,7 +13,9 @@
 
 namespace cryptoAL
 {
-    static std::string get_current_time_and_date_short()
+namespace parsing
+{
+    [[maybe_unused]] static std::string get_current_time_and_date_short()
     {
        auto now = std::chrono::system_clock::now();
        auto in_time_t = std::chrono::system_clock::to_time_t(now);
@@ -23,7 +25,8 @@ namespace cryptoAL
        //std::cout << "get_current_time_and_date: " << ss.str()  << std::endl;
        return ss.str();
     }
-    static std::string get_current_time_and_date()
+
+    [[maybe_unused]] static std::string get_current_time_and_date()
     {
        auto now = std::chrono::system_clock::now();
        auto in_time_t = std::chrono::system_clock::to_time_t(now);
@@ -34,7 +37,7 @@ namespace cryptoAL
        return ss.str();
     }
 
-    static std::string get_current_date()
+    [[maybe_unused]] static std::string get_current_date()
     {
        auto now = std::chrono::system_clock::now();
        auto in_time_t = std::chrono::system_clock::to_time_t(now);
@@ -44,7 +47,7 @@ namespace cryptoAL
        return ss.str();
     }
 
-    static int find_string(std::string url, char delim, std::string vlist, [[maybe_unused]] bool verbose = false)
+    [[maybe_unused]]  static int find_string(std::string url, char delim, std::string vlist, [[maybe_unused]] bool verbose = false)
     {
        size_t pos_start = 0;
        size_t pos_end = 0;
@@ -73,7 +76,7 @@ namespace cryptoAL
        return -1;
     }
 
-    static std::string get_string_by_index(std::string vlist, char delim, int idx, [[maybe_unused]] bool verbose = false)
+    [[maybe_unused]] static std::string get_string_by_index(std::string vlist, char delim, int idx, [[maybe_unused]] bool verbose = false)
     {
        size_t pos_start = 0;
        size_t pos_end = 0;
@@ -99,7 +102,7 @@ namespace cryptoAL
        return "";
     }
 
-    static std::vector<std::string> split(std::string s, std::string delimiter)
+    [[maybe_unused]] static std::vector<std::string> split(std::string s, std::string delimiter)
     {
        std::vector<std::string> res;
        if (s.size() == 0) return res;
@@ -129,7 +132,7 @@ namespace cryptoAL
        return res;
     }
 
-    static long long str_to_ll(const std::string& snum)
+    [[maybe_unused]] static long long str_to_ll(const std::string& snum)
     {
        long long r = -1;
        try
@@ -143,7 +146,7 @@ namespace cryptoAL
        return r;
     }
 
-    static std::string get_block(std::string s, std::string start, std::string last)
+    [[maybe_unused]] static std::string get_block(std::string s, std::string start, std::string last)
     {
        size_t pos_start = 0;
        size_t pos_end;
@@ -158,7 +161,8 @@ namespace cryptoAL
        return "";
     }
 
-    static std::string remove_hex_delim(const std::string& s)
+
+    [[maybe_unused]] static std::string remove_hex_delim(const std::string& s)
     {
         std::string r ;
         long long n = s.size();
@@ -170,7 +174,7 @@ namespace cryptoAL
         return r;
     }
 
-    static std::string remove_hex2_delim(const std::string& s)
+    [[maybe_unused]] static std::string remove_hex2_delim(const std::string& s)
     {
         std::string r ;
         long long n = s.size();
@@ -190,7 +194,7 @@ namespace cryptoAL
         return r;
     }
 
-    static std::string remove_delim(const std::string& s, char delim)
+    [[maybe_unused]] static std::string remove_delim(const std::string& s, char delim)
     {
         std::string r ;
         long long n = s.size();
@@ -202,8 +206,8 @@ namespace cryptoAL
         return r;
     }
 
-    //namespace fs = std::filesystem;
-    static bool fileexists2(const std::filesystem::path& p, std::filesystem::file_status s = std::filesystem::file_status{})
+    namespace fs = std::filesystem;
+    [[maybe_unused]] static bool fileexists2(const std::filesystem::path& p, std::filesystem::file_status s = std::filesystem::file_status{})
     {
         if(std::filesystem::status_known(s) ? std::filesystem::exists(s) : std::filesystem::exists(p))
             return true;
@@ -211,7 +215,7 @@ namespace cryptoAL
             return false;
     }
 
-    static std::string get_block_infile(std::string FILE, std::string start, std::string last)
+    [[maybe_unused]] static std::string get_block_infile(std::string FILE, std::string start, std::string last)
     {
         if (fileexists2(FILE))
         {
@@ -224,10 +228,10 @@ namespace cryptoAL
                 size_t pos_end;
                 if ((pos_start = s.find(start, 0)) != std::string::npos)
                 {
-                    //std::cerr << "start: " << pos_start << std::endl;
+                    std::cerr << "start: " << pos_start << std::endl;
                     if ((pos_end = s.find(last, pos_start)) != std::string::npos)
                     {
-                        //std::cerr << "end: " << pos_start << std::endl;
+                        std::cerr << "end: " << pos_start << std::endl;
                         if (pos_end  > (pos_start + start.size())  )
                             return s.substr(pos_start+start.size(), pos_end - (pos_start+start.size()) );
                         else
@@ -254,7 +258,7 @@ namespace cryptoAL
        return "";
     }
 
-
+}
 }
 #endif
 

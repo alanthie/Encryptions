@@ -308,7 +308,7 @@ namespace keymgr
                             // TODO flag pending checking curve...long time...
 
                             key_public.confirmed = true;
-							key_public.dt_confirmed = cryptoAL::get_current_time_and_date();
+							key_public.dt_confirmed = cryptoAL::parsing::get_current_time_and_date();
 
 							key_merged = true;
 							map_eccdom_private.insert(std::make_pair(keyname, key_public));
@@ -407,7 +407,7 @@ namespace keymgr
 							{
 								key_updated 	= true;
 								mykey.confirmed = true;
-								mykey.dt_confirmed = cryptoAL::get_current_time_and_date();
+								mykey.dt_confirmed = cryptoAL::parsing::get_current_time_and_date();
 								cnt_confirmed++;
 
 								if (VERBOSE_DEBUG)
@@ -509,7 +509,7 @@ namespace keymgr
 							{
 								key_updated 	= true;
 								mykey.confirmed = true;
-								mykey.dt_confirmed = cryptoAL::get_current_time_and_date();
+								mykey.dt_confirmed = cryptoAL::parsing::get_current_time_and_date();
 								cnt_confirmed++;
 
 								if (VERBOSE_DEBUG)
@@ -607,7 +607,7 @@ namespace keymgr
 							{
 								key_updated 	= true;
 								mykey.confirmed = true;
-								mykey.dt_confirmed = cryptoAL::get_current_time_and_date();
+								mykey.dt_confirmed = cryptoAL::parsing::get_current_time_and_date();
 								cnt_confirmed++;
 
 								if (VERBOSE_DEBUG)

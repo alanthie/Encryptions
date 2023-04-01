@@ -10,11 +10,15 @@
 #include <filesystem>
 #include "DES.h"
 #include "SHA256.h"
-//#include "crypto_key_util.hpp"
-//#include "crypto_parsing.hpp"
+#include "crypto_parsing.hpp"
 #include "data.hpp"
 #include "puzzle.hpp"
+
+//#include "ecc_util.hpp"
 #include "../src/crypto_ecckey.hpp"
+
+#include "uint_util.hpp"
+
 #include "encrypt.h"
 
 #ifdef _WIN32
@@ -30,301 +34,6 @@
 
 namespace cryptoAL
 {
-	struct filekeyutil
-    {
-        static int pos64(char c)
-        {
-            for(size_t  i=0;i<cryptoAL::BASEDIGIT64.size();i++)
-            {
-                if (c == cryptoAL::BASEDIGIT64[i])
-                {
-                    return (int)i;
-                }
-            }
-            std::cerr << "ERROR pos64v invalid base 64 char " << (int)(unsigned char)c << std::endl;
-            throw std::string("ERROR pos64() invalid base 64 char ");
-            return 0;
-        }
-
-        static int pos10(char c)
-        {
-            for(size_t i=0;i<cryptoAL::BASEDIGIT10.size();i++)
-            {
-                if (c == cryptoAL::BASEDIGIT10[i])
-                {
-                    return (int)i;
-                }
-            }
-            std::cerr << "ERROR invalid base 10 char " << (int)c << std::endl;
-            throw "ERROR invalid base 10 char ";
-            return 0;
-        }
-
-        static typeuinteger val(const std::string& s)
-        {
-            typeuinteger r = 0;
-            long long n = (long long)s.size();
-            for(long long i=0;i<n;i++)
-            {
-                r *= 64;
-                r += pos64(s[i]);
-            }
-            return r;
-        }
-        static typeuinteger val10(const std::string& s)
-        {
-            typeuinteger r = 0;
-            long long n = (long long)s.size();
-            for(long long i=0;i<n;i++)
-            {
-                r *= 10;
-                r += pos10(s[i]);
-            }
-            return r;
-        }
-
-        static typeuinteger mod_pow(typeuinteger base, typeuinteger exp, const typeuinteger& mod)
-        {
-            typeuinteger resoult = 1;
-
-            while (exp > 0)
-            {
-                if (typeuinteger(exp & 1) == 1)
-                    resoult = (base * resoult) % mod;
-                base = (base * base) % mod;
-                exp >>= 1;
-            }
-
-            return resoult;
-        }
-
-        static typeuinteger power_modulo(const typeuinteger& a, const typeuinteger& power, const typeuinteger& mod)
-        {
-            try
-            {
-                // windows stack overflow....
-                // Visual Studio uses 4KB for the stack but reserved 1MB by default. You can change this in "Configuration Properties"->Linker->System->"Stack Reserve Size" to 10MB for example.
-                // (a ⋅ b) mod m = [(a mod m) ⋅ (b mod m)] mod m
-                if (power == 0) return 1;
-                if (power % 2 == 1)
-                {
-                    return ((a % mod) * power_modulo(a, power - 1, mod)) % mod;
-                }
-
-                typeuinteger b = power_modulo(a, power / 2, mod) % mod;
-                return (b * b) % mod;
-            }
-            catch (const std::exception& e)
-            {
-                std::cerr << "ERROR exception thrown in power_modulo " << e.what() << std::endl;
-                throw e;
-            }
-            catch (...)
-            {
-                std::cerr << "ERROR exception thrown in power_modulo " << std::endl;
-                throw std::string("ERROR exception thrown in power_modulo ");
-            }
-        }
-
-        static std::string base10_to_base64(const std::string& s)
-        {
-            typeuinteger m = val10(s);
-            return to_base64(m);
-        }
-        static std::string base64_to_base10(const std::string& s)
-        {
-            typeuinteger m = val(s);
-            return to_base10(m);
-        }
-
-        static std::string to_base64(const typeuinteger& v)
-        {
-            typeuinteger r = v;
-            typeuinteger b64 = 64;
-            typeuinteger t;
-            int digit;
-            std::string s;
-            while(r > 0)
-            {
-                t = (r % b64);
-                digit = t.toInt();
-                if (digit< 0) throw std::string("to base64 bad digit < 0");
-                if (digit>63) throw std::string("to base64 bad digit > 63");
-                s += cryptoAL::BASEDIGIT64[digit];
-                r = r - digit;
-                r = r / 64;
-            }
-            std::reverse(s.begin(), s.end());
-            return s;
-        }
-
-        static std::string to_base10(const typeuinteger& v)
-        {
-            typeuinteger r = v;
-            int digit;
-            std::string s;
-            typeuinteger t;
-            typeuinteger b10 = 10;
-            while(r > 0)
-            {
-                t = (r % b10);
-                digit = t.toInt();
-                if (digit<0) throw std::string("to base10 bad digit < 0");
-                if (digit>9) throw std::string("to base10 bad digit > 9");
-                s += cryptoAL::BASEDIGIT10[digit];
-                r = r - digit;
-                r = r / 10;
-            }
-            std::reverse(s.begin(), s.end());
-            return s;
-        }
-
-		static void TEST()
-        {
-            std::string serr;
-
-            if (to_base10(1234) != "1234")
-            {
-                serr = "Error with to_base10 1234";
-                std::cerr << serr << std::endl;
-                throw serr;
-            }
-
-            if (val10("456")  != 456)
-            {
-                serr = "Error with val10 456";
-                std::cerr << serr << std::endl;
-                throw serr;
-            }
-
-            if (val10("0456") != 456)
-            {
-                serr = "Error with val10 0456";
-                std::cerr << serr << std::endl;
-                throw serr;
-            }
-
-            typeuinteger m = val10("456");
-            std::string m64 = to_base64(m);
-            if (val(m64) != m)
-            {
-                serr = "Error with to_base64/val";
-                std::cerr << serr << std::endl;
-                throw serr;
-            }
-
-            m64 = base10_to_base64("456");
-            if (val(m64) != 456)
-            {
-                serr = "Error with to_base10_to_base64";
-                std::cerr << serr << std::endl;
-                throw serr;
-            }
-        }
-
-        static typeuinteger hex_to_uinteger(std::string s)
-        {
-            typeuinteger r = 0;
-            long long n = (long long)s.size();
-            for(long long i=0;i<n;i++)
-            {
-                r *= 16;
-                if ((s[i]>= '0') && (s[i]<= '9') )
-                    r += (s[i] - '0');
-                else if ((s[i]>= 'a') && (s[i]<= 'f') )
-                    r += 10 + (s[i] - 'a');
-                else if ((s[i]>= 'A') && (s[i]<= 'F') )
-                    r +=  10 + (s[i] - 'A');
-                else
-                   throw "invalid hex";
-            }
-            return r;
-        }
-
-        static bool eccfileexists(const std::filesystem::path& p, std::filesystem::file_status s = std::filesystem::file_status{})
-        {
-            if(std::filesystem::status_known(s) ? std::filesystem::exists(s) : std::filesystem::exists(p))
-                return true;
-            else
-                return false;
-        }
-
-		static bool parse_ecc_domain(	const std::string& FILE, int& klen_inbits,
-                                        typeuinteger& a, typeuinteger& b, typeuinteger& p,
-                                        typeuinteger& n, typeuinteger& gx, typeuinteger& gy,
-                                        typeuinteger& h)
-     	{
-			if (eccfileexists(FILE) == false)
-			{
-				std::cerr << "no file: " << FILE << std::endl;
-				return false;
-			}
-
-			std::string s;
-
-			s = cryptoAL::get_block_infile(FILE, "\"p\":" , "},");
-			if (s.size() == 0) return false;
-			{
-                //std::cout << "s = " << s << std::endl;
-                std::string t = cryptoAL::remove_hex2_delim(s);
-                //std::cout << "t = " << t << std::endl;
-                p = hex_to_uinteger(t);
-			}
-			std::cout << "p = " << p << " bits: " << p.bitLength() << std::endl;
-
-			klen_inbits = p.bitLength();
-
-			s = cryptoAL::get_block_infile(FILE, "\"a\":" , ",");
-			if (s.size() == 0) return false;
-			{
-                std::string t = cryptoAL::remove_hex2_delim(s);
-                //std::cout << "t = " << t << std::endl;
-                a = hex_to_uinteger(t);
-			}
-			std::cout << "a = " << a << " bits: " << a.bitLength() << std::endl;
-
-			s = cryptoAL::get_block_infile(FILE, "\"b\":" , ",");
-			if (s.size() == 0) return false;
-			{
-                std::string t = cryptoAL::remove_hex2_delim(s);
-                //std::cout << "t = " << t << std::endl;
-                b = hex_to_uinteger(t);
-			}
-			std::cout << "b = " << b << " bits: " << b.bitLength() << std::endl;
-
-			s = cryptoAL::get_block_infile(FILE, "\"order\":" , ",");
-			if (s.size() == 0) return false;
-			{
-                std::string t = cryptoAL::remove_hex2_delim(s);
-                //std::cout << "t = " << t << std::endl;
-                n = hex_to_uinteger(t);
-			}
-			std::cout << "n = " << n << " bits: " <<n.bitLength() << std::endl;
-
-			s = cryptoAL::get_block_infile(FILE, "\"x\":" , ",");
-			if (s.size() == 0) return false;
-			{
-                std::string t = cryptoAL::remove_hex2_delim(s);
-                //std::cout << "t = " << t << std::endl;
-                gx = hex_to_uinteger(t);
-			}
-			std::cout << "gx = " << gx << " bits: " << gx.bitLength() << std::endl;
-
-			s = cryptoAL::get_block_infile(FILE, "\"y\":" , ",");
-			if (s.size() == 0) return false;
-			{
-                std::string t = cryptoAL::remove_hex2_delim(s);
-                //std::cout << "t = " << t << std::endl;
-                gy = hex_to_uinteger(t);
-			}
-			std::cout << "gy = " << gy << " bits: " << gy.bitLength() << std::endl;
-
-			h = 1;
-			return true;
-		 }
-
-    };
-
 
 	std::string get_summary_hex(const char* buffer, uint32_t buf_len);
 
@@ -486,7 +195,7 @@ namespace cryptoAL
 		std::string out_msg;
 
 		// parse...
-		std::vector<std::string> v = split(smsg, ";");
+		std::vector<std::string> v = parsing::split(smsg, ";");
 		if (v.size() < 8)
 		{
 			std::cerr << "ERROR ecc_decode_string bad format - missing token " << v.size() << std::endl;
@@ -494,10 +203,10 @@ namespace cryptoAL
 		}
 
 		long long vlen[4];
-		vlen[0] = cryptoAL::str_to_ll(v[0]);
-		vlen[1] = cryptoAL::str_to_ll(v[2]);
-		vlen[2] = cryptoAL::str_to_ll(v[4]);
-		vlen[3] = cryptoAL::str_to_ll(v[6]);
+		vlen[0] = cryptoAL::parsing::str_to_ll(v[0]);
+		vlen[1] = cryptoAL::parsing::str_to_ll(v[2]);
+		vlen[2] = cryptoAL::parsing::str_to_ll(v[4]);
+		vlen[3] = cryptoAL::parsing::str_to_ll(v[6]);
 
 		std::string in_Cm_x;
 		std::string in_Cm_y;
@@ -561,16 +270,16 @@ namespace cryptoAL
 
 		if (use_gmp == true)
 		{
-			RSAGMP::Utils::mpzBigInteger modulus(filekeyutil::base64_to_base10(k.s_n) );
-			RSAGMP::Utils::mpzBigInteger priv(filekeyutil::base64_to_base10(k.s_d));
-			RSAGMP::Utils::mpzBigInteger message(filekeyutil::base64_to_base10(msg));
+			RSAGMP::Utils::mpzBigInteger modulus(uint_util::base64_to_base10(k.s_n) );
+			RSAGMP::Utils::mpzBigInteger priv(uint_util::base64_to_base10(k.s_d));
+			RSAGMP::Utils::mpzBigInteger message(uint_util::base64_to_base10(msg));
 			RSAGMP::Utils::mpzBigInteger message1 = RSAGMP::Decrypt(message, priv, modulus);
-			decoded_rsa_data = filekeyutil::base10_to_base64(message1.get_str());
+			decoded_rsa_data = uint_util::base10_to_base64(message1.get_str());
 		}
 		else
 		{
 			std::cout << "WARNING not using GMP" << std::endl;
-			typeuinteger  v = filekeyutil::val(msg);
+			typeuinteger  v = uint_util::val(msg);
 			decoded_rsa_data = k.decode(v);
 		}
         msg_size_produced = (uint32_t)decoded_rsa_data.size();
@@ -673,18 +382,18 @@ namespace cryptoAL
 
 		if (use_gmp == true)
 		{
-			RSAGMP::Utils::mpzBigInteger modulus(filekeyutil::base64_to_base10(k.s_n) );
-			RSAGMP::Utils::mpzBigInteger pub(filekeyutil::base64_to_base10(k.s_e));
-			RSAGMP::Utils::mpzBigInteger message(filekeyutil::base64_to_base10(msg_to_encrypt));
+			RSAGMP::Utils::mpzBigInteger modulus(uint_util::base64_to_base10(k.s_n) );
+			RSAGMP::Utils::mpzBigInteger pub(uint_util::base64_to_base10(k.s_e));
+			RSAGMP::Utils::mpzBigInteger message(uint_util::base64_to_base10(msg_to_encrypt));
 			RSAGMP::Utils::mpzBigInteger message1 = RSAGMP::Encrypt(message, pub, modulus);
-			std::string s_gmp = filekeyutil::base10_to_base64(message1.get_str());
+			std::string s_gmp = uint_util::base10_to_base64(message1.get_str());
 			encoded_rsa_data = s_gmp;
 
 			if (SELF_TEST)
 			{
-				RSAGMP::Utils::mpzBigInteger priv(filekeyutil::base64_to_base10(k.s_d));
+				RSAGMP::Utils::mpzBigInteger priv(uint_util::base64_to_base10(k.s_d));
 				RSAGMP::Utils::mpzBigInteger message2 = RSAGMP::Decrypt(message1, priv, modulus);
-				std::string s_gmp2 = filekeyutil::base10_to_base64(message2.get_str());
+				std::string s_gmp2 = uint_util::base10_to_base64(message2.get_str());
 				if (s_gmp2 != msg_to_encrypt)
 				{
 					std::cout << "ERROR encryption decryption" << std::endl;
@@ -698,7 +407,7 @@ namespace cryptoAL
 		{
 			std::cout << "WARNING not using GMP" << std::endl;
 			typeuinteger  e = k.encode(msg_to_encrypt);
-			encoded_rsa_data = filekeyutil::to_base64(e);
+			encoded_rsa_data = uint_util::to_base64(e);
 		}
 
 		msg_size_produced = (uint32_t)encoded_rsa_data.size() ;
@@ -778,36 +487,6 @@ namespace cryptoAL
 		return -1;
 	}
 
-
-    int afind_string(std::string url, char delim, std::string vlist, [[maybe_unused]] bool verbose = false)
-    {
-       size_t pos_start = 0;
-       size_t pos_end = 0;
-       std::string  token;
-       int cnt = 0;
-
-       if (VERBOSE_DEBUG)
-           std::cout << "searching for match of "<< url << " in list " << vlist << std::endl;
-
-       for(size_t i=0;i<vlist.size();i++)
-       {
-           if (vlist[i]!=delim) pos_end++;
-           else
-           {
-               token = vlist.substr(pos_start, pos_end-pos_start);
-               if (VERBOSE_DEBUG)
-                   std::cout << "token "<< token << std::endl;
-               if (url.find(token, 0) != std::string::npos)
-               {
-                   return cnt;
-               }
-               pos_start = pos_end+1;
-               cnt++;
-           }
-       }
-       return -1;
-    }
-	
 	int getftp( std::string url, std::string outfile,
 				std::string encryped_ftp_user,
 				std::string encryped_ftp_pwd,
@@ -835,11 +514,11 @@ namespace cryptoAL
 		}
 		else
 		{
-			int pos = afind_string(url, ';', known_ftp_server,verbose);
+			int pos = parsing::find_string(url, ';', known_ftp_server,verbose);
 			if (pos >= 0)
 			{
-				encryped_ftp_user= get_string_by_index(encryped_ftp_user, ';', pos, verbose);
-				encryped_ftp_pwd = get_string_by_index(encryped_ftp_pwd,  ';', pos, verbose);
+				encryped_ftp_user= parsing::get_string_by_index(encryped_ftp_user, ';', pos, verbose);
+				encryped_ftp_pwd = parsing::get_string_by_index(encryped_ftp_pwd,  ';', pos, verbose);
 
 				if (s_ftp_last_pwd.size() == 0)
 				{

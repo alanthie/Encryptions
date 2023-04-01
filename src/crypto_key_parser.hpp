@@ -2,9 +2,9 @@
 #define CRYPTO_KEYPARSER_H_INCLUDED
 
 #include "crypto_const.hpp"
-#include <iostream>
 #include "crypto_strutil.hpp"
 #include "data.hpp"
+#include <iostream>
 
 namespace cryptoAL
 {
@@ -219,10 +219,10 @@ public:
 	bool parse_global_param(const std::string& line)
 	{
 		bool r = false;
-		std::vector<std::string> v = split(line, ";");
+		std::vector<std::string> v = parsing::split(line, ";");
 		for(size_t i=0;i<v.size();i++)
 		{
-			if (has_token("[repeat]",v[i], 0))
+			if (strutil::has_token("[repeat]",v[i], 0))
 			{
 				size_t sz = std::string("[repeat]").size();
 				if (v[i].size() > sz)
@@ -323,35 +323,35 @@ public:
 		keyspec k;
 
 		keyspec_composition_mode m;
-		std::vector<std::string> v = split(line, ";");
+		std::vector<std::string> v = parsing::split(line, ";");
 		for(size_t i=0;i<v.size();i++)
 		{
-			if (has_token("[mode]",v[i], 0))
+			if (strutil::has_token("[mode]",v[i], 0))
 			{
 				m = parse_mode(v[i]);
 				r.mode = m;
 			}
-			else if (has_token("[r]",  v[i], 0)) k = parse_key("[r]", 0, keyspec_type::RSA, false, v[i]);
-			else if (has_token("[r:]", v[i], 0)) k = parse_key("[r:]",0, keyspec_type::RSA, true,  v[i]);
-			else if (has_token("[e]",  v[i], 0)) k = parse_key("[e]", 0, keyspec_type::ECC, false, v[i]);
-			else if (has_token("[e:]", v[i], 0)) k = parse_key("[e:]",0, keyspec_type::ECC, true,  v[i]);
-			else if (has_token("[h]",  v[i], 0)) k = parse_key("[h]", 0, keyspec_type::HH, false, v[i]);
-			else if (has_token("[h:]", v[i], 0)) k = parse_key("[h:]",0, keyspec_type::HH, true,  v[i]);
-			else if (has_token("[l]",  v[i], 0)) k = parse_key("[l]", 0, keyspec_type::LocalFile, false, v[i]);
-			else if (has_token("[l:]", v[i], 0)) k = parse_key("[l:]",0, keyspec_type::LocalFile, true,  v[i]);
-			else if (has_token("[w]",  v[i], 0)) k = parse_key("[w]", 0, keyspec_type::WebFile, false, v[i]);
-			else if (has_token("[w:]", v[i], 0)) k = parse_key("[w:]",0, keyspec_type::WebFile, true,  v[i]);
-			else if (has_token("[v]",  v[i], 0)) k = parse_key("[v]", 0, keyspec_type::VideoFile, false, v[i]);
-			else if (has_token("[v:]", v[i], 0)) k = parse_key("[v:]",0, keyspec_type::VideoFile, true,  v[i]);
-			else if (has_token("[f]",  v[i], 0)) k = parse_key("[f]", 0, keyspec_type::FTPFile, false, v[i]);
-			else if (has_token("[f:]", v[i], 0)) k = parse_key("[f:]",0, keyspec_type::FTPFile, true,  v[i]);
-			else if (has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes512), v[i], 0))  k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes512) ,0, keyspec_type::wbaes_512,  false,  v[i]);
-			else if (has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes1024), v[i], 0))  k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes1024), 0, keyspec_type::wbaes_1024, false,  v[i]);
-			else if (has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes2048), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes2048),0, keyspec_type::wbaes_2048, false,  v[i]);
-			else if (has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes4096), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes4096),0, keyspec_type::wbaes_4096, false,  v[i]);
-			else if (has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes8192), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes8192),0, keyspec_type::wbaes_8192, false,  v[i]);
-			else if (has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384),0, keyspec_type::wbaes_16384, false,  v[i]);
-			else if (has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768),0, keyspec_type::wbaes_32768, false,  v[i]);
+			else if (strutil::has_token("[r]",  v[i], 0)) k = parse_key("[r]", 0, keyspec_type::RSA, false, v[i]);
+			else if (strutil::has_token("[r:]", v[i], 0)) k = parse_key("[r:]",0, keyspec_type::RSA, true,  v[i]);
+			else if (strutil::has_token("[e]",  v[i], 0)) k = parse_key("[e]", 0, keyspec_type::ECC, false, v[i]);
+			else if (strutil::has_token("[e:]", v[i], 0)) k = parse_key("[e:]",0, keyspec_type::ECC, true,  v[i]);
+			else if (strutil::has_token("[h]",  v[i], 0)) k = parse_key("[h]", 0, keyspec_type::HH, false, v[i]);
+			else if (strutil::has_token("[h:]", v[i], 0)) k = parse_key("[h:]",0, keyspec_type::HH, true,  v[i]);
+			else if (strutil::has_token("[l]",  v[i], 0)) k = parse_key("[l]", 0, keyspec_type::LocalFile, false, v[i]);
+			else if (strutil::has_token("[l:]", v[i], 0)) k = parse_key("[l:]",0, keyspec_type::LocalFile, true,  v[i]);
+			else if (strutil::has_token("[w]",  v[i], 0)) k = parse_key("[w]", 0, keyspec_type::WebFile, false, v[i]);
+			else if (strutil::has_token("[w:]", v[i], 0)) k = parse_key("[w:]",0, keyspec_type::WebFile, true,  v[i]);
+			else if (strutil::has_token("[v]",  v[i], 0)) k = parse_key("[v]", 0, keyspec_type::VideoFile, false, v[i]);
+			else if (strutil::has_token("[v:]", v[i], 0)) k = parse_key("[v:]",0, keyspec_type::VideoFile, true,  v[i]);
+			else if (strutil::has_token("[f]",  v[i], 0)) k = parse_key("[f]", 0, keyspec_type::FTPFile, false, v[i]);
+			else if (strutil::has_token("[f:]", v[i], 0)) k = parse_key("[f:]",0, keyspec_type::FTPFile, true,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes512), v[i], 0))  k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes512) ,0, keyspec_type::wbaes_512,  false,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes1024), v[i], 0))  k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes1024), 0, keyspec_type::wbaes_1024, false,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes2048), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes2048),0, keyspec_type::wbaes_2048, false,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes4096), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes4096),0, keyspec_type::wbaes_4096, false,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes8192), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes8192),0, keyspec_type::wbaes_8192, false,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384),0, keyspec_type::wbaes_16384, false,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768),0, keyspec_type::wbaes_32768, false,  v[i]);
 
 			if (k.ktype != keyspec_type::Unknown)
 			{
@@ -361,19 +361,6 @@ public:
 		return r;
 	}
 
-	bool has_token(const std::string& token, const std::string& line, size_t pos)
-	{
-		bool r = false;
-		if (line.size() >= token.size() + pos)
-		{
-			std::string s = line.substr(pos, token.size());
-			if (s == token)
-			{
-				r = true;
-			}
-		}
-		return r;
-	}
 
 	keyspec_composition_mode parse_mode(const std::string& keydesc)
 	{
@@ -398,11 +385,11 @@ public:
 		{
 			std::string s = keydesc.substr(token.size() + pos);
 
-			std::vector<std::string> v = split(s, ",");
+			std::vector<std::string> v = parsing::split(s, ",");
 			for(size_t i=0;i<v.size();i++)
 			{
 				long n = 0;
-				std::vector<std::string> eq = split(v[i], "=");
+				std::vector<std::string> eq = parsing::split(v[i], "=");
 
 				if (eq.size() >= 2)
 				{
