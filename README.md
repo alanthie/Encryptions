@@ -146,14 +146,14 @@ Overview:
 Recursive RSA (and Recursive Elliptic Curve):
 ![Alt text](/Doc/RecursiveRSA.png?raw=true "Recursive RSA")
 
-Now available: WhiteBox AES 512 bits to AES 32768 bits!
+WhiteBox (against compromise environment) AES 512 bits to AES 32768 bits!
 ![Alt text](/Doc/wbaes.png?raw=true "wbaes")
 
 There are two practical methods to mitigate code lifting attacks:
 <pre>
-1.external encodings
+1.external encodings (external encoding is extracted from a generate file of random numbers)
 2.large size of implementation which is beyond an attacker's processing capacity to copy and
-distribute the software's functionality (so may use many rounds of big keys like AES 32768+ bits)
+distribute the software's functionality (use many rounds of big keys like AES 32768+ bits)
 </pre>
 
 Example of urls.txt:
