@@ -10,7 +10,7 @@
 
 namespace cryptoAL
 {
-    bool get_next_seq(uint32_t& out_seq, const std::string& local_histo_db);
+    [[maybe_unused]] static bool get_next_seq_histo(uint32_t& out_seq, const std::string& local_histo_db);
 
     struct history_key
     {
@@ -53,7 +53,7 @@ namespace cryptoAL
 			data_sha[2] = checksum(encrypted_data, n, data_size- 1, result);
 			if(!result) return;
 
-			result = get_next_seq(sequence, local_histo_db);
+			result = get_next_seq_histo(sequence, local_histo_db);
 			if(!result) return;
 
 			dt = cryptoAL::parsing::get_current_time_and_date();
@@ -155,7 +155,7 @@ namespace cryptoAL
         std::string summary_sha;
     };
 
-	void history_key_to_public(const history_key& kin, history_key_public& kout)
+	[[maybe_unused]] static void history_key_to_public(const history_key& kin, history_key_public& kout)
 	{
 		kout.data_size = kin.data_size;
 		kout.data_sha0 = kin.data_sha[0];
@@ -170,7 +170,7 @@ namespace cryptoAL
 		kout.summary_sha = checksum;
 	}
 
-    bool find_history_key_by_sha_in_map(const std::string& key_sha, const std::map<uint32_t, history_key>& map_histo, uint32_t& seq, history_key& kout)
+    [[maybe_unused]] static  bool find_history_key_by_sha_in_map(const std::string& key_sha, const std::map<uint32_t, history_key>& map_histo, uint32_t& seq, history_key& kout)
 	{
 		bool found = false;
 		for(auto& [seqkey, k] : map_histo)
@@ -187,7 +187,7 @@ namespace cryptoAL
 	}
 
 
-    bool get_history_key(const uint32_t& seq, const std::string& local_histo_db, history_key& kout)
+    [[maybe_unused]] static bool get_history_key(const uint32_t& seq, const std::string& local_histo_db, history_key& kout)
 	{
 		bool found = false;
 
@@ -218,7 +218,7 @@ namespace cryptoAL
 		return found;
 	}
 
-	void show_history_key(const std::string& local_histo_db)
+	[[maybe_unused]] static void show_history_key(const std::string& local_histo_db)
 	{
 		if (file_util::fileexists(local_histo_db) == true)
 		{
@@ -242,7 +242,7 @@ namespace cryptoAL
 		}
 	}
 
-	bool export_public_history_key(const std::string& fileHistoPrivateDB, const std::string& fileHistoPublicDB)
+	[[maybe_unused]] static bool export_public_history_key(const std::string& fileHistoPrivateDB, const std::string& fileHistoPublicDB)
 	{
         bool r = true;
         std::map<std::string, history_key_public> map_histo_pub;
@@ -274,7 +274,7 @@ namespace cryptoAL
 		return r;
 	}
 
-	bool confirm_history_key(const std::string& local_histo_db, const std::string& local_histo_public_db, uint32_t& cnt, uint32_t& n)
+	[[maybe_unused]] static bool confirm_history_key(const std::string& local_histo_db, const std::string& local_histo_public_db, uint32_t& cnt, uint32_t& n)
 	{
 		cnt = 0;
 		n=0;
@@ -350,7 +350,7 @@ namespace cryptoAL
 		return r;
 	}
 
-	bool find_history_key_by_sha(const std::string& key_sha, const std::string& local_histo_db, history_key& kout)
+	[[maybe_unused]] static bool find_history_key_by_sha(const std::string& key_sha, const std::string& local_histo_db, history_key& kout)
 	{
 		bool found = false;
 
@@ -376,7 +376,7 @@ namespace cryptoAL
 		return found;
 	}
 
-	bool get_next_seq(uint32_t& out_seq, const std::string& local_histo_db)
+	[[maybe_unused]] static bool get_next_seq_histo(uint32_t& out_seq, const std::string& local_histo_db)
 	{
 		bool ok = true;
 		uint32_t maxseq=0;
@@ -410,7 +410,7 @@ namespace cryptoAL
 		return ok;
 	}
 
-	bool save_histo_key(const history_key& k, const std::string& local_histo_db)
+	[[maybe_unused]] static bool save_histo_key(const history_key& k, const std::string& local_histo_db)
 	{
 		bool ok = true;
 		bool toupdate = false;

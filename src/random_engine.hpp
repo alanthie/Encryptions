@@ -51,7 +51,7 @@ class random_engine
 namespace random
 {
 
-bool generate_random_file(std::string filename, long long Nk, long num_files = 1)
+[[maybe_unused]] static bool generate_random_file(std::string filename, long long Nk, long num_files = 1)
 {
     std::string s;
     std::string si;
@@ -110,19 +110,19 @@ bool generate_random_file(std::string filename, long long Nk, long num_files = 1
      return r;
 }
 
-void serializeUInt32(char (&buf)[4], uint32_t val)
+[[maybe_unused]] static void serializeUInt32(char (&buf)[4], uint32_t val)
 {
   memcpy(buf, &val, 4);
 }
 
-uint32_t parseUInt32(const char (&buf)[4])
+[[maybe_unused]] static uint32_t parseUInt32(const char (&buf)[4])
 {
   uint32_t val;
   memcpy(&val, buf, 4);
   return val;
 }
 
-bool generate_binary_random_file(std::string filename, long long Nk, long num_files = 1)
+[[maybe_unused]] static bool generate_binary_random_file(std::string filename, long long Nk, long num_files = 1)
 {
     //UINT_MAX   = 4294967295
     //ULONG_MAX  = 18446744073709551615
@@ -199,7 +199,7 @@ bool generate_binary_random_file(std::string filename, long long Nk, long num_fi
 
 
 
-std::string generate_base10_random_string(long long N)
+[[maybe_unused]] static std::string generate_base10_random_string(long long N)
 {
     std::string r;
     int digit;
@@ -251,7 +251,7 @@ std::string generate_base10_random_string(long long N)
 }
 
 
-std::string generate_base64_random_string(long long N)
+[[maybe_unused]] static std::string generate_base64_random_string(long long N)
 {
     std::string r;
     int digit;
@@ -303,7 +303,7 @@ std::string generate_base64_random_string(long long N)
     return r;
 }
 
-std::string generate_base16_random_string(long long N)
+[[maybe_unused]] static std::string generate_base16_random_string(long long N)
 {
     std::string r;
     int digit;

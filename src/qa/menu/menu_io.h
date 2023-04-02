@@ -99,8 +99,13 @@ namespace ns_menu
     template<typename T = int>
     auto getnum(std::istream& is, bool wholeline = true)
     {
-        if (wholeline) {
+        if (wholeline) 
+        {
             const auto o = menu_getline(is);
+            if (!o.has_value())
+			{
+				std::cout << "const auto o = menu_getline(is); return no value" << std::endl;
+			}
             return o.has_value() ? stonum<T>(*o) : std::optional<T> {};
         }
 
@@ -142,7 +147,9 @@ namespace ns_menu
 
             std::cout << " :";
             o = getnum<T>(std::cin, wholeline);
-        } while ((!o.has_value() || (((*o < nmin) || (*o > nmax)))) && (std::cout << "Invalid input" << std::endl));
+        } 
+        while ( (!o.has_value() || (((*o < nmin) || (*o > nmax)))) 
+                && (std::cout << "Invalid input" << std::endl) );
 
         return *o;
     }

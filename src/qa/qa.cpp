@@ -1,35 +1,39 @@
-#include "../../src/uint_util.hpp"
-
-#define qaclass qa_internal
-#include "qa_internal.hpp"
-#include <thread>
-#include "../c_plus_plus_serializer.h"
-#include "rsa_gen.hpp"
-
-#ifdef _WIN32
-//add preprocessor directive NOMINMAX
-#pragma warning ( disable : 4146 )
-#include "RSA-GMP/RSAGMPTest.h"
-#else
-//LINKER LIB: -lgmp -lgmpxx
-#include "RSA-GMP/RSAGMPTest.h"
-#endif
-
 #include "../../src/crypto_const.hpp"
-#include "../../src/crypto_history.hpp"
-#include "../../src/crypto_ecckey.hpp"
-#include "../../src/crypto_cfg.hpp"
-#include "../../src/ecc_util.hpp"
+#include "../../src/crypto_parsing.hpp"
+#include "menu/menu.h"
 
-#include "ec_gmp/ec_gmp_p_mul.hpp"
-#include "SimpleECC/src/test_simple_ecc.hpp"
-#include "ecc_point/ecc_curve.hpp"
-#include "aes-whitebox/aes_whitebox.hpp"
-#include "aes-whitebox/aes_whitebox_compiler.hpp"
+//#include "../../src/uint_util.hpp"
+//
+//#define qaclass qa_internal
+//#include "qa_internal.hpp"
+//#include <thread>
+//#include "../c_plus_plus_serializer.h"
+//#include "rsa_gen.hpp"
+//
+//#ifdef _WIN32
+////add preprocessor directive NOMINMAX
+//#pragma warning ( disable : 4146 )
+//#include "RSA-GMP/RSAGMPTest.h"
+//#else
+////LINKER LIB: -lgmp -lgmpxx
+//#include "RSA-GMP/RSAGMPTest.h"
+//#endif
+//
+//#include "../../src/crypto_const.hpp"
+//#include "../../src/crypto_history.hpp"
+//#include "../../src/crypto_ecckey.hpp"
+//#include "../../src/crypto_cfg.hpp"
+//#include "../../src/ecc_util.hpp"
+//
+//#include "ec_gmp/ec_gmp_p_mul.hpp"
+//#include "SimpleECC/src/test_simple_ecc.hpp"
+//#include "ecc_point/ecc_curve.hpp"
+//#include "aes-whitebox/aes_whitebox.hpp"
+//#include "aes-whitebox/aes_whitebox_compiler.hpp"
 
 #include "menu/menu.h"
 
-std::string VERSION = "v0.3";
+std::string VERSION = "v0.4";
 std::string FULLVERSION = VERSION + "_" + cryptoAL::parsing::get_current_date();
 
 long long keybits8x(long long bits)
@@ -43,21 +47,20 @@ long long keybits8x(long long bits)
 
 using namespace ns_menu;;
 
-void  menu()
+void qa_menu()
 {
-
     long long choice = 1;
     long long last_choice = 1;
-    //long long n;
-
 	bool first_time = true;
+
+	// NEW MENU
+	ns_menu::main_menu mm(FULLVERSION);
+	mm.run();
+
+/*
 	bool cfg_parse_result = false;
 	std::string cfg_file;
 	cryptoAL::crypto_cfg cfg("", false);
-
-// NEW MENU....
-//ns_menu::main_menu mm(cfg, FULLVERSION, cfg_file);
-//mm.run();
 
     std::string schoice;
     while(choice != 0)
@@ -153,30 +156,6 @@ void  menu()
 					}
 				}
 			}
-
-/*
-            ecc_curve c;
-//            c.test_msg("232FFTT325");
-//            c.test_msg("2");
-//            c.test_msg("232FF232FFTT325TT325");
-
-            bool r;
-            r = c.test_encode_decode("232FFTT325"); if (r) {std::cout << "OK " << std::endl;} else {std::cout << "FAILED " << std::endl;}
-            r = c.test_encode_decode("2");          if (r) {std::cout << "OK " << std::endl;} else {std::cout << "FAILED " << std::endl;}
-            r = c.test_encode_decode("232FF232FFTT325TT325");if (r) {std::cout << "OK " << std::endl;} else {std::cout << "FAILED " << std::endl;}
-
-            std::cout << "F(n)" << std::endl;
-            std::cout << "Enter a number: ";
-            std::string snum;
-            std::cin >> snum;
-            n = cryptoAL::parsing::str_to_ll(snum);
-            if (n==-1) continue;
-
-            qaclass qa;
-            auto rr = qa.F(n);
-            std::cout << "F(" << n << ") = " << rr << std::endl;
-            std::cout << std::endl;
-*/
         }
 
         else if (choice == 2)
@@ -1730,12 +1709,13 @@ void  menu()
 		}
 
     }
+	*/
 
 }
 
 
 int main()
 {
-    menu();
+    qa_menu();
     return 0;
 }

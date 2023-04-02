@@ -1,10 +1,10 @@
-// 	LINKER -lcurl
+// 	LINUX LINKER -lcurl
 // 	Post builds
 //		cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto
 //		copy x64\Release\crypto.exe ..\..\Exec_Windows\*
 
 //----------------------------------
-Lost git commit:
+Lost git commit to restore lost commit:
 //----------------------------------
 // Git restore tool: gitk --all --date-order $(git log -g --pretty=%H)
 
@@ -23,7 +23,7 @@ https://safecurves.cr.yp.to/
    % sudo make install
    
 //----------------------------------
-// AES512 https://github.com/balena/aes-whitebox
+// AES512+ https://github.com/balena/aes-whitebox
 // Need NTL installed
 // change makefile: 
 // aes_whitebox_compiler: aes_whitebox_compiler.o

@@ -1,22 +1,9 @@
 #ifndef _INCLUDES_crypto_batch
 #define _INCLUDES_crypto_batch
 
-#include <iostream>
-#include <fstream>
-#include <chrono>
-
 #include "crypto_const.hpp"
-#include "DES.h"
-#include "Buffer.hpp"
-#include "SHA256.h"
-#include "argparse.hpp"
-#include "ini_parser.hpp"
-#include "random_engine.hpp"
-#include "data.hpp"
-#include "puzzle.hpp"
 #include "encryptor.hpp"
 #include "decryptor.hpp"
-#include "crypto_test.hpp"
 
 namespace cryptoAL
 {

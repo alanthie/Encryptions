@@ -2,16 +2,14 @@
 #define ECCKEY_H_INCLUDED
 
 #include "crypto_const.hpp"
+#include "random_engine.hpp"
 #include "uint_util.hpp"
-
 #include "crc32a.hpp"
 #include "qa/ecc_point/ecc_curve.hpp"
 #include "c_plus_plus_serializer.h"
 
-
 namespace cryptoAL
 {
-
     struct ecc_domain
     {
         ecc_domain()
@@ -387,7 +385,7 @@ namespace cryptoAL
 
 namespace ecc
 {
-	std::string ecc_decode_string(	const std::string& smsg, ecc_key& ek,
+	[[maybe_unused]] static std::string ecc_decode_string(	const std::string& smsg, ecc_key& ek,
         							uint32_t msg_input_size_touse,
 									uint32_t& msg_size_produced, bool verbose = false)
 	{
@@ -463,9 +461,9 @@ namespace ecc
         }
 		return decoded_ecc_data;
 	}
-	
-	
-	std::string ecc_encode_string(  const std::string& smsg,
+
+
+	[[maybe_unused]] static std::string ecc_encode_string(  const std::string& smsg,
 									ecc_key& ek,
 									const std::string& public_key_of_decoder_x,
 									const std::string& public_key_of_decoder_y,

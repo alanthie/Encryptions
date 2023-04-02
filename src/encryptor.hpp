@@ -2351,7 +2351,7 @@ public:
             if (result)
             {
 				uint32_t out_seq;
-				result = get_next_seq(out_seq, local_histo_db);
+				result = get_next_seq_histo(out_seq, local_histo_db);
 				if (result)
 				{
 					hkey.update_seq(out_seq);

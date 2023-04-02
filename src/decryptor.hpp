@@ -2003,7 +2003,7 @@ public:
 				std::string local_histo_db = folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
 				hkey.make_from_file(encrypted_data, local_histo_db, hkey_ok);
 
-                hkey_ok = get_next_seq(hist_out_seq, local_histo_db);
+                hkey_ok = get_next_seq_histo(hist_out_seq, local_histo_db);
                 if (hkey_ok)
                 {
                     hkey.update_seq(hist_out_seq);

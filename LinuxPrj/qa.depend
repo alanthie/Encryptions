@@ -78,24 +78,10 @@
 	"mathcommon.h"
 	"BigInteger.h"
 
-1680401828 source:/home/server/dev/Encryptions/src/qa/qa.cpp
-	"../../src/uint_util.hpp"
-	"qa_internal.hpp"
-	<thread>
-	"../c_plus_plus_serializer.h"
-	"rsa_gen.hpp"
-	"RSA-GMP/RSAGMPTest.h"
-	"RSA-GMP/RSAGMPTest.h"
+1680453569 source:/home/server/dev/Encryptions/src/qa/qa.cpp
 	"../../src/crypto_const.hpp"
-	"../../src/crypto_history.hpp"
-	"../../src/crypto_ecckey.hpp"
-	"../../src/crypto_cfg.hpp"
-	"../../src/ecc_util.hpp"
-	"ec_gmp/ec_gmp_p_mul.hpp"
-	"SimpleECC/src/test_simple_ecc.hpp"
-	"ecc_point/ecc_curve.hpp"
-	"aes-whitebox/aes_whitebox.hpp"
-	"aes-whitebox/aes_whitebox_compiler.hpp"
+	"../../src/crypto_parsing.hpp"
+	"menu/menu.h"
 	"menu/menu.h"
 
 1678850313 /home/server/dev/Encryptions/src/qa/prime.h
@@ -256,7 +242,7 @@
 	"crypto_const.hpp"
 	"data.hpp"
 
-1680384108 /home/server/dev/Encryptions/src/random_engine.hpp
+1680451387 /home/server/dev/Encryptions/src/random_engine.hpp
 	<random>
 	"data.hpp"
 	"rng.h"
@@ -495,7 +481,7 @@
 	<string>
 	<iostream>
 
-1678850313 /home/server/dev/Encryptions/src/c_plus_plus_serializer.h
+1680403856 /home/server/dev/Encryptions/src/c_plus_plus_serializer.h
 	<fstream>
 	<iostream>
 	<sstream>
@@ -710,7 +696,7 @@
 	<string.h>
 	<gmpxx.h>
 
-1680399951 /home/server/dev/Encryptions/src/crypto_history.hpp
+1680451677 /home/server/dev/Encryptions/src/crypto_history.hpp
 	"crypto_const.hpp"
 	"c_plus_plus_serializer.h"
 	"data.hpp"
@@ -724,8 +710,9 @@
 	"crypto_parsing.hpp"
 	"c_plus_plus_serializer.h"
 
-1680394320 /home/server/dev/Encryptions/src/crypto_ecckey.hpp
+1680451567 /home/server/dev/Encryptions/src/crypto_ecckey.hpp
 	"crypto_const.hpp"
+	"random_engine.hpp"
 	"uint_util.hpp"
 	"crc32a.hpp"
 	"qa/ecc_point/ecc_curve.hpp"
@@ -863,9 +850,8 @@
 	<cctype>
 	<filesystem>
 
-1680381994 source:/home/server/dev/Encryptions/src/qa/menu/menu.cpp
+1680456831 source:/home/server/dev/Encryptions/src/qa/menu/menu.cpp
 	"menu.h"
-	"rsa_menu.h"
 
 1680312455 /home/server/dev/Encryptions/src/qa/menu/rsa_menu.hpp
 	<iostream>
@@ -875,8 +861,9 @@
 	<vector>
 	<type_traits>
 
-1680373689 /home/server/dev/Encryptions/src/qa/menu/menu.h
+1680457316 /home/server/dev/Encryptions/src/qa/menu/menu.h
 	"../../crypto_cfg.hpp"
+	"../../crypto_parsing.hpp"
 	"menu_io.h"
 	<iostream>
 	<any>
@@ -899,15 +886,17 @@
 	<vector>
 	<type_traits>
 
-1680391725 source:/home/server/dev/Encryptions/src/qa/menu/rsa_menu.cpp
+1680448787 source:/home/server/dev/Encryptions/src/qa/menu/rsa_menu.cpp
 	"../../../src/uint_util.hpp"
 	"../../../src/crypto_const.hpp"
 	"../../../src/file_util.hpp"
 	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
 	"../rsa_gen.hpp"
 	"menu.h"
+	"../RSA-GMP/RSAGMPTest.h"
 
-1680373534 /home/server/dev/Encryptions/src/qa/menu/menu_io.h
+1680454083 /home/server/dev/Encryptions/src/qa/menu/menu_io.h
 	"../../crypto_cfg.hpp"
 	<iostream>
 	<any>
@@ -921,7 +910,7 @@
 	<cctype>
 	<filesystem>
 
-1680373483 source:/home/server/dev/Encryptions/src/qa/menu/menu_io.cpp
+1680455145 source:/home/server/dev/Encryptions/src/qa/menu/menu_io.cpp
 	"menu_io.h"
 
 1680377160 /home/server/dev/Encryptions/src/uint_util.hpp
@@ -959,4 +948,50 @@
 	"qa/RSA-GMP/RSAGMPUtils.h"
 	"qa/RSA-GMP/RSAGMP.h"
 	"qa/RSA-GMP/RSAGMPUtils.h"
+
+1680449267 source:/home/server/dev/Encryptions/src/qa/menu/cfg_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"menu.h"
+
+1680450934 source:/home/server/dev/Encryptions/src/qa/menu/eccdomain_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"../../../src/ecc_util.hpp"
+	"../../../src/crypto_ecckey.hpp"
+	"menu.h"
+
+1680451144 source:/home/server/dev/Encryptions/src/qa/menu/ecckey_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"../../../src/crypto_ecckey.hpp"
+	"menu.h"
+
+1680451179 source:/home/server/dev/Encryptions/src/qa/menu/hh_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"../../../src/crypto_history.hpp"
+	"menu.h"
+
+1680458088 source:/home/server/dev/Encryptions/src/qa/menu/puzzle_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"../../../src/puzzle.hpp"
+	"../../../src/qa/prime.h"
+	"menu.h"
 

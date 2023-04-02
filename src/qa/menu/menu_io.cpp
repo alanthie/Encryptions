@@ -9,12 +9,25 @@ namespace ns_menu
         const size_t first = s.find_first_not_of(whitespace);
         return (first != std::string::npos) ? s.substr(first, (s.find_last_not_of(whitespace) - first + 1)) : std::string {};
     }
-	
+
 	std::optional<std::string> menu_getline(std::istream& is, const std::string& def)
 	{
-		for (auto no = is.rdbuf()->in_avail(); no && is && std::isspace(is.peek()); is.ignore(), --no);
+		for (	auto no = is.rdbuf()->in_avail(); 
+				no && is && std::isspace(is.peek()); is.ignore(), 
+				--no);
 		std::string ln;
-		return std::getline(is, ln) ? (ln.empty() && !def.empty() ? def : ln) : (is.clear(), std::optional<std::string> {});
+		
+		//When consuming whitespace-delimited input (e.g. int n; std::cin >> n;) any whitespace that follows, 
+		//	including a newline character, will be left on the input stream. 
+		//ignoring all leftover characters on the line of input with 
+		//	cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		auto& r = std::getline(is, ln);
+		//is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		//is.clear();
+		
+		return r ? 
+			(ln.empty() && !def.empty() ? def : ln) : 
+			(is.clear(), std::optional<std::string> {});
 	}
 
 	auto menu_getline(const std::string& prm, const std::string& def)
@@ -27,6 +40,12 @@ namespace ns_menu
 
 			std::cout << " :";
 			o = menu_getline(std::cin, def);
+
+			if (o.has_value())
+			{
+				std::cout << "input value" << *o << std::endl;
+			}
+
 		} while (!o.has_value() && (std::cout << "Invalid input" << std::endl));
 		return *o;
 	}

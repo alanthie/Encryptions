@@ -13,7 +13,7 @@
 #ifdef USE_SIZE_T
 typedef size_t my_size_t;
 #else
-typedef int my_size_t;
+typedef int my_size_t; // 2,147,483,647 = 2GB file
 #endif
 
 template < typename TYPE > struct Bits {

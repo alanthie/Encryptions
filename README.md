@@ -333,6 +333,21 @@ Select a task:
 25. EC Key: View my public elliptic curve keys (also included in the private db)
 26. EC Key: View other public elliptic curve keys
 ==> 
+
+New Menu:
+====================================
+QA version: v0.4_2023-04-02
+Current configuration file: ./cfg.ini
+====================================
+1. Config
+2. Puzzle
+3. RSA Key
+4. ECC Domain
+5. ECC Key
+6. Historical Hashes
+0. Exit this menu
+
+Enter option ==> 
 </pre>
 
 Man-In-The-Middle Attack prevention now implemented

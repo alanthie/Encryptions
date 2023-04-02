@@ -2,6 +2,7 @@
 #define QA_MENU_HPP_H_INCLUDED
 
 #include "../../crypto_cfg.hpp"
+#include "../../crypto_parsing.hpp"
 #include "menu_io.h"
 
 #include <iostream>
@@ -18,7 +19,6 @@
 
 namespace ns_menu
 {
-    using f_type = void(*)(std::any& param);
     class Menu;
 
 	enum MENU_ID
@@ -36,7 +36,7 @@ namespace ns_menu
     struct menu_item
     {
         std::string name;
-        std::variant<f_type, Menu*> func;
+        std::variant<int, Menu*> variant_val;
     };
     using vmi = std::vector<menu_item>;
 
@@ -44,17 +44,24 @@ namespace ns_menu
     class main_menu
     {
     public:
-        main_menu(cryptoAL::crypto_cfg& acfg, std::string aFULLVERSION, std::string acfg_file) : cfg(acfg), FULLVERSION(aFULLVERSION), cfg_file(acfg_file) {}
+        main_menu(std::string version): cfg("", false), FULLVERSION(version) {}
+
         int run();
 
         bool                    cfg_parse_result = false;
-        cryptoAL::crypto_cfg&   cfg;
+        cryptoAL::crypto_cfg    cfg;
         std::string             FULLVERSION;
         std::string             cfg_file;
+        bool                    config_first_time = false;
 
         void calledby(const Menu& m, size_t option);
 
-        void fRSA_1();
+        int fCFG(int choice);
+        int fPuzzle(int choice);
+        int fRSA(int choice);
+        int fECCDomain(int choice);
+        int fECCKey(int choice);
+        int fHH(int choice);
     };
 
     class Menu
@@ -75,7 +82,7 @@ namespace ns_menu
         std::string title() const noexcept;
         void title(const std::string& t);
 
-        void menu(std::any& param);
+        void menu();
 
         bool erase(size_t indx);
         bool append(const menu_item& mi);
@@ -85,16 +92,19 @@ namespace ns_menu
         class RunVisitor
         {
         public:
-            RunVisitor(std::any& par) : param(par) {}
+            RunVisitor(const Menu& mctx) : m_ctx(mctx) {}
 
-            void operator()(f_type func) { func(param); }
-            void operator()(Menu* menu) { Menu::menu(*menu, param); }
+            void operator()([[maybe_unused]] int choice) { }
+            void operator()(Menu* menu)
+            {
+                // next menu on stack
+                Menu::menu(*menu);
+            }
 
-        private:
-            std::any& param;
+            const Menu& m_ctx;
         };
 
-        static void menu(const Menu& m, std::any& param)
+        static void menu(const Menu& m)
         {
             const static auto show = [](const Menu& mu)
             {
@@ -110,19 +120,17 @@ namespace ns_menu
                     if (mu.p_main_menu != nullptr)
                     {
                         oss  << " version: " << mu.p_main_menu->FULLVERSION   << "\n";
-
-                        if (mu.p_main_menu->cfg_parse_result == false)
-                            oss << "Not using a configuration file" << "\n";
-                        else
-                            oss<< "Current configuration file: [" << mu.p_main_menu->cfg_file << "]" << "\n";
-
-                        oss<< "Select a task: " << "\n";
                     }
                 }
                 else
                 {
                     oss << mu.title() << "\n";
                 }
+
+                if (mu.p_main_menu->cfg_parse_result == false)
+                    oss << "Not using a configuration file" << "\n";
+                else
+                    oss<< "Current configuration file: [" << mu.p_main_menu->cfg_file << "]" << "\n";
 
                 oss << "====================================" << "\n";
 
@@ -131,20 +139,34 @@ namespace ns_menu
                     oss << "[" << i + 1 << "] " << mu.mitems[i].name << '\n';
                 }
 
-                oss << "[0] Exit menu\n\nEnter menu choice";
-                return getnum<size_t>(oss.str(), 0, nom);
+                oss << "[0] Exit this menu\n\nEnter option";
+
+                std::cout << oss.str() << " ==> " ;
+                std::string schoice;
+                std::cin >> schoice;
+                long long choice = cryptoAL::parsing::str_to_ll(schoice);
+                while ((choice < 0) || (choice > (long long )nom))
+                {
+                    std::cout << "invalid entry" << std::endl;
+                    std::cout << oss.str()<< " ==> " ;
+                    choice = cryptoAL::parsing::str_to_ll(schoice);
+                }
+                std::cout << std::endl;
+                return (int)choice;
+
+                //return getnum<size_t>(oss.str(), 0, nom);
             };
 
-
+            // SHOW new menu selected, wait menu option selection, calledby() if opt > 0
             for (size_t opt = 0U; (opt = show(m)) > 0; )
             {
                 if (m.p_main_menu!=nullptr)
                     m.p_main_menu->calledby(m, opt - 1);
 
-                // R visit(Visitor&&, Variants&&...);
-                // std::invoke(std::forward<Visitor>(vis), std::get<is>(std::forward<Variants>(vars))...)
-                std::visit(RunVisitor(param), m.mitems[opt - 1].func);
-              }
+                // std::invoke(std::forward<Visitor>(vis), std::get<is>(std::forward<Variants>(vars))...);
+                std::visit(RunVisitor(m), m.mitems[opt - 1].variant_val); // int or menu
+           }
+
         }
     };
 
