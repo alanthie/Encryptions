@@ -11,13 +11,7 @@
 #include "twofish.h"
 #include "Salsa20.h"
 #include "IDEA.hpp"
-
-#ifdef _WIN32
-#else
-#ifdef HAS_WHITEBOX_AES_FEATURE
 #include "qa/aes-whitebox/aes_whitebox.h"
-#endif
-#endif
 
 namespace cryptoAL
 {
@@ -522,9 +516,6 @@ void test_core(bool verbose = true)
         std::cout << "OK with binary AES 256 CBC algo "<<std::endl;
     }
 /*
-#ifdef _WIN32
-#else
-#ifdef HAS_WHITEBOX_AES_FEATURE
 	if (true)
     {
         unsigned char plain[] = { 	0x51, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xf,
@@ -579,8 +570,6 @@ void test_core(bool verbose = true)
         }
         std::cout << "OK with binary AES 512 cfb algo "<<std::endl;
     }
-#endif
-#endif
 */
 
     // TEST CLASSIC STRING DES
@@ -701,7 +690,7 @@ void test_core(bool verbose = true)
         if (file_util::fileexists(filename))
 		    std::remove(filename.data());
 
-        if ( key_util::wget(url.data(), filename.data()) != 0)
+        if ( key_file::wget(url.data(), filename.data()) != 0)
         {
             std::cout << "ERROR with wget " << std::endl;
         }
@@ -725,7 +714,7 @@ void test_core(bool verbose = true)
         if (file_util::fileexists(filename))
 		    std::remove(filename.data());
 
-        if ( key_util::wget(url.data(), filename.data()) != 0)
+        if ( key_file::wget(url.data(), filename.data()) != 0)
         {
             std::cout << "An error occured wget " << std::endl;
         }
@@ -755,7 +744,7 @@ void test_core(bool verbose = true)
         if (file_util::fileexists(filename))
 		    std::remove(filename.data());
 
-        int r = key_util::getvideo(url, filename, options);
+        int r = key_file::getvideo(url, filename, options);
         if (r < 0)
         {
             std::cout << "OK with getvideo, code:" << r << std::endl;
@@ -790,7 +779,7 @@ void test_core(bool verbose = true)
 		    std::remove(filename.data());
 
         std::string cmd = "ftp://" + user + ":" + pwd + "@ftp.vastserve.com/htdocs/Buffer.hpp";
-        if ( key_util::wget(cmd.data(), filename.data()) != 0)
+        if ( key_file::wget(cmd.data(), filename.data()) != 0)
         {
             std::cout << "ERROR with wget ftp://.." << std::endl;
         }
@@ -824,7 +813,7 @@ void test_core(bool verbose = true)
         std::string filename  = "./staging_img_header.txt";
         std::remove(filename.data());
 
-        if ( key_util::wget(url.data(), filename.data()) != 0)
+        if ( key_file::wget(url.data(), filename.data()) != 0)
         {
             std::cout << "An error occured wget " << std::endl;
         }

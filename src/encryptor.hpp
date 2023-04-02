@@ -25,6 +25,8 @@
 #include "crypto_png.hpp"
 #include "ecc_util.hpp"
 #include "qa/aes-whitebox/aes_whitebox.hpp"
+#include "rsa_util.hpp"
+#include "crypto_file.hpp"
 
 namespace cryptoAL
 {
@@ -33,8 +35,6 @@ static bool s_Twofish_initialise = false;
 
 class encryptor
 {
-// main use is: bool encrypt()
-
 const size_t NDISPLAY = 32;
 
 friend class crypto_package;
@@ -422,7 +422,7 @@ public:
 
         if (is_video)
         {
-            rc = key_util::getvideo(s.data(), file.data(), "", verbose);
+            rc = key_file::getvideo(s.data(), file.data(), "", verbose);
             if (rc!= 0)
             {
                 std::cerr << "ERROR with getvideo using youtube-dl, error code: " << rc << " url: " << s <<  " file: " << file << std::endl;
@@ -432,7 +432,7 @@ public:
         else if (is_local)
         {
             std::string local_url = folder_local + s;
-            rc = key_util::getlocal(local_url.data(), dataout_local, "", verbose);
+            rc = key_file::getlocal(local_url.data(), dataout_local, "", verbose);
             if (rc!= 0)
             {
                 std::cerr << "ERROR with get local file, error code: " << rc << " url: " << local_url <<  " file: " << file << std::endl;
@@ -441,7 +441,7 @@ public:
         }
         else if (is_ftp)
         {
-            rc = key_util::getftp(s.data(), file.data(),
+            rc = key_file::getftp(s.data(), file.data(),
                         encryped_ftp_user,
                         encryped_ftp_pwd,
                         known_ftp_server,
@@ -491,7 +491,7 @@ public:
                         if (VERBOSE_DEBUG)
                         {
                             std::cout << "histo key: " << histo_key << " size:" << histo_key.size() << std::endl;
-                            std::cout << "histo key: " << key_util::get_summary_hex(histo_key.data(), (uint32_t)histo_key.size()) << " size:" << histo_key.size() << std::endl;
+                            std::cout << "histo key: " << file_util::get_summary_hex(histo_key.data(), (uint32_t)histo_key.size()) << " size:" << histo_key.size() << std::endl;
                         }
                     }
                     else
@@ -545,8 +545,8 @@ public:
 				{
 				 	std::string rsa_key_at_iter = v[riter];
 
-					generate_rsa::rsa_key kout;
-					r = key_util::get_rsa_key(rsa_key_at_iter, local_rsa_db, kout);
+					cryptoAL::rsa::rsa_key kout;
+					r = rsa_util::get_rsa_key(rsa_key_at_iter, local_rsa_db, kout);
 
                     if (r)
                     {
@@ -560,13 +560,13 @@ public:
 							if (VERBOSE_DEBUG)
 							{
 								std::cout << "rsa key_len_in_bytes: " << key_len_in_bytes << std::endl;
-								std::cout << "rsa_data: " << key_util::get_summary_hex(embedded_rsa_key.data(), (uint32_t)embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
+								std::cout << "rsa_data: " << file_util::get_summary_hex(embedded_rsa_key.data(), (uint32_t)embedded_rsa_key.size()) << " size:" << embedded_rsa_key.size() << std::endl;
 							}
 						}
 
 						uint32_t msg_input_size_used = 0;
 						uint32_t msg_size_produced = 0;
-						std::string t = key_util::rsa_encode_string(vurlkey[i].sRSA_ECC_ENCODED_DATA, kout, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
+						std::string t = rsa_util::rsa_encode_string(vurlkey[i].sRSA_ECC_ENCODED_DATA, kout, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
 
 						// t may grow
 						vurlkey[i].sRSA_ECC_ENCODED_DATA = t;
@@ -710,7 +710,7 @@ public:
 							{
 								std::cout << "ecc key len in bytes:     " << key_len_in_bytes << std::endl;
 								std::cout << "ecc embedded random data: " << embedded_ecc_key << " size:" << embedded_ecc_key.size() << std::endl;
-								std::cout << "ecc embedded random key: " << key_util::get_summary_hex(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size())
+								std::cout << "ecc embedded random key:  " << file_util::get_summary_hex(embedded_ecc_key.data(), (uint32_t)embedded_ecc_key.size())
 										  << " size:" << embedded_ecc_key.size() << std::endl;
 							}
 						}
@@ -718,7 +718,7 @@ public:
 						uint32_t msg_input_size_used = 0;
 						uint32_t msg_size_produced = 0;
 
-						std::string t = key_util::ecc_encode_string(	vurlkey[i].sRSA_ECC_ENCODED_DATA, key_mine,
+						std::string t = ecc::ecc_encode_string(	vurlkey[i].sRSA_ECC_ENCODED_DATA, key_mine,
                                                             key_other.s_kg_x, key_other.s_kg_y,
 															msg_input_size_used,
 															msg_size_produced, SELF_TEST, verbose);
@@ -729,7 +729,7 @@ public:
 						if (VERBOSE_DEBUG)
 						{
 							std::cout << "ecc encoded data :" << t << " size:" << t.size() << std::endl;
-                            std::cout << "ecc encoded data :" << key_util::get_summary_hex(t.data(), (uint32_t)t.size()) << " size:" << t.size() << std::endl;
+                            std::cout << "ecc encoded data :" << file_util::get_summary_hex(t.data(), (uint32_t)t.size()) << " size:" << t.size() << std::endl;
 						}
 
 						if (riter == 0)
@@ -785,7 +785,7 @@ public:
         }
         else if (is_web)
         {
-            rc = key_util::wget(s.data(), file.data(), verbose);
+            rc = key_file::wget(s.data(), file.data(), verbose);
             if (rc!= 0)
             {
 				// TODO
@@ -882,7 +882,7 @@ public:
 
 						if (VERBOSE_DEBUG)
 						{
-							key_util::show_summary(b->getdata(), perfect_key_size);
+							file_util::show_summary(b->getdata(), perfect_key_size);
 						}
 					}
 					else
@@ -913,7 +913,7 @@ public:
 
 						if (VERBOSE_DEBUG)
 						{
-							key_util::show_summary(b->getdata(), perfect_key_size);
+							file_util::show_summary(b->getdata(), perfect_key_size);
 						}
 					}
 				}

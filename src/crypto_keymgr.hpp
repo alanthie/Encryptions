@@ -4,11 +4,11 @@
 #include "crypto_const.hpp"
 #include "crypto_ecckey.hpp"
 #include "data.hpp"
-#include "crypto_file.hpp"
 #include "crypto_key_parser.hpp"
 #include "random_engine.hpp"
 #include "crc32a.hpp"
 #include "c_plus_plus_serializer.h"
+#include "qa/rsa_gen.hpp"
 
 namespace cryptoAL
 {
@@ -93,7 +93,7 @@ namespace keymgr
 		if (t == CRYPTO_FILE_TYPE::RSA_PUBLIC)
         {
 		    std::string fileDB = path_public_db + RSA_OTHER_PUBLIC_DB;
-			std::map< std::string, generate_rsa::rsa_key > map_rsa_public;
+			std::map< std::string, cryptoAL::rsa::rsa_key > map_rsa_public;
 
 			bool ok = true;
 			if (file_util::fileexists(fileDB) == false)
@@ -362,8 +362,8 @@ namespace keymgr
 		    std::string filePrivateRSADB = path_private_db + RSA_MY_PRIVATE_DB;
             std::string fileStatusRSADB  = path_private_db + RSA_MY_STATUS_DB;
 
-			std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
-			std::map< std::string, generate_rsa::rsa_key > map_rsa_status;
+			std::map< std::string, cryptoAL::rsa::rsa_key > map_rsa_private;
+			std::map< std::string, cryptoAL::rsa::rsa_key > map_rsa_status;
 
 			bool ok = true;
 			if (file_util::fileexists(fileStatusRSADB) == false)
@@ -683,8 +683,8 @@ namespace keymgr
             std::string filePublicDB = path_public_db + RSA_OTHER_PUBLIC_DB;
             std::string fileStatusDB = path_public_db + RSA_OTHER_STATUS_DB;
 
-			std::map< std::string, generate_rsa::rsa_key > map_rsa_public;
-			std::map< std::string, generate_rsa::rsa_key > map_rsa_status;
+			std::map< std::string, cryptoAL::rsa::rsa_key > map_rsa_public;
+			std::map< std::string, cryptoAL::rsa::rsa_key > map_rsa_status;
 
 			bool ok = true;
 			if (file_util::fileexists(filePublicDB) == false)
@@ -707,7 +707,7 @@ namespace keymgr
 						key_exist = true;
 						cnt++;
 
-						generate_rsa::rsa_key key_public;
+						cryptoAL::rsa::rsa_key key_public;
 
 						key_public.key_size_in_bits = k.key_size_in_bits ;
 						key_public.s_n = k.s_n ;
@@ -875,8 +875,8 @@ namespace keymgr
             std::string filePrivateRSADB = path_private_db + RSA_MY_PRIVATE_DB;
             std::string filePublicRSADB  = path_private_db + RSA_MY_PUBLIC_DB;
 
-			std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
-			std::map< std::string, generate_rsa::rsa_key > map_rsa_public;
+			std::map< std::string, cryptoAL::rsa::rsa_key > map_rsa_private;
+			std::map< std::string, cryptoAL::rsa::rsa_key > map_rsa_public;
 
 			if (file_util::fileexists(filePrivateRSADB) == true)
 			{
@@ -891,7 +891,7 @@ namespace keymgr
 					{
 						cnt++;
 						key_exist = true;
-						generate_rsa::rsa_key key_public;
+						cryptoAL::rsa::rsa_key key_public;
 
 						key_public.key_size_in_bits = k.key_size_in_bits ;
 						key_public.s_n = k.s_n ;
@@ -1154,7 +1154,7 @@ namespace keymgr
         verbose=verbose;
 		std::vector<std::string> vmapkeyname;
 
-		std::map<std::string, generate_rsa::rsa_key> map_rsa_public;
+		std::map<std::string, cryptoAL::rsa::rsa_key> map_rsa_public;
 		std::map<std::string, ecc_key> map_ecc_public;
 		std::map<std::string, history_key_public> map_hh_public;
 

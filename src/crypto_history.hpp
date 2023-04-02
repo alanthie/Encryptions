@@ -2,12 +2,11 @@
 #define CRYPTO_HISTORY_H_INCLUDED
 
 #include "crypto_const.hpp"
-#include <map>
-#include <string>
 #include "c_plus_plus_serializer.h"
 #include "data.hpp"
-#include "crypto_file.hpp"
 #include "crc32a.hpp"
+#include <map>
+#include <string>
 
 namespace cryptoAL
 {

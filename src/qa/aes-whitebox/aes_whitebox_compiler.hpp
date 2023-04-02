@@ -4,8 +4,13 @@
 #include "../../crypto_const.hpp"
 #include "../../random_engine.hpp"
 #include "../../data.hpp"
-#include "../../crypto_file.hpp"
 #include "../../c_plus_plus_serializer.h"
+
+//Original code: https://github.com/balena/aes-whitebox
+#include <NTL/mat_GF2.h>
+#include "aes_private.h"
+#include "aes_whitebox.hpp"
+//LINKER LIB: -lntl -lpthread -lgmp
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,11 +18,6 @@
 #include <string.h>
 #include <stdarg.h>
 #include <array>
-//Original code: https://github.com/balena/aes-whitebox
-#include <NTL/mat_GF2.h>
-#include "aes_private.h"
-#include "aes_whitebox.hpp"
-//LINKER LIB: -lntl -lpthread -lgmp
 
 namespace WBAES
 {

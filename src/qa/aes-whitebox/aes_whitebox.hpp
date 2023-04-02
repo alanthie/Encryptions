@@ -2,7 +2,6 @@
 #define _INCLUDES_aes_whitebox_HPP
 
 #include "../../crypto_const.hpp"
-#include "../../crypto_file.hpp"
 #include "aes_whitebox_base.hpp"
 #include "../../c_plus_plus_serializer.h"
 

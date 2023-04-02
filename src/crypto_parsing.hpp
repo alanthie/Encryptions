@@ -3,14 +3,13 @@
 
 #include "crypto_const.hpp"
 #include "file_util.hpp"
+#include "data.hpp"
 #include <filesystem>
-#include <curl/curl.h>
 #include <chrono>
 #include <ctime>
 #include <sstream>
 #include <iomanip>
 #include <string>
-#include "data.hpp"
 
 namespace cryptoAL
 {
