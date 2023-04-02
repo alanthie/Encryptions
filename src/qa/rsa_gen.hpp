@@ -4,14 +4,13 @@
 #include "../uint_util.hpp"
 #include "../c_plus_plus_serializer.h"
 
-namespace generate_rsa
+namespace cryptoAL
+{
+namespace rsa
 {
     struct rsa_key
     {
-        rsa_key()
-        {
-        };
-
+        rsa_key() {}
 
         rsa_key(int key_size__bits, const std::string& a, const std::string& b, const std::string& c)
         {
@@ -151,9 +150,9 @@ namespace generate_rsa
         }
     };
 
-    int mainGenRSA(generate_rsa::PRIVATE_KEY& key, uint32_t klen_inbits);
+    int mainGenRSA(cryptoAL::rsa::PRIVATE_KEY& key, uint32_t klen_inbits);
 
-
+}
 }
 
 #endif

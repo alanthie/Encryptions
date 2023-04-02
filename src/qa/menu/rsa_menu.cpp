@@ -35,7 +35,7 @@ namespace ns_menu
         if (osummary == "0") onlysummary = true;
 
         //qaclass qa;
-        std::map< std::string, generate_rsa::rsa_key > map_rsa_private;
+        std::map< std::string, cryptoAL::rsa::rsa_key > map_rsa_private;
 
         // View
         if (file_util::fileexists(fileRSADB) == true)

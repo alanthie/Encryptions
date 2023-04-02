@@ -4,6 +4,7 @@
 #include "qa_internal.hpp"
 #include <thread>
 #include "../c_plus_plus_serializer.h"
+#include "rsa_gen.hpp"
 
 #ifdef _WIN32
 //add preprocessor directive NOMINMAX
@@ -205,7 +206,7 @@ void  menu()
             long long keysize = cryptoAL::parsing::str_to_ll(skeysize);
 
             qaclass qa;
-            auto r = qa.HEX(sfile, pos, keysize);
+            auto r = file_util::HEX(sfile, pos, keysize);
             std::cout << "HEX(" << sfile << "," << pos << "," << keysize << ") = " << r << std::endl;
             std::cout << std::endl;
         }
@@ -397,7 +398,7 @@ void  menu()
             if (osummary == "0") onlysummary = true;
 
 			qaclass qa;
-			std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
+			std::map< std::string, cryptoAL::rsa::rsa_key > map_RSA_private;
 
 			// View
 			if (file_util::fileexists(fileRSADB) == true)
@@ -462,7 +463,7 @@ void  menu()
             if (osummary == "0") onlysummary = true;
 
 			qaclass qa;
-			std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
+			std::map< std::string, cryptoAL::rsa::rsa_key > map_RSA_private;
 
 			// View
           	if (file_util::fileexists(fileRSADB) == true)
@@ -529,7 +530,7 @@ void  menu()
             if (osummary == "0") onlysummary = true;
 
 			qaclass qa;
-			std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
+			std::map< std::string, cryptoAL::rsa::rsa_key > map_RSA_private;
 
 			// View
           	if (file_util::fileexists(fileRSADB) == true)
@@ -601,8 +602,8 @@ void  menu()
 			//if (outfile == "0") outfile = "./" + cryptoAL::RSA_OTHER_PUBLIC_DB;
 
 			qaclass qa;
-			std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
-			std::map< std::string, generate_rsa::rsa_key > map_RSA_public;
+			std::map< std::string, cryptoAL::rsa::rsa_key > map_RSA_private;
+			std::map< std::string, cryptoAL::rsa::rsa_key > map_RSA_public;
 
 			if (file_util::fileexists(fileRSADB) == true)
 			{
@@ -613,7 +614,7 @@ void  menu()
 
 				for(auto& [keyname, k] : map_RSA_private)
 				{
-                    generate_rsa::rsa_key key_public;
+                    cryptoAL::rsa::rsa_key key_public;
                     key_public.key_size_in_bits = k.key_size_in_bits ;
                     key_public.s_n = k.s_n ;
                     key_public.s_e = k.s_e ;
@@ -648,7 +649,7 @@ void  menu()
 		else if (choice == 10)
       	{
 			qaclass qa;
-			generate_rsa::PRIVATE_KEY key;
+			cryptoAL::rsa::PRIVATE_KEY key;
 
 			std::cout << "Enter rsa key length in bits (0 = defaut = 16384): ";
 			std::string snum;
@@ -693,10 +694,10 @@ void  menu()
 
 			if (result == 0)
 			{
-				generate_rsa::rsa_key rkey;
+				cryptoAL::rsa::rsa_key rkey;
 				key.to_rsa_key(rkey, n, e, d, (uint32_t)klen);
 
-				std::map< std::string, generate_rsa::rsa_key > map_RSA_private;
+				std::map< std::string, cryptoAL::rsa::rsa_key > map_RSA_private;
 				if (file_util::fileexists(fileRSADB) == true)
 				{
 					std::ifstream infile;
@@ -797,7 +798,7 @@ void  menu()
 		else if (choice == 12)
       	{
 			qaclass qa;
-			generate_rsa::PRIVATE_KEY key;
+			cryptoAL::rsa::PRIVATE_KEY key;
 
 			std::cout << "Enter rsa key length in bits (0 = defaut = 2048): ";
 			std::string snum;
@@ -836,14 +837,14 @@ void  menu()
 				std::string s_e(pub.get_str());
 				std::string s_d(priv.get_str());
 
-				generate_rsa::rsa_key k;
-				generate_rsa::rsa_key rkey( (int)klen,
+				cryptoAL::rsa::rsa_key k;
+				cryptoAL::rsa::rsa_key rkey( (int)klen,
 										  uint_util::base10_to_base64(s_n),
 										  uint_util::base10_to_base64(s_e),
 										  uint_util::base10_to_base64(s_d));
 
 				// READ
-				std::map< std::string, generate_rsa::rsa_key> map_rsa_private;
+				std::map< std::string, cryptoAL::rsa::rsa_key> map_rsa_private;
 
 				if (file_util::fileexists(fileRSADB) == false)
 				{

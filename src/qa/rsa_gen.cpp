@@ -15,10 +15,11 @@
 #include <ctime>
 
 #ifdef _WIN32
-#include <windows.h>v // tickcount
+#include <windows.h> // GetTickCount
 #endif
 
-#include "../rsa_gen.hpp"
+#include "rsa_gen.hpp"
+#include "../file_util.hpp"
 
 namespace generate_rsa
 {
@@ -27,7 +28,7 @@ namespace generate_rsa
 // Avoid any debug-related output including progress
 #define NO_OUTPUT
 
-void PrintRSA(PRIVATE_KEY key) {
+void PrintRSA(cryptoAL::rsa::PRIVATE_KEY key) {
 	std::cout << "asn1=SEQUENCE:rsa_key" << std::endl;
 	std::cout << std::endl;
 	std::cout << "[rsa_key]" << std::endl;
@@ -486,7 +487,7 @@ typeuinteger ModInverse(typeuinteger a, typeuinteger n)
 }
 
 
-int mainGenRSA(PRIVATE_KEY& key, uint32_t klen_inbits = 2048)
+int mainGenRSA(cryptoAL::rsa::PRIVATE_KEY& key, uint32_t klen_inbits = 2048)
 {
 	typeuinteger primeA;
 	typeuinteger primeB;

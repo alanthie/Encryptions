@@ -4,8 +4,8 @@
 #include "crypto_const.hpp"
 #include "data.hpp"
 #include "SHA256.h"
-#include <filesystem>
 #include "common/includes.h" // makehex
+#include <filesystem>
 
 namespace file_util
 {
@@ -118,6 +118,29 @@ namespace file_util
 		}
 
 		return hex;
+	}
+
+	[[maybe_unused]] static void show_summary(const char* buffer, uint32_t buf_len)
+	{
+		for( uint32_t j = 0; j< buf_len; j++)
+		{
+			if (j<16) std::cout << (int)(unsigned char)buffer[j] << " ";
+			else if (j==16) {std::cout << " ... [" << buf_len << "] ... ";}
+			else if (j>buf_len-16) std::cout << (int)(unsigned char)buffer[j] << " ";
+		}
+		std::cout <<  std::endl;
+	}
+
+	[[maybe_unused]] static std::string get_summary_hex(const char* buffer, uint32_t buf_len)
+	{
+		std::string s;
+		for( uint32_t j = 0; j< buf_len; j++)
+		{
+			if (j<16) {s+= makehex((char)buffer[j], 2); s+= " ";}
+			else if (j==16) {s+= " ... ["; s+= std::to_string(buf_len); s+= "] ... ";}
+			else if (j>buf_len-16) { s+=  makehex((char)buffer[j], 2); s+=" ";}
+		}
+		return s;
 	}
 }
 #endif
