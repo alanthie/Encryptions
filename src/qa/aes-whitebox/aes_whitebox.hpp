@@ -340,6 +340,12 @@ struct wbaes_file
 	std::string folder;
 };
 
+// TODO maintain a limit number in memory - otherwise may exhaust memory...
+// We may want to use near "maximum" memory for whitebox to prevent transfer of memory to web
+// AES 32k == 64MB
+// void* malloc (size_t size); //No-throw guarantee: this function never throws exceptions.
+// If the function failed to allocate the requested block of memory, a null pointer is returned
+// void free (void* ptr); //If ptr is a null pointer, the function does nothing.
 class wbaes_pool
 {
 public:
@@ -379,6 +385,7 @@ public:
 		}
 		else
 		{
+			//TODO catch the std::bad_alloc
 			wbaes_instance_mgr* ptr_aes_instance_mgr = new wbaes_instance_mgr(iaes_type, ifolder, ikeyname, true, verbose);
 			if (ptr_aes_instance_mgr->table_error == true)
 			{

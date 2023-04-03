@@ -292,6 +292,16 @@ public:
 							uk.url_size = idx2;
 							vurlkey.push_back(uk);
 						}
+						else
+						{
+							if (s.size() >= URL_MAX_SIZE)
+							{
+								std::cerr 	<< "WARNING input url key line too long (reduce number of recursion) - line skipped " << s
+											<< ", max size of all keys : " << URL_MAX_SIZE
+											<< ", current size of all keys : " << s.size()
+											<< std::endl;
+							}
+						}
 					}
 				}
 			}
@@ -517,12 +527,10 @@ public:
             }
             else
             {
-                if (VERBOSE_DEBUG)
+				if (VERBOSE_DEBUG)
 				{
-					if (v.size() == 1)
-                   	 	std::cout << "unique rsa key name in URL: " << v[0] << std::endl;
-					else
-						std::cout << "multiple rsa key in URL: " << v[0] << " " << v[1] << " ..." << std::endl;
+					if (v.size() == 1) std::cout << "unique rsa key name in URL: " << v[0] << std::endl;
+					else if (v.size() > 1) std::cout << "multiple rsa key recursion in URL: " << v[0] << " " << v[1] << " ..." << v.size()<<std::endl;
 				}
             }
 
@@ -554,9 +562,9 @@ public:
                         if (riter == 0)
                         {
 							// generate random embedded_rsa_key
-							uint32_t key_len_in_bytes = kout.key_size_in_bits/8;
-							// Base64  todo
-							embedded_rsa_key = cryptoAL::random::generate_base64_random_string(key_len_in_bytes - 11);
+							uint32_t key_len_in_bytes = -1 + (kout.key_size_in_bits/8); // modulo p is not max of key_size_in_bits remove 8 bits
+							key_len_in_bytes *= 1.33; // adjust for base64
+							embedded_rsa_key = cryptoAL::random::generate_base64_random_string(key_len_in_bytes);
 							vurlkey[i].sRSA_ECC_ENCODED_DATA = embedded_rsa_key;
 							if (VERBOSE_DEBUG)
 							{
@@ -565,10 +573,10 @@ public:
 							}
 						}
 
-						uint32_t msg_input_size_used = 0;
+						//uint32_t msg_input_size_used = 0;
 						uint32_t msg_size_produced = 0;
 
-						std::string t = rsa_util::rsa_encode_full_string(vurlkey[i].sRSA_ECC_ENCODED_DATA, kout, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
+						std::string t = rsa_util::rsa_encode_full_string(vurlkey[i].sRSA_ECC_ENCODED_DATA, kout, msg_size_produced, use_gmp, SELF_TEST);
 						//std::string t = rsa_util::rsa_encode_string(vurlkey[i].sRSA_ECC_ENCODED_DATA, kout, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
 
 						// t may grow
@@ -610,9 +618,12 @@ public:
 							new_URL += std::to_string(v_encoded_size[riter]);
 							new_URL += std::string(";");
 						}
-						if (new_URL.size() > URL_MAX_SIZE)
+						if (new_URL.size() >= URL_MAX_SIZE)
 						{
-							std::cerr << "ERROR resursive rsa too long: " << new_URL << std::endl;
+							std::cerr 	<< "ERROR resursive rsa too long: " << new_URL
+										<< ", max size of all keys : " << URL_MAX_SIZE
+										<< ", current size of all keys : " << new_URL.size()
+										<< std::endl;
 							r = false;
 						}
 						else
@@ -707,7 +718,7 @@ public:
                         {
 							// generate random embedded_ecc_key
 							uint32_t key_len_in_bytes = key_mine.dom.key_size_bits/8;
-							embedded_ecc_key = cryptoAL::random::generate_base64_random_string(key_len_in_bytes - 11);
+							embedded_ecc_key = cryptoAL::random::generate_base64_random_string(key_len_in_bytes - 1);
 							vurlkey[i].sRSA_ECC_ENCODED_DATA = embedded_ecc_key;
 							if (VERBOSE_DEBUG)
 							{
@@ -771,9 +782,11 @@ public:
 							new_URL += std::to_string(v_encoded_size[riter]);
 							new_URL += std::string(";");
 						}
-						if (new_URL.size() > URL_MAX_SIZE)
+						if (new_URL.size() >= URL_MAX_SIZE)
 						{
-							std::cerr << "ERROR resursive ecc too long: " << new_URL << std::endl;
+							std::cerr 	<< "ERROR resursive ecc too long: " << new_URL
+										<< ", max size of all keys : " << URL_MAX_SIZE
+										<< ", current size of all keys : " << new_URL.size()<< std::endl;
 							r = false;
 						}
 						else
@@ -1155,7 +1168,8 @@ public:
 		if (key_size % 32 != 0)
 		{
             r = false;
-            std::cerr << "ERROR " << "encode_salsa20 key must be multiple of 32 bytes: " <<  key_size << std::endl;
+            std::cerr 	<< "ERROR " << "encode_salsa20 key must be multiple of 32 bytes: " <<  key_size 
+						<< std::endl;
             return r;
 		}
         if (key_size == 0)
@@ -1593,7 +1607,8 @@ public:
 		if (data_temp.buffer.size() % 32 != 0)
 		{
             r = false;
-            std::cerr << "ERROR encode_binaes256 " << "encoding file must be multiple of 32 bytes: " << data_temp.buffer.size() << std::endl;
+            std::cerr 	<< "ERROR encode_binaes256 " << "encoding file must be multiple of 32 bytes: " << data_temp.buffer.size() 
+						<< std::endl;
 			return false;
 		}
         if (data_temp.buffer.size() == 0)

@@ -574,7 +574,7 @@ public:
 						{
 							if (v.size() == 1)
 								std::cout << "unique rsa key name in URL: " << v[0] << std::endl;
-							else
+							else if (v.size() > 1)
 								std::cout << "multiple rsa key in URL: " << v[0] << " " << v[1] << " ..." << std::endl;
 						}
 					}
@@ -593,7 +593,7 @@ public:
 								uint32_t msg_size_produced;
 								std::string d = uk.sRSA_ECC_ENCODED_DATA.substr(0, v_encoded_size[riter]);
 								//std::string t = rsa_util::rsa_decode_string(d, kout, (uint32_t)d.size(), msg_size_produced, use_gmp);
-								std::string t = rsa_util::rsa_decode_full_string(d, kout, (uint32_t)d.size(), msg_size_produced, use_gmp);
+								std::string t = rsa_util::rsa_decode_full_string(d, kout, msg_size_produced, use_gmp);
 
 								// may reduce size
 								uk.sRSA_ECC_ENCODED_DATA = t + uk.sRSA_ECC_ENCODED_DATA.substr(d.size());
@@ -604,7 +604,7 @@ public:
 							{
 								uint32_t msg_size_produced;
 								//embedded_rsa_key = rsa_util::rsa_decode_string(uk.sRSA_ECC_ENCODED_DATA, kout, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced, use_gmp);
-								embedded_rsa_key = rsa_util::rsa_decode_full_string(uk.sRSA_ECC_ENCODED_DATA, kout, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced, use_gmp);
+								embedded_rsa_key = rsa_util::rsa_decode_full_string(uk.sRSA_ECC_ENCODED_DATA, kout, msg_size_produced, use_gmp);
 							}
 						}
 						else

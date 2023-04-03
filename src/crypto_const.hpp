@@ -135,7 +135,7 @@ constexpr static int16_t KEYPOS_ENCODESIZE  = 8;
 constexpr static int16_t URL_LEN_ENCODESIZE = 2;
 constexpr static int16_t CRYPTO_ALGO_ENCODESIZE = 2;
 constexpr static uint32_t URL_MIN_SIZE      = 4;
-constexpr static uint32_t URL_MAX_SIZE      = 64*16; // Multiple RSA/ECC keys name;size // TODO  make it dynamic (any size)
+constexpr static uint32_t URL_MAX_SIZE      = 64*20; // Multiple RSA/ECC keys name;size // TODO  make it dynamic (any size) multiple 64x
 
 constexpr static uint32_t MIN_KEY_SIZE      = 64;
 constexpr static int16_t CHKSUM_SIZE        = 64;
@@ -161,7 +161,7 @@ constexpr static uint32_t URLINFO_SIZE      =   URL_LEN_ENCODESIZE + URL_MAX_SIZ
 												PADDING_LEN_ENCODESIZE + 26; // padding 64
 
 constexpr static int16_t PADDING_MULTIPLE       = 64; // data should be at least 64x with Salsa20 requirement
-constexpr static int16_t PADDING_KEY_MULTIPLE   = 32; //  key should be at least 32x with Salsa20 requirement
+constexpr static int16_t PADDING_KEY_MULTIPLE   = 32; // key should be at least 32x with Salsa20 requirement
 constexpr static int16_t NITER_LIM              = 2048;
 constexpr static uint32_t FILE_SIZE_LIM         = 256*1024*1024;
 

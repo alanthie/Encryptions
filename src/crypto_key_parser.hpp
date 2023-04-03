@@ -296,6 +296,11 @@ public:
 				else
 				{
 					// skip!
+					if (len >= URL_MAX_SIZE)
+					{
+						std::string su(url);
+						std::cerr << "WARNING input url key line too long - skip " << su << ", max size: " << URL_MAX_SIZE << std::endl;
+					}
 				}
 
 				for(uint32_t ii=0;ii<URL_MAX_SIZE;ii++) url[ii] = 0;

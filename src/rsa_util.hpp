@@ -108,10 +108,8 @@ namespace rsa_util
 
 		// smsg maybe less or bigger than rsa capacity
 		std::string msg_to_encrypt;
-
-		// TODO adjust becuase of base 64
 		uint32_t key_len_bytes = -1 + (k.key_size_in_bits / 8); // recursive may reach modulo p
-
+        key_len_bytes *= 1.33; // can take more with base64
 		if (key_len_bytes < smsg.size())
 		{
 			msg_to_encrypt = smsg.substr(0, key_len_bytes);
@@ -165,7 +163,6 @@ namespace rsa_util
 	}
 
 	std::string rsa_encode_full_string( const std::string& smsg, cryptoAL::rsa::rsa_key& k,
-										uint32_t& msg_input_size_used,
 										uint32_t& msg_size_produced,
 										bool use_gmp, bool SELF_TEST)
 	{
@@ -176,6 +173,9 @@ namespace rsa_util
 
 		uint32_t t_msg_input_size_used;
 		uint32_t t_msg_size_produced;
+		uint32_t cnt = 0;
+		std::string token_out;
+		std::string token_in;
 		while(current_encoded_msg_len < required_encoded_msg_len)
 		{
 			t_msg_input_size_used = 0;
@@ -198,26 +198,40 @@ namespace rsa_util
 
 			r += s_size;
 			r += s2_size;
-			r += t.substr(0,t_msg_size_produced);
+			token_out = t.substr(0,t_msg_size_produced);
+			r += token_out;
+			token_in = r_remaining.substr(0, t_msg_input_size_used) ;
 
-			if (cryptoAL::VERBOSE_DEBUG)
-				std::cout << t_msg_input_size_used << "-" << t_msg_size_produced << "[" << r_remaining.substr(0, t_msg_input_size_used) << "]"<< "==>[" << s_size + t.substr(0,t_msg_size_produced) << "]"<< std::endl;
-
+			cnt++;
 			current_encoded_msg_len += t_msg_input_size_used;
 			if (t_msg_input_size_used < r_remaining.size())
                 r_remaining = r_remaining.substr(t_msg_input_size_used);
             else
                 r_remaining = "";
+
+            if (cryptoAL::VERBOSE_DEBUG)
+			{
+				if ((cnt <= 2) || (current_encoded_msg_len == required_encoded_msg_len))
+				{
+                    std::cout   << "(" << cnt << ") "
+                                << t_msg_input_size_used << "-" << t_msg_size_produced
+                                << "[" << token_in << "]"
+                                << "==>[" << s_size + token_out << "]"<< std::endl;
+                }
+				else if (cnt==3)
+				{
+					std::cout << "..." << std::endl;
+				}
+			}
 		}
-		msg_input_size_used = current_encoded_msg_len;
 		msg_size_produced = r.size();
 
-		if (cryptoAL::VERBOSE_DEBUG) std::cout << msg_input_size_used << "-" << msg_size_produced <<std::endl;
+		if (cryptoAL::VERBOSE_DEBUG) std::cout << current_encoded_msg_len << "-" << msg_size_produced <<std::endl;
 		return r;
 	}
 
 	std::string rsa_decode_full_string(	const std::string& smsg, cryptoAL::rsa::rsa_key& k,
-										uint32_t msg_input_size_touse, uint32_t& msg_size_produced, bool use_gmp)
+										uint32_t& msg_size_produced, bool use_gmp)
 	{
 		bool ok = true;
 		std::string r;
@@ -237,7 +251,6 @@ namespace rsa_util
 
             std::string s2_size = r_remaining.substr(6, 4); // trim the first
             size_t v2_size =  uint_util::val(s2_size).toLong();
-
 
             if (r_remaining.size() >= 10 + v_size)
             {
@@ -269,7 +282,13 @@ namespace rsa_util
 					std::string t = rsa_decode_string(v[i], k, v[i].size(), t_msg_size_produced, use_gmp);
 					vr.push_back(t.substr(0, t_msg_size_produced));
 
-					if (cryptoAL::VERBOSE_DEBUG) std::cout << v[i].size() << "[" << v[i] << "]"<< "==>[" << t.substr(0, t_msg_size_produced) << "]"<< std::endl;
+					if (cryptoAL::VERBOSE_DEBUG)
+					{
+						if ((i<=1) || (i==v.size() - 1))
+							std::cout << v[i].size() << "[" << v[i] << "]"<< "==>[" << t.substr(0, t_msg_size_produced) << "]"<< std::endl;
+						else if (i==2)
+							std::cout  << "..."<< std::endl;
+					}
 				}
 			}
 
@@ -281,7 +300,7 @@ namespace rsa_util
 				sz += vr[i].size();
 			}
 			msg_size_produced = sz;
-			if (cryptoAL::VERBOSE_DEBUG) std::cout << sz << std::endl;
+			if (cryptoAL::VERBOSE_DEBUG) std::cout << "output size: " << sz << std::endl;
 		}
 		return r;
 	}

@@ -331,7 +331,7 @@ int main_crypto(int argc, char **argv)
 
             encode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
-                .help("specify the verbose");
+                .help("set verbose level (-v 1, for debug: -v debug");
 
             encode_command.add_argument("-k", "--keep")
                 .default_value(std::string(""))
@@ -437,7 +437,7 @@ int main_crypto(int argc, char **argv)
 
             decode_command.add_argument("-v", "--verbose")
                 .default_value(std::string(""))
-                .help("specify the verbose");
+                .help("set verbose level (-v 1, for debug: -v debug");
 
             decode_command.add_argument("-k", "--keep")
                 .default_value(std::string(""))
@@ -830,6 +830,7 @@ int main_crypto(int argc, char **argv)
 
 
             bool verbose = verb.size() > 0 ? true : false;
+			if (verb == "debug") VERBOSE_DEBUG = true;
             bool keeping = keep.size() > 0 ? true : false;
             bool bgmp = gmp.size() > 0 ? true : false;
             bool bauto = autoon.size() > 0 ? true : false;
@@ -885,7 +886,8 @@ int main_crypto(int argc, char **argv)
             if (encr.encrypt(false) == true)
             {
                 std::cerr << "CRYPTO ENCODING SUCCESS" << std::endl;
-                std::cout << "Encrypted file: " << encr.filename_encrypted_data << std::endl;
+                std::cout << "Encrypted file: " << encr.filename_encrypted_data
+                          << " (size: " << file_util::filesize(encr.filename_encrypted_data) << " bytes)" << std::endl;
                 if (puzzle_path.size() > 0)
                     std::cout << "Puzzle file   : " << encr.filename_partial_puzzle << std::endl;
                 else
@@ -927,6 +929,7 @@ int main_crypto(int argc, char **argv)
 			auto png = cmd.get<std::string>("--png");
 
             bool verbose = verb.size() > 0 ? true : false;
+			if (verb == "debug") VERBOSE_DEBUG = true;
             bool keeping = keep.size() > 0 ? true : false;
 			bool bgmp = gmp.size() > 0 ? true : false;
 			bool bauto = autoon.size() > 0 ? true : false;
