@@ -2,6 +2,7 @@
 #define _INCLUDES_aes_whitebox_base_HPP
 
 #include "../../crypto_const.hpp"
+#include "../../c_plus_plus_serializer.h"
 
 namespace WBAES
 {

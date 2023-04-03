@@ -161,7 +161,7 @@
 	<fstream>
 	<stdio.h>
 
-1680214085 /home/server/dev/Encryptions/src/crypto_const.hpp
+1680533351 /home/server/dev/Encryptions/src/crypto_const.hpp
 	"base_const.hpp"
 	<filesystem>
 	<curl/curl.h>
@@ -431,7 +431,7 @@
 	<stdlib.h>
 	"twofish.h"
 
-1680217251 /home/server/dev/Encryptions/src/base_const.hpp
+1680524825 /home/server/dev/Encryptions/src/base_const.hpp
 	<cstddef>
 	<map>
 	<string>
@@ -806,7 +806,7 @@
 	<stdlib.h>
 	<fstream>
 
-1680401916 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox_compiler.hpp
+1680564236 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox_compiler.hpp
 	"../../crypto_const.hpp"
 	"../../random_engine.hpp"
 	"../../data.hpp"
@@ -824,7 +824,7 @@
 1680323101 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_private.h
 	"../../crypto_const.hpp"
 
-1680399878 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox.hpp
+1680542745 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox.hpp
 	"../../crypto_const.hpp"
 	"aes_whitebox_base.hpp"
 	"../../c_plus_plus_serializer.h"
@@ -833,8 +833,9 @@
 	<stdint.h>
 	<stddef.h>
 
-1680133038 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox_base.hpp
+1680561976 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox_base.hpp
 	"../../crypto_const.hpp"
+	"../../c_plus_plus_serializer.h"
 
 1680313395 /home/server/dev/Encryptions/src/qa/menu/menu.hpp
 	<iostream>
@@ -849,7 +850,7 @@
 	<cctype>
 	<filesystem>
 
-1680456831 source:/home/server/dev/Encryptions/src/qa/menu/menu.cpp
+1680564569 source:/home/server/dev/Encryptions/src/qa/menu/menu.cpp
 	"menu.h"
 
 1680312455 /home/server/dev/Encryptions/src/qa/menu/rsa_menu.hpp
@@ -860,7 +861,7 @@
 	<vector>
 	<type_traits>
 
-1680457316 /home/server/dev/Encryptions/src/qa/menu/menu.h
+1680564591 /home/server/dev/Encryptions/src/qa/menu/menu.h
 	"../../crypto_cfg.hpp"
 	"../../crypto_parsing.hpp"
 	"menu_io.h"
@@ -992,5 +993,25 @@
 	"../../../src/crypto_parsing.hpp"
 	"../../../src/puzzle.hpp"
 	"../../../src/qa/prime.h"
+	"menu.h"
+
+1680564342 source:/home/server/dev/Encryptions/src/qa/menu/wbaes_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"../aes-whitebox/aes_whitebox.hpp"
+	"../aes-whitebox/aes_whitebox_compiler.hpp"
+	"../../../src/c_plus_plus_serializer.h"
+	"menu.h"
+
+1680564732 source:/home/server/dev/Encryptions/src/qa/menu/tools_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"../../../src/c_plus_plus_serializer.h"
 	"menu.h"
 

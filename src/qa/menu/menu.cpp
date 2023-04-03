@@ -125,6 +125,30 @@ namespace ns_menu
 		mHH.set_main_menu(this);
 		mHH.set_id(MENU_ID::HH);
 
+		Menu mWBAES
+		{
+			"Whitebox AES keys",
+			{
+				{"Create a WB AES key", 	1},
+				{"Create multiple WB AES keys",2},
+				{"Create a WB AES key from instruction file", 3},
+				{"Create multiple WB AES key from multiple instruction files", 4}
+			}
+		};
+		mWBAES.set_main_menu(this);
+		mWBAES.set_id(MENU_ID::WBAES);
+
+		Menu mTOOLS
+		{
+			"Tools",
+			{
+				{"HEX file dump", 	1},
+				{"SHA256 of a file",2}
+			}
+		};
+		mTOOLS.set_main_menu(this);
+		mTOOLS.set_id(MENU_ID::TOOLS);
+
 		Menu m1 {"QA",
 					{
 						{"Config",      &mCFG}, // The variant_val is a menu
@@ -132,7 +156,9 @@ namespace ns_menu
 						{"RSA Key",     &mRSA},
 						{"ECC Domain",  &mECC},
 						{"ECC Key",     &mECCKey},
-						{"Historical Hashes", &mHH}
+						{"Historical Hashes", &mHH},
+						{"Whitebox AES keys", &mWBAES},
+						{"Tools", &mTOOLS}
 					}
 				};
 		m1.set_main_menu(this);
@@ -173,6 +199,14 @@ namespace ns_menu
 		else if (m.id == MENU_ID::Puzzle)
         {
             fPuzzle(option+1);
+        }
+		else if (m.id == MENU_ID::WBAES)
+        {
+            fWBAES(option+1);
+        }
+		else if (m.id == MENU_ID::TOOLS)
+        {
+            fTOOLS(option+1);
         }
     }
 }

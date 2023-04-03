@@ -461,6 +461,32 @@ int generate_aes(	const std::string& file_for_key, uint32_t pos1,
 		return -1;
 	}
 
+	cryptoAL::cryptodata build_info_file;
+	std::string build_info_filename = pathtbl + aes + "_" + tablekeyname + "_build_info" + ".tbl";
+	std::string s_build_info;
+	s_build_info += file_for_key + "\n";
+	s_build_info += std::to_string(pos1) + "\n";
+	s_build_info += file_for_xor + "\n";
+	s_build_info += std::to_string(pos2) + "\n";
+	{
+		std::string sha = file_util::file_checksum(file_for_key);
+		s_build_info += sha + "\n";
+	}
+	{
+		std::string sha = file_util::file_checksum(file_for_xor);
+		s_build_info += sha + "\n";
+	}
+	s_build_info += "\n";
+	build_info_file.buffer.write(s_build_info.data(), s_build_info.size());
+	rr = build_info_file.save_to_file(build_info_filename);
+	if (rr == false)
+	{
+		std::cerr << "ERROR writing build info file " << build_info_filename << std::endl;
+		return -1;
+	}
+	if (verbose)
+		std::cout << "build info will be at: " << build_info_filename << std::endl;
+
 	int r = 0;
 	bool ok = true;
 	int Nk = 0, Nr = 0;
@@ -510,7 +536,7 @@ int generate_aes(	const std::string& file_for_key, uint32_t pos1,
 
 	// TODO - merge tbl
 	{
-        if (verbose) std::cout << "generate whitebox aes... " << aes << std::endl;
+        if (verbose) std::cout << "generating whitebox aes... " << aes << std::endl;
 
 		long long N = 4*Nk*2;
 
@@ -528,7 +554,7 @@ int generate_aes(	const std::string& file_for_key, uint32_t pos1,
 
 		int n;
 		int digit;
-		std::string skey;// = cryptoAL::generate_base16_random_string(N);
+		std::string skey;
 		for(long long i=pos1;i<pos1+N;i++)
         {
 			n = (int)(unsigned char)data_file_for_key.buffer.getdata()[i];

@@ -29,7 +29,9 @@ namespace ns_menu
 		RSA,
 		ECC_DOMAIN,
 		ECC_KEY,
-		HH
+		HH,
+        WBAES,
+        TOOLS
 	};
 
 
@@ -62,6 +64,8 @@ namespace ns_menu
         int fECCDomain(int choice);
         int fECCKey(int choice);
         int fHH(int choice);
+        int fWBAES(int choice);
+        int fTOOLS(int choice);
     };
 
     class Menu

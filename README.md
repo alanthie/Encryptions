@@ -339,13 +339,15 @@ New Menu:
 QA version: v0.4_2023-04-02
 Current configuration file: ./cfg.ini
 ====================================
-1. Config
-2. Puzzle
-3. RSA Key
-4. ECC Domain
-5. ECC Key
-6. Historical Hashes
-0. Exit this menu
+[1] Config
+[2] Puzzle
+[3] RSA Key
+[4] ECC Domain
+[5] ECC Key
+[6] Historical Hashes
+[7] Whitebox AES keys
+[8] Tools
+[0] Exit this menu
 
 Enter option ==> 
 </pre>
