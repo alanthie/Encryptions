@@ -78,10 +78,9 @@
 	"mathcommon.h"
 	"BigInteger.h"
 
-1680453569 source:/home/server/dev/Encryptions/src/qa/qa.cpp
+1680459454 source:/home/server/dev/Encryptions/src/qa/qa.cpp
 	"../../src/crypto_const.hpp"
 	"../../src/crypto_parsing.hpp"
-	"menu/menu.h"
 	"menu/menu.h"
 
 1678850313 /home/server/dev/Encryptions/src/qa/prime.h

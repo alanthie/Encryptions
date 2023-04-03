@@ -5,6 +5,7 @@
 #include "uint_util.hpp"
 #include "qa/rsa_gen.hpp"
 #include "file_util.hpp"
+#include "crypto_parsing.hpp"
 
 #ifdef _WIN32
 //add preprocessor directive NOMINMAX
@@ -96,15 +97,20 @@ namespace rsa_util
 		return decoded_rsa_data;
 	}
 
-	std::string rsa_encode_string(  const std::string& smsg, cryptoAL::rsa::rsa_key& k,
-                                    uint32_t& msg_input_size_used, uint32_t& msg_size_produced,
+
+	std::string rsa_encode_string(  const std::string& smsg,
+									cryptoAL::rsa::rsa_key& k,
+                                    uint32_t& msg_input_size_used,
+									uint32_t& msg_size_produced,
                                     bool use_gmp, bool SELF_TEST)
 	{
 		std::string encoded_rsa_data;
 
 		// smsg maybe less or bigger than rsa capacity
 		std::string msg_to_encrypt;
-		uint32_t key_len_bytes = k.key_size_in_bits / 8;
+
+		// TODO adjust becuase of base 64
+		uint32_t key_len_bytes = -1 + (k.key_size_in_bits / 8); // recursive may reach modulo p
 
 		if (key_len_bytes < smsg.size())
 		{
@@ -156,6 +162,128 @@ namespace rsa_util
 
 		//std::cout << "RSA encoding total size " << encoded_rsa_data.size() << std::endl;
 		return encoded_rsa_data;
+	}
+
+	std::string rsa_encode_full_string( const std::string& smsg, cryptoAL::rsa::rsa_key& k,
+										uint32_t& msg_input_size_used,
+										uint32_t& msg_size_produced,
+										bool use_gmp, bool SELF_TEST)
+	{
+		std::string r;
+		std::string r_remaining = smsg;
+		uint32_t required_encoded_msg_len = (uint32_t)smsg.size();
+		uint32_t current_encoded_msg_len = 0;
+
+		uint32_t t_msg_input_size_used;
+		uint32_t t_msg_size_produced;
+		while(current_encoded_msg_len < required_encoded_msg_len)
+		{
+			t_msg_input_size_used = 0;
+			t_msg_size_produced   = 0;
+			std::string t = rsa_encode_string(r_remaining, k, t_msg_input_size_used, t_msg_size_produced, use_gmp, SELF_TEST);
+
+			if (t_msg_size_produced == 0)
+			{
+				std::cerr << "ERROR t_msg_size_produced == 0" << std::endl;
+				break;
+			}
+
+			std::string s_size = uint_util::base10_to_base64(std::to_string(t_msg_size_produced));
+			while(s_size.size() < 4) s_size = std::string("0") + s_size ;
+			s_size = std::string("1") + s_size ; // 0 is trim later otherwise
+
+			std::string s2_size = uint_util::base10_to_base64(std::to_string(t_msg_input_size_used));
+			while(s2_size.size() < 4) s2_size = std::string("0") + s2_size ;
+			s2_size = std::string("1") + s2_size ; // 0 is trim later otherwise
+
+			r += s_size;
+			r += s2_size;
+			r += t.substr(0,t_msg_size_produced);
+
+			if (cryptoAL::VERBOSE_DEBUG)
+				std::cout << t_msg_input_size_used << "-" << t_msg_size_produced << "[" << r_remaining.substr(0, t_msg_input_size_used) << "]"<< "==>[" << s_size + t.substr(0,t_msg_size_produced) << "]"<< std::endl;
+
+			current_encoded_msg_len += t_msg_input_size_used;
+			if (t_msg_input_size_used < r_remaining.size())
+                r_remaining = r_remaining.substr(t_msg_input_size_used);
+            else
+                r_remaining = "";
+		}
+		msg_input_size_used = current_encoded_msg_len;
+		msg_size_produced = r.size();
+
+		if (cryptoAL::VERBOSE_DEBUG) std::cout << msg_input_size_used << "-" << msg_size_produced <<std::endl;
+		return r;
+	}
+
+	std::string rsa_decode_full_string(	const std::string& smsg, cryptoAL::rsa::rsa_key& k,
+										uint32_t msg_input_size_touse, uint32_t& msg_size_produced, bool use_gmp)
+	{
+		bool ok = true;
+		std::string r;
+		std::vector<std::string> vr;
+		uint32_t t_msg_size_produced;
+
+		if (cryptoAL::VERBOSE_DEBUG)
+			std::cout << "input size [" << smsg.size() << "]" << std::endl;
+
+		std::string r_remaining = smsg;
+		std::vector<std::string> v;
+		std::vector<size_t> vinsz;
+		while (r_remaining.size() > 10)
+		{
+            std::string s_size = r_remaining.substr(1, 4); // trim the first
+            size_t v_size =  uint_util::val(s_size).toLong();
+
+            std::string s2_size = r_remaining.substr(6, 4); // trim the first
+            size_t v2_size =  uint_util::val(s2_size).toLong();
+
+
+            if (r_remaining.size() >= 10 + v_size)
+            {
+                v.push_back(r_remaining.substr(10, v_size));
+                vinsz.push_back(v2_size);
+                if (r_remaining.size() > 10 + v_size)
+                    r_remaining = r_remaining.substr(10 + v_size);
+                else
+					r_remaining = "";
+            }
+            else
+            {
+                std::cerr << "ERROR decoding RSA invalid length r_remaining.size() < 10 + v_size " << r_remaining.size() << " " << 10 + v_size << std::endl;
+				ok = false;
+				for(size_t i=0;i<v.size();i++)
+				{
+					std::cerr << v[i] << std::endl;
+				}
+				break;
+            }
+		}
+
+		if (ok)
+		{
+			for(size_t i=0;i<v.size();i++)
+			{
+				if (v[i].size() > 0)
+				{
+					std::string t = rsa_decode_string(v[i], k, v[i].size(), t_msg_size_produced, use_gmp);
+					vr.push_back(t.substr(0, t_msg_size_produced));
+
+					if (cryptoAL::VERBOSE_DEBUG) std::cout << v[i].size() << "[" << v[i] << "]"<< "==>[" << t.substr(0, t_msg_size_produced) << "]"<< std::endl;
+				}
+			}
+
+			uint32_t sz = 0;
+			for(size_t i=0;i<vr.size();i++)
+			{
+                while(vr[i].size() < vinsz[i]) vr[i] = std::string("0") + vr[i];
+				r  += vr[i];
+				sz += vr[i].size();
+			}
+			msg_size_produced = sz;
+			if (cryptoAL::VERBOSE_DEBUG) std::cout << sz << std::endl;
+		}
+		return r;
 	}
 
 }

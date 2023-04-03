@@ -555,6 +555,7 @@ public:
                         {
 							// generate random embedded_rsa_key
 							uint32_t key_len_in_bytes = kout.key_size_in_bits/8;
+							// Base64  todo
 							embedded_rsa_key = cryptoAL::random::generate_base64_random_string(key_len_in_bytes - 11);
 							vurlkey[i].sRSA_ECC_ENCODED_DATA = embedded_rsa_key;
 							if (VERBOSE_DEBUG)
@@ -566,7 +567,9 @@ public:
 
 						uint32_t msg_input_size_used = 0;
 						uint32_t msg_size_produced = 0;
-						std::string t = rsa_util::rsa_encode_string(vurlkey[i].sRSA_ECC_ENCODED_DATA, kout, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
+
+						std::string t = rsa_util::rsa_encode_full_string(vurlkey[i].sRSA_ECC_ENCODED_DATA, kout, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
+						//std::string t = rsa_util::rsa_encode_string(vurlkey[i].sRSA_ECC_ENCODED_DATA, kout, msg_input_size_used, msg_size_produced, use_gmp, SELF_TEST);
 
 						// t may grow
 						vurlkey[i].sRSA_ECC_ENCODED_DATA = t;
@@ -961,6 +964,7 @@ public:
                     if (VERBOSE_DEBUG)
                     {
                         std::cout << "key extracted from data of size: " << d.buffer.size() << std::endl;
+						std::cout << "key checksum: " << std::string(vurlkey[i].checksum, 64) << std::endl;
                     }
                 }
             }
