@@ -32,6 +32,16 @@ namespace ns_menu
             std::cout << "HEX(" << sfile << "," << pos << "," << keysize << ") = " << rr << std::endl;
             std::cout << std::endl;
         }
+        else if (choice == 2)
+        {
+            std::cout << "Enter filename: ";
+            std::string sfile;
+            std::cin >> sfile;
+
+            std::string rr = file_util::file_checksum(sfile);
+            std::cout << "SHA(" << sfile << ") = " << rr << std::endl;
+            std::cout << std::endl;
+        }
         return r;
 	}
 }
