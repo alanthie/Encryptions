@@ -2036,14 +2036,19 @@ public:
 			if (auto_flag)
 			{
 				std::cout << std::endl;
-				std::cout << "WARNING It appears that your are decoding a file you made and auto update is on." << std::endl;
-				std::cout << "Normally the auto update flag is to update other public keys received from the sender of the encrypted file." << std::endl;
-				std::cout << "The auto update will update your other public keys with your own public keys!" << std::endl;
-				std::cout << "Do you really want to do this update? n=no (normal, just do the decoding), y=yes (I'm only testing)" << std::endl;
+				std::cout << "WARNING - It appears that your are decoding a file you made and auto update is on." << std::endl;
+				std::cout << "Normally the auto update flag is to update the public keys received from the sender of the encrypted file." << std::endl;
+				std::cout << "The auto option will update the public keys of the sender with your own public keys!" << std::endl;
+				std::cout << "Do you really want to do this? n=no (normal, just do the decoding), y=yes (I'm only testing)" << std::endl;
 				std::cout << "==> ";
 				std::string q = ns_menu::get_input_string();
-				if (q=="n") auto_save = false;
-				else if (q=="N") auto_save = false;
+				if      ((q=="n") || (q=="N") || (q=="no") || (q== "NO")) {auto_save = false;}
+				else if ((q=="y") || (q=="Y") || (q=="yes")|| (q=="YES")) {}
+				else
+				{
+                    std::cout << "invalid response, only the decoding will be done, no update of public keys" << std::endl;
+                    auto_save = false;
+				}
 			}
 		}
 
@@ -2067,10 +2072,6 @@ public:
             {
                 std::cerr << "ERROR " << "the provided puzzle dont match the initial one." << std::endl;
                 r = false;
-            }
-            else if (VERBOSE_DEBUG)
-            {
-                std::cout << "DEBUG " << "the provided puzzle match the initial one: " << crc_full_puz_key << std::endl;
             }
         }
         if (r)
