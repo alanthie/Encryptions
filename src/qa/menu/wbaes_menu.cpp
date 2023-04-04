@@ -34,10 +34,10 @@ namespace ns_menu
 				else if (pos==7) aes = "aes32768";
 
 				std::string pathdb;
-				if ((cfg_parse_result) && (cfg.cmdparam.folder_local.size()>0))
+				if ((cfg_parse_result) && (cfg.cmdparam.wbaes_my_private_path.size()>0))
 				{
-					pathdb = cfg.cmdparam.folder_local;
-					std::cout << "Folder where key tables (*.tbl) will be saved [using local folder in config]: " << pathdb << std::endl;
+					pathdb = cfg.cmdparam.wbaes_my_private_path;
+					std::cout << "Folder where key tables (*.tbl) will be saved [using wbaes_my_private_path in config]: " << pathdb << std::endl;
 				}
 				else
 				{

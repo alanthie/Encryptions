@@ -327,6 +327,7 @@ public:
 		std::cout << "filename_decrypted_data: " << cmdparam.filename_decrypted_data  << std::endl;
 
         std::cout << "folder_staging:          " << cmdparam.folder_staging  << std::endl;
+		std::cout << "folder_local             " << cmdparam.folder_local << std::endl;
         std::cout << "folder_my_private_rsa:   " << cmdparam.folder_my_private_rsa << std::endl;
         std::cout << "folder_other_public_rsa: " << cmdparam.folder_other_public_rsa   << std::endl;
         std::cout << "folder_my_private_ecc:   " << cmdparam.folder_my_private_ecc   << std::endl;
