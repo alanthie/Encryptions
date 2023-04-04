@@ -20,6 +20,7 @@
 #include "crypto_cfg.hpp"
 #include "crypto_png.hpp"
 #include "qa/aes-whitebox/aes_whitebox.hpp"
+#include "qa/menu/menu.h"
 
 
 namespace cryptoAL
@@ -2013,6 +2014,43 @@ public:
 			}
 		}
 
+		//-------------------------
+		// TODO some simple identification of origin
+		//-------------------------
+		char c[256+1] = {0};
+		int cnt=0;
+		for(size_t i=file_size-256;i<file_size;i++)
+		{
+			c[cnt] = encrypted_data.buffer.getdata()[i];
+			cnt++;
+		}
+		std::string remote_cd(c);
+		strutil::trim(remote_cd);
+		encrypted_data.buffer.remove_last_n_char(256);
+		if (VERBOSE_DEBUG) std::cout << "file remote directory: " << remote_cd << std::endl;
+		std::string cd = file_util::get_current_dir();
+
+		bool auto_save = auto_flag;
+		if (cd == remote_cd)
+		{
+			if (auto_flag)
+			{
+				std::cout << std::endl;
+				std::cout << "WARNING It appears that your are decoding a file you made and auto update is on." << std::endl;
+				std::cout << "Normally the auto update flag is to update other public keys received from the sender of the encrypted file." << std::endl;
+				std::cout << "The auto update will update your other public keys with your own public keys!" << std::endl;
+				std::cout << "Do you really want to do this update? n=no (normal, just do the decoding), y=yes (I'm only testing)" << std::endl;
+				std::cout << "==> ";
+				std::string q = ns_menu::get_input_string();
+				if (q=="n") auto_save = false;
+				else if (q=="N") auto_save = false;
+			}
+		}
+
+		//-------------------------
+		// PLAIN crc_full_puz_key
+		//-------------------------
+		file_size = encrypted_data.buffer.size();
 		uint32_t crc_read_full_puz_key;
 		uint32_t crc_full_puz_key;
 		if (r)
@@ -2035,7 +2073,6 @@ public:
                 std::cout << "DEBUG " << "the provided puzzle match the initial one: " << crc_full_puz_key << std::endl;
             }
         }
-
         if (r)
 		{
             encrypted_data.buffer.remove_last_n_char(4);
@@ -2297,7 +2334,7 @@ public:
             r = data_temp.copy_buffer_to(decrypted_data);
             if (r)
             {
-                r = post_decode(decrypted_data, filename_decrypted_data);
+                r = post_decode(decrypted_data, filename_decrypted_data, auto_save);
                 if(r==false)
                 {
                     std::cerr << "ERROR " << "saving " << filename_decrypted_data << std::endl;
@@ -2431,7 +2468,7 @@ public:
 		return r;
 	}
 
-	bool post_decode(cryptodata& decrypted_data, const std::string& filename_decrypted_data)
+	bool post_decode(cryptodata& decrypted_data, const std::string& filename_decrypted_data, bool auto_save = true)
 	{
         datalist.verbose = verbose;
         bool r = true;
@@ -2449,7 +2486,8 @@ public:
                                         folder_my_private_rsa,
                                         folder_my_private_ecc,
                                         folder_my_private_hh,
-                                        verbose);
+                                        verbose,
+										auto_save); // save if auto_flag==true
 
         if (r)
         {

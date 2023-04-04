@@ -24,7 +24,7 @@ namespace ns_menu
 			else
 			{
                 std::cout << "Enter path for ecc domain database " << cryptoAL::ECC_DOMAIN_DB << " (0 = current directory) : ";
-                std::cin >> pathDOMdb;
+                pathDOMdb = get_input_string();
                 if (pathDOMdb == "0") pathDOMdb = "./";
                 fileECCDOMDB = pathDOMdb + cryptoAL::ECC_DOMAIN_DB;
 			}
@@ -62,7 +62,7 @@ namespace ns_menu
                 {
                     std::cout << "Select a ecc domain " << 1 << "-" << std::to_string(cnt) << " (0 = largest key ) : ";
                     std::string dom;
-                    std::cin >> dom;
+                    dom = get_input_string();
 
                     long long idom = cryptoAL::parsing::str_to_ll(dom);
                     if (idom <   1) idom = 1;
@@ -86,7 +86,7 @@ namespace ns_menu
                         {
                             std::cout << "Enter path for ecc private keys database " << cryptoAL::ECCKEY_MY_PRIVATE_DB << " (0 = same as domain) : ";
                             std::string pathecckeydb;
-                            std::cin >> pathecckeydb;
+                            pathecckeydb = get_input_string();
                             if (pathecckeydb == "0") pathecckeydb = pathDOMdb;
                             fileECCKEYDB = pathecckeydb + cryptoAL::ECCKEY_MY_PRIVATE_DB;
                         }
@@ -161,14 +161,14 @@ namespace ns_menu
 			{
                 std::cout << "Enter path for my private ecc keys db " << cryptoAL::ECCKEY_MY_PRIVATE_DB << " (0 = current directory) : ";
                 std::string pathdb;
-                std::cin >> pathdb;
+                pathdb = get_input_string();
                 if (pathdb == "0") pathdb = "./";
                 fileECCKEYDB = pathdb + cryptoAL::ECCKEY_MY_PRIVATE_DB;
 			}
 
 			std::cout << "Only show summary (0 = true): ";
             std::string osummary;
-            std::cin >> osummary;
+            osummary = get_input_string();
             bool onlysummary=false;
             if (osummary == "0") onlysummary = true;
 
@@ -231,7 +231,7 @@ namespace ns_menu
 			else
 			{
                 std::cout << "Enter path for my private ecc keys db " << cryptoAL::ECCKEY_MY_PRIVATE_DB << " (0 = current directory) : ";
-                std::cin >> pathdb;
+                pathdb = get_input_string();
                 if (pathdb == "0") pathdb = "./";
                 fileECCKEYDB = pathdb + cryptoAL::ECCKEY_MY_PRIVATE_DB;
 			}
@@ -290,14 +290,14 @@ namespace ns_menu
 			else
 			{
                 std::cout << "Enter path for my ecc public database " << cryptoAL::ECCKEY_MY_PUBLIC_DB << " (0 = current directory) : ";
-                std::cin >> pathdb;
+                pathdb = get_input_string();
                 if (pathdb == "0") pathdb = "./";
                 fileECCKEYDB = pathdb + cryptoAL::ECCKEY_MY_PUBLIC_DB;
 			}
 
             std::cout << "Only show summary (0 = true): ";
             std::string osummary;
-            std::cin >> osummary;
+            osummary = get_input_string();
             bool onlysummary=false;
             if (osummary == "0") onlysummary = true;
 
@@ -358,14 +358,14 @@ namespace ns_menu
 			else
 			{
                 std::cout << "Enter path of other ecc public database " << cryptoAL::ECCKEY_OTHER_PUBLIC_DB << " (0 = current directory) : ";
-                std::cin >> pathdb;
+                pathdb = get_input_string();
                 if (pathdb == "0") pathdb = "./";
                 fileECCKEYDB = pathdb + cryptoAL::ECCKEY_OTHER_PUBLIC_DB;
 			}
 
             std::cout << "Only show summary (0 = true): ";
             std::string osummary;
-            std::cin >> osummary;
+            osummary = get_input_string();
             bool onlysummary=false;
             if (osummary == "0") onlysummary = true;
 

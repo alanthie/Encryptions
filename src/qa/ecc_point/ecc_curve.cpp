@@ -8,8 +8,6 @@ int ecc_curve::init_curve(  unsigned int nbits,
                             const std::string& ia, const std::string& ib, const std::string& iprime,
 							const std::string& iorder, int icofactor, const std::string& igx, const std::string& igy)
 {
-    if (verbose) std::cout << "init_curve " << "\n";
-
     mpz_init_set_str(prime,iprime.data(),10);
 	mpz_init_set_str(a,ia.data(),10);
 	mpz_init_set_str(b,ib.data(),10);
@@ -19,23 +17,19 @@ int ecc_curve::init_curve(  unsigned int nbits,
     cofactor = icofactor;
 
     bits_len = nbits; //bitSize(prime);
-    if (verbose)
-    {
-        std::cout << "BITS " << bits_len  << "\n";
-    }
 
 	MSG_BYTES_MAX = bits_len/8;
 	MSG_BYTES_MAX -= 1;             // space to find a valid message on curve x+0, 1,...255 - 50% of x are on curve
 	MSG_BYTES_PAD = 1;
-	if (verbose)
-	{
-        std::cout << "MSG_BYTES_MAX " << MSG_BYTES_MAX  << "\n";
-        std::cout << "MSG_BYTES_PAD " << MSG_BYTES_PAD  << "\n";
-	}
+	//if (verbose)
+	//{
+    //    std::cout << "MSG_BYTES_MAX " << MSG_BYTES_MAX  << "\n";
+    //    std::cout << "MSG_BYTES_PAD " << MSG_BYTES_PAD  << "\n";
+	//}
 
 	if (existPoint1(generator_point.x,generator_point.y))
     {
-        if (verbose) std::cout << "generator_point OK"  << "\n";
+        //if (verbose) std::cout << "generator_point OK"  << "\n";
 		return 0;
 	}
 	else
@@ -348,8 +342,8 @@ bool ecc_curve::decode(ecc_point& in_Cm, ecc_point& in_rG, std::string& out_msg,
 	}
 
 	out_msg = std::string(out_message.getdata(), out_message.size()); // not zero ended buffer out_message
-	if (verbose)
-        std::cout <<"message from [Cm-rGPriv] point: " << out_msg << " size: " << out_msg.size() << std::endl;
+	//if (verbose)
+    //    std::cout <<"message from [Cm-rGPriv] point: " << out_msg << " size: " << out_msg.size() << std::endl;
 
 	return true;
 }

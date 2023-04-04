@@ -428,7 +428,9 @@ bool GenerateTables(const char* hexKey, const char* rndKey, uint32_t rndsize, in
 }
 
 
-int generate_aes(	const std::string& file_for_key, uint32_t pos1,
+int generate_aes(	const std::string& short_file_for_key,
+					const std::string& short_file_for_xor,
+					const std::string& file_for_key, uint32_t pos1,
 					const std::string& file_for_xor, uint32_t pos2,
 					const std::string& aes, const std::string& pathtbl, const std::string& tablekeyname, bool verbose = false)
 {
@@ -464,10 +466,12 @@ int generate_aes(	const std::string& file_for_key, uint32_t pos1,
 	cryptoAL::cryptodata build_info_file;
 	std::string build_info_filename = pathtbl + aes + "_" + tablekeyname + "_build_info" + ".tbl";
 	std::string s_build_info;
-	s_build_info += file_for_key + "\n";
-	s_build_info += std::to_string(pos1) + "\n";
-	s_build_info += file_for_xor + "\n";
-	s_build_info += std::to_string(pos2) + "\n";
+	s_build_info += aes 					+ "\n";
+	s_build_info += tablekeyname 			+ "\n";
+	s_build_info += short_file_for_key 		+ "\n";
+	s_build_info += std::to_string(pos1) 	+ "\n";
+	s_build_info += short_file_for_xor 		+ "\n";
+	s_build_info += std::to_string(pos2) 	+ "\n";
 	{
 		std::string sha = file_util::file_checksum(file_for_key);
 		s_build_info += sha + "\n";

@@ -19,7 +19,7 @@ namespace ns_menu
 			{
 			    std::cout << "Select one 1=AES512, 2=AES1024, 3=AES2048, 4=AES4096, 5=AES8192, 6=AES16384, 7=AES32768 ";
 				std::string spos;
-				std::cin >> spos;
+				spos = get_input_string();
 				long long pos = cryptoAL::parsing::str_to_ll(spos);
 				if (pos<1) pos = 1;
 				if (pos>7) pos = 7;
@@ -42,10 +42,10 @@ namespace ns_menu
 				else
 				{
 					std::cout << "Enter path where to save key tables (*.tbl) " << " (0 = current directory) : ";
-					std::cin >> pathdb;
+					pathdb = get_input_string();
 					if (pathdb == "0") pathdb = "./";
 				}
-			
+
 				std::string pathkey;
 				if ((cfg_parse_result) && (cfg.cmdparam.folder_local.size()>0))
 				{
@@ -55,13 +55,13 @@ namespace ns_menu
 				else
 				{
 					std::cout << "Enter path where to find key input files " << " (0 = current directory) : ";
-					std::cin >> pathkey;
+					pathkey = get_input_string();
 					if (pathkey == "0") pathkey = "./";
 				}
-				
+
 				std::cout << "Enter key name (5 *.tbl files are generated): ";
 				std::string kn;
-				std::cin >> kn;
+				kn = get_input_string();
 				if (kn.size()==0)
 				{
                     std::cout << "ERROR keyname empty" << std::endl;
@@ -73,26 +73,30 @@ namespace ns_menu
 
 				std::string file_for_key;
 				std::string file_for_xor;
+				std::string short_file_for_key;
+				std::string short_file_for_xor;
 
 				std::cout << "Enter file to use to generate the key (0 = binary.dat.1) : ";
-				std::cin >> file_for_key;
+				file_for_key = get_input_string();
 				if (file_for_key.size()==0)
                 {
                     std::cout << "ERROR empty filename " << std::endl;
                     return -1;
 				}
 				if (file_for_key == "0") file_for_key = "binary.dat.1";
+				short_file_for_key = file_for_key;
 				file_for_key = pathkey + file_for_key;
 				std::cout << "file to use to generate the key is: " << file_for_key << std::endl;
 
 				std::cout << "Enter file to use to generate the xor (0 = binary.dat.2) : ";
-				std::cin >> file_for_xor;
+				file_for_xor = get_input_string();
 				if (file_for_xor.size()==0)
 				{
                     std::cout << "ERROR empty filename " << std::endl;
                     return -1;
 				}
 				if (file_for_xor == "0") file_for_xor = "binary.dat.2";
+				short_file_for_xor = file_for_xor;
 				file_for_xor = pathkey + file_for_xor;
 				std::cout << "file to use to generate the xor is: " << file_for_xor << std::endl;
 
@@ -102,7 +106,7 @@ namespace ns_menu
 				long long pos2;
 
 				std::cout << "Enter file position for key (0 = first byte) : ";
-				std::cin >> pos_for_key;
+				pos_for_key = get_input_string();
 				if (pos_for_key.size()==0)
                 {
                     std::cout << "ERROR empty position " << std::endl;
@@ -114,7 +118,7 @@ namespace ns_menu
 				std::cout << "file position for key is: " << pos1 << std::endl;
 
 				std::cout << "Enter file position for xor (0 = first byte) : ";
-				std::cin >> pos_for_xor;
+				pos_for_xor = get_input_string();
 				if (pos_for_xor.size()==0)
 				{
                     std::cout << "ERROR empty position " << std::endl;
@@ -125,13 +129,17 @@ namespace ns_menu
 				if (pos2 < 0) pos2 = 0;
 				std::cout << "file position for xor is: " << pos2 << std::endl;
 
-				int r = WBAES::generate_aes(file_for_key, (uint32_t)pos1, file_for_xor, (uint32_t)pos2, aes, pathdb, kn, true);		// CREATE
+				int r = WBAES::generate_aes(short_file_for_key,
+											short_file_for_xor,
+											file_for_key, (uint32_t)pos1,
+											file_for_xor, (uint32_t)pos2,
+											aes, pathdb, kn, true);		// CREATE
 				if (r!=0)
 				{
 					std::cerr << "ERROR creating aes" << std::endl;
 					return -1;
 				}
-				
+
 				WBAES::wbaes_instance_mgr aes_instance_mgr(aes, pathdb, kn, true, true);	// LOAD
 				WBAES::wbaes_vbase* paes = aes_instance_mgr.get_aes();
 				if (paes == nullptr)
@@ -183,28 +191,4 @@ namespace ns_menu
         return r;
     }
 
-/* HEX
-        else if (choice == 3)
-        {
-            std::cout << "HEX(file, position, keysize)" << std::endl;
-            std::cout << "Enter filename: ";
-            std::string sfile;
-            std::cin >> sfile;
-
-            std::cout << "Enter position: ";
-            std::string spos;
-            std::cin >> spos;
-            long long pos = cryptoAL::parsing::str_to_ll(spos);
-
-            std::cout << "Enter keysize: ";
-            std::string skeysize;
-            std::cin >> skeysize;
-            long long keysize = cryptoAL::parsing::str_to_ll(skeysize);
-
-            qaclass qa;
-            auto r = file_util::HEX(sfile, pos, keysize);
-            std::cout << "HEX(" << sfile << "," << pos << "," << keysize << ") = " << r << std::endl;
-            std::cout << std::endl;
-        }
-*/
 }

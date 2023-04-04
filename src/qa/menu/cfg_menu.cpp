@@ -19,7 +19,7 @@ namespace ns_menu
 
 			std::cout << "Enter full path of the config file (0 = ./cfg.ini, 1 = skip): ";
 			std::string sfile;
-			std::cin >> sfile;
+			sfile = get_input_string();
 			if (sfile.size() == 0)
 			{
 			}

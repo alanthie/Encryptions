@@ -93,14 +93,14 @@ namespace ns_menu
 			{
                 std::cout << "Enter path for my private rsa database " << cryptoAL::RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
                 std::string pathdb;
-                std::cin >> pathdb;
+                pathdb = get_input_string();
                 if (pathdb == "0") pathdb = "./";
                 fileRSADB = pathdb + cryptoAL::RSA_MY_PRIVATE_DB;
 			}
 
 			std::cout << "Only show summary (0 = true): ";
 			std::string osummary;
-			std::cin >> osummary;
+			osummary = get_input_string();
 			bool onlysummary=false;
 			if (osummary == "0") onlysummary = true;
 
@@ -159,14 +159,14 @@ namespace ns_menu
 			{
 				std::cout << "Enter path for my rsa public database " << cryptoAL::RSA_MY_PUBLIC_DB << " (0 = current directory) : ";
 				std::string pathdb;
-				std::cin >> pathdb;
+				pathdb = get_input_string();
 				if (pathdb == "0") pathdb = "./";
 				fileRSADB = pathdb + cryptoAL::RSA_MY_PUBLIC_DB;
 			}
 
             std::cout << "Only show summary (0 = true): ";
             std::string osummary;
-            std::cin >> osummary;
+            osummary = get_input_string();
             bool onlysummary=false;
             if (osummary == "0") onlysummary = true;
 
@@ -225,14 +225,14 @@ namespace ns_menu
 			{
 				std::cout << "Enter path of other rsa public database " << cryptoAL::RSA_OTHER_PUBLIC_DB << " (0 = current directory) : ";
 				std::string pathdb;
-				std::cin >> pathdb;
+				pathdb = get_input_string();
 				if (pathdb == "0") pathdb = "./";
 				fileRSADB = pathdb + cryptoAL::RSA_OTHER_PUBLIC_DB;
 			}
 
             std::cout << "Only show summary (0 = true): ";
             std::string osummary;
-            std::cin >> osummary;
+            osummary = get_input_string();
             bool onlysummary=false;
             if (osummary == "0") onlysummary = true;
 
@@ -294,7 +294,7 @@ namespace ns_menu
 			{
 				std::cout << "Enter path of my private rsa database to read: " << cryptoAL::RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
 				std::string pathdb;
-				std::cin >> pathdb;
+				pathdb = get_input_string();
 				if (pathdb == "0") pathdb = "./";
 				fileRSADB = pathdb + cryptoAL::RSA_MY_PRIVATE_DB;
 			}
@@ -352,7 +352,7 @@ namespace ns_menu
 
 			std::cout << "Enter rsa key length in bits (0 = defaut = 16384): ";
 			std::string snum;
-			std::cin >> snum;
+			snum = get_input_string();
 			long long klen = cryptoAL::parsing::str_to_ll(snum);
 			if (klen==-1)
 			{
@@ -372,14 +372,14 @@ namespace ns_menu
 			{
 				std::cout << "Enter path for rsa database " << cryptoAL::RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
 				std::string pathdb;
-				std::cin >> pathdb;
+				pathdb = get_input_string();
 				if (pathdb == "0") pathdb = "./";
 				fileRSADB = pathdb + cryptoAL::RSA_MY_PRIVATE_DB;
 			}
 
 			std::cout << "Enter path for OPENSSL "<< " (0 = not needed, 1 = D:\\000DEV\\Encryptions\\Exec_Windows\\binOpenSSL\\ for openssl.exe) : ";
 			std::string pathopenssl;
-			std::cin >> pathopenssl;
+			pathopenssl = get_input_string();
 			if (pathopenssl == "0") pathopenssl = "";
 			if (pathopenssl == "1") pathopenssl = "D:\\000DEV\\Encryptions\\Exec_Windows\\binOpenSSL\\";
 
@@ -504,7 +504,7 @@ namespace ns_menu
 
 			std::cout << "Enter rsa key length in bits (0 = defaut = 2048): ";
 			std::string snum;
-			std::cin >> snum;
+			snum = get_input_string();
 			long long klen = cryptoAL::parsing::str_to_ll(snum);
 			if (klen==-1)
 			{
@@ -523,7 +523,7 @@ namespace ns_menu
 			{
 				std::cout << "Enter path for rsa database " << cryptoAL::RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
 				std::string pathdb;
-				std::cin >> pathdb;
+				pathdb = get_input_string();
 				if (pathdb == "0") pathdb = "./";
 				fileRSADB = pathdb + cryptoAL::RSA_MY_PRIVATE_DB;
 			}

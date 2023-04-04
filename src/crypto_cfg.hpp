@@ -373,7 +373,8 @@ public:
 
 };
 
-
+// hwinfo
+// https://github.com/lfreist/hwinfo
 
 } //namespace
 #endif // CRYPTO_CFG_HPP

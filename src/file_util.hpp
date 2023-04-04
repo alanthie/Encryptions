@@ -17,6 +17,11 @@ namespace file_util
 			return false;
 	}
 
+	[[maybe_unused]] static std::string get_current_dir()
+	{
+		return std::filesystem::current_path();
+	}
+
 	[[maybe_unused]] static int32_t filesize(std::string filename)
 	{
 		int32_t sz = -1;

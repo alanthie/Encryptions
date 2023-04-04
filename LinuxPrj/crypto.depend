@@ -181,7 +181,7 @@
 	<curl/curl.h>
 	"encrypt.h"
 
-1680539364 /home/server/dev/Encryptions/src/encryptor.hpp
+1680587704 /home/server/dev/Encryptions/src/encryptor.hpp
 	"crypto_const.hpp"
 	<iostream>
 	<fstream>
@@ -224,7 +224,7 @@
 	<stdio.h>
 	<string.h>
 
-1680542821 /home/server/dev/Encryptions/src/decryptor.hpp
+1680587717 /home/server/dev/Encryptions/src/decryptor.hpp
 	"crypto_const.hpp"
 	"file_util.hpp"
 	"ecc_util.hpp"
@@ -244,6 +244,7 @@
 	"crypto_cfg.hpp"
 	"crypto_png.hpp"
 	"qa/aes-whitebox/aes_whitebox.hpp"
+	"qa/menu/menu.h"
 
 1680400077 /home/server/dev/Encryptions/src/crypto_test.hpp
 	"crypto_const.hpp"
@@ -546,20 +547,20 @@
 	<gmpxx.h>
 	"../../Buffer.hpp"
 
-1679201870 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.cpp
+1680587553 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.cpp
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
 	<iostream>
 	"ecc_curve.hpp"
 
-1679197916 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_elgamal.cpp
+1680587403 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_elgamal.cpp
 	<stdlib.h>
 	<stdio.h>
 	<time.h>
 	"ecc_curve.hpp"
 
-1680204859 /home/server/dev/Encryptions/src/cryptodata_list.hpp
+1680586062 /home/server/dev/Encryptions/src/cryptodata_list.hpp
 	"crypto_const.hpp"
 	"crypto_png.hpp"
 	<iostream>
@@ -595,7 +596,7 @@
 	<string>
 	<algorithm>
 
-1680573289 /home/server/dev/Encryptions/src/crypto_cfg.hpp
+1680580594 /home/server/dev/Encryptions/src/crypto_cfg.hpp
 	"crypto_const.hpp"
 	"ini_parser.hpp"
 	"crypto_strutil.hpp"
@@ -663,7 +664,7 @@
 	<fstream>
 	<filesystem>
 
-1680400429 /home/server/dev/Encryptions/src/file_util.hpp
+1680583007 /home/server/dev/Encryptions/src/file_util.hpp
 	"crypto_const.hpp"
 	"data.hpp"
 	"SHA256.h"
@@ -693,4 +694,34 @@
 	<filesystem>
 	<iostream>
 	<fstream>
+
+1680577666 /home/server/dev/Encryptions/src/qa/menu/menu.h
+	"../../crypto_cfg.hpp"
+	"../../crypto_parsing.hpp"
+	"menu_io.h"
+	<iostream>
+	<any>
+	<string>
+	<variant>
+	<vector>
+	<type_traits>
+	<optional>
+	<sstream>
+	<limits>
+	<cctype>
+	<filesystem>
+
+1680454083 /home/server/dev/Encryptions/src/qa/menu/menu_io.h
+	"../../crypto_cfg.hpp"
+	<iostream>
+	<any>
+	<string>
+	<variant>
+	<vector>
+	<type_traits>
+	<optional>
+	<sstream>
+	<limits>
+	<cctype>
+	<filesystem>
 

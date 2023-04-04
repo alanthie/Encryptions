@@ -290,7 +290,8 @@ public:
 							const std::string&  folder_my_private_rsa,
                             const std::string&  folder_my_private_ecc,
                             const std::string&  folder_my_private_hh,
-							bool verbose = false)
+							bool verbose = false,
+							bool auto_save = true)
 	{
 		bool r = true;
 		r = header.read_from_buffer(in_data.buffer,
@@ -316,12 +317,15 @@ public:
 			if (VERBOSE_DEBUG) std::cout << "------------------------------------ " <<  std:: endl;
 			if (VERBOSE_DEBUG) std::cout << " Saving files: " << std:: endl;
 			if (VERBOSE_DEBUG) std::cout << "------------------------------------ " <<  std:: endl;
+			bool is_raw;
 			for(size_t i=0;i<vitem.size();i++)
 			{
+				is_raw = false;
                 if ( (cntRAW==0) && (header.vitem[i].data_type == CRYPTO_FILE_TYPE::RAW))
                 {
                     cntRAW++;
                     vitem[i].filename = filename_raw_data;
+					is_raw = true;
                 }
 				vitem[i].b->buffer.increase_size(header.vitem[i].data_size);
 
@@ -329,13 +333,14 @@ public:
 				vitem[i].b->buffer.write(&in_data.buffer.getdata()[posdata], header.vitem[i].data_size, 0);
 
 				// bck...
-
-				if (VERBOSE_DEBUG)
+				if (auto_save || is_raw)
 				{
-					std::cout << "saving... " << vitem[i].filename << std:: endl;
+					if (VERBOSE_DEBUG)
+					{
+						std::cout << "saving... " << vitem[i].filename << std:: endl;
+					}
+					vitem[i].b->save_to_file(vitem[i].filename);
 				}
-				vitem[i].b->save_to_file(vitem[i].filename);
-
 				posdata += header.vitem[i].data_size;
 			}
 			if (VERBOSE_DEBUG) std::cout << "------------------------------------ "  << std:: endl<< std:: endl;

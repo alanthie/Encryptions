@@ -1168,7 +1168,7 @@ public:
 		if (key_size % 32 != 0)
 		{
             r = false;
-            std::cerr 	<< "ERROR " << "encode_salsa20 key must be multiple of 32 bytes: " <<  key_size 
+            std::cerr 	<< "ERROR " << "encode_salsa20 key must be multiple of 32 bytes: " <<  key_size
 						<< std::endl;
             return r;
 		}
@@ -1607,7 +1607,7 @@ public:
 		if (data_temp.buffer.size() % 32 != 0)
 		{
             r = false;
-            std::cerr 	<< "ERROR encode_binaes256 " << "encoding file must be multiple of 32 bytes: " << data_temp.buffer.size() 
+            std::cerr 	<< "ERROR encode_binaes256 " << "encoding file must be multiple of 32 bytes: " << data_temp.buffer.size()
 						<< std::endl;
 			return false;
 		}
@@ -2319,6 +2319,11 @@ public:
                 data_temp, puz_key_full.getdata(), puz_key_full.size(), data_temp_next);
 
         data_temp_next.buffer.writeUInt32(crc_full_puz_key, -1);    // PLAIN
+
+		// TODO some simple identification of origin
+		std::string cd = file_util::get_current_dir();
+		while (cd.size() < 256) cd += " ";
+		data_temp_next.buffer.write(cd.data(), 256);
 
         if (VERBOSE_DEBUG)
         {

@@ -184,27 +184,27 @@ namespace ns_menu
 			{
 				std::cout << "Enter folder of qa binary random data: ";
 				std::string sf;
-				std::cin >> sf;
+				sf = get_input_string();
 			}
 
             std::cout << "Enter puzzle filename (0 = defaut): ";
             std::string pf;
-            std::cin >> pf;
+            pf = get_input_string();
             if (pf == "0") pf = "";
 
             std::cout << "Enter data short filename (0 = defaut): ";
             std::string dsf;
-            std::cin >> dsf;
+            dsf = get_input_string();
             if (dsf == "0") dsf = "";
 
             std::cout << "Enter number of files to use (0 = defaut): ";
             std::string snf;
-            std::cin >> snf;
+            snf = get_input_string();
             long long nf = cryptoAL::parsing::str_to_ll(snf);
 
             std::cout << "Enter number of questions to generate per file read  (0 = defaut): ";
             std::string snqa;
-            std::cin >> snqa;
+            snqa = get_input_string();
             long long nqa = cryptoAL::parsing::str_to_ll(snqa);
 
             make_puzzle(pf, sf, dsf, nf, nqa);
@@ -221,17 +221,17 @@ namespace ns_menu
 			{
 				std::cout << "Enter folder of qa binary random data: ";
 				std::string sf;
-				std::cin >> sf;
+				sf = get_input_string();
 			}
 
             std::cout << "Enter puzzle filename (0 = defaut): ";
             std::string pf;
-            std::cin >> pf;
+            pf = get_input_string();
             if (pf == "0") pf = "";
 
             std::cout << "Enter output resolved puzzle filename (0 = defaut): ";
             std::string opf;
-            std::cin >> opf;
+            opf = get_input_string();
             if (opf == "0") opf = "";
 
             resolve_puzzle(pf, opf, sf);

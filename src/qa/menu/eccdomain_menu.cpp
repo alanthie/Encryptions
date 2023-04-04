@@ -17,7 +17,7 @@ namespace ns_menu
       	{
 			std::cout << "Enter ecc text file (ecgen output) to parse: ";
 			std::string eccfile;
-			std::cin >> eccfile;
+			eccfile = get_input_string();
 
 			std::string fileECCDOMDB;
 			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_ecc.size()>0))
@@ -28,7 +28,7 @@ namespace ns_menu
 			{
                 std::cout << "Enter path for ecc domain database " << cryptoAL::ECC_DOMAIN_DB << " (0 = current directory) : ";
                 std::string pathdb;
-                std::cin >> pathdb;
+                pathdb = get_input_string();
                 if (pathdb == "0") pathdb = "./";
                 fileECCDOMDB = pathdb + cryptoAL::ECC_DOMAIN_DB;
 			}
@@ -121,7 +121,7 @@ namespace ns_menu
 			else
 			{
                 std::string pathdb;
-                std::cin >> pathdb;
+                pathdb = get_input_string();
                 if (pathdb == "0") pathdb = "./";
                 fileECCDOMDB = pathdb + cryptoAL::ECC_DOMAIN_DB;
             }
@@ -138,14 +138,14 @@ namespace ns_menu
 			{
                 std::cout << "Enter path for ecc domain database " << cryptoAL::ECC_DOMAIN_DB << " (0 = current directory) : ";
                 std::string pathdb;
-                std::cin >> pathdb;
+                pathdb = get_input_string();
                 if (pathdb == "0") pathdb = "./";
                 fileECCDOMDB = pathdb + cryptoAL::ECC_DOMAIN_DB;
 			}
 
 			std::cout << "Only show summary (0 = true): ";
             std::string osummary;
-            std::cin >> osummary;
+            osummary = get_input_string();
             bool onlysummary=false;
             if (osummary == "0") onlysummary = true;
 
@@ -210,7 +210,7 @@ namespace ns_menu
 			else
 			{
                 std::cout << "Enter path of your ecc domain database " << cryptoAL::ECC_DOMAIN_DB << " (0 = current directory) : ";
-                std::cin >> pathdb;
+                pathdb = get_input_string();
                 if (pathdb == "0") pathdb = "./";
                 fileECCDOMDB = pathdb + cryptoAL::ECC_DOMAIN_DB;
 			}
@@ -226,7 +226,7 @@ namespace ns_menu
 			{
 				std::cout << "Enter path of other ecc domain database to import " << cryptoAL::ECC_DOMAIN_DB << " (0 = current directory) : ";
 				std::string pathotherdb;
-				std::cin >> pathotherdb;
+				pathotherdb = get_input_string();
 				if (pathotherdb == "0") pathotherdb = "./";
 				std::string fileECCDOMOTHERDB = pathotherdb + cryptoAL::ECC_DOMAIN_DB;
 			}

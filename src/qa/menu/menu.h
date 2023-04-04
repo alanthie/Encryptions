@@ -21,6 +21,16 @@ namespace ns_menu
 {
     class Menu;
 
+    static std::string get_input_string()
+    {
+        //std::cin stops reading as soon as it encounters a space or new lin
+        std::string r;
+        std::cin >> r;
+        std::cin.ignore(10000, '\n');
+        std::cin.clear();
+        return r;
+    }
+
 	enum MENU_ID
 	{
         ROOT = 0,
@@ -144,15 +154,17 @@ namespace ns_menu
                 }
 
                 oss << "[0] Exit this menu\n\nEnter option";
-
                 std::cout << oss.str() << " ==> " ;
-                std::string schoice;
-                std::cin >> schoice;
+
+                std::string schoice = get_input_string();
                 long long choice = cryptoAL::parsing::str_to_ll(schoice);
+
                 while ((choice < 0) || (choice > (long long )nom))
                 {
                     std::cout << "invalid entry" << std::endl;
                     std::cout << oss.str()<< " ==> " ;
+
+                    schoice = get_input_string();
                     choice = cryptoAL::parsing::str_to_ll(schoice);
                 }
                 std::cout << std::endl;

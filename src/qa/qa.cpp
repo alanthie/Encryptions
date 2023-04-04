@@ -15,6 +15,7 @@ void qa_menu()
 
 int main()
 {
+	std::cout << "current directory: " << file_util::get_current_dir() << std::endl;
     qa_menu();
     return 0;
 }

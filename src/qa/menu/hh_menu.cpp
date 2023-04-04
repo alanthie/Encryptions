@@ -23,7 +23,7 @@ namespace ns_menu
 			{
                 std::cout << "Enter path of encode history database " << cryptoAL::HHKEY_MY_PRIVATE_ENCODE_DB << " (0 = current directory) : ";
                 std::string pathdb;
-                std::cin >> pathdb;
+                pathdb = get_input_string();
                 if (pathdb == "0") pathdb = "./";
                 fileHistoDB = pathdb + cryptoAL::HHKEY_MY_PRIVATE_ENCODE_DB;
 			}
@@ -50,7 +50,7 @@ namespace ns_menu
 			{
                 std::cout << "Enter path of decode history database " << cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB << " (0 = current directory) : ";
                 std::string pathdb;
-                std::cin >> pathdb;
+                pathdb = get_input_string();
                 if (pathdb == "0") pathdb = "./";
                 fileHistoDB = pathdb + cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB;
 			}
@@ -80,7 +80,7 @@ namespace ns_menu
 			{
                 std::cout << "Enter path of private decode history database " << cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB << " (0 = current directory) : ";
                 std::string pathdb;
-                std::cin >> pathdb;
+                pathdb = get_input_string();
                 if (pathdb == "0") pathdb = "./";
                 fileHistoPrivateDB = pathdb + cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB;
                 fileHistoPublicDB  = pathdb + cryptoAL::HHKEY_MY_PUBLIC_DECODE_DB;
@@ -121,7 +121,7 @@ namespace ns_menu
 			{
                 std::cout << "Enter path of encode history database " << cryptoAL::HHKEY_MY_PRIVATE_ENCODE_DB << " (0 = current directory) : ";
                 std::string pathdb;
-                std::cin >> pathdb;
+                pathdb = get_input_string();
                 if (pathdb == "0") pathdb = "./";
                 fileHistoPrivateEncodeDB = pathdb + cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB;
             }
@@ -134,7 +134,7 @@ namespace ns_menu
 			{
                 std::cout << "Enter path to read received hh (" + cryptoAL::HHKEY_OTHER_PUBLIC_DECODE_DB + ")" << " (0 = current directory) : ";
                 std::string pathreaddb;
-                std::cin >> pathreaddb;
+                pathreaddb = get_input_string();
                 if (pathreaddb == "0") pathreaddb = "./";
                 importfile = pathreaddb + cryptoAL::HHKEY_OTHER_PUBLIC_DECODE_DB;
             }

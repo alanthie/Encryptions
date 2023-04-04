@@ -166,14 +166,14 @@ void ecc_curve::getMessageFromPoint(message_point& msg, cryptoAL::Buffer& final_
         cc = (char)c;
         message[i] = cc; // digit
         cnt++;
-        if (verbose)
-            std::cout << i << " digit[i] " << c << std::endl;
+        //if (VERBOSE_DEBUG)
+        //    std::cout << i << " digit[i] " << c << std::endl;
 	}
 
 	for (unsigned int i=cnt;i<MSG_BYTES_MAX+K;i++)
 	{
         message[i] = 0;
-        if (verbose) std::cout << i << " *digit[i] " << 0 << std::endl;
+        //if (VERBOSE_DEBUG) std::cout << i << " *digit[i] " << 0 << std::endl;
 	}
 
     size_t NBefore = 0;
