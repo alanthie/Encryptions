@@ -720,6 +720,7 @@ public:
                                 std::cerr << "ecc domain: " << ek_mine.dom.name() << std::endl;
                             }
 
+							bool DECODE_FULL=false;
 							if (riter != 0)
 							{
 								std::string d = uk.sRSA_ECC_ENCODED_DATA.substr(0, v_encoded_size[riter]);
@@ -729,7 +730,12 @@ public:
                                 }
 
                                 uint32_t msg_size_produced;
-								std::string t = ecc::ecc_decode_string(d, ek_mine, (uint32_t)d.size(), msg_size_produced, verbose);
+								std::string t;
+								if (DECODE_FULL)
+									t = ecc::ecc_decode_full_string(d, ek_mine, msg_size_produced, verbose);
+								else
+									t = ecc::ecc_decode_string(d, ek_mine, (uint32_t)d.size(), msg_size_produced, verbose);
+									
 								if (VERBOSE_DEBUG)
                                 {
                                     std::cerr << "ecc data decoded: " << t << " size: " << t.size() << std::endl;
@@ -740,7 +746,11 @@ public:
 							else
 							{
 								uint32_t msg_size_produced;
-								embedded_ecc_key = ecc::ecc_decode_string(uk.sRSA_ECC_ENCODED_DATA, ek_mine, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced, verbose);
+								if (DECODE_FULL)
+									embedded_ecc_key = ecc::ecc_decode_full_string(uk.sRSA_ECC_ENCODED_DATA, ek_mine, msg_size_produced, verbose);
+								else
+									embedded_ecc_key = ecc::ecc_decode_string(uk.sRSA_ECC_ENCODED_DATA, ek_mine, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced, verbose);
+								
 								if (VERBOSE_DEBUG)
                                 {
                                     std::cout << "ecc encoded data:        " << uk.sRSA_ECC_ENCODED_DATA << " size: " << uk.sRSA_ECC_ENCODED_DATA.size() << std::endl;

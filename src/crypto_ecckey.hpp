@@ -383,11 +383,15 @@ namespace cryptoAL
 
     };
 
+
 namespace ecc
 {
-	[[maybe_unused]] static std::string ecc_decode_string(	const std::string& smsg, ecc_key& ek,
-        							uint32_t msg_input_size_touse,
-									uint32_t& msg_size_produced, bool verbose = false)
+	[[maybe_unused]] static std::string ecc_decode_string(
+									const std::string& smsg,
+									ecc_key&            ek,
+        							uint32_t            msg_input_size_touse,
+									uint32_t&           msg_size_produced,
+									bool                verbose = false)
 	{
 		std::string decoded_ecc_data;
 		std::string msg;
@@ -462,14 +466,91 @@ namespace ecc
 		return decoded_ecc_data;
 	}
 
+	[[maybe_unused]] static std::string ecc_decode_full_string(	const std::string& smsg, ecc_key& ek,
+                                                                uint32_t& msg_size_produced, bool verbose=false)
+	{
+		bool ok = true;
+		std::string r;
+		std::vector<std::string> vr;
+		uint32_t t_msg_size_produced;
 
-	[[maybe_unused]] static std::string ecc_encode_string(  const std::string& smsg,
-									ecc_key& ek,
-									const std::string& public_key_of_decoder_x,
-									const std::string& public_key_of_decoder_y,
-                                    uint32_t& msg_input_size_used,
-									uint32_t& msg_size_produced,
-                                    bool SELF_TEST, bool verbose = false)
+		if (cryptoAL::VERBOSE_DEBUG)
+			std::cout << "input size [" << smsg.size() << "]" << std::endl;
+
+		std::string r_remaining = smsg;
+		std::vector<std::string> v;
+		std::vector<size_t> vinsz;
+		while (r_remaining.size() > 10)
+		{
+            std::string s_size = r_remaining.substr(1, 4); // trim the first
+            size_t v_size =  uint_util::val(s_size).toLong();
+
+            std::string s2_size = r_remaining.substr(6, 4); // trim the first
+            size_t v2_size =  uint_util::val(s2_size).toLong();
+
+            if (r_remaining.size() >= 10 + v_size)
+            {
+                v.push_back(r_remaining.substr(10, v_size));
+                vinsz.push_back(v2_size);
+                if (r_remaining.size() > 10 + v_size)
+                    r_remaining = r_remaining.substr(10 + v_size);
+                else
+					r_remaining = "";
+            }
+            else
+            {
+                std::cerr << "ERROR decoding ECC invalid length r_remaining.size() < 10 + v_size " << r_remaining.size() << " " << 10 + v_size << std::endl;
+				ok = false;
+				for(size_t i=0;i<v.size();i++)
+				{
+					std::cerr << v[i] << std::endl;
+				}
+				break;
+            }
+		}
+
+		if (ok)
+		{
+			for(size_t i=0;i<v.size();i++)
+			{
+				if (v[i].size() > 0)
+				{
+					std::string t = ecc_decode_string(v[i], ek, v[i].size(), t_msg_size_produced, verbose);
+
+					vr.push_back(t.substr(0, t_msg_size_produced));
+
+					if (cryptoAL::VERBOSE_DEBUG)
+					{
+						if ((i<=1) || (i==v.size() - 1))
+							std::cout << v[i].size() << "[" << v[i] << "]"<< "==>[" << t.substr(0, t_msg_size_produced) << "]"<< std::endl;
+						else if (i==2)
+							std::cout  << "..."<< std::endl;
+					}
+				}
+			}
+
+			uint32_t sz = 0;
+			for(size_t i=0;i<vr.size();i++)
+			{
+                while(vr[i].size() < vinsz[i]) vr[i] = std::string("0") + vr[i];
+				r  += vr[i];
+				sz += vr[i].size();
+			}
+			msg_size_produced = sz;
+			if (cryptoAL::VERBOSE_DEBUG) std::cout << "output size: " << sz << std::endl;
+		}
+		return r;
+	}
+
+	[[maybe_unused]] static std::string ecc_encode_string(
+                                    const std::string&  smsg,
+									ecc_key&            ek,
+									const std::string&  public_key_of_decoder_x,
+									const std::string&  public_key_of_decoder_y,
+                                    uint32_t&           msg_input_size_used,
+									uint32_t&           msg_size_produced,
+                                    bool                SELF_TEST,
+                                    bool                verbose = false)
 	{
 		std::string encoded_ecc_data;
 
@@ -498,7 +579,6 @@ namespace ecc
 			std::string out_rG_x;
 			std::string out_rG_y;
 
-		   	//bool r = ek.encode(	smsg, public_key_of_decoder_x, public_key_of_decoder_y, out_Cm_x, out_Cm_y, out_rG_x, out_rG_y, verbose);
 			bool r = ek.encode(	msg_to_encrypt, public_key_of_decoder_x, public_key_of_decoder_y, out_Cm_x, out_Cm_y, out_rG_x, out_rG_y, verbose);
 
 			if (r)
@@ -531,6 +611,87 @@ namespace ecc
             }
 		}
 		return encoded_ecc_data;
+	}
+
+	[[maybe_unused]] static std::string ecc_encode_full_string(
+                                        const std::string&  smsg,
+										ecc_key&            ek,
+										const std::string&  public_key_of_decoder_x,
+                                        const std::string&  public_key_of_decoder_y,
+										uint32_t&           msg_size_produced,
+										bool                SELF_TEST,
+										bool                verbose=false)
+	{
+		std::string r;
+		std::string r_remaining = smsg;
+		uint32_t required_encoded_msg_len = (uint32_t)smsg.size();
+		uint32_t current_encoded_msg_len = 0;
+
+		uint32_t t_msg_input_size_used;
+		uint32_t t_msg_size_produced;
+		uint32_t cnt = 0;
+		std::string token_out;
+		std::string token_in;
+		while(current_encoded_msg_len < required_encoded_msg_len)
+		{
+			t_msg_input_size_used = 0;
+			t_msg_size_produced   = 0;
+
+			std::string t = ecc_encode_string(	r_remaining,
+                                                ek,
+                                                public_key_of_decoder_x,
+                                                public_key_of_decoder_y,
+												t_msg_input_size_used,
+												t_msg_size_produced,
+												SELF_TEST,
+												verbose);
+
+			if (t_msg_size_produced == 0)
+			{
+				std::cerr << "ERROR t_msg_size_produced == 0" << std::endl;
+				break;
+			}
+
+			std::string s_size = uint_util::base10_to_base64(std::to_string(t_msg_size_produced));
+			while(s_size.size() < 4) s_size = std::string("0") + s_size ;
+			s_size = std::string("1") + s_size ; // 0 is trim later otherwise
+
+			std::string s2_size = uint_util::base10_to_base64(std::to_string(t_msg_input_size_used));
+			while(s2_size.size() < 4) s2_size = std::string("0") + s2_size ;
+			s2_size = std::string("1") + s2_size ; // 0 is trim later otherwise
+
+			r += s_size;
+			r += s2_size;
+			token_out = t.substr(0,t_msg_size_produced);
+			r += token_out;
+			token_in = r_remaining.substr(0, t_msg_input_size_used) ;
+
+			cnt++;
+			current_encoded_msg_len += t_msg_input_size_used;
+			if (t_msg_input_size_used < r_remaining.size())
+                r_remaining = r_remaining.substr(t_msg_input_size_used);
+            else
+                r_remaining = "";
+
+            if (cryptoAL::VERBOSE_DEBUG)
+			{
+				if ((cnt <= 2) || (current_encoded_msg_len == required_encoded_msg_len))
+				{
+                    std::cout   << "(" << cnt << ") "
+                                << t_msg_input_size_used << "-" << t_msg_size_produced
+                                << "[" << token_in << "]"
+                                << "==>[" << s_size + token_out << "]"<< std::endl;
+                }
+				else if (cnt==3)
+				{
+					std::cout << "..." << std::endl;
+				}
+			}
+		}
+		msg_size_produced = r.size();
+
+		if (cryptoAL::VERBOSE_DEBUG) std::cout << current_encoded_msg_len << "-" << msg_size_produced <<std::endl;
+		return r;
 	}
 
 }

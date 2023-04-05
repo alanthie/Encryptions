@@ -55,8 +55,9 @@ namespace rsa_util
 		return found;
 	}
 
-    std::string rsa_decode_string(	const std::string& smsg, cryptoAL::rsa::rsa_key& k,
-									uint32_t msg_input_size_touse, uint32_t& msg_size_produced, bool use_gmp)
+    [[maybe_unused]] static std::string rsa_decode_string(	const std::string& smsg, cryptoAL::rsa::rsa_key& k,
+                                                            uint32_t msg_input_size_touse, uint32_t& msg_size_produced,
+                                                            bool use_gmp, [[maybe_unused]] bool verbose=false)
 	{
 		std::string decoded_rsa_data;
 		std::string msg;
@@ -98,11 +99,11 @@ namespace rsa_util
 	}
 
 
-	std::string rsa_encode_string(  const std::string& smsg,
-									cryptoAL::rsa::rsa_key& k,
-                                    uint32_t& msg_input_size_used,
-									uint32_t& msg_size_produced,
-                                    bool use_gmp, bool SELF_TEST)
+	[[maybe_unused]] static std::string rsa_encode_string(  const std::string& smsg,
+                                                            cryptoAL::rsa::rsa_key& k,
+                                                            uint32_t& msg_input_size_used,
+                                                            uint32_t& msg_size_produced,
+                                                            bool use_gmp, bool SELF_TEST, [[maybe_unused]] bool verbose=false)
 	{
 		std::string encoded_rsa_data;
 
@@ -151,20 +152,16 @@ namespace rsa_util
 		}
 
 		msg_size_produced = (uint32_t)encoded_rsa_data.size() ;
-		//std::cout << "RSA encoding " << msg_to_encrypt.size() << " to " << encoded_rsa_data.size() << std::endl;
-
 		if (msg_to_encrypt.size() < smsg.size())
 		{
 			encoded_rsa_data += smsg.substr(msg_to_encrypt.size());
 		}
-
-		//std::cout << "RSA encoding total size " << encoded_rsa_data.size() << std::endl;
 		return encoded_rsa_data;
 	}
 
-	std::string rsa_encode_full_string( const std::string& smsg, cryptoAL::rsa::rsa_key& k,
-										uint32_t& msg_size_produced,
-										bool use_gmp, bool SELF_TEST)
+	[[maybe_unused]] static std::string rsa_encode_full_string( const std::string& smsg, cryptoAL::rsa::rsa_key& k,
+                                                                uint32_t& msg_size_produced,
+                                                                bool use_gmp, bool SELF_TEST, bool verbose=false)
 	{
 		std::string r;
 		std::string r_remaining = smsg;
@@ -180,7 +177,7 @@ namespace rsa_util
 		{
 			t_msg_input_size_used = 0;
 			t_msg_size_produced   = 0;
-			std::string t = rsa_encode_string(r_remaining, k, t_msg_input_size_used, t_msg_size_produced, use_gmp, SELF_TEST);
+			std::string t = rsa_encode_string(r_remaining, k, t_msg_input_size_used, t_msg_size_produced, use_gmp, SELF_TEST, verbose);
 
 			if (t_msg_size_produced == 0)
 			{
@@ -230,8 +227,8 @@ namespace rsa_util
 		return r;
 	}
 
-	std::string rsa_decode_full_string(	const std::string& smsg, cryptoAL::rsa::rsa_key& k,
-										uint32_t& msg_size_produced, bool use_gmp)
+	[[maybe_unused]] static std::string rsa_decode_full_string(	const std::string& smsg, cryptoAL::rsa::rsa_key& k,
+                                                                uint32_t& msg_size_produced, bool use_gmp, bool verbose=false)
 	{
 		bool ok = true;
 		std::string r;
@@ -279,7 +276,7 @@ namespace rsa_util
 			{
 				if (v[i].size() > 0)
 				{
-					std::string t = rsa_decode_string(v[i], k, v[i].size(), t_msg_size_produced, use_gmp);
+					std::string t = rsa_decode_string(v[i], k, v[i].size(), t_msg_size_produced, use_gmp, verbose);
 					vr.push_back(t.substr(0, t_msg_size_produced));
 
 					if (cryptoAL::VERBOSE_DEBUG)

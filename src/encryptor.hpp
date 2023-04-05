@@ -732,10 +732,29 @@ public:
 						uint32_t msg_input_size_used = 0;
 						uint32_t msg_size_produced = 0;
 
-						std::string t = ecc::ecc_encode_string(	vurlkey[i].sRSA_ECC_ENCODED_DATA, key_mine,
-                                                            key_other.s_kg_x, key_other.s_kg_y,
-															msg_input_size_used,
-															msg_size_produced, SELF_TEST, verbose);
+						std::string t;
+						bool ENCODE_FULL=false;
+						if (ENCODE_FULL == false)
+						{
+							t = ecc::ecc_encode_string(	vurlkey[i].sRSA_ECC_ENCODED_DATA, 
+														key_mine,
+														key_other.s_kg_x, 
+														key_other.s_kg_y,
+														msg_input_size_used,
+														msg_size_produced, 
+														SELF_TEST, 
+														verbose);
+						}
+						else
+						{
+							t = ecc::ecc_encode_full_string(vurlkey[i].sRSA_ECC_ENCODED_DATA, 
+															key_mine,
+															key_other.s_kg_x, 
+															key_other.s_kg_y,
+															msg_size_produced, 
+															SELF_TEST, 
+															verbose);
+						}
 
 						// t may grow
 						vurlkey[i].sRSA_ECC_ENCODED_DATA = t;
