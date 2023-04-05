@@ -364,6 +364,9 @@ Feature implemented: Transform encrypted data to another format (ex: png image):
 Setup
 ![Alt text](/Doc/sec.png?raw=true "sec")
 
+Setup
+![Alt text](/Doc/exchange.png?raw=true "exchange")
+
 License
 <pre>
 Free for personal usage
