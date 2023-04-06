@@ -486,7 +486,7 @@ int generate_aes(	const std::string& short_file_for_key,
         }
         {
             std::string sha = file_util::file_checksum(file_for_xor);
-            s_build_info += std::string("sha_filexora: ") + sha + "\n";
+            s_build_info += std::string("sha_filexor: ") + sha + "\n";
         }
         s_build_info += "\n";
         build_info_file.buffer.write(s_build_info.data(), s_build_info.size());

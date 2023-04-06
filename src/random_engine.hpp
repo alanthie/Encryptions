@@ -303,6 +303,22 @@ namespace random
     return r;
 }
 
+[[maybe_unused]] static uint32_t get_random_number_modulo_max(uint32_t NMAX)
+{
+#ifdef _WIN32
+    uint32_t LIM = UINT_MAX;
+#else
+    uint32_t LIM = std::numeric_limits<uint32_t>::max();
+#endif
+
+    srand ((unsigned int)time(NULL));
+    srand ((unsigned int)random_engine::getTickCount());
+    random_engine rd;
+
+	uint32_t n = (uint32_t)(rd.get_rand() * LIM);
+	return n % NMAX;
+}
+
 [[maybe_unused]] static std::string generate_base16_random_string(long long N)
 {
     std::string r;

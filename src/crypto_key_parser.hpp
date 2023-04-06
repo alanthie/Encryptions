@@ -261,64 +261,7 @@ public:
 
 	void parse_lines(cryptodata& urls_data, std::vector<std::string>& vlines)
     {
-	    char c;
-
-        char url[URL_MAX_SIZE] = { 0 };
-        int pos = -1;
-        uint32_t idx=0;
-
-        vlines.clear();
-
-		for(size_t i=0;i<urls_data.buffer.size();i++)
-		{
-			c = urls_data.buffer.getdata()[i];
-			pos++;
-
-			if ((c == '\n') || (i==urls_data.buffer.size()-1))
-			{
-				if (i==urls_data.buffer.size()-1)
-				{
-					if ((c!=0) && (c!='\r') && (c!='\n'))
-					{
-						url[idx] = c;
-						idx++;
-					}
-				}
-
-				uint32_t len = idx;
-
-				if ( ((len >= URL_MIN_SIZE) && (len <= URL_MAX_SIZE)) && (url[0]!=';') )
-				{
-					std::string su(url);
-					su = strutil::trim_copy(su);
-					vlines.push_back(su);
-				}
-				else
-				{
-					// skip!
-					if (len >= URL_MAX_SIZE)
-					{
-						std::string su(url);
-						std::cerr << "WARNING input url key line too long - skip " << su << ", max size: " << URL_MAX_SIZE << std::endl;
-					}
-				}
-
-				for(uint32_t ii=0;ii<URL_MAX_SIZE;ii++) url[ii] = 0;
-				pos = -1;
-				idx = 0;
-			}
-			else
-			{
-				if ((c!=0) && (c!='\r') && (c!='\n'))
-				{
-					if (idx < URL_MAX_SIZE)
-					{
-						url[idx] = c;
-						idx++;
-					}
-				}
-			}
-		}
+		cryptoAL::parsing::parse_lines(urls_data, vlines, URL_MIN_SIZE, URL_MAX_SIZE);
     }
 
 	keyspec_composite parse_keyspec_composite(const std::string& line)
@@ -349,13 +292,13 @@ public:
 			else if (strutil::has_token("[v:]", v[i], 0)) k = parse_key("[v:]",0, keyspec_type::VideoFile, true,  v[i]);
 			else if (strutil::has_token("[f]",  v[i], 0)) k = parse_key("[f]", 0, keyspec_type::FTPFile, false, v[i]);
 			else if (strutil::has_token("[f:]", v[i], 0)) k = parse_key("[f:]",0, keyspec_type::FTPFile, true,  v[i]);
-			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes512), v[i], 0))  k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes512) ,0, keyspec_type::wbaes_512,  false,  v[i]);
-			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes1024), v[i], 0))  k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes1024), 0, keyspec_type::wbaes_1024, false,  v[i]);
-			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes2048), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes2048),0, keyspec_type::wbaes_2048, false,  v[i]);
-			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes4096), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes4096),0, keyspec_type::wbaes_4096, false,  v[i]);
-			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes8192), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes8192),0, keyspec_type::wbaes_8192, false,  v[i]);
-			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384),0, keyspec_type::wbaes_16384, false,  v[i]);
-			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768),0, keyspec_type::wbaes_32768, false,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes512),  v[i], 0))  	k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes512) ,0, keyspec_type::wbaes_512,  false,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes1024), v[i], 0))  	k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes1024), 0, keyspec_type::wbaes_1024, false,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes2048), v[i], 0)) 	k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes2048),0, keyspec_type::wbaes_2048, false,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes4096), v[i], 0)) 	k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes4096),0, keyspec_type::wbaes_4096, false,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes8192), v[i], 0)) 	k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes8192),0, keyspec_type::wbaes_8192, false,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384), v[i], 0)) 	k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384),0, keyspec_type::wbaes_16384, false,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768), v[i], 0)) 	k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768),0, keyspec_type::wbaes_32768, false,  v[i]);
 
 			if (k.ktype != keyspec_type::Unknown)
 			{

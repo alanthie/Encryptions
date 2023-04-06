@@ -109,6 +109,7 @@
 		<Unit filename="../src/qa/ecc_point/ecc_curve.cpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_curve.hpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_elgamal.cpp" />
+		<Unit filename="../src/qa/rsa_gen.cpp" />
 		<Unit filename="../src/random_engine.hpp" />
 		<Unit filename="../src/rng.h" />
 		<Unit filename="../src/twofish.c">

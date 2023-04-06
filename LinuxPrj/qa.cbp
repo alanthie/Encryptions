@@ -86,9 +86,16 @@
 		<Unit filename="../src/qa/ecc_point/ecc_curve.cpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_curve.hpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_elgamal.cpp" />
+		<Unit filename="../src/qa/menu/cfg_menu.cpp" />
+		<Unit filename="../src/qa/menu/eccdomain_menu.cpp" />
+		<Unit filename="../src/qa/menu/ecckey_menu.cpp" />
+		<Unit filename="../src/qa/menu/hh_menu.cpp" />
 		<Unit filename="../src/qa/menu/menu.cpp" />
 		<Unit filename="../src/qa/menu/menu_io.cpp" />
+		<Unit filename="../src/qa/menu/puzzle_menu.cpp" />
 		<Unit filename="../src/qa/menu/rsa_menu.cpp" />
+		<Unit filename="../src/qa/menu/tools_menu.cpp" />
+		<Unit filename="../src/qa/menu/wbaes_menu.cpp" />
 		<Unit filename="../src/qa/prime.h" />
 		<Unit filename="../src/qa/qa.cpp" />
 		<Unit filename="../src/qa/qa_internal.hpp" />

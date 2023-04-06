@@ -2,11 +2,13 @@
 #define _INCLUDES_aes_whitebox_HPP
 
 #include "../../crypto_const.hpp"
+#include "../../random_engine.hpp"
 #include "aes_whitebox_base.hpp"
 #include "../../c_plus_plus_serializer.h"
 
 namespace WBAES
 {
+
 class wbaes512 : public wbaes_base<22, 16>
 {
 public:
@@ -435,6 +437,58 @@ public:
 	}
 
 };
+
+[[maybe_unused]] static bool validate_wbaes_key(WBAES::wbaes_vbase* paes, bool verbose=true)
+{
+	if (paes==nullptr) return false;
+	bool r = true;
+	int N = 2 * paes->key_length(); // 2x test
+
+	std::string splain 		= cryptoAL::random::generate_base16_random_string(2*N); // 2 * for base16
+	std::string splaincopy 	= splain;
+	size_t plainLen = splain.size();
+
+	std::vector<uint8_t> eout(plainLen, 0);
+	std::vector<uint8_t> dout(plainLen, 0);
+
+	//NO KEY!!!!!!!!!!!!!!!!!! but BIG *.tbl
+	const unsigned char iv[16] = {0x60, 0x61, 0x82, 0x93, 0x04, 0x05, 0x06, 0x07,0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,};
+
+	// aes
+	const size_t MAX_DISPLAY = 64;
+	if (verbose) std::cout << "WBAES test message   : ";
+	for(size_t i=0;i<std::min(MAX_DISPLAY, plainLen);i++) std::cout << (int)splain[i];
+	if (verbose) std::cout << "..." <<std::endl;
+
+	paes->aes_whitebox_encrypt_cfb(iv, (uint8_t*)splaincopy.data(), plainLen, eout.data());
+	if (verbose) std::cout << "WBAES encrypt message: ";
+	for(size_t i=0;i<std::min(MAX_DISPLAY, plainLen);i++) std::cout << (int)eout[i];
+	if (verbose) std::cout << "..." <<std::endl;
+
+	paes->aes_whitebox_decrypt_cfb(iv, eout.data(), plainLen, dout.data());
+	if (verbose) std::cout << "WBAES decrypt message: ";
+	for(size_t i=0;i<std::min(MAX_DISPLAY, plainLen);i++) std::cout << (int)dout[i];
+	if (verbose) std::cout << "..." << std::endl;
+
+	for(size_t i=0;i<plainLen;i++)
+	{
+		if (dout[i] != splain[i])
+		{
+			std::cerr << "Error with WBAES "<< i <<std::endl;
+			std::cerr << (int)dout[i]<<std::endl;
+			std::cerr << (int)splain[i]<<std::endl;
+			r = false;
+			break;
+		}
+	}
+	if (r)
+	{
+		if (verbose)
+			std::cout << "WBAES key OK"<<std::endl;
+	}
+	return r;
+}
+
 
 }  // namespace
 

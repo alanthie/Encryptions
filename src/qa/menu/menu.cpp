@@ -129,10 +129,8 @@ namespace ns_menu
 		{
 			"Whitebox AES keys",
 			{
-				{"Create a WB AES key", 	1},
-				{"Create multiple WB AES keys",2},
-				{"Create a WB AES key from instruction file", 3},
-				{"Create multiple WB AES key from multiple instruction files", 4}
+				{"Create one or multiple WB AES key", 	1},
+				{"Create one or multiple WB AES key from one or multiple instruction files", 2}
 			}
 		};
 		mWBAES.set_main_menu(this);

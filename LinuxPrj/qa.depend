@@ -241,7 +241,7 @@
 	"crypto_const.hpp"
 	"data.hpp"
 
-1680451387 /home/server/dev/Encryptions/src/random_engine.hpp
+1680812282 /home/server/dev/Encryptions/src/random_engine.hpp
 	<random>
 	"data.hpp"
 	"rng.h"
@@ -807,7 +807,7 @@
 	<stdlib.h>
 	<fstream>
 
-1680745060 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox_compiler.hpp
+1680807738 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox_compiler.hpp
 	"../../crypto_const.hpp"
 	"../../random_engine.hpp"
 	"../../data.hpp"
@@ -825,8 +825,9 @@
 1680323101 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_private.h
 	"../../crypto_const.hpp"
 
-1680743880 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox.hpp
+1680807843 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox.hpp
 	"../../crypto_const.hpp"
+	"../../random_engine.hpp"
 	"aes_whitebox_base.hpp"
 	"../../c_plus_plus_serializer.h"
 
@@ -851,7 +852,7 @@
 	<cctype>
 	<filesystem>
 
-1680564569 source:/home/server/dev/Encryptions/src/qa/menu/menu.cpp
+1680819558 source:/home/server/dev/Encryptions/src/qa/menu/menu.cpp
 	"menu.h"
 
 1680312455 /home/server/dev/Encryptions/src/qa/menu/rsa_menu.hpp
@@ -929,7 +930,7 @@
 	<fstream>
 	<filesystem>
 
-1680583007 /home/server/dev/Encryptions/src/file_util.hpp
+1680810141 /home/server/dev/Encryptions/src/file_util.hpp
 	"crypto_const.hpp"
 	"data.hpp"
 	"SHA256.h"
@@ -996,12 +997,13 @@
 	"../../../src/qa/prime.h"
 	"menu.h"
 
-1680744985 source:/home/server/dev/Encryptions/src/qa/menu/wbaes_menu.cpp
+1680821638 source:/home/server/dev/Encryptions/src/qa/menu/wbaes_menu.cpp
 	"../../../src/uint_util.hpp"
 	"../../../src/crypto_const.hpp"
 	"../../../src/file_util.hpp"
 	"../../../src/crypto_cfg.hpp"
 	"../../../src/crypto_parsing.hpp"
+	"../../../src/crypto_strutil.hpp"
 	"../aes-whitebox/aes_whitebox.hpp"
 	"../aes-whitebox/aes_whitebox_compiler.hpp"
 	"../../../src/c_plus_plus_serializer.h"

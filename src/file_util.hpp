@@ -34,6 +34,23 @@ namespace file_util
 		return sz;
 	}
 
+	[[maybe_unused]] static std::vector<std::string> files_in_directory(const std::string& dirname)
+	{
+		std::vector<std::string> r;
+
+		if(std::filesystem::is_directory(dirname))
+		{
+            const std::filesystem::path d{dirname};
+			for (auto const& dir_entry : std::filesystem::directory_iterator{d} )
+			{
+				r.push_back(dir_entry.path());
+				//std::cout << dir_entry.path() << '\n';
+			}
+		}
+		return r;
+	}
+
+
 	[[maybe_unused]] static bool is_file_same(std::string filename1, std::string filename2)
 	{
 		cryptoAL::cryptodata data1;
