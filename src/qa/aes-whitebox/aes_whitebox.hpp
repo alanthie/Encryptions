@@ -348,6 +348,8 @@ struct wbaes_file
 // void free (void* ptr); //If ptr is a null pointer, the function does nothing.
 class wbaes_pool
 {
+	const size_t WBAES_LIM = 10;
+
 public:
 	std::map<std::string, wbaes_instance_mgr*> map_wbaes_instance;
 
@@ -366,6 +368,25 @@ public:
 		}
 	}
 
+	void remove_one_except(const std::string& key)
+	{
+		for(auto& [k, d] : map_wbaes_instance)
+		{
+			if (k != key)
+			{
+				wbaes_instance_mgr* pmgr = map_wbaes_instance[k];
+				if (pmgr != nullptr)
+				{
+					delete pmgr;
+					pmgr = nullptr;
+					map_wbaes_instance[k] = nullptr;
+				}
+				map_wbaes_instance.erase(k);
+				break;
+			}
+		}
+	}
+
 	wbaes_vbase* get_aes_instance(const std::string& iaes_type, const std::string& ikeyname, const std::string& ifolder, bool verbose=false)
 	{
 		wbaes_vbase* r = nullptr;
@@ -375,8 +396,10 @@ public:
 		if (map_wbaes_instance.find(key) != map_wbaes_instance.end() )
 		{
 			wbaes_instance_mgr* ptr_aes_instance_mgr = map_wbaes_instance[key];
-			if (ptr_aes_instance_mgr!=nullptr)
+			if (ptr_aes_instance_mgr != nullptr)
+			{
 				r = ptr_aes_instance_mgr->get_aes();
+			}
 			else
 			{
 				// ?
@@ -385,7 +408,7 @@ public:
 		}
 		else
 		{
-			//TODO catch the std::bad_alloc
+			// TODO catch the std::bad_alloc
 			wbaes_instance_mgr* ptr_aes_instance_mgr = new wbaes_instance_mgr(iaes_type, ifolder, ikeyname, true, verbose);
 			if (ptr_aes_instance_mgr->table_error == true)
 			{
@@ -399,6 +422,11 @@ public:
 			}
 			else
 			{
+				if (map_wbaes_instance.size() >= WBAES_LIM)
+				{
+					remove_one_except(key);
+				}
+
 				map_wbaes_instance[key] = ptr_aes_instance_mgr;
 				r = ptr_aes_instance_mgr->get_aes();
 			}

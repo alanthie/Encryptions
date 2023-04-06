@@ -4,6 +4,7 @@
 #include "crypto_const.hpp"
 #include "file_util.hpp"
 #include "data.hpp"
+#include "crypto_strutil.hpp"
 #include <filesystem>
 #include <chrono>
 #include <ctime>
@@ -247,6 +248,68 @@ namespace parsing
 
         std::cerr << "get_block_infile failed" << std::endl;
        return "";
+    }
+
+	[[maybe_unused]] static void parse_lines(	cryptodata& file_data, std::vector<std::string>& vlines,
+												size_t MIN_SIZE_LINE, size_t MAX_SIZE_LINE)
+    {
+	    char c;
+        char line[MAX_SIZE_LINE] = { 0 };
+        int pos = -1;
+        uint32_t idx=0;
+
+        vlines.clear();
+
+		for(size_t i=0;i<file_data.buffer.size();i++)
+		{
+			c = file_data.buffer.getdata()[i];
+			pos++;
+
+			if ((c == '\n') || (i==file_data.buffer.size()-1))
+			{
+				if (i==file_data.buffer.size()-1)
+				{
+					if ((c!=0) && (c!='\r') && (c!='\n'))
+					{
+						line[idx] = c;
+						idx++;
+					}
+				}
+
+				uint32_t len = idx;
+
+				if ( ((len >= MIN_SIZE_LINE) && (len <= MAX_SIZE_LINE)) && (line[0]!=';') )
+				{
+					std::string su(line);
+					su = strutil::trim_copy(su);
+					vlines.push_back(su);
+				}
+				else
+				{
+					// skip!
+					if (len >= MAX_SIZE_LINE)
+					{
+						std::string su(line);
+						std::cerr << "WARNING input  line too long - skip " << su << ", max size: " << MAX_SIZE_LINE << std::endl;
+					}
+				}
+
+				for(uint32_t ii=0;ii<MAX_SIZE_LINE;ii++) line[ii] = 0;
+				pos = -1;
+				idx = 0;
+			}
+			else
+			{
+				if ((c!=0) && (c!='\r') && (c!='\n'))
+				{
+					if (idx < MAX_SIZE_LINE)
+					{
+						line[idx] = c;
+						idx++;
+					}
+				}
+			}
+		}
     }
 
 }

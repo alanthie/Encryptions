@@ -432,7 +432,11 @@ int generate_aes(	const std::string& short_file_for_key,
 					const std::string& short_file_for_xor,
 					const std::string& file_for_key, uint32_t pos1,
 					const std::string& file_for_xor, uint32_t pos2,
-					const std::string& aes, const std::string& pathtbl, const std::string& tablekeyname, bool verbose = false)
+					const std::string& aes,
+					const std::string& pathtbl,
+					const std::string& tablekeyname,
+					bool gen_build_info = true,
+					bool verbose = false)
 {
 	if (file_util::fileexists(file_for_key) == false)
 	{
@@ -456,40 +460,45 @@ int generate_aes(	const std::string& short_file_for_key,
 
 	cryptoAL::cryptodata data_file_for_xor;
 	rr = data_file_for_xor.read_from_file(file_for_xor);
-	//auto sz2 = data_file_for_xor.buffer.size();
 	if (rr == false)
 	{
 		std::cerr << "ERROR reading file for xor " <<  " file: " << file_for_xor << std::endl;
 		return -1;
 	}
 
-	cryptoAL::cryptodata build_info_file;
-	std::string build_info_filename = pathtbl + aes + "_" + tablekeyname + "_build_info" + ".tbl";
-	std::string s_build_info;
-	s_build_info += aes 					+ "\n";
-	s_build_info += tablekeyname 			+ "\n";
-	s_build_info += short_file_for_key 		+ "\n";
-	s_build_info += std::to_string(pos1) 	+ "\n";
-	s_build_info += short_file_for_xor 		+ "\n";
-	s_build_info += std::to_string(pos2) 	+ "\n";
+	//-----------------------------------------------------
+	// build_info
+	//-----------------------------------------------------
+	if (gen_build_info)
 	{
-		std::string sha = file_util::file_checksum(file_for_key);
-		s_build_info += sha + "\n";
-	}
-	{
-		std::string sha = file_util::file_checksum(file_for_xor);
-		s_build_info += sha + "\n";
-	}
-	s_build_info += "\n";
-	build_info_file.buffer.write(s_build_info.data(), s_build_info.size());
-	rr = build_info_file.save_to_file(build_info_filename);
-	if (rr == false)
-	{
-		std::cerr << "ERROR writing build info file " << build_info_filename << std::endl;
-		return -1;
-	}
-	if (verbose)
-		std::cout << "build info will be at: " << build_info_filename << std::endl;
+        cryptoAL::cryptodata build_info_file;
+        std::string build_info_filename = pathtbl + aes + "_" + tablekeyname + "_build_info" + ".tbl";
+        std::string s_build_info;
+        s_build_info += std::string("aes: ") + aes + "\n";
+        s_build_info += std::string("key: ") + tablekeyname 			+ "\n";
+        s_build_info += std::string("filekey: ") + short_file_for_key 	+ "\n";
+        s_build_info += std::string("pos_filekey: ") + std::to_string(pos1) + "\n";
+        s_build_info += std::string("filexor: ") + short_file_for_xor 	+ "\n";
+        s_build_info += std::string("pos_filexor: ") + std::to_string(pos2) + "\n";
+        {
+            std::string sha = file_util::file_checksum(file_for_key);
+            s_build_info += std::string("sha_filekey: ") + sha + "\n";
+        }
+        {
+            std::string sha = file_util::file_checksum(file_for_xor);
+            s_build_info += std::string("sha_filexora: ") + sha + "\n";
+        }
+        s_build_info += "\n";
+        build_info_file.buffer.write(s_build_info.data(), s_build_info.size());
+        rr = build_info_file.save_to_file(build_info_filename);
+        if (rr == false)
+        {
+            std::cerr << "ERROR writing build info file " << build_info_filename << std::endl;
+            return -1;
+        }
+        if (verbose)
+            std::cout << "build info will be at: " << build_info_filename << std::endl;
+    }
 
 	int r = 0;
 	bool ok = true;
