@@ -1,6 +1,8 @@
 #ifndef __ECC__CURVE__
 #define __ECC__CURVE__
 
+#include "../../crypto_const.hpp"
+
 #ifdef _WIN32
 //add preprocessor directive NOMINMAX
 #pragma warning ( disable : 4146 )
@@ -41,6 +43,7 @@ struct ecc_curve
     unsigned int MSG_BYTES_MAX; // ONE BYTE for counter
     unsigned int MSG_BYTES_PAD = 1;
     bool verbose = false;
+    bool verbose_debug = false;
 
     int init_curve( unsigned int nbits,
                     const std::string& ia, const std::string& ib, const std::string& iprime, const std::string& iorder, int icofactor, const std::string& igx, const std::string& igy);

@@ -52,6 +52,9 @@ namespace ns_menu
 			std::cout << "OSName:" << pr.OSName()<< std::endl;
 			std::cout << "OSVersion:" << pr.OSVersion()<< std::endl;
 			std::cout << "RAMTotal:" << pr.RAMTotal()<< std::endl;
+			std::cout << "GPUName:" << pr.GPUName()<< std::endl;
+			std::cout << "GPUVendor:" << pr.GPUVendor()<< std::endl;
+			//std::cout << "StorageTotal:" << pr.StorageTotal()<< std::endl;
 		}
         return r;
 	}

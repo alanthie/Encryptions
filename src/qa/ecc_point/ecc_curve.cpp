@@ -1,8 +1,9 @@
+#include "../../crypto_const.hpp"
+#include "ecc_curve.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <iostream>
-#include "ecc_curve.hpp"
 
 int ecc_curve::init_curve(  unsigned int nbits,
                             const std::string& ia, const std::string& ib, const std::string& iprime,
@@ -21,15 +22,18 @@ int ecc_curve::init_curve(  unsigned int nbits,
 	MSG_BYTES_MAX = bits_len/8;
 	MSG_BYTES_MAX -= 1;             // space to find a valid message on curve x+0, 1,...255 - 50% of x are on curve
 	MSG_BYTES_PAD = 1;
-	//if (verbose)
-	//{
-    //    std::cout << "MSG_BYTES_MAX " << MSG_BYTES_MAX  << "\n";
-    //    std::cout << "MSG_BYTES_PAD " << MSG_BYTES_PAD  << "\n";
-	//}
+	if (verbose_debug)
+	{
+		std::cout << "ecc_curve::init_curve MSG_BYTES_MAX " << MSG_BYTES_MAX  << "\n";
+   		std::cout << "ecc_curve::init_curve MSG_BYTES_PAD " << MSG_BYTES_PAD  << "\n";
+	}
 
+	if (verbose_debug)
+	{
+		std::cout << "ecc_curve::init_curve if (existPoint1(generator_point.x,generator_point.y)) "<< "\n";
+	}
 	if (existPoint1(generator_point.x,generator_point.y))
     {
-        //if (verbose) std::cout << "generator_point OK"  << "\n";
 		return 0;
 	}
 	else
@@ -303,6 +307,10 @@ bool ecc_curve::encode(ecc_point& out_Cm, ecc_point& out_rG, const std::string& 
     cryptoAL::Buffer buffer_message;
     message_point Pm;
 
+	if (verbose_debug)
+	{
+		std::cout << "ecc_curve::encode bool r = format_msg_for_ecc(msg, buffer_message)"<< "\n";
+	}
     bool r = format_msg_for_ecc(msg, buffer_message);
 	if (r==false)
 	{
@@ -310,15 +318,46 @@ bool ecc_curve::encode(ecc_point& out_Cm, ecc_point& out_rG, const std::string& 
         return false;
 	}
 
-	Pm = getECCPointFromMessage(buffer_message);
-	if (Pm.p.is_valid == false)
-    {
-        std::cerr << "ERROR message encoding on elliptic curve" << std::endl;
-		return false;
+	if (verbose_debug)
+	{
+		std::cout << "ecc_curve::encode Pm = getECCPointFromMessage(buffer_message)"<< "\n";
+	}
+	try
+	{
+        Pm = getECCPointFromMessage(buffer_message);
+        if (Pm.p.is_valid == false)
+        {
+            std::cerr << "ERROR message encoding on elliptic curve" << std::endl;
+            return false;
+        }
+	}
+	catch(const std::exception& e)
+	{
+        std::cerr << "ERROR message encoding on elliptic curve - exception" << e.what() << std::endl;
+        return false;
+	}
+	catch(...)
+	{
+        std::cerr << "ERROR message encoding on elliptic curve - exception" << std::endl;
+        return false;
 	}
 
+	if (verbose_debug)
+	{
+		std::cout << "ecc_curve::encode out_rG = mult(generator_point, private_key);"<< "\n";
+	}
 	out_rG = mult(generator_point, private_key);
+
+	if (verbose_debug)
+	{
+		std::cout << "ecc_curve::encode ecc_point rPub  = mult(publicKey, private_key);"<< "\n";
+	}
 	ecc_point rPub  = mult(publicKey, private_key);
+
+	if (verbose_debug)
+	{
+		std::cout << "ecc_curve::encode ecc_point out_Cm = sum(Pm.p, rPub);"<< "\n";
+	}
 	out_Cm = sum(Pm.p, rPub);
 	return true;
 }

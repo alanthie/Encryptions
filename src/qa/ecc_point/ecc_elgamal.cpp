@@ -45,7 +45,7 @@ bool ecc_curve::format_msg_for_ecc(const std::string& msg, cryptoAL::Buffer& out
    	out_message.write(msg.data(), (uint32_t)msg.size());
    	out_message.write(&c[0], 1);
 
-   	if (verbose)
+   	if (verbose_debug)
     for(size_t i=0;i<out_message.size();i++)
    	{
         //std::cout << i << " message[i] " << (unsigned int) (unsigned char)out_message.getdata()[i]<< std::endl;
@@ -56,6 +56,11 @@ bool ecc_curve::format_msg_for_ecc(const std::string& msg, cryptoAL::Buffer& out
 // msg = x = 0x00 ---- 0x00 "FFzaa234fsdf" 0x00
 message_point ecc_curve::getECCPointFromMessage(cryptoAL::Buffer& message_buffer)
 {
+	if (verbose_debug)
+	{
+		std::cout << "getECCPointFromMessage message_buffer.size()" << message_buffer.size() << "\n";
+	}
+
     message_point rm;
     if (message_buffer.size() < MSG_BYTES_PAD)
     {
@@ -68,7 +73,7 @@ message_point ecc_curve::getECCPointFromMessage(cryptoAL::Buffer& message_buffer
 	mpz_init(x);
     ecc_point r;
 
-    unsigned int  NBefore = 0;
+    size_t NBefore = 0;
     for(size_t i=0;i<message_buffer.size();i++)
    	{
         if (message_buffer.getdata()[i] == 0)
@@ -80,25 +85,34 @@ message_point ecc_curve::getECCPointFromMessage(cryptoAL::Buffer& message_buffer
             break;
         }
    	}
-    unsigned int  NAfter = message_buffer.size() - NBefore;
+    size_t NAfter = message_buffer.size() - NBefore;
+
+    if (verbose_debug)
+	{
+        std::cout << "size_t NAfter = message_buffer.size() - NBefore;"<< "\n";
+		std::cout << "NBefore: " << NBefore << "\n";
+		std::cout << "NAfter:  " << NAfter << "\n";
+		std::cout << "message_buffer.size()" << message_buffer.size() << "\n";
+		std::cout << "const char* message = &message_buffer.getdata()[NBefore];"<< "\n";
+	}
 
 	unsigned int n;
     const char* message = &message_buffer.getdata()[NBefore];
-	for (unsigned int i = NAfter-1;i>=0;i--)
+	for (int i = NAfter-1;i>=0;i--)
     {
 		mpz_t temp;
 		mpz_init_set_str(temp,pow256string(i).data(),BASE_16);
 		n = (unsigned int)(unsigned char)(*message);
 		mpz_addmul_ui(x,temp,n);
 		++message;
-		//if (verbose) gmp_printf("x=%Zd\n",x);
+		//if (verbose_debug) gmp_printf("x=%Zd\n",x);
 	}
 
     // check x, x+1, ... x+255 50%, 75%, ...99.9999...%
 	int i=0;
 	do{
-		if (verbose) printf("i-> %d",i);
-		if (verbose) gmp_printf(" x=%Zd\n",x);
+		if (verbose_debug) printf("i-> %d",i);
+		if (verbose_debug) gmp_printf(" x=%Zd\n",x);
 
 		r = existPoint(x);
 		i++;
@@ -113,9 +127,9 @@ message_point ecc_curve::getECCPointFromMessage(cryptoAL::Buffer& message_buffer
         return rm;
     }
 
-    if (verbose) gmp_printf("r.x=%Zd\n",r.x);
+    if (verbose_debug) gmp_printf("r.x=%Zd\n",r.x);
 	mpz_mod(r.x,r.x,prime); // TOO BIG..........
-	if (verbose) gmp_printf("r.x mod prime = %Zd\n",r.x);
+	if (verbose_debug) gmp_printf("r.x mod prime = %Zd\n",r.x);
 
 	if (r.is_valid)
     {
@@ -166,17 +180,17 @@ void ecc_curve::getMessageFromPoint(message_point& msg, cryptoAL::Buffer& final_
         cc = (char)c;
         message[i] = cc; // digit
         cnt++;
-        //if (VERBOSE_DEBUG)
+        //if (verbose_debug)
         //    std::cout << i << " digit[i] " << c << std::endl;
 	}
 
 	for (unsigned int i=cnt;i<MSG_BYTES_MAX+K;i++)
 	{
         message[i] = 0;
-        //if (VERBOSE_DEBUG) std::cout << i << " *digit[i] " << 0 << std::endl;
+        //if (verbose_debug) std::cout << i << " *digit[i] " << 0 << std::endl;
 	}
 
-    unsigned int NBefore = 0;
+    size_t NBefore = 0;
     for(unsigned int i=0;i<MSG_BYTES_MAX+K;i++)
    	{
         if (out_message.getdata()[i] == 0)
@@ -188,7 +202,7 @@ void ecc_curve::getMessageFromPoint(message_point& msg, cryptoAL::Buffer& final_
             break;
         }
    	}
-    unsigned int NAfter = MSG_BYTES_MAX+K - NBefore;
+    size_t NAfter = MSG_BYTES_MAX+K - NBefore;
 
     final_message.clear();
     final_message.increase_size(NAfter - 1);
@@ -327,15 +341,15 @@ int ecc_curve::test_msg(const std::string& smsg)
 //            ]
 //
 
-	if (verbose) gmp_printf("ORDER=%Zd\n",order);
-	if (verbose) gmp_printf("PRIME=%Zd\n",prime);
-	if (verbose) gmp_printf("Gxy=%Zd %Zd\n",generator_point.x,generator_point.y);
+	if (verbose_debug) gmp_printf("ORDER=%Zd\n",order);
+	if (verbose_debug) gmp_printf("PRIME=%Zd\n",prime);
+	if (verbose_debug) gmp_printf("Gxy=%Zd %Zd\n",generator_point.x,generator_point.y);
 
 	bool r = format_msg_for_ecc(smsg, buffer_message);
 	if (r==false) return -1;
 
     // const char* message = buffer_message.getdata();
-    if (verbose) std::cout << "message: " << smsg << std::endl;
+    if (verbose_debug) std::cout << "message: " << smsg << std::endl;
 
 	// key generation
     mpz_t privateKey_decoder;
@@ -355,7 +369,7 @@ int ecc_curve::test_msg(const std::string& smsg)
 	}
 	mpz_urandomm(random, st, order);
 	mpz_init_set(privateKey_decoder, random);
-	if (verbose) gmp_printf("privateKey_decoder=%Zd\n",privateKey_decoder);
+	if (verbose_debug) gmp_printf("privateKey_decoder=%Zd\n",privateKey_decoder);
 
 	nr = random_in_range(1000,2000);
 	for(int j=0;j<nr;j++)
@@ -364,7 +378,7 @@ int ecc_curve::test_msg(const std::string& smsg)
 	}
 	mpz_urandomm(random, st, order);
 	mpz_init_set(privateKey_encoder, random);
-	if (verbose) gmp_printf("privateKey_encoder=%Zd\n",privateKey_encoder);
+	if (verbose_debug) gmp_printf("privateKey_encoder=%Zd\n",privateKey_encoder);
 
 	ecc_point publicKey_decoder = mult(generator_point, privateKey_decoder);
 
@@ -374,34 +388,34 @@ int ecc_curve::test_msg(const std::string& smsg)
 		printf("ERROR \n");
 		return -1;
 	}
-    if (verbose) gmp_printf("msg point x,y, msg add:  %Zd %Zd %d \n",rm.p.x,rm.p.y,rm.qtd_adicoes);
+    if (verbose_debug) gmp_printf("msg point x,y, msg add:  %Zd %Zd %d \n",rm.p.x,rm.p.y,rm.qtd_adicoes);
 
     // Encryption encoder
 	ecc_point rG    = mult(generator_point, privateKey_encoder);
 	ecc_point rPub  = mult(publicKey_decoder, privateKey_encoder);
-	if (verbose) gmp_printf("Encryption publicKey_decoder(Pub=r'G).xy=%Zd %Zd\n",publicKey_decoder.x, publicKey_decoder.y);
-	if (verbose) gmp_printf("Encryption privateKey_encoder(r)=%Zd\n",privateKey_encoder);
-	if (verbose) gmp_printf("Encryption rPub.x %Zd rPub.y %Zd Mp.x %Zd\n",rPub.x,rPub.y,rm.p.x);
-	if (verbose) gmp_printf("Encryption rG.x %Zd rG.y %Zd\n",rG.x,rG.y);
+	if (verbose_debug) gmp_printf("Encryption publicKey_decoder(Pub=r'G).xy=%Zd %Zd\n",publicKey_decoder.x, publicKey_decoder.y);
+	if (verbose_debug) gmp_printf("Encryption privateKey_encoder(r)=%Zd\n",privateKey_encoder);
+	if (verbose_debug) gmp_printf("Encryption rPub.x %Zd rPub.y %Zd Mp.x %Zd\n",rPub.x,rPub.y,rm.p.x);
+	if (verbose_debug) gmp_printf("Encryption rG.x %Zd rG.y %Zd\n",rG.x,rG.y);
 
 	ecc_point Cm = sum(rm.p, rPub);
-	if (verbose) gmp_printf("Encryption [Cm=Pm+rGPub].x %Zd [Cm=Pm+rGPub].y %Zd\n",Cm.x,Cm.y);
+	if (verbose_debug) gmp_printf("Encryption [Cm=Pm+rGPub].x %Zd [Cm=Pm+rGPub].y %Zd\n",Cm.x,Cm.y);
 
 	// Decryption decoder
 	ecc_point rGPriv = mult(rG, privateKey_decoder);
-	if (verbose) gmp_printf("Decryption privateKey_decoder(r')=%Zd rG.x=%Zd rGPriv.x=%Zd rGPriv.y=%Zd\n",privateKey_decoder,rG.x,rGPriv.x,rGPriv.y);
+	if (verbose_debug) gmp_printf("Decryption privateKey_decoder(r')=%Zd rG.x=%Zd rGPriv.x=%Zd rGPriv.y=%Zd\n",privateKey_decoder,rG.x,rGPriv.x,rGPriv.y);
 	mpz_neg(rGPriv.y,rGPriv.y); //-rGPriv.y
 
     message_point rm1;
 
 	rm1.p = sum(Cm, rGPriv); // Cm-rGPriv
-	if (verbose) gmp_printf("Decryption [Cm-rGPriv].x: %Zd [Cm-rGPriv].y: %Zd\n", rm1.p.x, rm1.p.y);
+	if (verbose_debug) gmp_printf("Decryption [Cm-rGPriv].x: %Zd [Cm-rGPriv].y: %Zd\n", rm1.p.x, rm1.p.y);
 	cryptoAL::Buffer out_message;
 	getMessageFromPoint(rm1, out_message);
-	if (verbose) printf("Message final from [Cm-rGPriv] point: %s\n", out_message.getdata());
+	if (verbose_debug) printf("Message final from [Cm-rGPriv] point: %s\n", out_message.getdata());
 
 	endtime= clock();
-	if (verbose) printf("Execution time was %lu miliseconds\n", (endtime - starttime)/(CLOCKS_PER_SEC/1000));
+	if (verbose_debug) printf("Execution time was %lu miliseconds\n", (endtime - starttime)/(CLOCKS_PER_SEC/1000));
 
 	return 0;
 }
