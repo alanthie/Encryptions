@@ -141,7 +141,8 @@ namespace ns_menu
 			"Tools",
 			{
 				{"HEX file dump", 	1},
-				{"SHA256 of a file",2}
+				{"SHA256 of a file",2},
+				{"Hardware info",3}
 			}
 		};
 		mTOOLS.set_main_menu(this);

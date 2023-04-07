@@ -5,6 +5,7 @@
 #include "../../../src/crypto_parsing.hpp"
 #include "../../../src/c_plus_plus_serializer.h"
 #include "menu.h"
+#include "../SystemProperties.hpp"
 
 namespace ns_menu
 {
@@ -42,6 +43,16 @@ namespace ns_menu
             std::cout << "SHA(" << sfile << ") = " << rr << std::endl;
             std::cout << std::endl;
         }
+		else if (choice == 3)
+        {
+			//https://github.com/CasualYT31/SystemProperties
+			System::Properties pr;
+			std::cout << "CPUModel:" << pr.CPUModel() << std::endl;
+			std::cout << "CPUArchitecture:" << pr.CPUArchitecture()<< std::endl;
+			std::cout << "OSName:" << pr.OSName()<< std::endl;
+			std::cout << "OSVersion:" << pr.OSVersion()<< std::endl;
+			std::cout << "RAMTotal:" << pr.RAMTotal()<< std::endl;
+		}
         return r;
 	}
 }

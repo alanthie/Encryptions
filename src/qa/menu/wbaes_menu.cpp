@@ -14,64 +14,6 @@ namespace ns_menu
 //[1] Create one or multiple WB AES key
 //[2] Create one or multiple WB AES key from instruction file
 
-	std::vector<std::string> get_directory_files(const std::string& folder, const std::string& prefix = "binary.dat.", bool check_ending_as_number = true)
-	{
-		std::vector<std::string> vbin;
-	 	std::vector<std::string> v = file_util::files_in_directory(folder);
-		for(size_t i=0;i<v.size();i++)
-		{
-            // TODO last "/" or "\" marker
-			size_t pbin = v[i].rfind(prefix);
-			if (pbin!=std::string::npos)
-			{
-				std::string short_name = v[i].substr(pbin);
-
-				if (check_ending_as_number)
-				{
-					size_t p = short_name.find_last_of(".");
-					if (p!=std::string::npos)
-					{
-						std::string snum = short_name.substr(p+1);
-						long long l = cryptoAL::strutil::str_to_ll(snum);
-						if (l>=0)
-						{
-							vbin.push_back(short_name);
-						}
-					}
-				}
-				else
-				{
-                    size_t pslash = v[i].rfind("/");
-					if (pslash!=std::string::npos)
-					{
-						std::string s = v[i].substr(pslash+1);
-						size_t t = s.find(prefix);
-						if (t!=std::string::npos)
-						{
-							vbin.push_back(v[i].substr(pslash+1));
-							//std::cout  << v[i].substr(pslash+1)<<  std::endl;
-						}
-					}
-					else
-					{
-						pslash = v[i].rfind("\\");
-						if (pslash!=std::string::npos)
-						{
-							std::string s = v[i].substr(pslash+1);
-							size_t t = s.find(prefix);
-							if (t!=std::string::npos)
-							{
-								vbin.push_back(v[i].substr(pslash+1));
-								//std::cout  << v[i].substr(pslash+1)<<  std::endl;
-							}
-						}
-					}
-				}
-			}
-		}
-		return vbin;
-	}
-
 	bool read_build_info(const std::string& buidinfo_file, std::map<std::string, std::string>& map_kv)
 	{
         bool r = true;
@@ -171,7 +113,7 @@ namespace ns_menu
 				if ((cfg_parse_result) && (cfg.cmdparam.folder_local.size()>0))
 				{
 					pathkey = cfg.cmdparam.folder_local;
-					std::cout << "Folder where key input file will be read [using local folder in config]: " << pathkey << std::endl;
+					std::cout << "Folder where key input file will be read      [using local folder in config]:          " << pathkey << std::endl;
 				}
 				else
 				{
@@ -196,7 +138,7 @@ namespace ns_menu
 				if (REPEAT <= 0) REPEAT = 1;
 				std::string keyname_iter;
 
-				std::vector<std::string> vbin = get_directory_files(pathkey, "binary.dat.");
+				std::vector<std::string> vbin = file_util::get_directory_files(pathkey, "binary.dat.", true);
 
 				for(long long repeat = 0; repeat < REPEAT; repeat++)
 				{
@@ -336,7 +278,7 @@ namespace ns_menu
 			std::vector<std::string> vbuild_info;
 			if (COUNT>1)
 			{
-				vbuild_info = get_directory_files(buidinfo_directory, "_build_info.tbl", false);
+				vbuild_info = file_util::get_directory_files(buidinfo_directory, "_build_info.tbl", false);
 			}
 
 			std::string pathdb;
@@ -381,7 +323,7 @@ namespace ns_menu
 				{
 					buidinfo_file = buidinfo_directory + vbuild_info[repeat];
 				}
-				std::cout << "reading buid info file: " << buidinfo_file  << std::endl;
+				std::cout << "reading buid info file:" << buidinfo_file  << std::endl;
 
 				std::map<std::string, std::string> map_kv;
 				bool rr = read_build_info(buidinfo_file, map_kv);
