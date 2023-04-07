@@ -1,0 +1,74 @@
+;------------------------------------------------------------------------------------------------------------
+; Encoding commands, msg.zip.encrypted file to be send to the recipient (sam):
+; crypto encode -u urls.txt -g 1 -v 1 -i msg.zip -l ./sam/local/ -r ./sam/ -x 3 -epu ./sam/ -epv ./me/
+; or
+; crypto encode -cfg ./cfg.ini -v 1 -a 1
+;------------------------------------------------------------------------------------------------------------
+
+;------------------------------------------------------------------------------------------------------------
+; Decoding commands for me:
+;
+; Decoding commands at the recipient site (sam):
+; decode -g 1 -i msg.zip.encrypted -l ./al/local/ -r ./me/  -epu ./al/ -epv ./me/ -v 1
+; or
+; crypto encode -cfg ./cfg.ini -v 1 -a 1
+;------------------------------------------------------------------------------------------------------------
+
+;------------------------------------------------------------------------
+; URL keys source when encoding:
+;------------------------------------------------------------------------
+;Web files (also ftp[f] and videos[v])
+;[w]https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz
+;[w]https://i.postimg.cc/ZKGMV8SP/Screenshot-from-2023-02-23-19-39-28.png
+
+;Local shared files between me and sam (like shared USB) in ./sam/
+;[l]binary.dat.71
+;[l]binary.dat.44
+
+;Historical shared confirmed hashes in ./me/
+;v[h]5
+
+;RSA public keys given by recipient (sam) in ./sam/
+;[r]MY_RSAKEY_2048_2023-03-25_14:29:11
+;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;
+;[mode]block;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;
+;[r:]last=10,first=6,random=7;[r:]last=1,first=2,random=25;
+
+;ECC publc keys given by recipient (sam) in ./sam/
+;[e]MY_ECCKEY_360_2023-03-25_14:33:22
+;[mode]recur;[e]MY_ECCKEY_1024_2023-03-18_12:20:21;[e]MY_ECCKEY_360_2023-03-25_14:33:22
+;[e:]last=10,first=1,random=15;[r:]last=10,first=26,random=22;
+;[e:]last=10,first=2,random=35;[r:]last=13,first=16,random=13;
+
+;------------------------------------------------------------------------
+; GLOBAL parameters
+;------------------------------------------------------------------------
+;Repeat all keys generation N times producing more encoding rounds
+[repeat]1
+
+// NOT FIRST and NOT CONSECUTIVE SAME AES KEY
+[l]binary.dat.44
+;[aes16384]aa_20230403221044
+;[l]binary.dat.43
+;[aes4096]bb_20230403222915
+;[l]binary.dat.42
+;[e]MY_ECCKEY_1024_2023-04-02_12:18:44
+;[e]MY_ECCKEY_1024_2023-04-02_12:18:44;MY_ECCKEY_1024_2023-04-02_12:18:44;
+[l]binary.dat.41
+;[r]MY_RSAKEY_512_2023-03-25_11:36:46
+[e:]last=1,first=1,random=15;
+
+;[w]https://i.postimg.cc/ZKGMV8SP/Screenshot-from-2023-02-23-19-39-28.png
+;[l]binary.dat.71
+;[l]binary.dat.44
+;[l]binary.dat.71
+;[l]binary.dat.44
+;[l]binary.dat.71
+[l]binary.dat.44
+
+;[mode]recur;[e]MY_ECCKEY_360_2023-03-25_14:33:22;[e]MY_ECCKEY_360_2023-03-25_14:33:22;[e]MY_ECCKEY_360_2023-03-25_14:33:22;[e]MY_ECCKEY_360_2023-03-25_14:33:22;[e]MY_ECCKEY_360_2023-03-25_14:33:22;[e]MY_ECCKEY_360_2023-03-25_14:33:22;[e]MY_ECCKEY_360_2023-03-25_14:33:22;[e]MY_ECCKEY_360_2023-03-25_14:33:22
+;[mode]recur;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;[r]MY_RSAKEY_2048_2023-03-25_14:29:11
+
+;[e:]last=10,first=6,random=5;[r:]last=10,first=6,random=15;
+;[r:]last=1,first=1,random=10;
+//[r:]last=1,first=1,random=5;
