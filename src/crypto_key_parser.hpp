@@ -251,6 +251,8 @@ public:
 			}
 			else
 			{
+				if (cryptoAL::VERBOSE_DEBUG)
+					std::cout << "parsing line :" << vlines[i] << std::endl;
 				keyspec_composite c = parse_keyspec_composite(vlines[i]);
 				if (c.vkeyspec.size() > 0)
 					vkeyspec_composite.push_back( c);
@@ -268,15 +270,20 @@ public:
 	{
 		keyspec_composite r;
 		keyspec k;
+		bool is_mode;
 
 		keyspec_composition_mode m;
 		std::vector<std::string> v = parsing::split(line, ";");
 		for(size_t i=0;i<v.size();i++)
 		{
+			k.ktype = keyspec_type::Unknown;
+			is_mode = false;
+			
 			if (strutil::has_token("[mode]",v[i], 0))
 			{
 				m = parse_mode(v[i]);
 				r.mode = m;
+				is_mode = true;
 			}
 			else if (strutil::has_token("[r]",  v[i], 0)) k = parse_key("[r]", 0, keyspec_type::RSA, false, v[i]);
 			else if (strutil::has_token("[r:]", v[i], 0)) k = parse_key("[r:]",0, keyspec_type::RSA, true,  v[i]);
@@ -303,6 +310,11 @@ public:
 			if (k.ktype != keyspec_type::Unknown)
 			{
 				r.vkeyspec.push_back(k);
+			}
+			else if (is_mode == false)
+			{
+				if (cryptoAL::VERBOSE_DEBUG)
+					std::cout << "WARNING unrecognized or missing [token] in line :" << line << std::endl;
 			}
 		}
 		return r;
