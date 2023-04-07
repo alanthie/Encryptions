@@ -177,19 +177,19 @@ inline void ParallelRoutine(mpzBigInteger &primeP, mpzBigInteger &primeQ, RSAGMP
 
 // 3 PRIMES
 inline void ParallelRoutine3(	mpzBigInteger &primeP, mpzBigInteger &primeQ, mpzBigInteger &primeR,
-								RSAGMP::Utils::Generator *gen, unsigned int size, unsigned int precision, int threads)
+								RSAGMP::Utils::Generator *gen, unsigned int size, unsigned int precision, int threads, bool verbose = true)
 {
 	primeP = gen->getBig(PRIME3_SIZE);
-	auto workerP = std::thread(ParallelNextPrime, &primeP, PRIME3_SIZE, precision, threads/3);
+	auto aworkerP = std::thread(ParallelNextPrime, &primeP, PRIME3_SIZE, precision, threads/3);
 
 	primeR = gen->getBig(PRIME3_SIZE);
-	auto workerR = std::thread(ParallelNextPrime, &primeR, PRIME3_SIZE, precision, threads/3);
+	auto aworkerR = std::thread(ParallelNextPrime, &primeR, PRIME3_SIZE, precision, threads/3);
 
 	primeQ = gen->getBig(PRIME3_SIZE);
-	Prime::ParallelNextPrime(&primeQ, PRIME3_SIZE, precision, (threads-2*threads/3));
+	Prime::ParallelNextPrime(&primeQ, PRIME3_SIZE, precision, threads/3);
 
-	workerP.join();
-	workerR.join();
+	if (aworkerP.joinable()) aworkerP.join();
+	if (aworkerR.joinable()) aworkerR.join();
 
 	bool pqOK;
 	bool prOK;
@@ -198,11 +198,21 @@ inline void ParallelRoutine3(	mpzBigInteger &primeP, mpzBigInteger &primeQ, mpzB
     prOK = Q_check3(primeP, primeR, PRIME3_SIZE);
     qrOK = Q_check3(primeQ, primeR, PRIME3_SIZE);
 
+	uint32_t cnt=0;
     while( (!pqOK) || (!prOK) || (!qrOK) )
     {
-        // Redo all
-        //primeP = gen->getBig(PRIME3_SIZE);
-        //auto workerP = std::thread(ParallelNextPrime, &primeP, PRIME3_SIZE, precision, threads/3);
+		cnt++;
+		if (cnt > 2)
+		{
+            // Redo P
+            primeP = gen->getBig(PRIME3_SIZE);
+            Prime::ParallelNextPrime(&primeP, PRIME3_SIZE, precision, threads);
+
+            cnt = 0;
+            pqOK = Q_check3(primeP, primeQ, PRIME3_SIZE);
+            prOK = Q_check3(primeP, primeR, PRIME3_SIZE);
+            qrOK = Q_check3(primeQ, primeR, PRIME3_SIZE);
+		}
 
         if ((!pqOK) && (!prOK))
         {
@@ -210,32 +220,26 @@ inline void ParallelRoutine3(	mpzBigInteger &primeP, mpzBigInteger &primeQ, mpzB
             auto workerQ = std::thread(ParallelNextPrime, &primeQ, PRIME3_SIZE, precision, threads/2);
 
             primeR = gen->getBig(PRIME3_SIZE);
-            auto workerR = std::thread(ParallelNextPrime, &primeR, PRIME3_SIZE, precision, (threads-threads/2));
+            auto workerR = std::thread(ParallelNextPrime, &primeR, PRIME3_SIZE, precision, threads/2);
 
-            workerQ.join();
-            workerR.join();
+            if (workerQ.joinable()) workerQ.join();
+            if (workerR.joinable()) workerR.join();
         }
         else if (!pqOK)
         {
-            primeQ = gen->getBig(PRIME3_SIZE);
-            auto workerQ = std::thread(ParallelNextPrime, &primeQ, PRIME3_SIZE, precision, (threads-0));
-            workerQ.join();
+			primeQ = gen->getBig(PRIME3_SIZE);
+			Prime::ParallelNextPrime(&primeQ, PRIME3_SIZE, precision, threads);
         }
         else if (!prOK)
         {
             primeR = gen->getBig(PRIME3_SIZE);
-            auto workerR = std::thread(ParallelNextPrime, &primeR, PRIME3_SIZE, precision, (threads-0));
-            workerR.join();
+			Prime::ParallelNextPrime(&primeR, PRIME3_SIZE, precision, threads);
         }
 
         pqOK = Q_check3(primeP, primeQ, PRIME3_SIZE);
         prOK = Q_check3(primeP, primeR, PRIME3_SIZE);
         qrOK = Q_check3(primeQ, primeR, PRIME3_SIZE);
     }
-
-//	std::cout << "ParallelRoutine3 primeP:" << primeP << std::endl;
-// 	std::cout << "ParallelRoutine3 primeQ:" << primeQ << std::endl;
-//  std::cout << "ParallelRoutine3 primeR:" << primeR << std::endl;
 }
 
 bool RSAGMP::Keygen(mpzBigInteger &pubkey,

@@ -1,4 +1,5 @@
 #include "RSAGMPPrime.h"
+#include <iostream>
 
 using namespace RSAGMP;
 using namespace RSAGMP::Prime;
@@ -156,6 +157,8 @@ void WorkerRoutine(mpzBigInteger *current, int size, unsigned int precision, int
 //extract a random number and search a early prime using more threads
 void Prime::ParallelNextPrime(mpzBigInteger *current, unsigned int size, unsigned int precision, int threads)
 {
+	//std::cout << "ParallelNextPrime entry " << threads << std::endl;
+
     if(*current < 2)
     {
         *current = 2;
@@ -166,18 +169,19 @@ void Prime::ParallelNextPrime(mpzBigInteger *current, unsigned int size, unsigne
 
     std::atomic<bool> not_found;
     not_found = true;
-    int i;
     std::thread *workers = new std::thread[threads];
 
-    for(i = 0; i<threads; i++)
+    for(int i = 0; i<threads; i++)
     {
         workers[i] = std::thread(WorkerRoutine, current, size, precision, i, 2*threads, &not_found);
     }
 
-    for(i = 0; i<threads; i++)
+    for(int i = 0; i<threads; i++)
     {
         workers[i].join();
     }
 
     delete[] workers;
+	
+	//std::cout << "ParallelNextPrime exit "<< std::endl;
 }
