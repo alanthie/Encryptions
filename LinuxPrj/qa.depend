@@ -411,7 +411,7 @@
 	"decryptor.hpp"
 	"crypto_test.hpp"
 
-1655389906 source:/home/server/dev/Encryptions/src/SHA256.cpp
+1680836979 source:/home/server/dev/Encryptions/src/SHA256.cpp
 	"SHA256.h"
 	<cstring>
 	<sstream>
@@ -481,13 +481,13 @@
 	<string>
 	<iostream>
 
-1680403856 /home/server/dev/Encryptions/src/c_plus_plus_serializer.h
+1680836979 /home/server/dev/Encryptions/src/c_plus_plus_serializer.h
 	<fstream>
 	<iostream>
 	<sstream>
 	<vector>
 
-1678328653 /home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMP.h
+1680895273 /home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMP.h
 	"RSAGMPPrime.h"
 	<thread>
 
@@ -503,7 +503,7 @@
 	<stdlib.h>
 	<random>
 
-1678347439 /home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPTest.h
+1680898773 /home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPTest.h
 	<iostream>
 	"RSAGMP.h"
 	<stdint.h>
@@ -524,19 +524,20 @@
 1441841430 source:/home/server/dev/Encryptions/src/qa/RSA_generate/bigint/BigUnsignedInABase.cc
 	"BigUnsignedInABase.hh"
 
-1678328738 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMP.cpp
+1680903338 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMP.cpp
 	"RSAGMP.h"
+	<iostream>
 
-1678328099 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPmainTest.cpp
+1680898794 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPmainTest.cpp
 	"RSAGMPTest.h"
 
-1678328624 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPPrime.cpp
+1680903836 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPPrime.cpp
 	"RSAGMPPrime.h"
 
 1678850313 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPUtils.cpp
 	"RSAGMPUtils.h"
 
-1678347439 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPTest.cpp
+1680900463 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPTest.cpp
 	"RSAGMPTest.h"
 
 1678850313 /home/server/dev/Encryptions/src/qa/ec_gmp/ec_gmp_p_mul.hpp
@@ -710,7 +711,7 @@
 	"crypto_parsing.hpp"
 	"c_plus_plus_serializer.h"
 
-1680656099 /home/server/dev/Encryptions/src/crypto_ecckey.hpp
+1680890769 /home/server/dev/Encryptions/src/crypto_ecckey.hpp
 	"crypto_const.hpp"
 	"random_engine.hpp"
 	"uint_util.hpp"
@@ -718,21 +719,23 @@
 	"qa/ecc_point/ecc_curve.hpp"
 	"c_plus_plus_serializer.h"
 
-1680587553 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.cpp
+1680890127 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.cpp
+	"../../crypto_const.hpp"
+	"ecc_curve.hpp"
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
 	<iostream>
-	"ecc_curve.hpp"
 
-1679174275 /home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.hpp
+1680890014 /home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.hpp
+	"../../crypto_const.hpp"
 	<ctype.h>
 	<string.h>
 	<stdio.h>
 	<gmpxx.h>
 	"../../Buffer.hpp"
 
-1680587403 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_elgamal.cpp
+1680891390 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_elgamal.cpp
 	<stdlib.h>
 	<stdio.h>
 	<time.h>
@@ -766,7 +769,7 @@
 	<iostream>
 	<gmpxx.h>
 
-1680580594 /home/server/dev/Encryptions/src/crypto_cfg.hpp
+1680889017 /home/server/dev/Encryptions/src/crypto_cfg.hpp
 	"crypto_const.hpp"
 	"ini_parser.hpp"
 	"crypto_strutil.hpp"
@@ -807,7 +810,7 @@
 	<stdlib.h>
 	<fstream>
 
-1680807738 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox_compiler.hpp
+1680836979 /home/server/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox_compiler.hpp
 	"../../crypto_const.hpp"
 	"../../random_engine.hpp"
 	"../../data.hpp"
@@ -852,7 +855,7 @@
 	<cctype>
 	<filesystem>
 
-1680819558 source:/home/server/dev/Encryptions/src/qa/menu/menu.cpp
+1680899026 source:/home/server/dev/Encryptions/src/qa/menu/menu.cpp
 	"menu.h"
 
 1680312455 /home/server/dev/Encryptions/src/qa/menu/rsa_menu.hpp
@@ -888,7 +891,7 @@
 	<vector>
 	<type_traits>
 
-1680578301 source:/home/server/dev/Encryptions/src/qa/menu/rsa_menu.cpp
+1680900419 source:/home/server/dev/Encryptions/src/qa/menu/rsa_menu.cpp
 	"../../../src/uint_util.hpp"
 	"../../../src/crypto_const.hpp"
 	"../../../src/file_util.hpp"
@@ -930,10 +933,11 @@
 	<fstream>
 	<filesystem>
 
-1680836979 /home/server/dev/Encryptions/src/file_util.hpp
+1680841470 /home/server/dev/Encryptions/src/file_util.hpp
 	"crypto_const.hpp"
 	"data.hpp"
 	"SHA256.h"
+	"crypto_strutil.hpp"
 	"common/includes.h"
 	<filesystem>
 
@@ -951,7 +955,7 @@
 	"qa/RSA-GMP/RSAGMP.h"
 	"qa/RSA-GMP/RSAGMPUtils.h"
 
-1680577933 source:/home/server/dev/Encryptions/src/qa/menu/cfg_menu.cpp
+1680836979 source:/home/server/dev/Encryptions/src/qa/menu/cfg_menu.cpp
 	"../../../src/uint_util.hpp"
 	"../../../src/crypto_const.hpp"
 	"../../../src/file_util.hpp"
@@ -959,7 +963,7 @@
 	"../../../src/crypto_parsing.hpp"
 	"menu.h"
 
-1680578006 source:/home/server/dev/Encryptions/src/qa/menu/eccdomain_menu.cpp
+1680836979 source:/home/server/dev/Encryptions/src/qa/menu/eccdomain_menu.cpp
 	"../../../src/uint_util.hpp"
 	"../../../src/crypto_const.hpp"
 	"../../../src/file_util.hpp"
@@ -969,7 +973,7 @@
 	"../../../src/crypto_ecckey.hpp"
 	"menu.h"
 
-1680578090 source:/home/server/dev/Encryptions/src/qa/menu/ecckey_menu.cpp
+1680836979 source:/home/server/dev/Encryptions/src/qa/menu/ecckey_menu.cpp
 	"../../../src/uint_util.hpp"
 	"../../../src/crypto_const.hpp"
 	"../../../src/file_util.hpp"
@@ -978,7 +982,7 @@
 	"../../../src/crypto_ecckey.hpp"
 	"menu.h"
 
-1680578131 source:/home/server/dev/Encryptions/src/qa/menu/hh_menu.cpp
+1680836979 source:/home/server/dev/Encryptions/src/qa/menu/hh_menu.cpp
 	"../../../src/uint_util.hpp"
 	"../../../src/crypto_const.hpp"
 	"../../../src/file_util.hpp"
@@ -987,7 +991,7 @@
 	"../../../src/crypto_history.hpp"
 	"menu.h"
 
-1680578206 source:/home/server/dev/Encryptions/src/qa/menu/puzzle_menu.cpp
+1680836979 source:/home/server/dev/Encryptions/src/qa/menu/puzzle_menu.cpp
 	"../../../src/uint_util.hpp"
 	"../../../src/crypto_const.hpp"
 	"../../../src/file_util.hpp"
@@ -997,7 +1001,7 @@
 	"../../../src/qa/prime.h"
 	"menu.h"
 
-1680821638 source:/home/server/dev/Encryptions/src/qa/menu/wbaes_menu.cpp
+1680851394 source:/home/server/dev/Encryptions/src/qa/menu/wbaes_menu.cpp
 	"../../../src/uint_util.hpp"
 	"../../../src/crypto_const.hpp"
 	"../../../src/file_util.hpp"
@@ -1009,7 +1013,7 @@
 	"../../../src/c_plus_plus_serializer.h"
 	"menu.h"
 
-1680578343 source:/home/server/dev/Encryptions/src/qa/menu/tools_menu.cpp
+1680884057 source:/home/server/dev/Encryptions/src/qa/menu/tools_menu.cpp
 	"../../../src/uint_util.hpp"
 	"../../../src/crypto_const.hpp"
 	"../../../src/file_util.hpp"
@@ -1017,4 +1021,205 @@
 	"../../../src/crypto_parsing.hpp"
 	"../../../src/c_plus_plus_serializer.h"
 	"menu.h"
+	"../SystemProperties.hpp"
+
+1680848535 source:/home/server/dev/Encryptions/src/qa/hwinfo.cpp
+	"hwinfo.hpp"
+	"hwinfo/include/hwinfo/hwinfo.h"
+	<iostream>
+	<iomanip>
+
+1680849118 /home/server/dev/Encryptions/src/qa/hwinfo.hpp
+	"../crypto_const.hpp"
+	"hwinfo/include/hwinfo/hwinfo.h"
+
+1680848978 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/hwinfo.h
+	"cpu.h"
+	"battery.h"
+	"cpu.h"
+	"disk.h"
+	"gpu.h"
+	"mainboard.h"
+	"os.h"
+	"ram.h"
+
+1680848077 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/battery.h
+	<string>
+	<vector>
+	"platform.h"
+
+1680846156 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/platform.h
+
+1680850201 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/cpu.h
+	<optional>
+	<string>
+	<vector>
+
+1680848177 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/disk.h
+	<string>
+	<vector>
+
+1678136847 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/gpu.h
+	<string>
+	<vector>
+
+1680844711 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/mainboard.h
+	<string>
+	<vector>
+	"platform.h"
+
+1678136847 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/os.h
+	<string>
+
+1678136847 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/ram.h
+	<string>
+
+1680845496 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/battery.cpp
+	"../include/hwinfo/battery.h"
+
+1680845515 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/cpu.cpp
+	"../include/hwinfo/cpu.h"
+	<string>
+	<vector>
+	"../include/hwinfo/cpuid.h"
+	"../include/hwinfo/platform.h"
+
+1680845541 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/cpuid.h
+	"platform.h"
+	<Windows.h>
+	<cpuid.h>
+
+1680845575 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/disk.cpp
+	"../include/hwinfo/disk.h"
+	"../include/hwinfo/utils/stringutils.h"
+
+1680849550 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/utils/stringutils.h
+	<cstring>
+	<string>
+	<vector>
+
+1680845599 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/gpu.cpp
+	<regex>
+	<string>
+	<vector>
+	"../include/hwinfo/utils/subprocess.h"
+	"hwinfo/WMIwrapper.h"
+	"../include/hwinfo/gpu.h"
+
+1678136847 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/utils/subprocess.h
+	<cstdio>
+	<iostream>
+	<memory>
+	<string>
+	<vector>
+
+1680845614 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/mainboard.cpp
+	"../include/hwinfo/mainboard.h"
+	<fstream>
+	<utility>
+	"../include/hwinfo/WMIwrapper.h"
+
+1678136847 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/WMIwrapper.h
+	<WbemIdl.h>
+	<Windows.h>
+	<comdef.h>
+	<ntddscsi.h>
+	<string>
+	<type_traits>
+	<vector>
+
+1680845623 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/os.cpp
+	"../include/hwinfo/os.h"
+	<string>
+
+1680845638 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/ram.cpp
+	<string>
+	<vector>
+	<unistd.h>
+	<sys/sysctl.h>
+	<Windows.h>
+	"../include/hwinfo/WMIwrapper.h"
+	"../include/hwinfo/ram.h"
+
+1680845645 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/system.cpp
+	"../include/hwinfo/system.h"
+
+1680845658 /home/server/dev/Encryptions/src/qa/hwinfo/include/hwinfo/system.h
+	<string>
+	<vector>
+	"cpu.h"
+	"disk.h"
+	"gpu.h"
+	"ram.h"
+
+1680847944 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/linux/battery.cpp
+	"../../include/hwinfo/platform.h"
+	<filesystem>
+	<fstream>
+	"../../include/hwinfo/battery.h"
+
+1680846489 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/linux/cpu.cpp
+	"../../include/hwinfo/platform.h"
+	<algorithm>
+	<fstream>
+	<map>
+	<optional>
+	<string>
+	<vector>
+	"../../include/hwinfo/cpu.h"
+	"../../include/hwinfo/utils/stringutils.h"
+	"../../include/hwinfo/cpuid.h"
+
+1680846496 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/linux/disk.cpp
+	"../../include/hwinfo/platform.h"
+	<filesystem>
+	<fstream>
+	"../../include/hwinfo/disk.h"
+	"../../include/hwinfo/utils/stringutils.h"
+
+1680846499 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/linux/gpu.cpp
+	"../../include/hwinfo/platform.h"
+	<regex>
+	<string>
+	<vector>
+	"../../include/hwinfo/gpu.h"
+	"../../include/hwinfo/utils/subprocess.h"
+
+1680846503 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/linux/mainboard.cpp
+	"../../include/hwinfo/platform.h"
+	<fstream>
+	"../../include/hwinfo/mainboard.h"
+
+1680846506 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/linux/os.cpp
+	"../../include/hwinfo/platform.h"
+	<sys/stat.h>
+	<sys/utsname.h>
+	<fstream>
+	<sstream>
+	<string>
+	"../../include/hwinfo/os.h"
+	"../../include/hwinfo/utils/stringutils.h"
+
+1680846514 source:/home/server/dev/Encryptions/src/qa/hwinfo/src/linux/ram.cpp
+	"../../include/hwinfo/platform.h"
+	<unistd.h>
+	<string>
+	<vector>
+	"../../include/hwinfo/ram.h"
+
+1680883726 source:/home/server/dev/Encryptions/src/qa/SystemProperties.cpp
+	"SystemProperties.hpp"
+	<filesystem>
+	<fstream>
+	<sys/sysinfo.h>
+
+1680883192 /home/server/dev/Encryptions/src/qa/SystemProperties.hpp
+	<string>
+	<system_error>
+	<filesystem>
+	<variant>
+	<vector>
+	<comdef.h>
+	<WbemIdl.h>
+	<sys/utsname.h>
 

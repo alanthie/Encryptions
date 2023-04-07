@@ -21,7 +21,7 @@
 #include "crypto_png.hpp"
 #include "qa/aes-whitebox/aes_whitebox.hpp"
 #include "qa/menu/menu.h"
-
+#include "qa/SystemProperties.hpp"
 
 namespace cryptoAL
 {
@@ -735,7 +735,7 @@ public:
 									t = ecc::ecc_decode_full_string(d, ek_mine, msg_size_produced, verbose);
 								else
 									t = ecc::ecc_decode_string(d, ek_mine, (uint32_t)d.size(), msg_size_produced, verbose);
-									
+
 								if (VERBOSE_DEBUG)
                                 {
                                     std::cerr << "ecc data decoded: " << t << " size: " << t.size() << std::endl;
@@ -750,7 +750,7 @@ public:
 									embedded_ecc_key = ecc::ecc_decode_full_string(uk.sRSA_ECC_ENCODED_DATA, ek_mine, msg_size_produced, verbose);
 								else
 									embedded_ecc_key = ecc::ecc_decode_string(uk.sRSA_ECC_ENCODED_DATA, ek_mine, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced, verbose);
-								
+
 								if (VERBOSE_DEBUG)
                                 {
                                     std::cout << "ecc encoded data:        " << uk.sRSA_ECC_ENCODED_DATA << " size: " << uk.sRSA_ECC_ENCODED_DATA.size() << std::endl;
@@ -2034,30 +2034,54 @@ public:
 			c[cnt] = encrypted_data.buffer.getdata()[i];
 			cnt++;
 		}
-		std::string remote_cd(c);
-		strutil::trim(remote_cd);
+		std::string remote_hwinfo(c);
+		strutil::trim(remote_hwinfo);
+
+		std::string current_hwinfo;
+		System::Properties pr;
+		current_hwinfo = pr.CPUModel() + " " + pr.GPUName();
+		strutil::trim(current_hwinfo);
+
 		encrypted_data.buffer.remove_last_n_char(256);
-		if (VERBOSE_DEBUG) std::cout << "file remote directory: " << remote_cd << std::endl;
-		std::string cd = file_util::get_current_dir();
+		if (VERBOSE_DEBUG) std::cout << "remote hwinfo: " << remote_hwinfo << std::endl;
 
 		bool auto_save = auto_flag;
-		if (cd == remote_cd)
+		if (current_hwinfo == remote_hwinfo)
 		{
 			if (auto_flag)
 			{
-				std::cout << std::endl;
-				std::cout << "WARNING - It appears that your are decoding a file you made and auto update is on." << std::endl;
-				std::cout << "Normally the auto update flag is to update the public keys received from the sender of the encrypted file." << std::endl;
-				std::cout << "The auto option will update the public keys of the sender with your own public keys!" << std::endl;
-				std::cout << "Do you really want to do this? n=no (normal, just do the decoding), y=yes (I'm only testing)" << std::endl;
-				std::cout << "==> ";
-				std::string q = ns_menu::get_input_string();
-				if      ((q=="n") || (q=="N") || (q=="no") || (q== "NO")) {auto_save = false;}
-				else if ((q=="y") || (q=="Y") || (q=="yes")|| (q=="YES")) {}
+				bool okTESTING = false;
+				if (	(cfg_parse_result) &&
+						(cfg.cmdparam.allow_auto_update_on_same_machine_for_testing.size()>0)
+					)
+				{
+					// all_auto_update_on_same_machine_for_testing = 1
+					long long n = parsing::str_to_ll(cfg.cmdparam.allow_auto_update_on_same_machine_for_testing);
+					if (n > 0)
+					{
+						okTESTING = true;
+					}
+				}
+
+				if (okTESTING == false)
+				{
+					std::cout << std::endl;
+					std::cout << "WARNING - It appears that your are decoding a file you made and auto update is on." << std::endl;
+					std::cout << "Normally the auto update flag is to update the public keys received from the sender of the encrypted file." << std::endl;
+					std::cout << "The auto option will update the public keys of the sender with your own public keys!" << std::endl;
+					std::cout << "Do you really want to do this? n=no (normal, just do the decoding), y=yes (I'm only testing)" << std::endl;
+					std::cout << "==> ";
+					std::string q = ns_menu::get_input_string();
+					if      ((q=="n") || (q=="N") || (q=="no") || (q== "NO")) {auto_save = false;}
+					else if ((q=="y") || (q=="Y") || (q=="yes")|| (q=="YES")) {}
+					else
+					{
+						std::cout << "invalid response, only the decoding will be done, no update of public keys" << std::endl;
+						auto_save = false;
+					}
+				}
 				else
 				{
-                    std::cout << "invalid response, only the decoding will be done, no update of public keys" << std::endl;
-                    auto_save = false;
 				}
 			}
 		}

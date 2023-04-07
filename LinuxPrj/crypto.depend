@@ -181,7 +181,7 @@
 	<curl/curl.h>
 	"encrypt.h"
 
-1680836979 /home/server/dev/Encryptions/src/encryptor.hpp
+1680885163 /home/server/dev/Encryptions/src/encryptor.hpp
 	"crypto_const.hpp"
 	<iostream>
 	<fstream>
@@ -207,6 +207,7 @@
 	"qa/aes-whitebox/aes_whitebox.hpp"
 	"rsa_util.hpp"
 	"crypto_file.hpp"
+	"qa/SystemProperties.hpp"
 
 1590687588 /home/server/dev/Encryptions/src/twofish.h
 
@@ -224,7 +225,7 @@
 	<stdio.h>
 	<string.h>
 
-1680655620 /home/server/dev/Encryptions/src/decryptor.hpp
+1680889042 /home/server/dev/Encryptions/src/decryptor.hpp
 	"crypto_const.hpp"
 	"file_util.hpp"
 	"ecc_util.hpp"
@@ -245,6 +246,7 @@
 	"crypto_png.hpp"
 	"qa/aes-whitebox/aes_whitebox.hpp"
 	"qa/menu/menu.h"
+	"qa/SystemProperties.hpp"
 
 1680400077 /home/server/dev/Encryptions/src/crypto_test.hpp
 	"crypto_const.hpp"
@@ -411,7 +413,7 @@
 	<sstream>
 	<vector>
 
-1678328653 /home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMP.h
+1680895273 /home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMP.h
 	"RSAGMPPrime.h"
 	<thread>
 
@@ -465,21 +467,22 @@
 	<string>
 	<iostream>
 
-1678328738 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMP.cpp
+1680904184 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMP.cpp
 	"RSAGMP.h"
+	<iostream>
 
-1678328099 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPmainTest.cpp
+1680898794 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPmainTest.cpp
 	"RSAGMPTest.h"
 
-1678347439 /home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPTest.h
+1680898773 /home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPTest.h
 	<iostream>
 	"RSAGMP.h"
 	<stdint.h>
 
-1678328624 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPPrime.cpp
+1680903836 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPPrime.cpp
 	"RSAGMPPrime.h"
 
-1678347439 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPTest.cpp
+1680904107 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPTest.cpp
 	"RSAGMPTest.h"
 
 1678850313 source:/home/server/dev/Encryptions/src/qa/RSA-GMP/RSAGMPUtils.cpp
@@ -533,7 +536,7 @@
 	<ctype.h>
 	"vigenere.hpp"
 
-1680836979 /home/server/dev/Encryptions/src/crypto_ecckey.hpp
+1680890769 /home/server/dev/Encryptions/src/crypto_ecckey.hpp
 	"crypto_const.hpp"
 	"random_engine.hpp"
 	"uint_util.hpp"
@@ -541,21 +544,23 @@
 	"qa/ecc_point/ecc_curve.hpp"
 	"c_plus_plus_serializer.h"
 
-1679174275 /home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.hpp
+1680890014 /home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.hpp
+	"../../crypto_const.hpp"
 	<ctype.h>
 	<string.h>
 	<stdio.h>
 	<gmpxx.h>
 	"../../Buffer.hpp"
 
-1680587553 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.cpp
+1680890127 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_curve.cpp
+	"../../crypto_const.hpp"
+	"ecc_curve.hpp"
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
 	<iostream>
-	"ecc_curve.hpp"
 
-1680836979 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_elgamal.cpp
+1680891390 source:/home/server/dev/Encryptions/src/qa/ecc_point/ecc_elgamal.cpp
 	<stdlib.h>
 	<stdio.h>
 	<time.h>
@@ -597,7 +602,7 @@
 	<string>
 	<algorithm>
 
-1680580594 /home/server/dev/Encryptions/src/crypto_cfg.hpp
+1680889017 /home/server/dev/Encryptions/src/crypto_cfg.hpp
 	"crypto_const.hpp"
 	"ini_parser.hpp"
 	"crypto_strutil.hpp"
@@ -666,10 +671,11 @@
 	<fstream>
 	<filesystem>
 
-1680836979 /home/server/dev/Encryptions/src/file_util.hpp
+1680841470 /home/server/dev/Encryptions/src/file_util.hpp
 	"crypto_const.hpp"
 	"data.hpp"
 	"SHA256.h"
+	"crypto_strutil.hpp"
 	"common/includes.h"
 	<filesystem>
 
@@ -726,4 +732,20 @@
 	<limits>
 	<cctype>
 	<filesystem>
+
+1680883192 /home/server/dev/Encryptions/src/qa/SystemProperties.hpp
+	<string>
+	<system_error>
+	<filesystem>
+	<variant>
+	<vector>
+	<comdef.h>
+	<WbemIdl.h>
+	<sys/utsname.h>
+
+1680883726 source:/home/server/dev/Encryptions/src/qa/SystemProperties.cpp
+	"SystemProperties.hpp"
+	<filesystem>
+	<fstream>
+	<sys/sysinfo.h>
 

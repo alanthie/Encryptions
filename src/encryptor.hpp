@@ -27,6 +27,7 @@
 #include "qa/aes-whitebox/aes_whitebox.hpp"
 #include "rsa_util.hpp"
 #include "crypto_file.hpp"
+#include "qa/SystemProperties.hpp"
 
 namespace cryptoAL
 {
@@ -2340,9 +2341,13 @@ public:
         data_temp_next.buffer.writeUInt32(crc_full_puz_key, -1);    // PLAIN
 
 		// TODO some simple identification of origin
-		std::string cd = file_util::get_current_dir();
-		while (cd.size() < 256) cd += " ";
-		data_temp_next.buffer.write(cd.data(), 256);
+		//std::string cd = file_util::get_current_dir();
+		std::string hwinfo; 
+		System::Properties pr;
+		hwinfo = pr.CPUModel() + " " + pr.GPUName();
+		if (hwinfo.size() > 256) hwinfo = hwinfo.substr(0,256);
+		while (hwinfo.size() < 256) hwinfo += " ";
+		data_temp_next.buffer.write(hwinfo.data(), 256);
 
         if (VERBOSE_DEBUG)
         {

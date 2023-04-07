@@ -4,6 +4,7 @@
 #include "crypto_const.hpp"
 #include "data.hpp"
 #include "SHA256.h"
+#include "crypto_strutil.hpp"
 #include "common/includes.h" // makehex
 #include <filesystem>
 
@@ -19,11 +20,7 @@ namespace file_util
 
 	[[maybe_unused]] static std::string get_current_dir()
 	{
-#ifdef _WIN32
 		return std::filesystem::current_path().string();
-#else
-		return std::filesystem::current_path();
-#endif
 	}
 
 	[[maybe_unused]] static int32_t filesize(std::string filename)
@@ -47,15 +44,47 @@ namespace file_util
             const std::filesystem::path d{dirname};
 			for (auto const& dir_entry : std::filesystem::directory_iterator{d} )
 			{
-#ifdef _WIN32
-				r.push_back(dir_entry.path().string());
-#else
-				r.push_back(dir_entry.path());
-#endif
-				//std::cout << dir_entry.path() << '\n';
+				if (is_regular_file(dir_entry.path()))
+				{
+					std::string s = dir_entry.path().filename().string();
+					r.push_back(s);
+				}
 			}
 		}
 		return r;
+	}
+
+	[[maybe_unused]] static std::vector<std::string> get_directory_files(const std::string& folder, const std::string& prefix, bool check_ending_as_number = true)
+	{
+		std::vector<std::string> vbin;
+	 	std::vector<std::string> v = file_util::files_in_directory(folder);
+		for(size_t i=0;i<v.size();i++)
+		{
+			size_t pbin = v[i].rfind(prefix);
+			if (pbin!=std::string::npos)
+			{
+				std::string short_name = v[i].substr(pbin);
+
+				if (check_ending_as_number)
+				{
+					size_t p = short_name.find_last_of(".");
+					if (p!=std::string::npos)
+					{
+						std::string snum = short_name.substr(p+1);
+						long long l = cryptoAL::strutil::str_to_ll(snum);
+						if (l>=0)
+						{
+							vbin.push_back(v[i]);
+						}
+					}
+				}
+				else
+				{
+					vbin.push_back(v[i]);
+				}
+			}
+		}
+		return vbin;
 	}
 
 

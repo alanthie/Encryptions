@@ -248,6 +248,17 @@ namespace cryptoAL
         {
             ecc_curve ecc;
 			ecc.verbose = verb;
+			ecc.verbose_debug = cryptoAL::VERBOSE_DEBUG;
+			if (cryptoAL::VERBOSE_DEBUG)
+			{
+				std::cout << "ecc.init_curve dom.key_size_bits: " << dom.key_size_bits << std::endl;
+				std::cout << "ecc.init_curve uint_util::base64_to_base10(dom.s_a): " << uint_util::base64_to_base10(dom.s_a)<< std::endl;
+				std::cout << "ecc.init_curve uint_util::base64_to_base10(dom.s_b): " << uint_util::base64_to_base10(dom.s_b)<< std::endl;
+				std::cout << "ecc.init_curve uint_util::base64_to_base10(dom.s_p): " << uint_util::base64_to_base10(dom.s_p)<< std::endl;
+				std::cout << "ecc.init_curve uint_util::base64_to_base10(dom.s_n): " << uint_util::base64_to_base10(dom.s_n)<< std::endl;
+				std::cout << "ecc.init_curve uint_util::base64_to_base10(dom.s_gx): " << uint_util::base64_to_base10(dom.s_gx)<< std::endl;
+				std::cout << "ecc.init_curve uint_util::base64_to_base10(dom.s_gy): " << uint_util::base64_to_base10(dom.s_gy)<< std::endl;
+			}
             int ir = ecc.init_curve(dom.key_size_bits,
                                     uint_util::base64_to_base10(dom.s_a),
                                     uint_util::base64_to_base10(dom.s_b),
@@ -264,7 +275,6 @@ namespace cryptoAL
 
             ecc_point   out_Cm;
             ecc_point   out_rG;
-
             ecc_point   publicKey_decoder;
             mpz_t       privateKey_encoder;
 
@@ -272,7 +282,13 @@ namespace cryptoAL
             mpz_init_set_str(publicKey_decoder.x,uint_util::base64_to_base10(publicKey_decoder_x).data(),10);
             mpz_init_set_str(publicKey_decoder.y,uint_util::base64_to_base10(publicKey_decoder_y).data(),10);
 
-            //bool encode(ecc_point& out_Cm, ecc_point& out_rG, const std::string& msg, ecc_point& publicKey, mpz_t& private_key);
+			if (cryptoAL::VERBOSE_DEBUG)
+			{
+				std::cout << "call ecc.encode(out_Cm, out_rG, msg, publicKey_decoder, privateKey_encoder) msg.size()" << msg.size() << std::endl;
+				std::cout << "ecc_point publicKey_decoder x " << uint_util::base64_to_base10(publicKey_decoder_x) << std::endl;
+				std::cout << "ecc_point publicKey_decoder y " << uint_util::base64_to_base10(publicKey_decoder_y) << std::endl;
+				std::cout << "mpz_t     privateKey_encoder  " << uint_util::base64_to_base10(s_k) << std::endl;
+			}
             bool r = ecc.encode(out_Cm, out_rG, msg, publicKey_decoder, privateKey_encoder);
             if (r)
             {
@@ -294,6 +310,8 @@ namespace cryptoAL
         {
             ecc_curve ecc;
 			ecc.verbose = verb;
+			ecc.verbose_debug = cryptoAL::VERBOSE_DEBUG;
+
             int ir = ecc.init_curve(dom.key_size_bits,
                                     uint_util::base64_to_base10(dom.s_a),
                                     uint_util::base64_to_base10(dom.s_b),
@@ -344,6 +362,8 @@ namespace cryptoAL
 
 			ecc_curve ecc;
 			ecc.verbose = verb;
+			ecc.verbose_debug = cryptoAL::VERBOSE_DEBUG;
+
             int ir = ecc.init_curve(dom.key_size_bits,
                                     uint_util::base64_to_base10(dom.s_a),
                                     uint_util::base64_to_base10(dom.s_b),
@@ -442,7 +462,7 @@ namespace ecc
 		if (r)
 		{
 			decoded_ecc_data = out_msg;
-			if (VERBOSE_DEBUG)
+			if (cryptoAL::VERBOSE_DEBUG)
 			{
                 std::cout << "ecc decoded data: " << decoded_ecc_data << std::endl;
 			}
@@ -563,6 +583,12 @@ namespace ecc
 		uint32_t key_len_bytes = ek.dom.key_size_bits / 8;
 		key_len_bytes--;
 
+		if (cryptoAL::VERBOSE_DEBUG)
+		{
+			std::cout << "ecc_encode_string key_smsg size: " << smsg.size() << std::endl;
+			std::cout << "ecc_encode_string key_len_bytes: " << key_len_bytes<< std::endl;
+		}
+
 		if (key_len_bytes < smsg.size())
 		{
 			msg_to_encrypt = smsg.substr(0, key_len_bytes);
@@ -579,6 +605,13 @@ namespace ecc
 			std::string out_rG_x;
 			std::string out_rG_y;
 
+			if (cryptoAL::VERBOSE_DEBUG)
+			{
+				std::cout << "call ek.encode msg_to_encrypt.size()  : " << msg_to_encrypt.size() << std::endl;
+				std::cout << "call ek.encode public_key_of_decoder_x: " << public_key_of_decoder_x<< std::endl;
+				std::cout << "call ek.encode public_key_of_decoder_y: " << public_key_of_decoder_y<< std::endl;
+			}
+
 			bool r = ek.encode(	msg_to_encrypt, public_key_of_decoder_x, public_key_of_decoder_y, out_Cm_x, out_Cm_y, out_rG_x, out_rG_y, verbose);
 
 			if (r)
@@ -588,7 +621,7 @@ namespace ecc
 				encoded_ecc_data += std::to_string(out_rG_x.size()) + ";" + out_rG_x + ";";
 				encoded_ecc_data += std::to_string(out_rG_y.size()) + ";" + out_rG_y + ";";
 
-				if (VERBOSE_DEBUG)
+				if (cryptoAL::VERBOSE_DEBUG)
 				{
                     std::cout << "ecc encoded data [Cm+rG]: " << encoded_ecc_data << std::endl;
                     std::cout << "ecc encoded data [Cm+rG] size: " << encoded_ecc_data.size() << std::endl;
@@ -604,7 +637,7 @@ namespace ecc
 		if (msg_to_encrypt.size() < smsg.size())
 		{
 			encoded_ecc_data += smsg.substr(msg_to_encrypt.size());
-			if (VERBOSE_DEBUG)
+			if (cryptoAL::VERBOSE_DEBUG)
             {
                 std::cout << "ecc recursive encoded data: " << encoded_ecc_data << std::endl;
                 std::cout << "ecc recursive encoded data size: " << encoded_ecc_data.size() << std::endl;

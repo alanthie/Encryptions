@@ -92,6 +92,8 @@ struct cfg_cmdparam
 	std::string verbose;
 	std::string converter;
 	std::string check_converter;
+	
+	std::string allow_auto_update_on_same_machine_for_testing;
 };
 
 class crypto_cfg
@@ -285,6 +287,8 @@ public:
 		cmdparam.auto_flag       			    = apply_var(ini.get_string("auto_flag", CFG_cmdparam_section));
 		cmdparam.converter       			    = apply_var(ini.get_string("converter", CFG_cmdparam_section));
 		cmdparam.check_converter       			= apply_var(ini.get_string("check_converter", CFG_cmdparam_section));
+		
+		cmdparam.allow_auto_update_on_same_machine_for_testing = apply_var(ini.get_string("allow_auto_update_on_same_machine_for_testing", CFG_cmdparam_section));
 	}
 
 	void read_algo()

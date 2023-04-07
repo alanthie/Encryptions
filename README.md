@@ -130,14 +130,13 @@ Current set of encryption algorithms
     TWOFISH
     Salsa20
     IDEA
-    RSA (2 primes)
+    RSA (2 primes and 3 primes*)
     Recursive RSA
     Shuffling
     Elliptic Curve
     Recursive Elliptic Curve
-    WhiteBox (against compromise environment) AES 512 bits to AES 32768 bits!
-    
-    Future: Multiple primes (3+) RSA [the security of Multi-prime RSA is undeniably better than the standard RSA]
+    WhiteBox (against compromise environment) AES 512 bits to AES 32768 bits!  
+    *[the security of Multi-prime (3+) RSA is undeniably better than the standard RSA]
 </pre>
 
 Overview:
