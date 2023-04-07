@@ -9,7 +9,7 @@
 
 namespace ns_menu
 {
-	int main_menu::fECCDomain(int choice)
+	int main_menu::fECCDomain(size_t choice)
    	{
 		int r = 0;
 

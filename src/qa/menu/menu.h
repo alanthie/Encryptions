@@ -68,14 +68,14 @@ namespace ns_menu
 
         void calledby(const Menu& m, size_t option);
 
-        int fCFG(int choice);
-        int fPuzzle(int choice);
-        int fRSA(int choice);
-        int fECCDomain(int choice);
-        int fECCKey(int choice);
-        int fHH(int choice);
-        int fWBAES(int choice);
-        int fTOOLS(int choice);
+        int fCFG(size_t choice);
+        int fPuzzle(size_t choice);
+        int fRSA(size_t choice);
+        int fECCDomain(size_t choice);
+        int fECCKey(size_t choice);
+        int fHH(size_t choice);
+        int fWBAES(size_t choice);
+        int fTOOLS(size_t choice);
     };
 
     class Menu

@@ -42,7 +42,7 @@ bool ecc_curve::format_msg_for_ecc(const std::string& msg, cryptoAL::Buffer& out
    	{
         out_message.write(&c[0], 1);
    	}
-   	out_message.write(msg.data(), msg.size());
+   	out_message.write(msg.data(), (uint32_t)msg.size());
    	out_message.write(&c[0], 1);
 
    	if (verbose)
@@ -68,7 +68,7 @@ message_point ecc_curve::getECCPointFromMessage(cryptoAL::Buffer& message_buffer
 	mpz_init(x);
     ecc_point r;
 
-    size_t NBefore = 0;
+    unsigned int  NBefore = 0;
     for(size_t i=0;i<message_buffer.size();i++)
    	{
         if (message_buffer.getdata()[i] == 0)
@@ -80,11 +80,11 @@ message_point ecc_curve::getECCPointFromMessage(cryptoAL::Buffer& message_buffer
             break;
         }
    	}
-   	size_t NAfter = message_buffer.size() - NBefore;
+    unsigned int  NAfter = message_buffer.size() - NBefore;
 
 	unsigned int n;
     const char* message = &message_buffer.getdata()[NBefore];
-	for (int i = NAfter-1;i>=0;i--)
+	for (unsigned int i = NAfter-1;i>=0;i--)
     {
 		mpz_t temp;
 		mpz_init_set_str(temp,pow256string(i).data(),BASE_16);
@@ -176,7 +176,7 @@ void ecc_curve::getMessageFromPoint(message_point& msg, cryptoAL::Buffer& final_
         //if (VERBOSE_DEBUG) std::cout << i << " *digit[i] " << 0 << std::endl;
 	}
 
-    size_t NBefore = 0;
+    unsigned int NBefore = 0;
     for(unsigned int i=0;i<MSG_BYTES_MAX+K;i++)
    	{
         if (out_message.getdata()[i] == 0)
@@ -188,7 +188,7 @@ void ecc_curve::getMessageFromPoint(message_point& msg, cryptoAL::Buffer& final_
             break;
         }
    	}
-   	size_t NAfter = MSG_BYTES_MAX+K - NBefore;
+    unsigned int NAfter = MSG_BYTES_MAX+K - NBefore;
 
     final_message.clear();
     final_message.increase_size(NAfter - 1);

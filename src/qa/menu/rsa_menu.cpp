@@ -76,7 +76,7 @@ namespace ns_menu
      }
 
 
-    int main_menu::fRSA(int choice)
+    int main_menu::fRSA(size_t choice)
     {
 		int r = 0;
 		if (choice == 1) // RSA Key: View my private RSA key

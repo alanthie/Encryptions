@@ -7,6 +7,10 @@
 #include "../../c_plus_plus_serializer.h"
 
 //Original code: https://github.com/balena/aes-whitebox
+#ifdef _WIN32
+//add preprocessor directive NOMINMAX
+#pragma warning ( disable : 4146 )
+#endif
 #include <NTL/mat_GF2.h>
 #include "aes_private.h"
 #include "aes_whitebox.hpp"
@@ -489,7 +493,7 @@ int generate_aes(	const std::string& short_file_for_key,
             s_build_info += std::string("sha_filexor: ") + sha + "\n";
         }
         s_build_info += "\n";
-        build_info_file.buffer.write(s_build_info.data(), s_build_info.size());
+        build_info_file.buffer.write(s_build_info.data(), (uint32_t)s_build_info.size());
         rr = build_info_file.save_to_file(build_info_filename);
         if (rr == false)
         {

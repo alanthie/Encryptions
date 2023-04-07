@@ -19,7 +19,11 @@ namespace file_util
 
 	[[maybe_unused]] static std::string get_current_dir()
 	{
+#ifdef _WIN32
+		return std::filesystem::current_path().string();
+#else
 		return std::filesystem::current_path();
+#endif
 	}
 
 	[[maybe_unused]] static int32_t filesize(std::string filename)
@@ -43,7 +47,11 @@ namespace file_util
             const std::filesystem::path d{dirname};
 			for (auto const& dir_entry : std::filesystem::directory_iterator{d} )
 			{
+#ifdef _WIN32
+				r.push_back(dir_entry.path().string());
+#else
 				r.push_back(dir_entry.path());
+#endif
 				//std::cout << dir_entry.path() << '\n';
 			}
 		}

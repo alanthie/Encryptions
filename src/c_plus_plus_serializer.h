@@ -296,7 +296,12 @@ static inline std::ostream &operator<<(std::ostream &out, Bits< C< T, N > & > co
 #ifdef DEBUG_C_PLUS_PLUS_SERIALIZER
   std::cout << "write array container<T> " << v.t.size() << " elems" << std::endl;
 #endif
-  my_size_t sz = v.t.size();
+  if (v.t.size() >= INT_MAX)
+  {
+      std::cerr << "ERROR (v.t.size() > INT_MAX)\n";
+  }
+
+  my_size_t sz = (my_size_t)v.t.size(); //typedef int my_size_t; // 2,147,483,647 = 2GB file
   out << bits(sz);
   for (auto i : v.t) {
     out << bits(i);

@@ -110,7 +110,7 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;NOMINMAX</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\000DEV\Encryptions\src\qa\ExternalLib\wide-decimal\wide-decimal-main;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-integer\wide-integer-master;D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;D:\000Lib\libgmp_6.2.1-4_msvc17\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\000DEV\Encryptions\src\qa\ExternalLib\wide-decimal\wide-decimal-main;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-integer\wide-integer-master;D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;D:\000Lib\libgmp_6.2.1-4_msvc17\include;D:\000DEV\Encryptions\src\qa\WinNTL-11_5_1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -132,7 +132,7 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;NOMINMAX</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\000DEV\Encryptions\src\qa\ExternalLib\wide-decimal\wide-decimal-main;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-integer\wide-integer-master;D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;D:\000Lib\libgmp_6.2.1-4_msvc17\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\000DEV\Encryptions\src\qa\ExternalLib\wide-decimal\wide-decimal-main;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-integer\wide-integer-master;D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;D:\000Lib\libgmp_6.2.1-4_msvc17\include;D:\000DEV\Encryptions\src\qa\WinNTL-11_5_1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -153,6 +153,16 @@
     <ClCompile Include="..\..\src\qa\Bin2PNG\lodepng.cpp" />
     <ClCompile Include="..\..\src\qa\ecc_point\ecc_curve.cpp" />
     <ClCompile Include="..\..\src\qa\ecc_point\ecc_elgamal.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\cfg_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\eccdomain_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\ecckey_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\hh_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\menu_io.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\puzzle_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\rsa_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\tools_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\wbaes_menu.cpp" />
     <ClCompile Include="..\..\src\qa\qa.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMP.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPmainTest.cpp" />

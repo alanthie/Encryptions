@@ -110,7 +110,7 @@ namespace rsa_util
 		// smsg maybe less or bigger than rsa capacity
 		std::string msg_to_encrypt;
 		uint32_t key_len_bytes = -1 + (k.key_size_in_bits / 8); // recursive may reach modulo p
-        key_len_bytes *= 1.33; // can take more with base64
+        key_len_bytes = (uint32_t)(key_len_bytes * 1.33); // can take more with base64
 		if (key_len_bytes < smsg.size())
 		{
 			msg_to_encrypt = smsg.substr(0, key_len_bytes);
@@ -221,7 +221,7 @@ namespace rsa_util
 				}
 			}
 		}
-		msg_size_produced = r.size();
+		msg_size_produced = (uint32_t)r.size();
 
 		if (cryptoAL::VERBOSE_DEBUG) std::cout << current_encoded_msg_len << "-" << msg_size_produced <<std::endl;
 		return r;
@@ -276,7 +276,7 @@ namespace rsa_util
 			{
 				if (v[i].size() > 0)
 				{
-					std::string t = rsa_decode_string(v[i], k, v[i].size(), t_msg_size_produced, use_gmp, verbose);
+					std::string t = rsa_decode_string(v[i], k, (uint32_t)v[i].size(), t_msg_size_produced, use_gmp, verbose);
 					vr.push_back(t.substr(0, t_msg_size_produced));
 
 					if (cryptoAL::VERBOSE_DEBUG)
@@ -294,7 +294,7 @@ namespace rsa_util
 			{
                 while(vr[i].size() < vinsz[i]) vr[i] = std::string("0") + vr[i];
 				r  += vr[i];
-				sz += vr[i].size();
+				sz += (uint32_t)vr[i].size();
 			}
 			msg_size_produced = sz;
 			if (cryptoAL::VERBOSE_DEBUG) std::cout << "output size: " << sz << std::endl;

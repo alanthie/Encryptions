@@ -563,7 +563,7 @@ public:
                         {
 							// generate random embedded_rsa_key
 							uint32_t key_len_in_bytes = -1 + (kout.key_size_in_bits/8); // modulo p is not max of key_size_in_bits remove 8 bits
-							key_len_in_bytes *= 1.33; // adjust for base64
+							key_len_in_bytes = (uint32_t) (key_len_in_bytes * 1.33); // adjust for base64
 							embedded_rsa_key = cryptoAL::random::generate_base64_random_string(key_len_in_bytes);
 							vurlkey[i].sRSA_ECC_ENCODED_DATA = embedded_rsa_key;
 							if (VERBOSE_DEBUG)

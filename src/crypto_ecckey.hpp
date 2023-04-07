@@ -515,7 +515,7 @@ namespace ecc
 			{
 				if (v[i].size() > 0)
 				{
-					std::string t = ecc_decode_string(v[i], ek, v[i].size(), t_msg_size_produced, verbose);
+					std::string t = ecc_decode_string(v[i], ek, (uint32_t)v[i].size(), t_msg_size_produced, verbose);
 
 					vr.push_back(t.substr(0, t_msg_size_produced));
 
@@ -534,7 +534,7 @@ namespace ecc
 			{
                 while(vr[i].size() < vinsz[i]) vr[i] = std::string("0") + vr[i];
 				r  += vr[i];
-				sz += vr[i].size();
+				sz += (uint32_t)vr[i].size();
 			}
 			msg_size_produced = sz;
 			if (cryptoAL::VERBOSE_DEBUG) std::cout << "output size: " << sz << std::endl;
@@ -688,7 +688,7 @@ namespace ecc
 				}
 			}
 		}
-		msg_size_produced = r.size();
+		msg_size_produced = (uint32_t)r.size();
 
 		if (cryptoAL::VERBOSE_DEBUG) std::cout << current_encoded_msg_len << "-" << msg_size_produced <<std::endl;
 		return r;

@@ -7,7 +7,7 @@
 
 namespace ns_menu
 {
-	int main_menu::fCFG(int choice)
+	int main_menu::fCFG(size_t choice)
    	{
 		int r = 0;
 

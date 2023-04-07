@@ -169,7 +169,7 @@ namespace ns_menu
         return r;
      }
 
-	int main_menu::fPuzzle(int choice)
+	int main_menu::fPuzzle(size_t choice)
    	{
 		int r = 0;
 

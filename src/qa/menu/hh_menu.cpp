@@ -8,7 +8,7 @@
 
 namespace ns_menu
 {
-	int main_menu::fHH(int choice)
+	int main_menu::fHH(size_t choice)
    	{
 		int r = 0;
 

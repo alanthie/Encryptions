@@ -128,7 +128,7 @@ namespace ns_menu
     }
 
 
-	int main_menu::fWBAES(int choice)
+	int main_menu::fWBAES(size_t choice)
    	{
         int r = 0;
 
@@ -219,17 +219,17 @@ namespace ns_menu
 						uint32_t n;
 						std::cout << "key/xor will be extracted randomly from binary.dat.* files" << std::endl;
 
-						n = cryptoAL::random::get_random_number_modulo_max(vbin.size());
+						n = cryptoAL::random::get_random_number_modulo_max((uint32_t)vbin.size());
 						short_file_for_key = vbin[n];
 
-						n = cryptoAL::random::get_random_number_modulo_max(vbin.size());
+						n = cryptoAL::random::get_random_number_modulo_max((uint32_t)vbin.size());
 						short_file_for_xor = vbin[n];
 
 						file_for_key = pathkey + short_file_for_key;
 						file_for_xor = pathkey + short_file_for_xor;
 
-						pos1 = cryptoAL::random::get_random_number_modulo_max(file_util::filesize(file_for_key) / 2 );
-						pos2 = cryptoAL::random::get_random_number_modulo_max(file_util::filesize(file_for_xor) / 2 );
+						pos1 = cryptoAL::random::get_random_number_modulo_max((uint32_t)file_util::filesize(file_for_key) / 2 );
+						pos2 = cryptoAL::random::get_random_number_modulo_max((uint32_t)file_util::filesize(file_for_xor) / 2 );
 					}
 					else
 					{

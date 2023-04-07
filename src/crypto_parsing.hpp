@@ -254,7 +254,8 @@ namespace parsing
 												size_t MIN_SIZE_LINE, size_t MAX_SIZE_LINE)
     {
 	    char c;
-        char line[MAX_SIZE_LINE] = { 0 };
+        std::vector<char> line(MAX_SIZE_LINE, 0);
+        //char line[MAX_SIZE_LINE] = { 0 };
         int pos = -1;
         uint32_t idx=0;
 
@@ -280,7 +281,7 @@ namespace parsing
 
 				if ( ((len >= MIN_SIZE_LINE) && (len <= MAX_SIZE_LINE)) && (line[0]!=';') )
 				{
-					std::string su(line);
+					std::string su(line.data());
 					su = strutil::trim_copy(su);
 					vlines.push_back(su);
 				}
@@ -289,7 +290,7 @@ namespace parsing
 					// skip!
 					if (len >= MAX_SIZE_LINE)
 					{
-						std::string su(line);
+						std::string su(line.data());
 						std::cerr << "WARNING input  line too long - skip " << su << ", max size: " << MAX_SIZE_LINE << std::endl;
 					}
 				}

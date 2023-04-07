@@ -28,6 +28,16 @@
     <ClCompile Include="..\..\src\qa\Bin2PNG\lodepng.cpp" />
     <ClCompile Include="..\..\src\qa\ecc_point\ecc_curve.cpp" />
     <ClCompile Include="..\..\src\qa\ecc_point\ecc_elgamal.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\cfg_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\eccdomain_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\ecckey_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\hh_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\menu_io.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\puzzle_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\rsa_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\tools_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\wbaes_menu.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMP.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPmainTest.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPPrime.cpp" />
@@ -68,6 +78,7 @@
     <ClInclude Include="..\..\src\puzzle.hpp" />
     <ClInclude Include="..\..\src\qa\Bin2PNG\lodepng.h" />
     <ClInclude Include="..\..\src\qa\ecc_point\ecc_curve.hpp" />
+    <ClInclude Include="..\..\src\qa\menu\menu.h" />
     <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMP.h" />
     <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMPPrime.h" />
     <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMPTest.h" />
@@ -179,13 +190,13 @@
       <PreprocessorDefinitions>CURL_STATICLIB;_CRT_SECURE_NO_WARNINGS;NOMINMAX</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-integer\wide-integer-master;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-decimal\wide-decimal-main;D:\000Lib\libgmp_6.2.1-4_msvc17\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-integer\wide-integer-master;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-decimal\wide-decimal-main;D:\000Lib\libgmp_6.2.1-4_msvc17\include;D:\000DEV\Encryptions\src\qa\WinNTL-11_5_1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;gmp.lib;libgmp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;D:\000Lib\libgmp_6.2.1-4_msvc17\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;gmp.lib;libgmp.lib;winNTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;D:\000Lib\libgmp_6.2.1-4_msvc17\lib\x64;D:\000DEV\Encryptions\WinPrj\winNTL\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy x64\Release\crypto.exe ..\..\Exec_Windows\</Command>
@@ -200,15 +211,15 @@
       <PreprocessorDefinitions>CURL_STATICLIB;_CRT_SECURE_NO_WARNINGS;NOMINMAX</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-integer\wide-integer-master;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-decimal\wide-decimal-main;D:\000Lib\libgmp_6.2.1-4_msvc17\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\include;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-integer\wide-integer-master;D:\000DEV\Encryptions\src\qa\ExternalLib\wide-decimal\wide-decimal-main;D:\000Lib\libgmp_6.2.1-4_msvc17\include;D:\000DEV\Encryptions\src\qa\WinNTL-11_5_1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;gmp.lib;libgmp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;D:\000Lib\libgmp_6.2.1-4_msvc17\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;gmp.lib;libgmp.lib;winNTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;D:\000Lib\libgmp_6.2.1-4_msvc17\lib\x64;D:\000DEV\Encryptions\WinPrj\winNTL\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy x64\Release\crypto.exe ..\..\Exec_Windows\</Command>

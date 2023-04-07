@@ -8,7 +8,7 @@
 
 namespace ns_menu
 {
-	int main_menu::fTOOLS(int choice)
+	int main_menu::fTOOLS(size_t choice)
    	{
         int r = 0;
         if (choice == 1)
