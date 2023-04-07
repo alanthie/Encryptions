@@ -77,7 +77,9 @@ namespace ns_menu
 				{"Export my public RSA key", 	4},
 				{"Generate RSA key with OPENSSL command line (fastest)", 5},
 				{"Test RSA GMP key generator", 6},
-				{"Generate RSA key with GMP (fast)", 7}
+				{"Test RSA (3 primes) GMP key generator", 7},
+				{"Generate RSA key with GMP (fast)", 8},
+				{"Generate RSA (3 primes) key with GMP (fast)", 9}
 			}
 		};
 		mRSA.set_main_menu(this);

@@ -3,21 +3,21 @@
 #include <time.h>
 #include "ecc_curve.hpp"
 
-int random_in_range (unsigned int min, unsigned int max)
+int random_in_range (unsigned int amin, unsigned int amax)
 {
     int base_random = rand(); /* in [0, RAND_MAX] */
-    if (RAND_MAX == base_random) return random_in_range(min, max);
+    if (RAND_MAX == base_random) return random_in_range(amin, amax);
 
-    int range       = max - min,
+    int range       = amax - amin,
     remainder   = RAND_MAX % range,
     bucket      = RAND_MAX / range;
     if (base_random < RAND_MAX - remainder)
     {
-        return min + base_random/bucket;
+        return amin + base_random/bucket;
     }
     else
     {
-        return random_in_range (min, max);
+        return random_in_range (amin, amax);
     }
 }
 
@@ -56,11 +56,6 @@ bool ecc_curve::format_msg_for_ecc(const std::string& msg, cryptoAL::Buffer& out
 // msg = x = 0x00 ---- 0x00 "FFzaa234fsdf" 0x00
 message_point ecc_curve::getECCPointFromMessage(cryptoAL::Buffer& message_buffer)
 {
-	if (verbose_debug)
-	{
-		std::cout << "getECCPointFromMessage message_buffer.size()" << message_buffer.size() << "\n";
-	}
-
     message_point rm;
     if (message_buffer.size() < MSG_BYTES_PAD)
     {

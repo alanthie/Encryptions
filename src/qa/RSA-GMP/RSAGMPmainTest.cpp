@@ -15,4 +15,11 @@ namespace RSAGMP
        RSAGMP::CustomTest(sz, &generator, 8, 20);
        return 0;
    }
+   
+   int main_rsa3_gmp_test_mt(unsigned int sz = 1024)
+   {
+       RSAGMP::Utils::TestGenerator generator;
+       RSAGMP::CustomTest3(sz, &generator, 8, 20);
+       return 0;
+   }
 }

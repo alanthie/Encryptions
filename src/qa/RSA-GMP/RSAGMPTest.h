@@ -10,6 +10,7 @@ namespace RSAGMP
 {
     bool DefaultTest(unsigned int size = 1024);
     bool CustomTest(unsigned int size, Utils::Generator *generator, int threads = 1, unsigned int precision=20);
+    bool CustomTest3(unsigned int size, Utils::Generator *generator, int threads = 1, unsigned int precision=20);
 
     int main_rsa_gmp_test(unsigned int sz );
 
@@ -18,7 +19,9 @@ namespace RSAGMP
 
     bool get_keys(  unsigned int size, Utils::Generator *generator, int threads, unsigned int precision,
 				    Utils::mpzBigInteger& pub, Utils::mpzBigInteger& priv, Utils::mpzBigInteger& modulus);
-                         
+                    
+   bool get_keys_3primes(   unsigned int size, Utils::Generator *generator, int threads, unsigned int precision,
+				            Utils::mpzBigInteger& pub, Utils::mpzBigInteger& priv, Utils::mpzBigInteger& modulus); 
 
 }
 

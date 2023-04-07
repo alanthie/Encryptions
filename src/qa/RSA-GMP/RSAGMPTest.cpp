@@ -6,7 +6,7 @@ bool RSAGMP::DefaultTest(unsigned int size)
 
    if(size < 64)
    {
-       std::cout << "RSA test invald input\n";
+       std::cout << "RSA test invald input, need >= 64\n";
        return false;
    }
    mpzBigInteger pub, priv, modulus;
@@ -21,9 +21,9 @@ bool RSAGMP::DefaultTest(unsigned int size)
 
    bool result = (message1 == message);
    if(result)
-       std::cout << "RSA GMP test OK - bits size: " << std::to_string(size) << " - Elapsed Time: " << elapsed.count() / 1000 << " sec" << std::endl;
+       std::cout << "RSA GMP encrypt/decrypt OK - bits size: " << std::to_string(size) << " - Elapsed Time: " << elapsed.count() / 1000 << " sec" << std::endl;
    else
-       std::cout << "RSA GMP test ERROR\n";
+       std::cout << "ERROR RSA GMP encrypt/decrypt\n";
    return result;
 }
 
@@ -42,12 +42,12 @@ int RSAGMP::rsa_gmp_test_key(std::string n, std::string e,std::string d, unsigne
 
    if(result)
    {
-       std::cout << "RSA GMP encrypt/decrypt test OK\n";
+       std::cout << "RSA GMP encrypt/decrypt OK\n";
        return 0;
    }
    else
    {
-       std::cout << "RSA GMP encrypt/decrypt test ERROR\n";
+       std::cout << "RSA GMP encrypt/decrypt ERROR\n";
        return -1;
    }
 }
@@ -58,7 +58,7 @@ auto start = std::chrono::high_resolution_clock::now();
 
    if(size < 64 || generator == NULL)
    {
-       std::cout << "RSA test invalid input\n";
+       std::cout << "RSA test invalid input, need >= 64\n";
        return false;
    }
    mpzBigInteger pub, priv, modulus;
@@ -72,22 +72,48 @@ auto start = std::chrono::high_resolution_clock::now();
    auto finish = std::chrono::high_resolution_clock::now();
    std::chrono::duration<double, std::milli> elapsed = finish - start;
 
+   if(result)
+       std::cout << "RSA GMP  Encrypt/Decrypt OK- bits size: " << std::to_string(size) << " - Elapsed Time: " << elapsed.count() / 1000 << " sec" << std::endl;
+   else
+ 		std::cout << "ERROR RSA GMP Encrypt/Decrypt\n";
+   return result;
+}
+
+bool RSAGMP::CustomTest3(unsigned int size, Utils::Generator *generator, int threads, unsigned int precision)
+{
+	auto start = std::chrono::high_resolution_clock::now();
+
+   if(size < 96 || generator == NULL)
+   {
+       std::cout << "RSA test invalid input, bits size must be >= 96\n";
+       return false;
+   }
+   mpzBigInteger pub, priv, modulus;
+
+   ParallelKeygen3(pub, priv, modulus, generator, size, threads, precision);
+   mpzBigInteger message = generator->getBig(size) % modulus;
+   mpzBigInteger crypto = Encrypt(message, pub, modulus);
+   mpzBigInteger message1 = Decrypt(crypto, priv, modulus);
+   bool result = message1 == message;
+
+   auto finish = std::chrono::high_resolution_clock::now();
+   std::chrono::duration<double, std::milli> elapsed = finish - start;
 
    if(result)
-       std::cout << "RSA GMP Parallel test OK- bits size: " << std::to_string(size) << " - Elapsed Time: " << elapsed.count() / 1000 << " sec" << std::endl;
+       std::cout << "RSA GMP Encrypt/Decrypt OK- bits size: " << std::to_string(size) << " - Elapsed Time: " << elapsed.count() / 1000 << " sec" << std::endl;
    else
- 		std::cout << "RSA GMP Parallel test ERROR\n";
+ 		std::cout << "ERROR RSA GMP Encrypt/Decrypt\n";
    return result;
 }
 
 bool RSAGMP::get_keys(	unsigned int size, Utils::Generator *generator, int threads, unsigned int precision,
-			Utils::mpzBigInteger& pub, Utils::mpzBigInteger& priv, Utils::mpzBigInteger& modulus)
+						Utils::mpzBigInteger& pub, Utils::mpzBigInteger& priv, Utils::mpzBigInteger& modulus)
 {
 	auto start = std::chrono::high_resolution_clock::now();
 
 	if(size < 64 || generator == NULL)
 	{
-		std::cout << "RSA test invalid input\n";
+		std::cout << "RSA  invalid input, bit size must be >= 64 bits\n";
 		return false;
 	}
 
@@ -101,9 +127,35 @@ bool RSAGMP::get_keys(	unsigned int size, Utils::Generator *generator, int threa
 	std::chrono::duration<double, std::milli> elapsed = finish - start;
 
 	if(result)
-		std::cout << "RSA GMP Parallel test OK- bits size: " << std::to_string(size) << " - Elapsed Time: " << elapsed.count() / 1000 << " sec" << std::endl;
+		std::cout << "RSA GMP Encrypt/Decrypt OK- bits size: " << std::to_string(size) << " - Elapsed Time: " << elapsed.count() / 1000 << " sec" << std::endl;
 	else
-		std::cout << "RSA GMP Parallel test ERROR\n";
+		std::cout << "ERROR RSA GMP Encrypt/Decrypt\n";
+
+	return result;
+}
+
+bool RSAGMP::get_keys_3primes(	unsigned int size, Utils::Generator *generator, int threads, unsigned int precision,
+								Utils::mpzBigInteger& pub, Utils::mpzBigInteger& priv, Utils::mpzBigInteger& modulus)
+{
+	auto start = std::chrono::high_resolution_clock::now();
+
+	if(size < 32*3 || generator == NULL)
+	{
+		std::cout << "RSA (3 primes) invalid input, bit size must be >= 96 bits\n";
+		return false;
+	}
+
+	ParallelKeygen3(pub, priv, modulus, generator, size, threads, precision);
+	mpzBigInteger message = generator->getBig(size) % modulus;
+	mpzBigInteger crypto = Encrypt(message, pub, modulus);
+	mpzBigInteger message1 = Decrypt(crypto, priv, modulus);
+	bool result = message1 == message;
+
+	auto finish = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double, std::milli> elapsed = finish - start;
+
+	if(result) std::cout << "RSA (3 primes) GMP Encrypt/Decrypt OK- bits size: " << std::to_string(size) << " - Elapsed Time: " << elapsed.count() / 1000 << " sec" << std::endl;
+	else std::cout << "ERROR RSA (3 primes) GMP Encrypt/Decrypt\n";
 
 	return result;
 }

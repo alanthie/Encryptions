@@ -36,7 +36,8 @@ bool MRpredicate2(const mpzBigInteger &y, const mpzBigInteger &N, const mpzBigIn
  	return i != w;
 }
 
-bool MRtest(const mpzBigInteger &N, unsigned int size, unsigned int precision, TestGenerator *gen)  //Miller-rabin test for prime number
+//Miller-rabin test for prime number
+bool MRtest(const mpzBigInteger &N, unsigned int size, unsigned int precision, TestGenerator *gen)
 {
 	unsigned int w; mpzBigInteger z;
 
@@ -108,8 +109,9 @@ void Prime::ThreadsNextPrime(mpzBigInteger *current, unsigned int size, unsigned
 	}
 }
 
-//Version for worker routine
-bool WorkersMRtest(const mpzBigInteger &N, unsigned int size, unsigned int precision, std::atomic<bool> *not_found, TestGenerator *gen)  //Miller-rabin test for prime number
+// Version for worker routine
+// Miller-rabin test for prime number
+bool WorkersMRtest(const mpzBigInteger &N, unsigned int size, unsigned int precision, std::atomic<bool> *not_found, TestGenerator *gen)
 {
  unsigned int w; mpzBigInteger z;
 
@@ -136,46 +138,46 @@ bool WorkersMRtest(const mpzBigInteger &N, unsigned int size, unsigned int preci
 
 void WorkerRoutine(mpzBigInteger *current, int size, unsigned int precision, int id, int increment, std::atomic<bool> *not_found)
 {
- mpzBigInteger number = *current + 2*id;
- auto gen = TestGenerator();
+    mpzBigInteger number = *current + 2*id;
+    auto gen = TestGenerator();
 
- while (*not_found && !WorkersMRtest(number, size, precision, not_found, &gen))
- {
-     number += increment;
- }
+    while (*not_found && !WorkersMRtest(number, size, precision, not_found, &gen))
+    {
+        number += increment;
+    }
 
- bool expected = true;
- if(not_found->compare_exchange_strong(expected, false))
- {
-     *current = number;
- }
+    bool expected = true;
+    if(not_found->compare_exchange_strong(expected, false))
+    {
+        *current = number;
+    }
 }
 
 //extract a random number and search a early prime using more threads
 void Prime::ParallelNextPrime(mpzBigInteger *current, unsigned int size, unsigned int precision, int threads)
 {
- if(*current < 2)
- {
-     *current = 2;
-     return;
- }
- if(mpzBigInteger(*current & 1) == 0)
-     (*current)++;
+    if(*current < 2)
+    {
+        *current = 2;
+        return;
+    }
+    if(mpzBigInteger(*current & 1) == 0)
+        (*current)++;
 
- std::atomic<bool> not_found;
- not_found = true;
- int i;
- std::thread *workers = new std::thread[threads];
+    std::atomic<bool> not_found;
+    not_found = true;
+    int i;
+    std::thread *workers = new std::thread[threads];
 
- for(i = 0; i<threads; i++)
- {
-     workers[i] = std::thread(WorkerRoutine,current, size, precision, i, 2*threads, &not_found);
- }
+    for(i = 0; i<threads; i++)
+    {
+        workers[i] = std::thread(WorkerRoutine, current, size, precision, i, 2*threads, &not_found);
+    }
 
- for(i = 0; i<threads; i++)
- {
-     workers[i].join();
- }
+    for(i = 0; i<threads; i++)
+    {
+        workers[i].join();
+    }
 
- delete[] workers;
+    delete[] workers;
 }
