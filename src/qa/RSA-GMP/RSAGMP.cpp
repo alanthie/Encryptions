@@ -607,7 +607,7 @@ bool RSAGMP::ParallelKeygenN(mpzBigInteger &pubkey, mpzBigInteger &privkey, mpzB
 							 RSAGMP::Utils::Generator *gen, unsigned int size, int threads, unsigned int precision,
 							 unsigned int NPRIMES)
 {
-	if (threads < NPRIMES)
+	if (threads < (int)NPRIMES)
 	  return KeygenN(pubkey, privkey, modulus, gen, size, precision, NPRIMES);
 
 	if ( (size < NPRIMES*32) || (precision < 2))
@@ -615,7 +615,7 @@ bool RSAGMP::ParallelKeygenN(mpzBigInteger &pubkey, mpzBigInteger &privkey, mpzB
 
 	std::vector<mpzBigInteger> vPrime(NPRIMES);
 
-	if(threads < NPRIMES*2)
+	if(threads < (int) (NPRIMES*2))
         DualRoutineN(vPrime, gen, size, precision, NPRIMES);
 	else
         ParallelRoutineN(vPrime, gen, size, precision, threads, NPRIMES);

@@ -48,6 +48,7 @@
     <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigIntegerUtils.cc" />
     <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigUnsigned.cc" />
     <ClCompile Include="..\..\src\qa\RSA_generate\bigint\BigUnsignedInABase.cc" />
+    <ClCompile Include="..\..\src\qa\SystemProperties.cpp" />
     <ClCompile Include="..\..\src\SHA256.cpp" />
     <ClCompile Include="..\..\src\SymAlg.cpp" />
     <ClCompile Include="..\..\src\twofish.c" />
@@ -90,6 +91,7 @@
     <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigUnsigned.hh" />
     <ClInclude Include="..\..\src\qa\RSA_generate\bigint\BigUnsignedInABase.hh" />
     <ClInclude Include="..\..\src\qa\RSA_generate\bigint\NumberlikeArray.hh" />
+    <ClInclude Include="..\..\src\qa\SystemProperties.hpp" />
     <ClInclude Include="..\..\src\random_engine.hpp" />
     <ClInclude Include="..\..\src\rng.h" />
     <ClInclude Include="..\..\src\Salsa20.h" />

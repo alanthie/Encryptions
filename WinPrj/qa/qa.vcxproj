@@ -179,6 +179,7 @@
     <ClCompile Include="..\..\src\qa\SimpleECC\src\j_point.cpp" />
     <ClCompile Include="..\..\src\qa\SimpleECC\src\point.cpp" />
     <ClCompile Include="..\..\src\qa\SimpleECC\src\simple_ecc_test.cpp" />
+    <ClCompile Include="..\..\src\qa\SystemProperties.cpp" />
     <ClCompile Include="..\..\src\SHA256.cpp" />
     <ClCompile Include="..\..\src\vigenere.cpp" />
   </ItemGroup>
@@ -210,6 +211,7 @@
     <ClInclude Include="..\..\src\qa\SimpleECC\src\j_point.hpp" />
     <ClInclude Include="..\..\src\qa\SimpleECC\src\point.hpp" />
     <ClInclude Include="..\..\src\qa\SimpleECC\src\test_simple_ecc.hpp" />
+    <ClInclude Include="..\..\src\qa\SystemProperties.hpp" />
     <ClInclude Include="..\..\src\qa\uinteger_t.hh" />
     <ClInclude Include="..\..\src\SHA256.h" />
     <ClInclude Include="..\..\src\vigenere.hpp" />
