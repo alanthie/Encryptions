@@ -320,7 +320,7 @@ namespace ns_menu
                         std::cout << "key size: " << k.dom.key_size_bits << std::endl;
                         std::cout << "key public  kG_x: " << k.s_kg_x<< std::endl;
                         std::cout << "key public  kG_y: " << k.s_kg_y<< std::endl;
-                        std::cout << "key private k <should be empty> : " << k.s_k << std::endl;
+                        std::cout << "key private k <should be zero/empty> : " << k.s_k << std::endl;
                         std::cout << "key confirmed : " << k.confirmed << std::endl;
                         std::cout << "key marked for delete : " << k.deleted << std::endl;
                         std::cout << "key usage count: " << k.usage_count<< std::endl;
@@ -388,7 +388,7 @@ namespace ns_menu
                         std::cout << "key size: " << k.dom.key_size_bits << std::endl;
                         std::cout << "key public  kG_x: " << k.s_kg_x<< std::endl;
                         std::cout << "key public  kG_y: " << k.s_kg_y<< std::endl;
-                        std::cout << "key private k <should be empty> : " << k.s_k << std::endl;
+                        std::cout << "key private k <should be zero/empty> : " << k.s_k << std::endl;
                         std::cout << "key confirmed : " << k.confirmed << std::endl;
                         std::cout << "key marked for delete : " << k.deleted << std::endl;
                         std::cout << "key usage count: " << k.usage_count<< std::endl;

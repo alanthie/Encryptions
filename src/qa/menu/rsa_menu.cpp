@@ -120,9 +120,9 @@ namespace ns_menu
 					{
 						std::cout << "key name: " << user << std:: endl;
 						std::cout << "key size: " << k.key_size_in_bits << std:: endl;
-						std::cout << "key public  n (base 10): " << k.get_n()<< std:: endl;
-						std::cout << "key public  e (base 10): " << k.get_e() << std:: endl;
-						std::cout << "key private d (base 10): " << k.get_d() << std:: endl;
+						std::cout << "key public  n (base 64): " << k.s_n << std:: endl;
+						std::cout << "key public  e (base 64): " << k.s_e << std:: endl;
+						std::cout << "key private d (base 64): " << k.s_d << std:: endl;
 						std::cout << "key confirmed : " << k.confirmed << std::endl;
 						std::cout << "key marked for delete : " << k.deleted << std::endl;
 						std::cout << "key usage count: " << k.usage_count<< std::endl;
@@ -186,9 +186,9 @@ namespace ns_menu
                     {
                         std::cout << "key name: " << user << std:: endl;
                         std::cout << "key size: " << k.key_size_in_bits << std:: endl;
-                        std::cout << "key public  n (base 10): " << k.get_n()<< std:: endl;
-                        std::cout << "key public  e (base 10): " << k.get_e() << std:: endl;
-                        std::cout << "key private d (base 10): <should be zero> " << k.get_d() << std:: endl;
+                        std::cout << "key public  n (base 64): " << k.s_n << std:: endl;
+                        std::cout << "key public  e (base 64): " << k.s_e << std:: endl;
+                        std::cout << "key private d (base 64): <should be zero/empty> " << k.s_d << std:: endl;
                         std::cout << "key confirmed : " << k.confirmed << std::endl;
                         std::cout << "key marked for delete : " << k.deleted << std::endl;
                         std::cout << "key usage count: " << k.usage_count<< std::endl;
@@ -252,9 +252,9 @@ namespace ns_menu
                     {
                         std::cout << "key name: " << user << std:: endl;
                         std::cout << "key size: " << k.key_size_in_bits << std:: endl;
-                        std::cout << "key public  n (base 10): " << k.get_n()<< std:: endl;
-                        std::cout << "key public  e (base 10): " << k.get_e() << std:: endl;
-                        std::cout << "key private d (base 10): <should be zero> " << k.get_d() << std:: endl;
+                        std::cout << "key public  n (base 64): " << k.s_n << std:: endl;
+                        std::cout << "key public  e (base 64): " << k.s_e << std:: endl;
+                        std::cout << "key private d (base 64): <should be zero/empty> " << k.s_d << std:: endl;
                         std::cout << "key confirmed : " << k.confirmed << std::endl;
                         std::cout << "key marked for delete : " << k.deleted << std::endl;
                         std::cout << "key usage count: " << k.usage_count<< std::endl;

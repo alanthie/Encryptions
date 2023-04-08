@@ -407,6 +407,53 @@ namespace ns_menu
 			std::cout << std::endl;
 		}
 
+		else if (choice == 3)
+        {
+			std::string pathdb;
+			if ((cfg_parse_result) && (cfg.cmdparam.wbaes_my_private_path.size()>0))
+			{
+				pathdb = cfg.cmdparam.wbaes_my_private_path;
+				std::cout << "Folder where wbaes key tables(*.tbl) will be read [using wbaes_my_private_path in config]: " << pathdb << std::endl;
+			}
+			else
+			{
+				std::cout << "Enter path where wbaes key tables (*.tbl) will be read " << " (0 = current directory) : ";
+				pathdb = get_input_string();
+				if (pathdb == "0") pathdb = "./";
+			}
+
+			std::cout << "--------------------------------------------------" << std::endl;
+			std::cout << "Summary of wabeas keys" << std::endl;
+			std::cout << "Folder: " << pathdb << std::endl;
+			std::cout << "--------------------------------------------------" << std::endl;
+			std::vector<std::string> vbin = file_util::get_directory_files(pathdb, "_tyboxes.tbl", false);
+			std::sort(vbin.begin(),vbin.end());
+			std::vector<std::string> vkey;
+			for(size_t i = 0; i < vbin.size(); i++)
+			{
+				vkey.push_back(vbin[i].substr(0, vbin[i].find("_tyboxes.tbl")));
+			}
+
+			std::string all;
+			for(size_t i = 0; i < vkey.size(); i++)
+			{
+				std::cout << "[" << i+1 << "] Key: " << vkey[i] << std::endl;
+				all+=vkey[i];
+			}
+
+			{
+				SHA256 sha;
+				sha.update(reinterpret_cast<const uint8_t*> (all.data()), all.size() );
+				uint8_t* digest = sha.digest();
+				std::string s = SHA256::toString(digest);
+				delete[] digest;
+
+				std::cout << "--------------------------------------------------" << std::endl;
+				std::cout << "Count: " << vkey.size() << std::endl;
+				std::cout << "Overall keys SHA: " << s << std::endl<< std::endl;
+			}
+		}
+		
         return r;
     }
 

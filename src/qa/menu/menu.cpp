@@ -75,10 +75,10 @@ namespace ns_menu
 				{"View my public RSA key (also included in the private db)", 2},
 				{"View other public RSA key", 	3},
 				{"Export my public RSA key", 	4},
-				{"Generate RSA key with OPENSSL command line (fastest)", 5},
-				{"Test RSA GMP key generator", 6},
+				{"Generate RSA (2 primes) key with OPENSSL command line (fastest)", 5},
+				{"Test RSA (2 primes) GMP key generator", 6},
 				{"Test RSA (3 primes) GMP key generator", 7},
-				{"Generate RSA key with GMP (fast)", 8},
+				{"Generate RSA (2 primes) key with GMP (fast)", 8},
 				{"Generate RSA (3 primes) key with GMP (fast)", 9},
 				{"Generate RSA (N primes) key with GMP (fast)", 10}
 			}
@@ -133,7 +133,8 @@ namespace ns_menu
 			"Whitebox AES keys",
 			{
 				{"Create one or multiple WB AES key", 	1},
-				{"Create one or multiple WB AES key from one or multiple instruction files", 2}
+				{"Create one or multiple WB AES key from one or multiple instruction files", 2},
+				{"Summary of WBEAS keys",3}
 			}
 		};
 		mWBAES.set_main_menu(this);
@@ -147,7 +148,8 @@ namespace ns_menu
 				{"SHA256 of a file",2},
 				{"Hardware info",3},
 				{"Summary of binary.dat.*",4},
-				{"Summary of WBEAS keys",5}
+				{"Summary of WBEAS key tables",5},
+				{"Summary of WBEAS keys",6}
 			}
 		};
 		mTOOLS.set_main_menu(this);
