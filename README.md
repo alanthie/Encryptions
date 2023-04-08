@@ -130,7 +130,7 @@ Current set of encryption algorithms
     TWOFISH
     Salsa20
     IDEA
-    RSA (2 primes and 3 primes*)
+    RSA (2 primes and 3+ primes)*
     Recursive RSA
     Shuffling
     Elliptic Curve

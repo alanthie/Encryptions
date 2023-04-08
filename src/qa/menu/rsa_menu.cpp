@@ -497,7 +497,7 @@ namespace ns_menu
 			RSAGMP::CustomTest(4096*2, &generator, nt);
 			RSAGMP::CustomTest(4096*4, &generator, nt);
 		}
-		else if (choice == 7) 
+		else if (choice == 7)
 		{
 			int nt = std::thread::hardware_concurrency();
 			std::cout << "using " << nt << " threads - test keys (3 primes) 1536 to 24576" << std::endl;
@@ -692,6 +692,112 @@ namespace ns_menu
 					}
 
 					std::string keyname = std::string("MY_RSA3KEY_") + std::to_string(klen) + std::string("_") + cryptoAL::parsing::get_current_time_and_date();
+					map_rsa_private.insert(std::make_pair(keyname,  rkey));
+
+					{
+						std::ofstream outfile;
+						outfile.open(fileRSADB, std::ios_base::out);
+						outfile << bits(map_rsa_private);
+						outfile.close();
+					}
+					std::cout << "key saved as: "  << keyname << " in " << fileRSADB << std:: endl;
+				}
+			}
+		}
+
+		else if (choice == 10) // Generate RSA (N primes) key with GMP (fast)
+      	{
+			cryptoAL::rsa::PRIVATE_KEY key;
+
+			unsigned int NPRIMES = 4;
+			std::cout << "Enter rsa NUMBER of primes: ";
+			std::string sNPRIMES;
+			sNPRIMES = get_input_string();
+			long long n = cryptoAL::parsing::str_to_ll(sNPRIMES);
+			if (n<=2) n=2;
+			NPRIMES = (unsigned int) n;
+
+			std::cout << "Enter rsa (" << NPRIMES <<" primes) key length in bits (0 = defaut = 4096): ";
+			std::string snum;
+			snum = get_input_string();
+			long long klen = cryptoAL::parsing::str_to_ll(snum);
+			if (klen==-1)
+			{
+                r = -1;
+                return r;
+			}
+			if (klen == 0) klen = 4096;
+			klen = keybits8x(klen);
+
+			std::string fileRSADB;
+			if ((cfg_parse_result) && (cfg.cmdparam.folder_my_private_rsa.size()>0))
+			{
+				fileRSADB = cfg.cmdparam.folder_my_private_rsa + cryptoAL::RSA_MY_PRIVATE_DB;
+			}
+			else
+			{
+				std::cout << "Enter path for rsa database " << cryptoAL::RSA_MY_PRIVATE_DB << " (0 = current directory) : ";
+				std::string pathdb;
+				pathdb = get_input_string();
+				if (pathdb == "0") pathdb = "./";
+				fileRSADB = pathdb + cryptoAL::RSA_MY_PRIVATE_DB;
+			}
+
+			int nt = std::thread::hardware_concurrency();
+			std::cout << "using " << nt << " threads" << std::endl;
+
+			RSAGMP::Utils::TestGenerator generator;
+
+			RSAGMP::Utils::mpzBigInteger pub;
+			RSAGMP::Utils::mpzBigInteger priv;
+			RSAGMP::Utils::mpzBigInteger modulus;
+			bool rr = RSAGMP::get_keys_Nprimes((unsigned int)klen, &generator, nt, 20, pub, priv, modulus, NPRIMES);
+			if (rr)
+			{
+				std::string s_n(modulus.get_str());
+				std::string s_e(pub.get_str());
+				std::string s_d(priv.get_str());
+
+				cryptoAL::rsa::rsa_key k;
+				cryptoAL::rsa::rsa_key rkey( (int)klen,
+										  uint_util::base10_to_base64(s_n),
+										  uint_util::base10_to_base64(s_e),
+										  uint_util::base10_to_base64(s_d));
+
+				// READ
+				std::map< std::string, cryptoAL::rsa::rsa_key> map_rsa_private;
+
+				if (file_util::fileexists(fileRSADB) == false)
+				{
+					std::ofstream outfile;
+					outfile.open(fileRSADB, std::ios_base::out);
+					outfile.close();
+				}
+
+				if (file_util::fileexists(fileRSADB) == true)
+				{
+					std::ifstream infile;
+					infile.open (fileRSADB, std::ios_base::in);
+					infile >> bits(map_rsa_private);
+					infile.close();
+				}
+				else
+				{
+					std::cerr << "ERROR no file: "  << fileRSADB << std:: endl;
+					r = -1;
+				}
+
+				if (r >= 0)
+				{
+					// backup
+					{
+						std::ofstream outfile;
+						outfile.open(fileRSADB + ".bck", std::ios_base::out);
+						outfile << bits(map_rsa_private);
+						outfile.close();
+					}
+
+					std::string keyname = std::string("MY_RSA") + std::to_string(NPRIMES) + std::string("KEY_") + std::to_string(klen) + std::string("_") + cryptoAL::parsing::get_current_time_and_date();
 					map_rsa_private.insert(std::make_pair(keyname,  rkey));
 
 					{

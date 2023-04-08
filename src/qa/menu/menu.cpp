@@ -79,7 +79,8 @@ namespace ns_menu
 				{"Test RSA GMP key generator", 6},
 				{"Test RSA (3 primes) GMP key generator", 7},
 				{"Generate RSA key with GMP (fast)", 8},
-				{"Generate RSA (3 primes) key with GMP (fast)", 9}
+				{"Generate RSA (3 primes) key with GMP (fast)", 9},
+				{"Generate RSA (N primes) key with GMP (fast)", 10}
 			}
 		};
 		mRSA.set_main_menu(this);

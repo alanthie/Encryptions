@@ -22,6 +22,10 @@ namespace RSAGMP
                     
    bool get_keys_3primes(   unsigned int size, Utils::Generator *generator, int threads, unsigned int precision,
 				            Utils::mpzBigInteger& pub, Utils::mpzBigInteger& priv, Utils::mpzBigInteger& modulus); 
+                                    
+   bool get_keys_Nprimes(   unsigned int size, Utils::Generator *generator, int threads, unsigned int precision,
+				            Utils::mpzBigInteger& pub, Utils::mpzBigInteger& priv, Utils::mpzBigInteger& modulus,
+							unsigned int NPRIMES);
 
 }
 

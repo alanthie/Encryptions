@@ -159,3 +159,30 @@ bool RSAGMP::get_keys_3primes(	unsigned int size, Utils::Generator *generator, i
 
 	return result;
 }
+
+bool RSAGMP::get_keys_Nprimes(	unsigned int size, Utils::Generator *generator, int threads, unsigned int precision,
+								Utils::mpzBigInteger& pub, Utils::mpzBigInteger& priv, Utils::mpzBigInteger& modulus,
+								unsigned int NPRIMES)
+{
+	auto start = std::chrono::high_resolution_clock::now();
+
+	if ((size < 32*NPRIMES) || (generator == NULL))
+	{
+		std::cout << "RSA (N primes) invalid input, bit size must be >= 32*NPRIMES bits\n";
+		return false;
+	}
+
+	ParallelKeygenN(pub, priv, modulus, generator, size, threads, precision, NPRIMES);
+	mpzBigInteger message = generator->getBig(size) % modulus;
+	mpzBigInteger crypto = Encrypt(message, pub, modulus);
+	mpzBigInteger message1 = Decrypt(crypto, priv, modulus);
+	bool result = message1 == message;
+
+	auto finish = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double, std::milli> elapsed = finish - start;
+
+	if(result) std::cout << "RSA (N primes) GMP Encrypt/Decrypt OK- bits size: " << std::to_string(size) << " - Elapsed Time: " << elapsed.count() / 1000 << " sec" << std::endl;
+	else std::cout << "ERROR RSA (N primes) GMP Encrypt/Decrypt\n";
+
+	return result;
+}
