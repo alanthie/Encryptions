@@ -366,6 +366,9 @@ Setup
 Keys exchange
 ![Alt text](/Doc/exchange.png?raw=true "exchange")
 
+Relative security
+![Alt text](/Doc/relative.png?raw=true "relative")
+
 License
 <pre>
 Free for personal usage
