@@ -145,7 +145,9 @@ namespace ns_menu
 			{
 				{"HEX file dump", 	1},
 				{"SHA256 of a file",2},
-				{"Hardware info",3}
+				{"Hardware info",3},
+				{"Summary of binary.dat.*",4},
+				{"Summary of WBEAS keys",5}
 			}
 		};
 		mTOOLS.set_main_menu(this);
