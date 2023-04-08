@@ -40,24 +40,25 @@ inline bool E_check(const mpzBigInteger &E, const mpzBigInteger &Phi)
 }
 
 // check the compliance with security standard
-inline bool Q_check(mpzBigInteger Q, mpzBigInteger P, unsigned long size)
+inline bool Q_check(mpzBigInteger Q, mpzBigInteger P, unsigned long sizeOnePrime)
 {
   mpzBigInteger dif = abs(P-Q);
   P=(P-1)>>1;
   Q=(Q-1)>>1;
-  return (bitSize(dif) > size/2) && coprime(P,Q); //size/2 is 1/4 now
+  return (bitSize(dif) >= sizeOnePrime/2) && coprime(P,Q); //size/2 is 1/4 now
 }
 
 // 3 PRIMES
 // check the compliance with security standard
-inline bool Q_checkN(mpzBigInteger Q, mpzBigInteger P, unsigned long size, unsigned int NPRIMES) //??unsigned long vs unsigned int
+inline bool Q_checkN(mpzBigInteger Q, mpzBigInteger P, unsigned long sizeOnePrime, unsigned int NPRIMES) //??unsigned long vs unsigned int
 {
 	bool r = true;
+	unsigned int szDiffBit = sizeOnePrime/NPRIMES; // this is Nth root so very small difference
 	{
 	  	mpzBigInteger dif = abs(P-Q);
 	  	P=(P-1) >>1; // (p-1)/2 and (q-1)/2 are coprimes
 	  	Q=(Q-1) >>1;
-	  	r = (bitSize(dif) > size/NPRIMES) && coprime(P,Q); //size/2 is 1/2N now
+	  	r = (bitSize(dif) >= szDiffBit) && coprime(P,Q); //size/2 is 1/2N now
 	}
 	return r;
 }
@@ -311,7 +312,7 @@ inline void ParallelRoutine3(	mpzBigInteger &primeP, mpzBigInteger &primeQ, mpzB
 }
 
 // N PRIMES
-//ParallelRoutineN(vPrime, gen, size, precision, threads, NPRIMES);
+// ParallelRoutineN(vPrime, gen, size, precision, threads, NPRIMES);
 inline void ParallelRoutineN(	std::vector<mpzBigInteger>& vPrime,
 								RSAGMP::Utils::Generator *gen,
                                 unsigned int size,
@@ -323,13 +324,14 @@ inline void ParallelRoutineN(	std::vector<mpzBigInteger>& vPrime,
     std::vector<std::thread> vThreads;
 
     vPrime[0] = gen->getBig(PRIME_NSIZE(size, NPRIMES));
-    Prime::ParallelNextPrime( &vPrime[0], PRIME_NSIZE(size, NPRIMES), precision, std::max(int(1), (int)(threads/vPrime.size())) );
+    Prime::ParallelNextPrime(   &vPrime[0], PRIME_NSIZE(size, NPRIMES), precision, std::max(int(1),
+                                (int)(threads/vPrime.size())) );
 
     for(size_t i=1;i<vPrime.size();i++)
     {
         vPrime[i] = gen->getBig(PRIME_NSIZE(size, NPRIMES));
-        vThreads.push_back( std::thread(ParallelNextPrime, &vPrime[i], PRIME_NSIZE(size, NPRIMES), precision,
-                                        std::max(int(1), (int) (threads/vPrime.size()) )));
+        vThreads.push_back( std::thread(ParallelNextPrime,  &vPrime[i], PRIME_NSIZE(size, NPRIMES), precision,
+                                                            std::max(int(1), (int) (threads/vPrime.size()) )));
     }
 	for(size_t i=0;i<vThreads.size();i++)
         vThreads[i].join();
@@ -371,7 +373,8 @@ inline void ParallelRoutineN(	std::vector<mpzBigInteger>& vPrime,
 		{
             // Redo P
             vPrime[0] = gen->getBig(PRIME_NSIZE(size, NPRIMES));
-            Prime::ParallelNextPrime(&vPrime[0], PRIME_NSIZE(size, NPRIMES), precision, std::max(int(1), (int)(threads)) );
+            Prime::ParallelNextPrime(&vPrime[0], PRIME_NSIZE(size, NPRIMES), precision,
+                                     std::max(int(1), (int)(threads)) );
 
             cnt = 0;
             ok = true;
@@ -401,23 +404,35 @@ inline void ParallelRoutineN(	std::vector<mpzBigInteger>& vPrime,
 			}
 		}
 
-        //if (ok == false)
-        {
-            vThreads.clear();
-            for(size_t i=1;i<vPrime.size();i++)
-            {
-				if (vOK[i-1] == false)
-				{
-					vPrime[i] = gen->getBig(PRIME_NSIZE(size, NPRIMES));
-					vThreads.push_back( std::thread(ParallelNextPrime, 	&vPrime[i], PRIME_NSIZE(size, NPRIMES), precision,
-																		std::max(int(1), (int)(threads/cntNotOK)) ));
-				}
-            }
-            for(size_t i=0;i<vThreads.size();i++)
-                vThreads[i].join();
-        }
+		vThreads.clear();
+		for(size_t i=1;i<vPrime.size();i++)
+		{
+			while (vOK[i-1] == false)
+			{
+				vPrime[i] = gen->getBig(PRIME_NSIZE(size, NPRIMES));
 
-        // TODO parrallel
+                // Try to use max threads every times
+                ParallelNextPrime(  &vPrime[i], PRIME_NSIZE(size, NPRIMES), precision,
+                                    std::max(int(1), (int)(threads)) );
+                vOK[i-1] = Q_checkN(vPrime[0], vPrime[i], PRIME_NSIZE(size, NPRIMES), NPRIMES);
+
+                //diff between primes >= nth root, so very small, enough space to fit all primes
+                {
+                    if (vOK[i-1] == true)
+                    {
+                        for(size_t j=1;j<i;j++) // check balanced and coprime with all previous
+                        {
+                            vOK[i-1] = Q_checkN(vPrime[j], vPrime[i], PRIME_NSIZE(size, NPRIMES), NPRIMES);
+                            if (vOK[i-1] == false)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
+             }
+		}
+
         ok = true;
         cntNotOK = 0;
         for(size_t j=1;j<vPrime.size();j++)
@@ -430,7 +445,6 @@ inline void ParallelRoutineN(	std::vector<mpzBigInteger>& vPrime,
             }
         }
 
-        // TODO parrallel
         if (ok)
         {
             for(size_t i=1;i<vPrime.size();i++)
