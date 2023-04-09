@@ -30,6 +30,8 @@ namespace rsa
 		bool 		deleted 	= false;	// marked for delete
 		uint32_t 	usage_count = 0;
 		std::string dt_confirmed = "";
+		
+		void add_to_usage_count() {usage_count++;}
 
         friend std::ostream& operator<<(std::ostream &out, Bits<rsa_key & > my)
         {

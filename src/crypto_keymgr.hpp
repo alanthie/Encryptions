@@ -3,12 +3,13 @@
 
 #include "crypto_const.hpp"
 #include "crypto_ecckey.hpp"
+#include "qa/rsa_gen.hpp"
+#include "crypto_history.hpp"
 #include "data.hpp"
 #include "crypto_key_parser.hpp"
 #include "random_engine.hpp"
 #include "crc32a.hpp"
 #include "c_plus_plus_serializer.h"
-#include "qa/rsa_gen.hpp"
 
 namespace cryptoAL
 {
@@ -145,7 +146,7 @@ namespace keymgr
 		else if (t == CRYPTO_FILE_TYPE::ECC_PUBLIC)
         {
 		    std::string fileDB = path_public_db + ECCKEY_OTHER_PUBLIC_DB;
-			std::map< std::string, ecc_key > map_ecc_public;
+			std::map<std::string, ecc_key> map_ecc_public;
 
 			bool ok = true;
 			if (file_util::fileexists(fileDB) == false)
@@ -200,7 +201,7 @@ namespace keymgr
 		else if (t == CRYPTO_FILE_TYPE::HH_PUBLIC)
         {
 		    std::string fileDB = path_public_db + HHKEY_OTHER_PUBLIC_DECODE_DB; //??
-			std::map< std::string, ecc_key > map_hh_public;
+			std::map<std::string, history_key_public> map_hh_public;
 
 			bool ok = true;
 			if (file_util::fileexists(fileDB) == false)

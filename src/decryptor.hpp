@@ -22,6 +22,8 @@
 #include "qa/aes-whitebox/aes_whitebox.hpp"
 #include "qa/menu/menu.h"
 #include "qa/SystemProperties.hpp"
+#include "crypto_dbmgr.hpp"
+#include "hhkey_util.hpp"
 
 namespace cryptoAL
 {
@@ -333,7 +335,10 @@ public:
 
         std::string embedded_rsa_key;
         std::string embedded_ecc_key;
-        std::string histo_key;
+
+		history_key history_key_out;
+        std::string shisto_key; // 3 SHA
+		uint32_t histo_keyseq = 0;
 
 		char u[URL_MAX_SIZE] = {0};
 
@@ -451,7 +456,6 @@ public:
 			}
             else if (is_histo)
             {
-                history_key kout;
                 std::string local_histo_db = folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
 
                 std::string s(&u[pos_url]);
@@ -473,14 +477,14 @@ public:
                 }
                 if (r)
                 {
-                    r = find_history_key_by_sha(v[0], local_histo_db, kout);
+                    r = cryptoAL::hhkey_util::find_history_key_by_sha(v[0], local_histo_db, history_key_out, histo_keyseq, dbmgr, true);
                     if (r)
                     {
-                        histo_key = kout.data_sha[0]+kout.data_sha[1]+kout.data_sha[2];
+                        shisto_key = history_key_out.data_sha[0]+history_key_out.data_sha[1]+history_key_out.data_sha[2];
                         if (VERBOSE_DEBUG)
                         {
-                            std::cout << "histo key: " << histo_key << " size:" << histo_key.size() << std::endl;
-                            std::cout << "histo key: " << file_util::get_summary_hex(histo_key.data(), (uint32_t)histo_key.size()) << " size:" << histo_key.size() << std::endl;
+                            std::cout << "histo key: " << shisto_key << " size:" << shisto_key.size() << std::endl;
+                            std::cout << "histo key: " << file_util::get_summary_hex(shisto_key.data(), (uint32_t)shisto_key.size()) << " size:" << shisto_key.size() << std::endl;
                         }
                     }
                     else
@@ -585,16 +589,18 @@ public:
 					for (long long riter = N - 1; riter >= 0; riter--)
 					{
                         std::string rsa_key_at_iter = v[riter];
-						cryptoAL::rsa::rsa_key kout;
-						bool r = rsa_util::get_rsa_key(rsa_key_at_iter, local_rsa_db, kout);
+						cryptoAL::rsa::rsa_key krsaout;
+						bool r = rsa_util::get_rsa_key(rsa_key_at_iter, local_rsa_db, krsaout);
 						if (r)
 						{
+							dbmgr.add_to_usage_count_rsa(rsa_key_at_iter, local_rsa_db);
+
 							if (riter != 0)
 							{
 								uint32_t msg_size_produced;
 								std::string d = uk.sRSA_ECC_ENCODED_DATA.substr(0, v_encoded_size[riter]);
-								//std::string t = rsa_util::rsa_decode_string(d, kout, (uint32_t)d.size(), msg_size_produced, use_gmp);
-								std::string t = rsa_util::rsa_decode_full_string(d, kout, msg_size_produced, use_gmp);
+								//std::string t = rsa_util::rsa_decode_string(d, krsaout, (uint32_t)d.size(), msg_size_produced, use_gmp);
+								std::string t = rsa_util::rsa_decode_full_string(d, krsaout, msg_size_produced, use_gmp);
 
 								// may reduce size
 								uk.sRSA_ECC_ENCODED_DATA = t + uk.sRSA_ECC_ENCODED_DATA.substr(d.size());
@@ -604,8 +610,8 @@ public:
 							else
 							{
 								uint32_t msg_size_produced;
-								//embedded_rsa_key = rsa_util::rsa_decode_string(uk.sRSA_ECC_ENCODED_DATA, kout, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced, use_gmp);
-								embedded_rsa_key = rsa_util::rsa_decode_full_string(uk.sRSA_ECC_ENCODED_DATA, kout, msg_size_produced, use_gmp);
+								//embedded_rsa_key = rsa_util::rsa_decode_string(uk.sRSA_ECC_ENCODED_DATA, krsaout, (uint32_t)uk.sRSA_ECC_ENCODED_DATA.size(), msg_size_produced, use_gmp);
+								embedded_rsa_key = rsa_util::rsa_decode_full_string(uk.sRSA_ECC_ENCODED_DATA, krsaout, msg_size_produced, use_gmp);
 							}
 						}
 						else
@@ -714,6 +720,8 @@ public:
 						bool r = ecc_util::get_ecc_key(ecc_key_at_iter, local_private_ecc_db, ek_mine);
 						if (r)
 						{
+							dbmgr.add_to_usage_count_ecc(ecc_key_at_iter, local_private_ecc_db);
+
                             if (VERBOSE_DEBUG)
                             {
                                 std::cerr << "ecc private key found: " << ecc_key_at_iter << std::endl;
@@ -830,7 +838,8 @@ public:
 					}
 					else if (is_histo)
 					{
-						d.buffer.write(histo_key.data(), (uint32_t)histo_key.size());
+						d.buffer.write(shisto_key.data(), (uint32_t)shisto_key.size());
+						dbmgr.add_to_usage_count_hh_decode(histo_keyseq, folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB);
 					}
 
 					uint32_t pos = (uk.key_fromH * BASE) + uk.key_fromL ;
@@ -2014,9 +2023,9 @@ public:
 			if (folder_my_private_hh.size() > 0)
 			{
 				std::string local_histo_db = folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
-				hkey.make_from_file(encrypted_data, local_histo_db, hkey_ok);
+				cryptoAL::hhkey_util::make_from_file(hkey, encrypted_data, local_histo_db, hkey_ok, dbmgr, true);
 
-                hkey_ok = get_next_seq_histo(hist_out_seq, local_histo_db);
+                hkey_ok = cryptoAL::hhkey_util::get_next_seq_histo(hist_out_seq, local_histo_db, dbmgr, true);
                 if (hkey_ok)
                 {
                     hkey.update_seq(hist_out_seq);
@@ -2386,7 +2395,7 @@ public:
 			if (hkey_ok)
 			{
 				std::string local_histo_db = folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
-                save_histo_key(hkey, local_histo_db);
+                cryptoAL::hhkey_util::save_histo_key(hkey, local_histo_db, dbmgr, true);
                 if (VERBOSE_DEBUG)
                     std::cout << "history sequence saved: "  << hist_out_seq << std::endl;
 			}
@@ -2432,6 +2441,8 @@ public:
 
 	bool has_cfg_algo = false;
 	std::vector<CRYPTO_ALGO> vAlgo;
+
+	cryptoAL::db::db_mgr dbmgr;
 
 	bool pre_decode(uint32_t converterid, const std::string& filename_encrypted_data, cryptodata& output_encrypted_data, std::string& new_output_filename)
 	{
@@ -2514,6 +2525,12 @@ public:
 				std::cout << "!auto_flag" << std::endl;
         }
 
+		// TODO move to dbmgr
+		//	confirm_history_key() will re-read histo file
+		//	kpriv.update_confirmed(true);
+		//	map_histo[seq] = kpriv;
+		dbmgr.update();
+
         r = datalist.read_write_from(   decrypted_data, filename_decrypted_data,
                                         folder_other_public_rsa,
                                         folder_other_public_ecc,
@@ -2559,7 +2576,8 @@ public:
 			{
 				if (file_util::fileexists(importfile) == true)
 				{
-					std::cerr << "WARNING no file to update HH keys confirmation: " << fileHistoPrivateEncodeDB << std:: endl;
+					// TODO
+					//std::cerr << "WARNING no file to update HH keys confirmation: " << fileHistoPrivateEncodeDB << std:: endl;
 				}
 			}
         }

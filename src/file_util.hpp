@@ -18,6 +18,24 @@ namespace file_util
 			return false;
 	}
 
+	[[maybe_unused]] static  bool is_file_private(const std::string& filename)
+	{
+		bool r = false;
+		const std::filesystem::path d{filename};
+		if (std::filesystem::is_regular_file(d))
+		{
+			std::string s = d.filename().string();
+			if ((s == cryptoAL::RSA_MY_PRIVATE_DB) ||
+				(s == cryptoAL::ECCKEY_MY_PRIVATE_DB) ||
+				(s == cryptoAL::HHKEY_MY_PRIVATE_ENCODE_DB) ||
+				(s == cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB))
+			{
+				r = true;
+			}
+		}
+		return r;
+	}
+
 	[[maybe_unused]] static std::string get_current_dir()
 	{
 		return std::filesystem::current_path().string();

@@ -28,14 +28,51 @@ namespace rsa_util
 	{
 		bool found = false;
 
+		bool copied = false;
 		if (file_util::fileexists(local_rsa_db) == true)
 		{
 			std::map<std::string, cryptoAL::rsa::rsa_key> map_rsa;
 
+			// TESTING for future db decryption/decryption
+			if (false)
+			{
+                if (file_util::is_file_private(local_rsa_db))
+                {
+                    std::cout <<  "READING PRIVATE FILE " << local_rsa_db << std::endl;
+/*
+                    if (file_util::fileexists(local_rsa_db + ".tmp"))
+                        std::filesystem::remove(local_rsa_db + ".tmp");
+                    std::filesystem::copy(local_rsa_db, local_rsa_db + ".tmp");
+                    copied = true;
+*/
+                    //https://stdcxx.apache.org/doc/stdlibug/34-4.html
+					std::fstream fil(local_rsa_db);
+					std::stringstream header_stream;
+					header_stream << fil.rdbuf();
+/*
+                    const char* header_char_ptr = header_string.data();
+                    // [file_size + file_padding + sha_key]+[encrypted data...=>Salsa decode<key>], remove padding==>file data]
+                    // process the header, for example
+                    int idx;
+                    std::memcpy((char*) &idx,header_char_ptr,sizeof(int));
+*/
+					header_stream >> bits(map_rsa);
+                }
+			}
+
 			std::ifstream infile;
-			infile.open (local_rsa_db, std::ios_base::in);
+			if (copied)
+				infile.open (local_rsa_db + ".tmp", std::ios_base::in);
+			else
+				infile.open (local_rsa_db, std::ios_base::in);
 			infile >> bits(map_rsa);
 			infile.close();
+
+			if (copied)
+			{
+                if (file_util::fileexists(local_rsa_db + ".tmp"))
+                    std::filesystem::remove(local_rsa_db + ".tmp");
+			}
 
 			for(auto& [userkey, k] : map_rsa)
 			{

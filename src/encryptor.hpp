@@ -28,6 +28,8 @@
 #include "rsa_util.hpp"
 #include "crypto_file.hpp"
 #include "qa/SystemProperties.hpp"
+#include "crypto_dbmgr.hpp"
+#include "hhkey_util.hpp"
 
 namespace cryptoAL
 {
@@ -495,9 +497,11 @@ public:
                     uint32_t seq = (uint32_t)iseq;
 
 					// TODO - Use only HH confirmed....
-                    r = get_history_key(seq, local_histo_db, kout);
+                    r = cryptoAL::hhkey_util::get_history_key(seq, local_histo_db, kout, dbmgr, false);
                     if (r)
                     {
+						dbmgr.add_to_usage_count_hh_encode(seq, local_histo_db); //HHKEY_MY_PRIVATE_ENCODE_DB
+
                         histo_key = kout.data_sha[0]+kout.data_sha[1]+kout.data_sha[2];
                         if (VERBOSE_DEBUG)
                         {
@@ -737,23 +741,23 @@ public:
 						bool ENCODE_FULL=false;
 						if (ENCODE_FULL == false)
 						{
-							t = ecc::ecc_encode_string(	vurlkey[i].sRSA_ECC_ENCODED_DATA, 
+							t = ecc::ecc_encode_string(	vurlkey[i].sRSA_ECC_ENCODED_DATA,
 														key_mine,
-														key_other.s_kg_x, 
+														key_other.s_kg_x,
 														key_other.s_kg_y,
 														msg_input_size_used,
-														msg_size_produced, 
-														SELF_TEST, 
+														msg_size_produced,
+														SELF_TEST,
 														verbose);
 						}
 						else
 						{
-							t = ecc::ecc_encode_full_string(vurlkey[i].sRSA_ECC_ENCODED_DATA, 
+							t = ecc::ecc_encode_full_string(vurlkey[i].sRSA_ECC_ENCODED_DATA,
 															key_mine,
-															key_other.s_kg_x, 
+															key_other.s_kg_x,
 															key_other.s_kg_y,
-															msg_size_produced, 
-															SELF_TEST, 
+															msg_size_produced,
+															SELF_TEST,
 															verbose);
 						}
 
@@ -2342,7 +2346,7 @@ public:
 
 		// TODO some simple identification of origin
 		//std::string cd = file_util::get_current_dir();
-		std::string hwinfo; 
+		std::string hwinfo;
 		System::Properties pr;
 		hwinfo = pr.CPUModel() + " " + pr.GPUName();
 		if (hwinfo.size() > 256) hwinfo = hwinfo.substr(0,256);
@@ -2395,15 +2399,18 @@ public:
 		{
 			std::string local_histo_db = folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
 			bool result;
-			history_key hkey(encrypted_data, local_histo_db, result);
+
+			history_key hkey;
+			cryptoAL::hhkey_util::make_from_file(hkey, encrypted_data, local_histo_db, result, dbmgr, false);
+
             if (result)
             {
 				uint32_t out_seq;
-				result = get_next_seq_histo(out_seq, local_histo_db);
+				result = cryptoAL::hhkey_util::get_next_seq_histo(out_seq, local_histo_db, dbmgr, false);
 				if (result)
 				{
 					hkey.update_seq(out_seq);
-                	save_histo_key(hkey, local_histo_db);
+                	cryptoAL::hhkey_util::save_histo_key(hkey, local_histo_db, dbmgr, false);
                 	if (VERBOSE_DEBUG)
                         std::cout << "history sequence saved: "  << out_seq << std::endl;
 				}
@@ -2467,8 +2474,12 @@ public:
 	bool has_cfg_algo = false;
 	std::vector<CRYPTO_ALGO> vAlgo;
 
+	cryptoAL::db::db_mgr dbmgr;
+
 	bool post_encode(cryptodata& indata, const std::string& filename, cryptodata& out_encrypted_data, std::string& new_output_filename)
 	{
+		//dbmgr.update()
+
 		bool r = true;
 		new_output_filename = filename;
 

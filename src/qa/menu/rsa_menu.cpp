@@ -142,7 +142,7 @@ namespace ns_menu
 				std::cout << "---------------------------" << std::endl;
 				for(auto& [user, k] : map_rsa_private)
 				{
-					std::cout << "[r]" << user << std:: endl;
+					std::cout << "[r]" << user << " (usage_count:" << k.usage_count << ")" << std:: endl;
 				}
 				std::cout << std:: endl;
 			}

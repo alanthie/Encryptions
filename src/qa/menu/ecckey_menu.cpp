@@ -212,7 +212,7 @@ namespace ns_menu
 				std::cout << "---------------------------" << std::endl;
 				for(auto& [kname, k] : map_ecckey_private)
 				{
-					std::cout << "[e]" << kname << std:: endl;
+					std::cout << "[e]" << kname << " (usage_count:" << k.usage_count << ")" << std::endl;
 				}
 				std::cout << std:: endl;
 			}

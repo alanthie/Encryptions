@@ -3,20 +3,15 @@
 
 #include "crypto_const.hpp"
 #include "c_plus_plus_serializer.h"
-#include "data.hpp"
 #include "crc32a.hpp"
 #include <map>
 #include <string>
 
 namespace cryptoAL
 {
-    [[maybe_unused]] static bool get_next_seq_histo(uint32_t& out_seq, const std::string& local_histo_db);
-
     struct history_key
     {
-        history_key()
-        {
-        };
+        history_key() {}
 
 		void update_seq(const uint32_t& seq)
 		{
@@ -34,34 +29,6 @@ namespace cryptoAL
                 confirmed = b;
                 dt_confirmed = cryptoAL::parsing::get_current_time_and_date();
 			}
-		}
-
-		void make_from_file(cryptodata& encrypted_data, const std::string& local_histo_db, bool& result)
-		{
-            if (encrypted_data.buffer.size() < 64) {result=false;return;}
-			result = true;
-			data_size = encrypted_data.buffer.size();
-
-			data_sha[0] = checksum(encrypted_data, 0, data_size - 1, result);
-			if(!result) return;
-
-			uint32_t n = data_size/2;
-			data_sha[1] = checksum(encrypted_data, 0, n, result);
-			if(!result) return;
-
-			if (n > encrypted_data.buffer.size() - 1) n = data_size- 1;
-			data_sha[2] = checksum(encrypted_data, n, data_size- 1, result);
-			if(!result) return;
-
-			result = get_next_seq_histo(sequence, local_histo_db);
-			if(!result) return;
-
-			dt = cryptoAL::parsing::get_current_time_and_date();
-		}
-
-        history_key(cryptodata& encrypted_data, const std::string& local_histo_db, bool& result)
-		{
-            make_from_file(encrypted_data, local_histo_db, result);
 		}
 
         history_key(uint32_t dsize, const std::string& a, const std::string& b, const std::string& c)
@@ -86,6 +53,8 @@ namespace cryptoAL
 		bool 		deleted 	= false;	// marked for deleted
 		uint32_t 	usage_count = 0;
 		std::string dt_confirmed = "";
+
+		void add_to_usage_count() {usage_count++;}
 
         friend std::ostream& operator<<(std::ostream &out, Bits<history_key & > my)
         {
@@ -131,14 +100,17 @@ namespace cryptoAL
 
     struct history_key_public
     {
-        history_key_public()
-        {
-        }
+        history_key_public() {}
+
         friend std::ostream& operator<<(std::ostream &out, Bits<history_key_public & > my)
         {
             out << bits(my.t.data_size)
 				<< bits(my.t.data_sha0)
-				<< bits(my.t.summary_sha);
+				<< bits(my.t.summary_sha)
+				<< bits(my.t.confirmed)
+				<< bits(my.t.deleted)
+				<< bits(my.t.usage_count)
+				<< bits(my.t.dt_confirmed);
             return (out);
         }
 
@@ -146,13 +118,23 @@ namespace cryptoAL
         {
             in 	>> bits(my.t.data_size)
 				>> bits(my.t.data_sha0)
-				>> bits(my.t.summary_sha);
+				>> bits(my.t.summary_sha)
+				>> bits(my.t.confirmed)
+				>> bits(my.t.deleted)
+				>> bits(my.t.usage_count)
+				>> bits(my.t.dt_confirmed);
+
             return (in);
         }
 
         uint32_t data_size = 0;
         std::string data_sha0;
         std::string summary_sha;
+
+		bool 		confirmed 	= false;
+		bool 		deleted 	= false;	// marked for deleted
+		uint32_t 	usage_count = 0;
+		std::string dt_confirmed = "";
     };
 
 	[[maybe_unused]] static void history_key_to_public(const history_key& kin, history_key_public& kout)
@@ -170,7 +152,8 @@ namespace cryptoAL
 		kout.summary_sha = checksum;
 	}
 
-    [[maybe_unused]] static  bool find_history_key_by_sha_in_map(const std::string& key_sha, const std::map<uint32_t, history_key>& map_histo, uint32_t& seq, history_key& kout)
+    [[maybe_unused]] static  bool find_history_key_by_sha_in_map(	const std::string& key_sha, const std::map<uint32_t, 
+																	history_key>& map_histo, uint32_t& seq, history_key& kout)
 	{
 		bool found = false;
 		for(auto& [seqkey, k] : map_histo)
@@ -183,38 +166,6 @@ namespace cryptoAL
 				break;
 			}
 		}
-		return found;
-	}
-
-
-    [[maybe_unused]] static bool get_history_key(const uint32_t& seq, const std::string& local_histo_db, history_key& kout)
-	{
-		bool found = false;
-
-		if (file_util::fileexists(local_histo_db) == true)
-		{
-			std::map<uint32_t, history_key> map_histo;
-
-			std::ifstream infile;
-			infile.open (local_histo_db, std::ios_base::in);
-			infile >> bits(map_histo);
-			infile.close();
-
-			for(auto& [seqkey, k] : map_histo)
-			{
-				if (seqkey == seq)
-				{
-					found = true;
-					kout = k;
-					break;
-				}
-			}
-		}
-		else
-		{
-			std::cout << "WARNING no seq in histo file: " << seq << " " << local_histo_db << std::endl;
-		}
-
 		return found;
 	}
 
@@ -237,7 +188,9 @@ namespace cryptoAL
                             << " confirmed dt:" << k.dt_confirmed
                             << " sha[0]:" << k.data_sha[0]
                             << " dt:" << k.dt
-                            << " datasize:" << k.data_size << std::endl;
+                            << " datasize:" << k.data_size
+							<< " usage_count:" << k.usage_count
+							<< std::endl;
 			}
 		}
 	}
@@ -349,117 +302,6 @@ namespace cryptoAL
 
 		return r;
 	}
-
-	[[maybe_unused]] static bool find_history_key_by_sha(const std::string& key_sha, const std::string& local_histo_db, history_key& kout)
-	{
-		bool found = false;
-
-		if (file_util::fileexists(local_histo_db) == true)
-		{
-			std::map<uint32_t, history_key> map_histo;
-
-			std::ifstream infile;
-			infile.open (local_histo_db, std::ios_base::in);
-			infile >> bits(map_histo);
-			infile.close();
-
-			for(auto& [seqkey, k] : map_histo)
-			{
-				if (k.data_sha[0] == key_sha)
-				{
-					found = true;
-					kout = k;
-					break;
-				}
-			}
-		}
-		return found;
-	}
-
-	[[maybe_unused]] static bool get_next_seq_histo(uint32_t& out_seq, const std::string& local_histo_db)
-	{
-		bool ok = true;
-		uint32_t maxseq=0;
-		out_seq = 0;
-
-		if (file_util::fileexists(local_histo_db) == true)
-		{
-			std::map<uint32_t, history_key> map_histo;
-
-			std::ifstream infile;
-			infile.open (local_histo_db, std::ios_base::in);
-			infile >> bits(map_histo);
-			infile.close();
-
-			for(auto& [seqkey, k] : map_histo)
-			{
-				if (seqkey > maxseq)
-				{
-					maxseq = seqkey;
-					out_seq = maxseq;
-				}
-			}
-			out_seq++;
-		}
-		else
-		{
-			std::cout << "WARNING no histo file (creating historical sequence 1) in : " << local_histo_db << std::endl;
-			out_seq = 1;
-		}
-
-		return ok;
-	}
-
-	[[maybe_unused]] static bool save_histo_key(const history_key& k, const std::string& local_histo_db)
-	{
-		bool ok = true;
-		bool toupdate = false;
-
-		std::map<uint32_t, history_key> map_histo;
-		if (file_util::fileexists(local_histo_db) == true)
-		{
-			std::ifstream infile;
-			infile.open (local_histo_db, std::ios_base::in);
-			infile >> bits(map_histo);
-			infile.close();
-
-			for(auto& [seqkey, k] : map_histo)
-			{
-				if (seqkey == k.sequence)
-				{
-					toupdate = true;
-					break;
-				}
-			}
-        }
-
-        if (toupdate)
-        {
-        }
-        else
-        {
-        }
-        map_histo[k.sequence] = k;
-
-        // backup
-        if (file_util::fileexists(local_histo_db) == true)
-        {
-            std::ofstream outfile;
-            outfile.open(local_histo_db + ".bck", std::ios_base::out);
-            outfile << bits(map_histo);
-            outfile.close();
-        }
-
-        // save
-        {
-            std::ofstream outfile;
-            outfile.open(local_histo_db, std::ios_base::out);
-            outfile << bits(map_histo);
-            outfile.close();
-        }
-
-		return ok;
-	}
-
+	
 }
 #endif

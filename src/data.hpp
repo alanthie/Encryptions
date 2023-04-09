@@ -3,6 +3,7 @@
 
 #include "crypto_const.hpp"
 #include "Buffer.hpp"
+#include <filesystem>
 #include <fstream>
 #include <stdio.h>
 #include <iostream>
@@ -16,7 +17,7 @@ public:
     cryptodata(bool verb = false) {verbose = verb;}
     virtual ~cryptodata() {}
 
-    virtual bool read_from_file(std::string filename, bool allow_realloc = true)
+    virtual bool read_from_file(const std::string& filename, bool allow_realloc = true)
     {
         std::ifstream ifd(filename.data(), std::ios::binary | std::ios::ate);
         if (ifd)
@@ -88,7 +89,7 @@ public:
         return false;
     }
 
-    virtual bool save_to_file(std::string filename)
+    virtual bool save_to_file(const std::string& filename)
     {
         std::ofstream ofd(filename.data(), std::ios::out | std::ios::binary);
         if (ofd.bad() == false)
