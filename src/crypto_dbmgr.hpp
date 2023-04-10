@@ -10,10 +10,13 @@
 #include "data.hpp"
 #include "crc32a.hpp"
 #include "c_plus_plus_serializer.h"
+#include "exclusive-lock-file.h"
 
 #include <filesystem>
 #include <iostream>
 #include <fstream>
+#include <chrono>
+#include <thread>
 
 // crypto_dbmgr.hpp
 namespace cryptoAL
@@ -35,7 +38,10 @@ namespace db
 		std::map<std::string, std::map<uint32_t, cryptoAL::history_key>*>  	    multimap_hh_encode;
 		std::map<std::string, std::map<uint32_t, cryptoAL::history_key>*>  	    multimap_hh_decode;
 
-        db_mgr() {}
+		crypto_cfg& cfg;
+
+        db_mgr(crypto_cfg& c) : cfg(c) {}
+
 		~db_mgr()
 		{
 			update();
@@ -56,22 +62,54 @@ namespace db
                             std::map<std::string, cryptoAL::rsa::rsa_key>* pmap = multimap_rsa[pathdb];
                             if (pmap!=nullptr)
                             {
-                                // backup
-                                {
-                                    std::ofstream outfile;
-                                    outfile.open(pathdb + ".bck", std::ios_base::out);
-                                    outfile << bits(*pmap);
-                                    outfile.close();
-                                }
+								bool lock_ok = false;
+								int cnt = 0;
+								while (lock_ok == false)
+								{
+									try
+									{
+										exclusive_lock_file lockdb(pathdb + ".lock");
+										lock_ok = true;
 
-                                // save
-                                if (SHOWDEBUG) std::cout << "db_mgr saving " << pathdb << std::endl;
-                                {
-                                    std::ofstream out;
-                                    out.open(pathdb, std::ios_base::out);
-                                    out << bits(*pmap);
-                                    out.close();
-                                }
+										// save
+                                		if (SHOWDEBUG) std::cout << "db_mgr saving (lock acquired) " << pathdb << std::endl;
+
+										// backup
+										{
+											std::ofstream outfile;
+											outfile.open(pathdb + ".bck", std::ios_base::out);
+											outfile << bits(*pmap);
+											outfile.close();
+										}
+
+										{
+											std::ofstream out;
+											out.open(pathdb, std::ios_base::out);
+											out << bits(*pmap);
+											out.close();
+										}
+									}
+									catch(...)
+									{
+										lock_ok = false;
+									}
+
+									if (lock_ok)
+									{
+										break;
+									}
+									cnt++;
+
+									// TODO
+									std::cout << "INFO fail to acquire lock  - retrying in 1 sec... " << pathdb + ".lock" << std::endl;
+									std::this_thread::sleep_for(std::chrono::seconds(1));
+
+									if (cnt > 10)
+									{
+										std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
+										break;
+									}
+								}
                             }
                         }
 						map_private_key_rsa_update[pathdb] = false;
@@ -87,23 +125,57 @@ namespace db
                             std::map<std::string, cryptoAL::ecc_key>* pmap = multimap_ecc[pathdb];
                             if (pmap!=nullptr)
                             {
-                                // backup
-                                {
-                                    std::ofstream outfile;
-                                    outfile.open(pathdb + ".bck", std::ios_base::out);
-                                    outfile << bits(*pmap);
-                                    outfile.close();
-                                }
+								bool lock_ok = false;
+								int cnt = 0;
+								while (lock_ok == false)
+								{
+									try
+									{
+										exclusive_lock_file lockdb(pathdb + ".lock");
+										lock_ok = true;
 
-                                // save
-                                if (SHOWDEBUG) std::cout << "db_mgr saving " << pathdb << std::endl;
-                                {
-                                    std::ofstream out;
-                                    out.open(pathdb, std::ios_base::out);
-                                    out << bits(*pmap);
-                                    out.close();
-                                }
-                            }
+										// save
+                                		if (SHOWDEBUG) std::cout << "db_mgr saving (lock acquired) " << pathdb << std::endl;
+
+										// backup
+										{
+											std::ofstream outfile;
+											outfile.open(pathdb + ".bck", std::ios_base::out);
+											outfile << bits(*pmap);
+											outfile.close();
+										}
+
+										// save
+										if (SHOWDEBUG) std::cout << "db_mgr saving " << pathdb << std::endl;
+										{
+											std::ofstream out;
+											out.open(pathdb, std::ios_base::out);
+											out << bits(*pmap);
+											out.close();
+										}
+									}
+									catch(...)
+									{
+										lock_ok = false;
+									}
+
+									if (lock_ok)
+									{
+										break;
+									}
+									cnt++;
+
+									// TODO
+									std::cout << "INFO fail to acquire lock  - retrying in 1 sec... " << pathdb + ".lock" << std::endl;
+									std::this_thread::sleep_for(std::chrono::seconds(1));
+
+									if (cnt > 10)
+									{
+										std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
+										break;
+									}
+								}
+                            }	
                         }
 						map_private_key_ecc_update[pathdb] = false;
                     }
@@ -118,23 +190,57 @@ namespace db
                             std::map<uint32_t, cryptoAL::history_key>* pmap = multimap_hh_decode[pathdb];
                             if (pmap!=nullptr)
                             {
-                                // backup
-                                {
-                                    std::ofstream outfile;
-                                    outfile.open(pathdb + ".bck", std::ios_base::out);
-                                    outfile << bits(*pmap);
-                                    outfile.close();
-                                }
+								bool lock_ok = false;
+								int cnt = 0;
+								while (lock_ok == false)
+								{
+									try
+									{
+										exclusive_lock_file lockdb(pathdb + ".lock");
+										lock_ok = true;
 
-                                // save
-                                if (SHOWDEBUG) std::cout << "db_mgr saving " << pathdb << std::endl;
-                                {
-                                    std::ofstream out;
-                                    out.open(pathdb, std::ios_base::out);
-                                    out << bits(*pmap);
-                                    out.close();
-                                }
-                            }
+										// save
+                                		if (SHOWDEBUG) std::cout << "db_mgr saving (lock acquired) " << pathdb << std::endl;
+
+										// backup
+										{
+											std::ofstream outfile;
+											outfile.open(pathdb + ".bck", std::ios_base::out);
+											outfile << bits(*pmap);
+											outfile.close();
+										}
+
+										// save
+										if (SHOWDEBUG) std::cout << "db_mgr saving " << pathdb << std::endl;
+										{
+											std::ofstream out;
+											out.open(pathdb, std::ios_base::out);
+											out << bits(*pmap);
+											out.close();
+										}
+									}
+									catch(...)
+									{
+										lock_ok = false;
+									}
+
+									if (lock_ok)
+									{
+										break;
+									}
+									cnt++;
+
+									// TODO
+									std::cout << "INFO fail to acquire lock  - retrying in 1 sec... " << pathdb + ".lock" << std::endl;
+									std::this_thread::sleep_for(std::chrono::seconds(1));
+
+									if (cnt > 10)
+									{
+										std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
+										break;
+									}
+								}
+                            }	
                         }
 						map_private_key_hh_decode_update[pathdb] = false;
                     }
@@ -149,23 +255,57 @@ namespace db
                             std::map<uint32_t, cryptoAL::history_key>* pmap = multimap_hh_encode[pathdb];
                             if (pmap!=nullptr)
                             {
-                                // backup
-                                {
-                                    std::ofstream outfile;
-                                    outfile.open(pathdb + ".bck", std::ios_base::out);
-                                    outfile << bits(*pmap);
-                                    outfile.close();
-                                }
+								bool lock_ok = false;
+								int cnt = 0;
+								while (lock_ok == false)
+								{
+									try
+									{
+										exclusive_lock_file lockdb(pathdb + ".lock");
+										lock_ok = true;
 
-                                // save
-                                if (SHOWDEBUG) std::cout << "db_mgr saving " << pathdb << std::endl;
-                                {
-                                    std::ofstream out;
-                                    out.open(pathdb, std::ios_base::out);
-                                    out << bits(*pmap);
-                                    out.close();
-                                }
-                            }
+										// save
+                                		if (SHOWDEBUG) std::cout << "db_mgr saving (lock acquired) " << pathdb << std::endl;
+
+										// backup
+										{
+											std::ofstream outfile;
+											outfile.open(pathdb + ".bck", std::ios_base::out);
+											outfile << bits(*pmap);
+											outfile.close();
+										}
+
+										// save
+										if (SHOWDEBUG) std::cout << "db_mgr saving " << pathdb << std::endl;
+										{
+											std::ofstream out;
+											out.open(pathdb, std::ios_base::out);
+											out << bits(*pmap);
+											out.close();
+										}
+									}
+									catch(...)
+									{
+										lock_ok = false;
+									}
+
+									if (lock_ok)
+									{
+										break;
+									}
+									cnt++;
+
+									// TODO
+									std::cout << "INFO fail to acquire lock  - retrying in 1 sec... " << pathdb + ".lock" << std::endl;
+									std::this_thread::sleep_for(std::chrono::seconds(1));
+
+									if (cnt > 10)
+									{
+										std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
+										break;
+									}
+								}
+                            }	
                         }
 						map_private_key_hh_encode_update[pathdb] = false;
                     }
@@ -438,7 +578,7 @@ namespace db
             return r;
 		}
 
-		bool find_history_key_by_sha(const std::string& key_sha, const std::string& local_histo_db, 
+		bool find_history_key_by_sha(const std::string& key_sha, const std::string& local_histo_db,
 															 history_key& kout, uint32_t& seq, bool is_decode)
 		{
 			bool found = false;
@@ -510,7 +650,7 @@ namespace db
 			}
 			return found;
 		}
-		
+
 		bool save_histo_key(const history_key& k, const std::string& local_histo_db, bool is_decode)
 		{
 			bool ok = true;

@@ -34,7 +34,7 @@ const size_t NDISPLAY = 32;
 
 friend class crypto_package;
 private:
-    decryptor() : cfg("") {}
+    decryptor() : cfg("") , dbmgr(cfg) {}
 
 public:
 	decryptor(  std::string ifilename_cfg,
@@ -59,7 +59,7 @@ public:
                 bool iuse_gmp = false,
                 bool autoflag = false,
 				bool icheck_converter = false)
-        : cfg(ifilename_cfg, false)
+        : cfg(ifilename_cfg, false), dbmgr(cfg)
 	{
 		filename_cfg = ifilename_cfg;
         filename_puzzle = ifilename_puzzle;

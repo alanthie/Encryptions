@@ -182,7 +182,7 @@
 	<curl/curl.h>
 	"encrypt.h"
 
-1681075561 /home/server/dev/Encryptions/src/encryptor.hpp
+1681090711 /home/server/dev/Encryptions/src/encryptor.hpp
 	"crypto_const.hpp"
 	<iostream>
 	<fstream>
@@ -228,7 +228,7 @@
 	<stdio.h>
 	<string.h>
 
-1681075319 /home/server/dev/Encryptions/src/decryptor.hpp
+1681090720 /home/server/dev/Encryptions/src/decryptor.hpp
 	"crypto_const.hpp"
 	"file_util.hpp"
 	"ecc_util.hpp"
@@ -756,7 +756,7 @@
 	<fstream>
 	<sys/sysinfo.h>
 
-1681075261 /home/server/dev/Encryptions/src/crypto_dbmgr.hpp
+1681091988 /home/server/dev/Encryptions/src/crypto_dbmgr.hpp
 	"crypto_const.hpp"
 	"crypto_ecckey.hpp"
 	"qa/rsa_gen.hpp"
@@ -766,9 +766,12 @@
 	"data.hpp"
 	"crc32a.hpp"
 	"c_plus_plus_serializer.h"
+	"exclusive-lock-file.h"
 	<filesystem>
 	<iostream>
 	<fstream>
+	<chrono>
+	<thread>
 
 1681075112 /home/server/dev/Encryptions/src/hhkey_util.hpp
 	"crypto_const.hpp"
@@ -780,4 +783,14 @@
 	"c_plus_plus_serializer.h"
 	"qa/rsa_gen.hpp"
 	"crypto_dbmgr.hpp"
+
+1633177287 /home/server/dev/Encryptions/src/exclusive-lock-file.h
+	<string>
+
+1633177287 source:/home/server/dev/Encryptions/src/exclusive-lock-file.cpp
+	"exclusive-lock-file.h"
+	<stdexcept>
+	<Windows.h>
+	<sys/file.h>
+	<unistd.h>
 

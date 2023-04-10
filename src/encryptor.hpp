@@ -42,7 +42,7 @@ const size_t NDISPLAY = 32;
 
 friend class crypto_package;
 private:
-    encryptor() : cfg("") {}
+    encryptor() : cfg("") , dbmgr(cfg) {}
 
 public:
 
@@ -74,7 +74,7 @@ public:
 				long ishufflePerc = 0,                  // Parameter - shuffling percentage
 				bool autoflag = false,
 				uint32_t iconverter = 0)
-        : cfg (ifilename_cfg, false)
+        : cfg (ifilename_cfg, false), dbmgr(cfg)
     {
         filename_cfg = ifilename_cfg;
         filename_urls = ifilename_urls;
