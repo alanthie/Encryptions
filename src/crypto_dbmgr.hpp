@@ -60,7 +60,7 @@ namespace db
                         if (multimap_rsa.find(pathdb) != multimap_rsa.end())
                         {
                             std::map<std::string, cryptoAL::rsa::rsa_key>* pmap = multimap_rsa[pathdb];
-                            if ((pmap!=nullptr) && (map_private_key_rsa_update[pathdb] == true))
+                            if (pmap!=nullptr)
                             {
 								bool lock_ok = false;
 								int cnt = 0;
@@ -124,7 +124,7 @@ namespace db
                         if (multimap_ecc.find(pathdb) != multimap_ecc.end())
                         {
                             std::map<std::string, cryptoAL::ecc_key>* pmap = multimap_ecc[pathdb];
-                            if ((pmap!=nullptr) && (map_private_key_ecc_update[pathdb] == true))
+                            if (pmap!=nullptr)
                             {
 								bool lock_ok = false;
 								int cnt = 0;
@@ -190,7 +190,7 @@ namespace db
                         if (multimap_hh_decode.find(pathdb) != multimap_hh_decode.end())
                         {
                             std::map<uint32_t, cryptoAL::history_key>* pmap = multimap_hh_decode[pathdb];
-                            if ((pmap!=nullptr) && (map_private_key_hh_decode_update[pathdb] == true))
+                            if (pmap!=nullptr)
                             {
 								bool lock_ok = false;
 								int cnt = 0;
@@ -256,7 +256,7 @@ namespace db
                         if (multimap_hh_encode.find(pathdb) != multimap_hh_encode.end())
                         {
                             std::map<uint32_t, cryptoAL::history_key>* pmap = multimap_hh_encode[pathdb];
-                            if ((pmap!=nullptr) && (map_private_key_hh_encode_update[pathdb] == true))
+                            if (pmap!=nullptr)
                             {
 								bool lock_ok = false;
 								int cnt = 0;
