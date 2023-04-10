@@ -248,67 +248,161 @@ inline void ParallelRoutine3(	mpzBigInteger &primeP, mpzBigInteger &primeQ, mpzB
 								RSAGMP::Utils::Generator *gen, unsigned int size, unsigned int precision, int threads,
 								bool verbose = true)
 {
+	bool P = false;
+	bool Q = false;
+	bool R = false;
+	bool pqOK = false;
+	bool prOK = false;
+	bool qrOK = false;
+
+	std::cout << "...";std::cout.flush();
 	primeP = gen->getBig(PRIME_NSIZE(size, 3));
-	auto aworkerP = std::thread(ParallelNextPrime, &primeP, PRIME_NSIZE(size, 3), precision, threads/3);
+	Prime::ParallelNextPrime(&primeP, PRIME_NSIZE(size, 3), precision, threads);
+	P = true;
+	std::cout << "P";std::cout.flush();
 
-	primeR = gen->getBig(PRIME_NSIZE(size, 3));
-	auto aworkerR = std::thread(ParallelNextPrime, &primeR, PRIME_NSIZE(size, 3), precision, threads/3);
+    while(pqOK==false)
+    {
+        primeQ = gen->getBig(PRIME_NSIZE(size, 3));
+        Prime::ParallelNextPrime(&primeQ, PRIME_NSIZE(size, 3), precision, threads);
+        Q = true;
+        pqOK = Q_checkN(primeP, primeQ, PRIME_NSIZE(size, 3), 3);
+    }
+    std::cout << "Q";std::cout.flush();
 
-	primeQ = gen->getBig(PRIME_NSIZE(size, 3));
-	Prime::ParallelNextPrime(&primeQ, PRIME_NSIZE(size, 3), precision, threads/3);
+    if (pqOK)
+    {
+        while(prOK==false)
+        {
+            primeR = gen->getBig(PRIME_NSIZE(size, 3));
+            Prime::ParallelNextPrime(&primeR, PRIME_NSIZE(size, 3), precision, threads);
+            R = true;
+            prOK = Q_checkN(primeP, primeR, PRIME_NSIZE(size, 3), 3);
+        }
+        std::cout << "R";std::cout.flush();
 
-	if (aworkerP.joinable()) aworkerP.join();
-	if (aworkerR.joinable()) aworkerR.join();
-
-	bool pqOK;
-	bool prOK;
-	bool qrOK;
-	pqOK = Q_checkN(primeP, primeQ, PRIME_NSIZE(size, 3), 3);
-    prOK = Q_checkN(primeP, primeR, PRIME_NSIZE(size, 3), 3);
-    qrOK = Q_checkN(primeQ, primeR, PRIME_NSIZE(size, 3), 3);
+        if (prOK && Q && R)
+            qrOK = Q_checkN(primeQ, primeR, PRIME_NSIZE(size, 3), 3);
+        else
+            qrOK = false;
+    }
 
 	uint32_t cnt=0;
+	std::cout << "...";
     while( (!pqOK) || (!prOK) || (!qrOK) )
     {
 		cnt++;
 		if (cnt > 2)
 		{
             // Redo P
+            std::cout << "...";std::cout.flush();
+            P = false;
+            Q = false;
+            R = false;
+            pqOK = false;
+            prOK = false;
+            qrOK = false;
+
             primeP = gen->getBig(PRIME_NSIZE(size, 3));
             Prime::ParallelNextPrime(&primeP, PRIME_NSIZE(size, 3), precision, threads);
+            P = true;
+            std::cout << "P";std::cout.flush();
 
             cnt = 0;
-            pqOK = Q_checkN(primeP, primeQ, PRIME_NSIZE(size, 3), 3);
-            prOK = Q_checkN(primeP, primeR, PRIME_NSIZE(size, 3), 3);
-            qrOK = Q_checkN(primeQ, primeR, PRIME_NSIZE(size, 3), 3);
+
+            while(pqOK==false)
+            {
+                primeQ = gen->getBig(PRIME_NSIZE(size, 3));
+                Prime::ParallelNextPrime(&primeQ, PRIME_NSIZE(size, 3), precision, threads);
+                Q = true;
+                pqOK = Q_checkN(primeP, primeQ, PRIME_NSIZE(size, 3), 3);
+            }
+            std::cout << "Q";std::cout.flush();
+
+            if (pqOK)
+            {
+                while(prOK==false)
+                {
+                    primeR = gen->getBig(PRIME_NSIZE(size, 3));
+                    Prime::ParallelNextPrime(&primeR, PRIME_NSIZE(size, 3), precision, threads);
+                    R = true;
+                    prOK = Q_checkN(primeP, primeR, PRIME_NSIZE(size, 3), 3);
+                }
+                std::cout << "R";std::cout.flush();
+
+                if (prOK && Q && R)
+                    qrOK = Q_checkN(primeQ, primeR, PRIME_NSIZE(size, 3), 3);
+                else
+                    qrOK = false;
+            }
 		}
 
         if ((!pqOK) && (!prOK))
         {
-            primeQ = gen->getBig(PRIME_NSIZE(size, 3));
-            auto workerQ = std::thread(ParallelNextPrime, &primeQ, PRIME_NSIZE(size, 3), precision, threads/2);
+            while(pqOK==false)
+            {
+                Q = false;
+                primeQ = gen->getBig(PRIME_NSIZE(size, 3));
+                Prime::ParallelNextPrime(&primeQ, PRIME_NSIZE(size, 3), precision, threads);
+                Q = true;
+                pqOK = Q_checkN(primeP, primeQ, PRIME_NSIZE(size, 3), 3);
+            }
+            std::cout << "Q";std::cout.flush();
 
-            primeR = gen->getBig(PRIME_NSIZE(size, 3));
-            auto workerR = std::thread(ParallelNextPrime, &primeR, PRIME_NSIZE(size, 3), precision, threads/2);
+			if (pqOK)
+			{
+                while(prOK==false)
+                {
+                    R = false;
+                    primeR = gen->getBig(PRIME_NSIZE(size, 3));
+                    Prime::ParallelNextPrime(&primeR, PRIME_NSIZE(size, 3), precision, threads);
+                    R = true;
+                    prOK = Q_checkN(primeP, primeR, PRIME_NSIZE(size, 3), 3);
+                }
+                std::cout << "R";std::cout.flush();
 
-            if (workerQ.joinable()) workerQ.join();
-            if (workerR.joinable()) workerR.join();
+				if (prOK && Q && R)
+                    qrOK = Q_checkN(primeQ, primeR, PRIME_NSIZE(size, 3), 3);
+                else
+                    qrOK = false;
+            }
         }
         else if (!pqOK)
         {
-			primeQ = gen->getBig(PRIME_NSIZE(size, 3));
-			Prime::ParallelNextPrime(&primeQ, PRIME_NSIZE(size, 3), precision, threads);
+            while(pqOK==false)
+            {
+                Q = false;
+                primeQ = gen->getBig(PRIME_NSIZE(size, 3));
+                Prime::ParallelNextPrime(&primeQ, PRIME_NSIZE(size, 3), precision, threads);
+                Q = true;
+                pqOK = Q_checkN(primeP, primeQ, PRIME_NSIZE(size, 3), 3);
+            }
+            std::cout << "Q";std::cout.flush();
+
+			if (pqOK && Q && R)
+                qrOK = Q_checkN(primeQ, primeR, PRIME_NSIZE(size, 3), 3);
+            else
+                qrOK = false;
         }
         else if (!prOK)
         {
-            primeR = gen->getBig(PRIME_NSIZE(size, 3));
-			Prime::ParallelNextPrime(&primeR, PRIME_NSIZE(size, 3), precision, threads);
-        }
+            while(prOK==false)
+            {
+                R = false;
+                primeR = gen->getBig(PRIME_NSIZE(size, 3));
+                Prime::ParallelNextPrime(&primeR, PRIME_NSIZE(size, 3), precision, threads);
+                R = true;
+                prOK = Q_checkN(primeP, primeR, PRIME_NSIZE(size, 3), 3);
+            }
+            std::cout << "R";std::cout.flush();
 
-        pqOK = Q_checkN(primeP, primeQ, PRIME_NSIZE(size, 3), 3);
-        prOK = Q_checkN(primeP, primeR, PRIME_NSIZE(size, 3), 3);
-        qrOK = Q_checkN(primeQ, primeR, PRIME_NSIZE(size, 3), 3);
+			if (prOK && Q && R)
+                qrOK = Q_checkN(primeQ, primeR, PRIME_NSIZE(size, 3), 3);
+            else
+                qrOK = false;
+        }
     }
+    std::cout << std::endl;
 }
 
 // N PRIMES
