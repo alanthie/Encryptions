@@ -24,6 +24,7 @@
 #include "crypto_parsing.hpp"
 #include "vigenere.hpp"
 #include "data.hpp"
+#include "crypto_keygenmgr.hpp"
 
 // ../../../bin/Release/crypto encode -i msg.zip -u urls.txt  -l ./sam/local/ -v 1 -g 1 -rpv ./me/ -rpu ./sam/ -epv ./me/ -epu ./sam/ -hpv ./me/ -hpu ./sam/ -a 1
 //
@@ -246,6 +247,24 @@ int main_crypto(int argc, char **argv)
             unpack_command.add_argument("-k", "--key")
                 .default_value(std::string(""))
                 .help("specify the qa puzzle encryption key.");
+        }
+
+        // keygen subcommand
+        argparse::ArgumentParser keygen_command("keygen");
+        {
+            keygen_command.add_description("Auto generate pubic/private keys from policies in config file");
+
+          	keygen_command.add_argument("-cfg", "--cfg")
+                .default_value(std::string(""))
+                .help("specify a config file.");
+
+			keygen_command.add_argument("-threads", "--threads")
+                .default_value(std::string(""))
+                .help("specify max threads to use when genearating a new key");
+
+            keygen_command.add_argument("-v", "--verbose")
+                .default_value(std::string(""))
+                .help("set verbose level (-v 1, for debug: -v debug");
         }
 
         // Encode subcommand
@@ -476,6 +495,7 @@ int main_crypto(int argc, char **argv)
         program.add_subparser(unpack_command);
         program.add_subparser(hex_command);
         program.add_subparser(dump_command);
+        program.add_subparser(keygen_command);
 
         // Parse the arguments
         try {
@@ -757,6 +777,45 @@ int main_crypto(int argc, char **argv)
                 return -1;
             }
         }
+
+        // Keygen command
+        if (program.is_subcommand_used("keygen"))
+        {
+            auto& cmd = keygen_command;
+			auto cfg        = cmd.get<std::string>("--cfg");
+            auto threads    = cmd.get<std::string>("--threads");
+            auto verb       = cmd.get<std::string>("--verbose");
+
+            bool verbose = verb.size() > 0 ? true : false;
+			if (verb == "debug") VERBOSE_DEBUG = true;
+
+			long ithreads = 1;
+            try
+            {
+                size_t sz = 0;
+                ithreads = std::stol (threads, &sz);
+            }
+            catch(...)
+            {
+                std::cout << "Warning invalid threads value, threads reset to 1" << std::endl;
+                ithreads = 1;
+            }
+
+            cryptoAL::keygenerator::keygen_mgr keygenmgr(cfg, verbose);
+
+            std::cout << "Generating keys..." << std::endl;
+            if (keygenmgr.run((int)ithreads) == true)
+            {
+                std::cout << "KEYGEN SUCCESS" << std::endl;
+                return 0;
+            }
+            else
+            {
+                std::cerr << "KEYGEN FAILED" << std::endl;
+                return -1;
+            }
+        }
+
 
         // Encode command
         if (program.is_subcommand_used("encode"))

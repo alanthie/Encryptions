@@ -4,6 +4,7 @@
 #include "crypto_const.hpp"
 #include "ini_parser.hpp"
 #include "crypto_strutil.hpp"
+#include "crypto_parsing.hpp"
 #include "file_util.hpp"
 #include "data.hpp"
 #include <iostream>
@@ -12,7 +13,6 @@ namespace cryptoAL
 {
 const std::string CFG_var_section  		= "var";
 const std::string CFG_cmdparam_section  = "cmdparam";
-const std::string CFG_keymgr_section    = "keymgr";
 const std::string CFG_keygen_section    = "keygen";
 const std::string CFG_algo_section    	= "algo";
 
@@ -23,16 +23,12 @@ const std::string CFG_algo_section    	= "algo";
 // [cmdparam]
 // folder_my_private_rsa = [var_folder_me_jo]me/
 //
-// [keymgr]
-// max_usage1	= keytype:rsa,bits:64,max_usage_count:1
-// max_usage2	= keytype:rsa,bits:1024,max_usage_count:16
-//
 // [keygen]
-// policy1 		= keytype:rsa, pool_first:10, pool_random:30, pool_last:10, pool_new:20, pool_max:100
+// policy.1 		= keytype:rsa, primes:2, bits:1024, maxusagecount:2,  poolmin:10, poolnew:20, poolmax:100
+// policy.2 		= keytype:rsa, primes:3, bits:3072, maxusagecount:16, poolmin:10, poolnew:20, poolmax:100
 //
 // [algo]
 //  ALGO_BIN_AES_128_ecb	= 1
-
 
 // [algo]
 struct cfg_algo
@@ -92,8 +88,41 @@ struct cfg_cmdparam
 	std::string verbose;
 	std::string converter;
 	std::string check_converter;
-	
+
 	std::string allow_auto_update_on_same_machine_for_testing;
+};
+
+struct cfg_keygen_spec
+{
+	// policy.2 = keytype:rsa, primes:3, bits:3072, maxusagecount:16, poolmin:10, poolnew:20, poolmax:100
+	bool ok = false;
+	std::string policy_name;
+	std::string keytype;
+	std::string primes;
+	std::string bits;
+	std::string maxusagecount;
+	std::string poolmin;
+	std::string poolnew;
+	std::string poolmax;
+
+	void show()
+	{
+		std::cout << "policy_name:" << policy_name;
+		std::cout << ", keytype:" << keytype;
+		std::cout << ", primes:" << primes;
+		std::cout << ", bits:" << bits;
+		std::cout << ", maxusagecount:" << maxusagecount;
+		std::cout << ", poolmin:" << poolmin;
+		std::cout << ", poolnew:" << poolnew;
+		std::cout << ", poolmax:" << poolmax;
+		std::cout << std::endl;
+	}
+};
+
+// [keygen]
+struct cfg_keygen
+{
+	std::vector<cfg_keygen_spec> vspec;
 };
 
 class crypto_cfg
@@ -124,6 +153,7 @@ public:
 	std::map<std::string, std::map<std::string, std::string>> map_sections;
 	cfg_cmdparam 	cmdparam;
 	cfg_algo 		algo;
+	cfg_keygen		keygen;
 	std::map<std::string,std::string> map_var;
 
 	long long get_positive_value_negative_if_invalid(const std::string& s)
@@ -197,12 +227,14 @@ public:
 		read_var();
 		read_cmdparam();
 		read_algo();
+		read_keygen();
 
 		return r;
 	}
 
 	void read_var()
 	{
+		map_var.clear();
 		if (map_sections.find(CFG_var_section) != map_sections.end())
 		{
 			for(auto& [svar, sval] : map_sections[CFG_var_section])
@@ -243,6 +275,62 @@ public:
 			}
 		}
 		return r;
+	}
+
+	cfg_keygen_spec parse_keygen_spec(const std::string& strspec)
+	{
+		cfg_keygen_spec r;
+		r.ok = true;
+
+		std::vector<std::string> vspec = cryptoAL::parsing::split(strspec, ",");
+		for(size_t i=0; i< vspec.size(); i++)
+		{
+			// policy.2 = keytype:rsa, primes:3, bits:3072, maxusagecount:16, poolmin:10, poolnew:20, poolmax:100
+			std::vector<std::string> vtoken = cryptoAL::parsing::split(vspec[i], ":");
+			if (vtoken.size() >= 2)
+			{
+				cryptoAL::strutil::trim(vtoken[0]);
+				cryptoAL::strutil::trim(vtoken[1]);
+				if      (vtoken[0] == std::string("keytype") )			{r.keytype	= apply_var(vtoken[1]);}
+				else if (vtoken[0] == std::string("primes")  )			{r.primes  	= apply_var(vtoken[1]);}
+				else if (vtoken[0] == std::string("bits")  )			{r.bits  	= apply_var(vtoken[1]);}
+				else if (vtoken[0] == std::string("maxusagecount") ) 	{r.maxusagecount = apply_var(vtoken[1]);}
+				else if (vtoken[0] == std::string("poolmin")  )			{r.poolmin 	= apply_var(vtoken[1]);}
+				else if (vtoken[0] == std::string("poolnew") ) 			{r.poolnew  = apply_var(vtoken[1]);}
+				else if (vtoken[0] == std::string("poolmax") ) 			{r.poolmax  = apply_var(vtoken[1]);}
+			}
+		}
+		return r;
+	}
+
+	void read_keygen()
+	{
+		keygen.vspec.clear();
+		std::map<std::string,std::string> map_keygen;
+	
+		if (map_sections.find(CFG_keygen_section) == map_sections.end())
+		{
+			std::cerr << "WARNING no keygen section in config file: " << filecfg << std::endl;
+			return;
+		}
+
+		if (map_sections.find(CFG_keygen_section) != map_sections.end())
+		{
+			for(auto& [svar, sval] : map_sections[CFG_keygen_section])
+			{
+				map_keygen[svar] = sval;
+			}
+		}
+
+		for(auto& [policyname, str_spec] : map_keygen)
+		{
+			cfg_keygen_spec spec = parse_keygen_spec(str_spec);
+			if (spec.ok == true)
+			{
+				spec.policy_name = policyname;
+				keygen.vspec.push_back(spec);
+			}
+		}
 	}
 
   	void read_cmdparam()
@@ -287,7 +375,7 @@ public:
 		cmdparam.auto_flag       			    = apply_var(ini.get_string("auto_flag", CFG_cmdparam_section));
 		cmdparam.converter       			    = apply_var(ini.get_string("converter", CFG_cmdparam_section));
 		cmdparam.check_converter       			= apply_var(ini.get_string("check_converter", CFG_cmdparam_section));
-		
+
 		cmdparam.allow_auto_update_on_same_machine_for_testing = apply_var(ini.get_string("allow_auto_update_on_same_machine_for_testing", CFG_cmdparam_section));
 	}
 
@@ -373,12 +461,20 @@ public:
 		std::cout << "ALGO_wbaes16384:           " << algo.ALGO_wbaes16384  << std::endl;
 		std::cout << "ALGO_wbaes32768:           " << algo.ALGO_wbaes32768  << std::endl;
 		std::cout << "-------------------------------------------------" << std::endl<< std::endl;
+
+		std::cout << "-------------------------------------------------" << std::endl;
+		std::cout << "keygen section:" << std::endl;
+		std::cout << "-------------------------------------------------" << std::endl;
+		for(size_t i=0; i< keygen.vspec.size(); i++)
+		{
+			keygen.vspec[i].show();
+		}
+		std::cout << "-------------------------------------------------" << std::endl<< std::endl;
+
 	}
 
 };
 
-// hwinfo
-// https://github.com/lfreist/hwinfo
 
 } //namespace
 #endif // CRYPTO_CFG_HPP

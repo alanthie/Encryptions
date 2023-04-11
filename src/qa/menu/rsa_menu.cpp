@@ -79,6 +79,7 @@ namespace ns_menu
     int main_menu::fRSA(size_t choice)
     {
 		int r = 0;
+
 		if (choice == 1) // RSA Key: View my private RSA key
 		{
 			bool cfg_parse_result 		= this->cfg_parse_result;
@@ -128,6 +129,7 @@ namespace ns_menu
 						std::cout << "key usage count: " << k.usage_count<< std::endl;
 						std::cout << std:: endl;
 					}
+					std::cout << "count: " << map_rsa_private.size() << std::endl;
 				}
 			}
 			else
@@ -144,6 +146,7 @@ namespace ns_menu
 				{
 					std::cout << "[r]" << user << " (usage_count:" << k.usage_count << ")" << std:: endl;
 				}
+				std::cout << "count: " << map_rsa_private.size() << std::endl;
 				std::cout << std:: endl;
 			}
 		}
@@ -555,7 +558,7 @@ namespace ns_menu
 				std::string s_d(priv.get_str());
 
 				cryptoAL::rsa::rsa_key k;
-				cryptoAL::rsa::rsa_key rkey( (int)klen,
+				cryptoAL::rsa::rsa_key rkey( 2, (int)klen,
 										  uint_util::base10_to_base64(s_n),
 										  uint_util::base10_to_base64(s_e),
 										  uint_util::base10_to_base64(s_d));
@@ -653,7 +656,7 @@ namespace ns_menu
 				std::string s_d(priv.get_str());
 
 				cryptoAL::rsa::rsa_key k;
-				cryptoAL::rsa::rsa_key rkey( (int)klen,
+				cryptoAL::rsa::rsa_key rkey( 3, (int)klen,
 										  uint_util::base10_to_base64(s_n),
 										  uint_util::base10_to_base64(s_e),
 										  uint_util::base10_to_base64(s_d));
@@ -759,7 +762,7 @@ namespace ns_menu
 				std::string s_d(priv.get_str());
 
 				cryptoAL::rsa::rsa_key k;
-				cryptoAL::rsa::rsa_key rkey( (int)klen,
+				cryptoAL::rsa::rsa_key rkey( NPRIMES, (int)klen,
 										  uint_util::base10_to_base64(s_n),
 										  uint_util::base10_to_base64(s_e),
 										  uint_util::base10_to_base64(s_d));

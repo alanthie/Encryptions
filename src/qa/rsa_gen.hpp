@@ -12,14 +12,17 @@ namespace rsa
     {
         rsa_key() {}
 
-        rsa_key(int key_size__bits, const std::string& a, const std::string& b, const std::string& c)
+        rsa_key(int aprimes, int key_size__bits, const std::string& a, const std::string& b, const std::string& c)
         {
+			primes = aprimes;
+			if (primes < 2) primes = 2;
             key_size_in_bits = key_size__bits;
             s_n = a;
             s_e = b;
             s_d = c;
         }
 
+		uint32_t primes = 2;
         uint32_t key_size_in_bits = 0;
         std::string s_n; // base 64
         std::string s_e; // base 64
@@ -30,12 +33,12 @@ namespace rsa
 		bool 		deleted 	= false;	// marked for delete
 		uint32_t 	usage_count = 0;
 		std::string dt_confirmed = "";
-		
+
 		void add_to_usage_count() {usage_count++;}
 
         friend std::ostream& operator<<(std::ostream &out, Bits<rsa_key & > my)
         {
-            out << bits(my.t.key_size_in_bits) << bits(my.t.s_n) << bits(my.t.s_e) << bits(my.t.s_d)
+            out << bits(my.t.primes) << bits(my.t.key_size_in_bits) << bits(my.t.s_n) << bits(my.t.s_e) << bits(my.t.s_d)
             	<< bits(my.t.confirmed)
 				<< bits(my.t.deleted)
 				<< bits(my.t.usage_count)
@@ -45,7 +48,7 @@ namespace rsa
 
         friend std::istream& operator>>(std::istream &in, Bits<rsa_key &> my)
         {
-            in >> bits(my.t.key_size_in_bits) >> bits(my.t.s_n) >> bits(my.t.s_e) >> bits(my.t.s_d)
+            in  >> bits(my.t.primes) >> bits(my.t.key_size_in_bits) >> bits(my.t.s_n) >> bits(my.t.s_e) >> bits(my.t.s_d)
                 >> bits(my.t.confirmed)
 				>> bits(my.t.deleted)
 				>> bits(my.t.usage_count)
@@ -100,6 +103,7 @@ namespace rsa
 
         void to_rsa_key(rsa_key& rkey, const typeuinteger& n, const typeuinteger& e, const typeuinteger& d, uint32_t keysize_in_bits)
         {
+			rkey.primes = 2;
             rkey.key_size_in_bits = keysize_in_bits;
             {
                 std::stringstream ss;
@@ -130,6 +134,7 @@ namespace rsa
 
         void to_rsa_key(rsa_key& rkey)
         {
+			rkey.primes = 2;
             rkey.key_size_in_bits = key_size_in_bits;
 
             {
