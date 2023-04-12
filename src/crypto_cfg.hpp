@@ -98,6 +98,7 @@ struct cfg_keygen_spec
 	bool ok = false;
 	std::string policy_name;
 	std::string keytype;
+	std::string ecc_domain;
 	std::string primes;
 	std::string bits;
 	std::string maxusagecount;
@@ -109,6 +110,7 @@ struct cfg_keygen_spec
 	{
 		std::cout << "policy_name:" << policy_name;
 		std::cout << ", keytype:" << keytype;
+		std::cout << ", ecc_domain:" << ecc_domain;
 		std::cout << ", primes:" << primes;
 		std::cout << ", bits:" << bits;
 		std::cout << ", maxusagecount:" << maxusagecount;
@@ -293,6 +295,7 @@ public:
 				cryptoAL::strutil::trim(vtoken[1]);
 				if      (vtoken[0] == std::string("keytype") )			{r.keytype	= apply_var(vtoken[1]);}
 				else if (vtoken[0] == std::string("primes")  )			{r.primes  	= apply_var(vtoken[1]);}
+				else if (vtoken[0] == std::string("ecc_domain")  )		{r.ecc_domain = apply_var(vtoken[1]);}
 				else if (vtoken[0] == std::string("bits")  )			{r.bits  	= apply_var(vtoken[1]);}
 				else if (vtoken[0] == std::string("maxusagecount") ) 	{r.maxusagecount = apply_var(vtoken[1]);}
 				else if (vtoken[0] == std::string("poolmin")  )			{r.poolmin 	= apply_var(vtoken[1]);}

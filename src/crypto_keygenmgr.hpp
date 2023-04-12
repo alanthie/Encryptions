@@ -91,7 +91,7 @@ namespace keygenerator
 			std::string local_rsa_db = cfg.cmdparam.folder_my_private_rsa + RSA_MY_PRIVATE_DB;
 
 			bool work_todo = true;
-			while (work_todo)
+			while (work_todo) // ??why a while loop on single spec??
 			{
 				// scope to destroy objects
 				{
@@ -136,7 +136,7 @@ namespace keygenerator
 									}
 									else if (k.usage_count >= maxusagecount)
 									{
-										// 
+										//
 									}
 								}
 							}
@@ -269,7 +269,7 @@ namespace keygenerator
 								}
 							}
 						}
-						
+
 						// SAVE
 						dbmgr.flush(true);
 
@@ -284,13 +284,217 @@ namespace keygenerator
 		bool process_ecc(cfg_keygen_spec& spec, int max_threads)
 		{
 			bool r = true;
+			//policy.25 = keytype:ecc, bits:512, domain:512_aa57fdf40db2155665005e35a1b430bba4d359644da7bd91c8527235fcf0b17b, maxusagecount:16, poolmin:5, poolnew:2, poolmax:100
+
+			// spec.ecc_domain optional;
+
+			long long bits = cfg.get_positive_value_negative_if_invalid(spec.bits);
+			if (bits < 64) bits = 64;
+
+			long long maxusagecount = cfg.get_positive_value_negative_if_invalid(spec.maxusagecount);
+			if (maxusagecount < 1) maxusagecount = 1;
+
+			long long poolmin = cfg.get_positive_value_negative_if_invalid(spec.poolmin);
+			if (poolmin < 1) poolmin = 1;
+
+			long long poolnew = cfg.get_positive_value_negative_if_invalid(spec.poolnew);
+			if (poolnew < 0) poolnew = 0;
+
+			long long poolmax = cfg.get_positive_value_negative_if_invalid(spec.poolmax);
+			if (poolmax < 1) poolmax = 1;
+			if (poolmax < std::max(poolmin, poolnew)) poolmax = std::max(poolmin, poolnew);
+
+			if (cfg.cmdparam.folder_my_private_ecc.size() == 0)
+			{
+				return false;
+			}
+			std::string local_ecckey_db = cfg.cmdparam.folder_my_private_ecc + ECCKEY_MY_PRIVATE_DB;
+
+			bool work_todo = true;
+			while (work_todo) // ??why a while loop on single spec??
+			{
+				// scope to destroy objects
+				{
+					cryptoAL::db::db_mgr dbmgr(cfg);
+					std::map<std::string, cryptoAL::ecc_key>* pmap_ecckey = nullptr;
+
+					// READ
+					r = dbmgr.get_ecckey_map(local_ecckey_db, &pmap_ecckey, false);
+					if (r == false)
+					{
+						if (SHOWDEBUG) std::cout << "dbmgr.get_ecckey_map() == false" << std:: endl;
+						return false;
+					}
+					if (pmap_ecckey == nullptr)
+					{
+						if (SHOWDEBUG) std::cout << "pmap_ecckey == nullptr" << std:: endl;
+						return false;
+					}
+
+					long long cnt_active = 0;
+					long long cnt_new = 0;
+
+					std::map<std::string, cryptoAL::ecc_key>& map_ecckey = *pmap_ecckey;
+					if (SHOWDEBUG) std::cout << "ecc keys read "  << map_ecckey.size() << " from " << local_ecckey_db << std:: endl;
+					for(auto& [keyname, k] : map_ecckey)
+					{
+						uint32_t kbits = keybits8x(bits);
+
+						if (k.dom.key_size_bits == (int)kbits)
+						{
+							//if (k.primes == primes)
+							{
+								if (k.deleted == false)
+								{
+									if (k.usage_count == 0)
+									{
+										cnt_new++;
+									}
+									else if (k.usage_count < maxusagecount)
+									{
+										cnt_active++;
+									}
+									else if (k.usage_count >= maxusagecount)
+									{
+										//
+									}
+								}
+							}
+						}
+					}
+					if (SHOWDEBUG) std::cout << "cnt new keys: " << cnt_new << std::endl;
+					if (SHOWDEBUG) std::cout << "cnt active keys: " << cnt_active << std::endl;
+
+					work_todo = false;
+					long long cnt_gen_required = 0;
+					long long cnt_gen_new = 0;
+					long long cnt_gen_min = 0;
+					if (cnt_new < poolnew)
+					{
+						work_todo = true;
+						cnt_gen_new = poolnew - cnt_new;
+					}
+					if (poolmin > cnt_new + cnt_active)
+					{
+						work_todo = true;
+						cnt_gen_min = poolmin - (cnt_new + cnt_active);
+					}
+					cnt_gen_required = std::max(cnt_gen_new, cnt_gen_min);
+
+					if (cnt_gen_required > 0)
+					{
+						// ecc domain
+						std::map<std::string, cryptoAL::ecc_domain>* pmap_ecc_domain = nullptr;
+
+						std::string fileECCDOMDB = cfg.cmdparam.folder_my_private_ecc + cryptoAL::ECC_DOMAIN_DB;
+						if (file_util::fileexists(fileECCDOMDB) == true)
+						{
+							bool rr = dbmgr.get_eccdomain_map(fileECCDOMDB, &pmap_ecc_domain, false);
+							if (rr == false)
+							{
+								if (SHOWDEBUG) std::cout << "dbmgr.get_eccdomain_map() == false " << fileECCDOMDB << std:: endl;
+								return false;
+							}
+							if (pmap_ecc_domain == nullptr)
+							{
+								if (SHOWDEBUG) std::cout << "pmap_ecc_domain == nullptr " << fileECCDOMDB << std:: endl;
+								return false;
+							}
+
+							//std::ifstream infile;
+							//infile.open (fileECCDOMDB, std::ios_base::in);
+							//infile >> bits(map_ecc_domain);
+							//infile.close();
+						}
+						else
+						{
+							return false;
+						}
+						std::map<std::string, cryptoAL::ecc_domain>& map_ecc_domain = *pmap_ecc_domain;
+
+
+						std::string use_ecc_domname;
+						if (spec.ecc_domain.size() > 0)
+						{
+							for(auto& [eccname, kdom] : map_ecc_domain)
+							{
+								if (SHOWDEBUG) std::cout << "searching a compatible ecc domain: " << eccname << std::endl;
+								if (spec.ecc_domain == eccname)
+								{
+									if (kdom.key_size_bits == (int)bits)
+									{
+										use_ecc_domname = eccname;
+										break;
+									}
+								}
+							}
+						}
+
+						if (use_ecc_domname.size() == 0)
+						{
+							// find a compatible domain
+							for(auto& [eccname, kdom] : map_ecc_domain)
+							{
+								if (kdom.key_size_bits == (int)bits)
+								{
+									// TODO random
+									use_ecc_domname = eccname;
+									break;
+								}
+							}
+						}
+						if (use_ecc_domname.size() == 0)
+						{
+							work_todo = false;
+							//if (verbose) 
+							std::cout << "Skipping NO ECC domain found"<< std::endl;
+							return false;
+						}
+						
+						if (verbose) std::cout << "---------------------------------" << std::endl;
+						if (verbose) std::cout << "Required number of new ECC keys: "  << cnt_gen_required << std::endl;
+						if (verbose) std::cout << "ECC key bit size:                " << bits << std::endl;
+						if (verbose) std::cout << "ECC domain:                      " << use_ecc_domname << std::endl; // TODO
+						if (verbose) std::cout << "Number of threads:               " << max_threads << std::endl;
+						if (verbose) std::cout << "---------------------------------" << std::endl;
+
+
+						const auto& domain = map_ecc_domain[use_ecc_domname];
+
+						for(long long j=0;j<cnt_gen_required;j++)
+						{
+							cryptoAL::ecc_key ek;
+							ek.set_domain(domain);
+							bool rr = ek.generate_private_public_key(true);
+
+							if (rr)
+							{
+								// Insert
+								std::string keyname = 	std::string("MY_ECCKEY_") + std::to_string(domain.key_size_bits) + std::string("_") +
+														cryptoAL::parsing::get_current_time_and_date() +
+														std::string("_") + std::to_string(j) ; // too fast = same keyname
+
+								map_ecckey.insert(std::make_pair(keyname, ek));
+								dbmgr.mark_ecckey_as_changed(local_ecckey_db);
+
+								if (verbose) std::cout << "ecc key saved as: "  << keyname << " in " << local_ecckey_db << std:: endl;
+							}
+						}
+
+						// SAVE
+						dbmgr.flush(true);
+						if (cnt_gen_required > 0) if (verbose) std::cout << std:: endl;
+					}
+				}
+			}
+
 			return r;
 		}
 
 		bool process(cfg_keygen_spec& spec, int max_threads)
 		{
 			bool r = true;
-			if (spec.keytype == "rsa") return process_rsa(spec, max_threads);
+			if 		(spec.keytype == "rsa") return process_rsa(spec, max_threads);
 			else if (spec.keytype == "ecc") return process_ecc(spec, max_threads);
 			return r;
 		}

@@ -28,7 +28,9 @@ namespace file_util
 			if ((s == cryptoAL::RSA_MY_PRIVATE_DB) ||
 				(s == cryptoAL::ECCKEY_MY_PRIVATE_DB) ||
 				(s == cryptoAL::HHKEY_MY_PRIVATE_ENCODE_DB) ||
-				(s == cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB))
+				(s == cryptoAL::HHKEY_MY_PRIVATE_DECODE_DB)||
+				(s == cryptoAL::ECC_DOMAIN_DB)
+			   )
 			{
 				r = true;
 			}

@@ -30,30 +30,166 @@ namespace db
     public:
 		std::map<std::string, bool> map_private_key_rsa_update;
 		std::map<std::string, bool> map_private_key_ecc_update;
+		std::map<std::string, bool> map_private_key_eccdom_update;
 		std::map<std::string, bool> map_private_key_hh_encode_update;
 		std::map<std::string, bool> map_private_key_hh_decode_update;
 
 		std::map<std::string, std::map<std::string, cryptoAL::rsa::rsa_key>*> 	multimap_rsa;
 		std::map<std::string, std::map<std::string, cryptoAL::ecc_key>*>  		multimap_ecc;
+		std::map<std::string, std::map<std::string, cryptoAL::ecc_domain>*>  	multimap_eccdom; //read only ?
 		std::map<std::string, std::map<uint32_t, cryptoAL::history_key>*>  	    multimap_hh_encode;
 		std::map<std::string, std::map<uint32_t, cryptoAL::history_key>*>  	    multimap_hh_decode;
 
 		crypto_cfg& cfg;
 
         db_mgr(crypto_cfg& c) : cfg(c) {}
-		
+
 		~db_mgr()
 		{
 			if (SHOWDEBUG) std::cout << "~db_mgr()" << std::endl;
 			flush(true);
 		}
-		
+
 		void flush(bool merge_with_file = false)
 		{
 			if (SHOWDEBUG) std::cout << "flush merge_with_file " << merge_with_file  << std::endl;
-			
+
 			update(merge_with_file);
 			clear();
+		}
+
+		bool get_eccdomain_map(	const std::string& pathdb,
+                          		std::map<std::string, cryptoAL::ecc_domain>** map_ecc_domain,
+                            	bool merge_with_file = false)
+		{
+			if (SHOWDEBUG) std::cout << "get_eccdomain_map " << pathdb << std::endl;
+			if (SHOWDEBUG) std::cout << "merge_with_file " << merge_with_file << std::endl;
+
+			(*map_ecc_domain) = nullptr;
+			if (file_util::fileexists(pathdb) == false)
+			{
+				std::map<std::string, cryptoAL::ecc_domain> pmapnone;
+				std::ofstream outfile;
+				outfile.open(pathdb, std::ios_base::out);
+				outfile << bits(pmapnone);
+				outfile.close();
+			}
+
+			if (file_util::is_file_private(pathdb) == false)
+				return false;
+
+			bool r = true;
+			std::map<std::string, cryptoAL::ecc_domain>* pmap = nullptr;
+
+			if (multimap_eccdom.find(pathdb) == multimap_eccdom.end())
+			{
+				if (file_util::fileexists(pathdb))
+				{
+					// load
+					if (SHOWDEBUG) std::cout << "get_ecckey_map loading " << pathdb << std::endl;
+
+					// TODO LOCK
+					// ...
+
+					pmap = new std::map<std::string, cryptoAL::ecc_domain>;
+
+					std::ifstream infile;
+					infile.open(pathdb, std::ios_base::in);
+					infile >> bits(*pmap);
+					infile.close();
+
+					multimap_eccdom[pathdb] = pmap;;
+				}
+				else
+				{
+                    std::cerr << "ERROR no file " << pathdb << std::endl;
+					r = false;
+				}
+			}
+			else
+			{
+				pmap = multimap_eccdom[pathdb];
+
+				if (merge_with_file)
+				{
+					pmap = multimap_eccdom[pathdb];
+					merge_eccdom(false, pathdb, multimap_eccdom, pmap);
+					pmap = multimap_eccdom[pathdb];
+				}
+			}
+
+			if (r == true)
+			{
+				(*map_ecc_domain) = pmap;
+			}
+			return r;
+		}
+
+		bool get_ecckey_map(const std::string& pathdb,
+                          	std::map<std::string, cryptoAL::ecc_key>** map_ecc,
+                            bool merge_with_file = false)
+		{
+			if (SHOWDEBUG) std::cout << "get_ecckey_map " << pathdb << std::endl;
+			if (SHOWDEBUG) std::cout << "merge_with_file " << merge_with_file << std::endl;
+
+			(*map_ecc) = nullptr;
+			if (file_util::fileexists(pathdb) == false)
+			{
+				std::map<std::string, cryptoAL::ecc_key> pmapnone;
+				std::ofstream outfile;
+				outfile.open(pathdb, std::ios_base::out);
+				outfile << bits(pmapnone);
+				outfile.close();
+			}
+
+			if (file_util::is_file_private(pathdb) == false)
+				return false;
+
+			bool r = true;
+			std::map<std::string, cryptoAL::ecc_key>* pmap = nullptr;
+
+			if (multimap_ecc.find(pathdb) == multimap_ecc.end())
+			{
+				if (file_util::fileexists(pathdb))
+				{
+					// load
+					if (SHOWDEBUG) std::cout << "get_ecckey_map loading " << pathdb << std::endl;
+
+					// TODO LOCK
+					// ...
+
+					pmap = new std::map<std::string, cryptoAL::ecc_key>;
+
+					std::ifstream infile;
+					infile.open(pathdb, std::ios_base::in);
+					infile >> bits(*pmap);
+					infile.close();
+
+					multimap_ecc[pathdb] = pmap;;
+				}
+				else
+				{
+                    std::cerr << "ERROR no file " << pathdb << std::endl;
+					r = false;
+				}
+			}
+			else
+			{
+				pmap = multimap_ecc[pathdb];
+
+				if (merge_with_file)
+				{
+					pmap = multimap_ecc[pathdb];
+					merge_ecckey(false, pathdb, multimap_ecc, pmap);
+					pmap = multimap_ecc[pathdb];
+				}
+			}
+
+			if (r == true)
+			{
+				(*map_ecc) = pmap;
+			}
+			return r;
 		}
 
 		bool get_rsa_map(   const std::string& pathdb,
@@ -62,7 +198,7 @@ namespace db
 		{
 			if (SHOWDEBUG) std::cout << "get_rsa_map " << pathdb << std::endl;
 			if (SHOWDEBUG) std::cout << "merge_with_file " << merge_with_file << std::endl;
-		
+
 			(*map_rsa) = nullptr;
 			if (file_util::fileexists(pathdb) == false)
 			{
@@ -72,7 +208,7 @@ namespace db
 				outfile << bits(pmapnone);
 				outfile.close();
 			}
-			
+
 			if (file_util::is_file_private(pathdb) == false)
 				return false;
 
@@ -123,6 +259,19 @@ namespace db
 			return r;
 		}
 
+		void mark_ecckey_as_changed(const std::string& pathdb)
+		{
+			if (file_util::is_file_private(pathdb) == false)
+			{
+				if (SHOWDEBUG) std::cerr << "mark_ecckey_as_changed FAILED " << pathdb  << std::endl;
+			}
+			else
+			{
+				map_private_key_ecc_update[pathdb] = true;
+				if (SHOWDEBUG) std::cout << "mark_ecckey_as_changed " << pathdb  << std::endl;
+			}
+		}
+
 		void mark_rsa_as_changed(const std::string& pathdb)
 		{
 			if (file_util::is_file_private(pathdb) == false)
@@ -136,14 +285,67 @@ namespace db
 			}
 		}
 
+		void merge_ecckey(	bool already_in_lock,
+                        	const std::string& pathdb,
+							std::map<std::string, std::map<std::string, cryptoAL::ecc_key>*>& 	multimap_ecckey,
+							std::map<std::string, cryptoAL::ecc_key>* ptr_in_memory_map)
+		{
+			if (SHOWDEBUG) std::cout << "merge_ecckey " << pathdb << std::endl;
+			if (SHOWDEBUG) std::cout << "already_in_lock " << already_in_lock << std::endl;
+
+			// TODO
+			// LOCK file if already_in_lock == false
+
+			// read file into a temp map
+			std::map<std::string, cryptoAL::ecc_key>* temp_map = new std::map<std::string, cryptoAL::ecc_key>;
+			{
+				std::ifstream infile;
+				infile.open(pathdb, std::ios_base::in);
+				infile >> bits(*temp_map);
+				infile.close();
+			}
+			if (SHOWDEBUG) std::cout << "merge_ecckey file map count before merge: " << temp_map->size() << std::endl;
+
+			if (ptr_in_memory_map != nullptr)
+			{
+				if (SHOWDEBUG) std::cout << "merge_ecckey memory_map count " << (*ptr_in_memory_map).size() << std::endl;
+
+				for(auto& [keyname, k] : (*ptr_in_memory_map))
+				{
+					if (temp_map->find(keyname) == temp_map->end())
+					{
+						if (SHOWDEBUG) std::cout << "NEW KEY only in memory " << keyname << std::endl;
+						temp_map->insert(std::make_pair(keyname,  k));
+					}
+				}
+			}
+			if (SHOWDEBUG) std::cout << "merge_ecckey file map count after merge: " << temp_map->size() << std::endl;
+
+			// swap
+			multimap_ecckey[pathdb] = temp_map;
+			if (ptr_in_memory_map != nullptr)
+				delete ptr_in_memory_map;
+
+			// TODO
+			// UNLOCK file if already_in_lock == false
+		}
+
+		void merge_eccdom(	bool already_in_lock,
+                        	const std::string& pathdb,
+							std::map<std::string, std::map<std::string, cryptoAL::ecc_domain>*>& multimap_eccdom,
+							std::map<std::string, cryptoAL::ecc_domain>* ptr_in_memory_map)
+		{
+			//...read only
+		}
+
 		void merge_rsa(	bool already_in_lock,
                         const std::string& pathdb,
 						std::map<std::string, std::map<std::string, cryptoAL::rsa::rsa_key>*>& 	multimap_rsa,
 						std::map<std::string, cryptoAL::rsa::rsa_key>* ptr_in_memory_map)
-		{	
+		{
 			if (SHOWDEBUG) std::cout << "merge_rsa " << pathdb << std::endl;
 			if (SHOWDEBUG) std::cout << "already_in_lock " << already_in_lock << std::endl;
-		
+
 			// some changes may have been done in file by other process
 			// take status of keys from file
 			// add keys from memory
@@ -164,7 +366,7 @@ namespace db
 			if (ptr_in_memory_map != nullptr)
 			{
 				if (SHOWDEBUG) std::cout << "merge_rsa memory_map count " << (*ptr_in_memory_map).size() << std::endl;
-			
+
 				for(auto& [keyname, k] : (*ptr_in_memory_map))
 				{
 					if (temp_map->find(keyname) == temp_map->end())
@@ -190,9 +392,11 @@ namespace db
 			if (SHOWDEBUG) std::cout << "update " << std::endl;
 			if (SHOWDEBUG) std::cout << "update merge_with_file " << merge_with_file  << std::endl;
 			if (SHOWDEBUG) std::cout << "update rsa map count " << map_private_key_rsa_update.size() << std::endl;
-		
+
             try
             {
+				//multimap_eccdom read only ?
+
                 // save
                 for(auto& [pathdb, b] : map_private_key_rsa_update)
                 {
@@ -211,7 +415,7 @@ namespace db
 									{
 										// IN LOCK
 										if (SHOWDEBUG) std::cout << "update IN LOCK" << std::endl;
-										
+
 										exclusive_lock_file lockdb(pathdb + ".lock");
 										lock_ok = true;
 
@@ -514,6 +718,18 @@ namespace db
                 }
 				multimap_ecc.clear();
 
+				for(auto& [pathdb, m] : multimap_eccdom)
+                {
+                    if (m != nullptr)
+                    {
+                        if (SHOWDEBUG) std::cout << "clear deleting map_eccdom " << pathdb  << std::endl;
+                        delete m;
+                        m = nullptr;
+						multimap_eccdom[pathdb] = nullptr;
+                    }
+                }
+				multimap_eccdom.clear();
+
                 for(auto& [pathdb, m] : multimap_hh_decode)
                 {
                     if (m != nullptr)
@@ -525,7 +741,7 @@ namespace db
                     }
                 }
 				multimap_hh_decode.clear();
-				
+
                 for(auto& [pathdb, m] : multimap_hh_encode)
                 {
                     if (m != nullptr)
@@ -537,7 +753,7 @@ namespace db
                     }
                 }
 				multimap_hh_encode.clear();
-				
+
 				map_private_key_rsa_update.clear();
 				map_private_key_ecc_update.clear();
 				map_private_key_hh_encode_update.clear();
