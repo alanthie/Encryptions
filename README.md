@@ -250,12 +250,15 @@ converter                   =
 check_converter             =
 verbose                     = 1
 
-[keymgr]
-max_usage1	= keytype:rsa,bits:64,max_usage_count:1
-max_usage2	= keytype:rsa,bits:1024,max_usage_count:16
-
 [keygen]
-policy1     = keytype:rsa, pool_first:10, pool_random:30, pool_last:10, pool_new:20, pool_max:100
+policy.0 	= keytype:rsa, primes:2, bits:2040, maxusagecount:4,  poolmin:5, poolnew:8, poolmax:100
+policy.1 	= keytype:rsa, primes:3, bits:1536, maxusagecount:4,  poolmin:3, poolnew:6, poolmax:100
+policy.2 	= keytype:rsa, primes:3, bits:3072, maxusagecount:16, poolmin:3, poolnew:7, poolmax:100
+policy.3 	= keytype:rsa, primes:4, bits:12400, maxusagecount:16, poolmin:1, poolnew:1, poolmax:100
+policy.4 	= keytype:rsa, primes:5, bits:10000, maxusagecount:16, poolmin:1, poolnew:1, poolmax:100
+policy.5 	= keytype:rsa, primes:15, bits:15000, maxusagecount:16, poolmin:5, poolnew:5, poolmax:100
+policy.25 	= keytype:ecc, bits:512, domain:512_aa57fdf40db2155665005e35a1b430bba4d359644da7bd91c8527235fcf0b17b, maxusagecount:16, poolmin:7, poolnew:3, poolmax:100
+policy.26 	= keytype:ecc, bits:1024, maxusagecount:32, poolmin:8, poolnew:4, poolmax:100
 
 [algo]
 ALGO_BIN_AES_128_ecb = 0           
