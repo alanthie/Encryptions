@@ -904,6 +904,7 @@ namespace db
 
 			if (r)
 			{
+				pmap = multimap_rsa[pathdb];
 				if (pmap!=nullptr)
 				{
 					std::map<std::string, cryptoAL::rsa::rsa_key>& refmap = *pmap;
@@ -925,8 +926,13 @@ namespace db
 
 		bool add_to_usage_count_ecc(const std::string& key_name, const std::string& pathdb)
 		{
+			//std::cout <<  "add_to_usage_count_ecc()" << key_name << " " << pathdb << std::endl;
+		
 			if (file_util::is_file_private(pathdb) == false)
+			{
+				std::cerr << "ERROR no file: " << pathdb << std::endl;
 				return false;
+			}
 
             bool r = true;
 			std::map<std::string, cryptoAL::ecc_key>* pmap  = nullptr;
@@ -956,6 +962,7 @@ namespace db
 
 			if (r)
 			{
+				pmap = multimap_ecc[pathdb];
 				if (pmap!=nullptr)
 				{
 					std::map<std::string, cryptoAL::ecc_key>& refmap = *pmap;
@@ -970,6 +977,11 @@ namespace db
 							break;
 						}
 					}
+				}
+				else
+				{
+                    std::cerr << "ERROR no file in memory " << pathdb << std::endl;
+					r = false;
 				}
 			}
 

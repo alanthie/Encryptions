@@ -382,7 +382,7 @@ namespace cryptoAL
                 return false;
             }
 
-            if (verb) std::cout << "computing  rG = ecc.mult(G, private_key); " << std::endl;
+            // if (verb) std::cout << "computing  rG = ecc.mult(G, private_key); " << std::endl;
 			rG = ecc.mult(G, private_key);
 
 			mpz_class kgx(rG.x); s_kg_x = uint_util::base10_to_base64(kgx.get_str(10));
@@ -399,7 +399,7 @@ namespace cryptoAL
 			long long Nbytes = (long long) 1.33 * dom.key_size_bits / 8;
 			s_k = cryptoAL::random::generate_base64_random_string(Nbytes);
 
-			if (verb) std::cout << "private key:  " << s_k << std::endl;
+			//if (verb) std::cout << "private key:  " << s_k << std::endl;
 
 			bool r = compute_private_key_and_update_kG(verb);
 			return r;

@@ -123,10 +123,10 @@ namespace ns_menu
 						std::cout << "key size: " << k.key_size_in_bits << std:: endl;
 						std::cout << "key public  n (base 64): " << k.s_n << std:: endl;
 						std::cout << "key public  e (base 64): " << k.s_e << std:: endl;
-						std::cout << "key private d (base 64): " << k.s_d << std:: endl;
-						std::cout << "key confirmed : " << k.confirmed << std::endl;
-						std::cout << "key marked for delete : " << k.deleted << std::endl;
-						std::cout << "key usage count: " << k.usage_count<< std::endl;
+						std::cout << "key private d (base 64): ..."  << std:: endl; // << k.s_d << std:: endl;
+						std::cout << "key confirmed          : " << k.confirmed << std::endl;
+						std::cout << "key marked for delete  : " << k.deleted << std::endl;
+						std::cout << "key usage count        : " << k.usage_count<< std::endl;
 						std::cout << std:: endl;
 					}
 					std::cout << "count: " << map_rsa_private.size() << std::endl;
@@ -144,7 +144,7 @@ namespace ns_menu
 				std::cout << "---------------------------" << std::endl;
 				for(auto& [user, k] : map_rsa_private)
 				{
-					std::cout << "[r]" << user << " (usage_count:" << k.usage_count << ")" << std:: endl;
+					std::cout << "[r]" << user << " (usage_count:" << k.usage_count << ")"  << " (key confirmed :" << k.confirmed  << ")" << std::endl;
 				}
 				std::cout << "count: " << map_rsa_private.size() << std::endl;
 				std::cout << std:: endl;
@@ -258,9 +258,9 @@ namespace ns_menu
                         std::cout << "key public  n (base 64): " << k.s_n << std:: endl;
                         std::cout << "key public  e (base 64): " << k.s_e << std:: endl;
                         std::cout << "key private d (base 64): <should be zero/empty> " << k.s_d << std:: endl;
-                        std::cout << "key confirmed : " << k.confirmed << std::endl;
+                        std::cout << "key confirmed         : " << k.confirmed << std::endl;
                         std::cout << "key marked for delete : " << k.deleted << std::endl;
-                        std::cout << "key usage count: " << k.usage_count<< std::endl;
+                        std::cout << "key usage count       : " << k.usage_count<< std::endl;
                         std::cout << std:: endl;
                     }
                 }
