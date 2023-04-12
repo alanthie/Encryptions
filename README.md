@@ -295,6 +295,34 @@ ecgen_ec_curves/ec1024_3.txt
 ecgen_ec_curves/ec1536_1.txt
 </pre>
 
+Generate new keys automatically
+<pre>
+crypto keygen -cfg cfg.ini -v 1 -threads 30
+Generating keys...
+---------------------------------
+Required number of new ECC keys: 1
+ECC key bit size:                512
+ECC domain:                      512_aa57fdf40db2155665005e35a1b430bba4d359644da7bd91c8527235fcf0b17b
+Number of threads:               30
+---------------------------------
+public key kg_x:  1PmTWb3lg0HnYGsy6FCKmywCRkHGyms45hnvmzSpLg0ZQMu9a=uxhKVAVW2alDKt=+GW7pVfgi4j48IejRGeMd
+public key kg_y:  21LvBGz4u43li1qlq86=Per7C9us06+liKk6a+VG5QxTebtIC3WwXAOKeSPvBSKT3Xld=Jkm1yFGoZKLs9CDSj
+ecc key saved as: MY_ECCKEY_512_2023-04-12_19:20:35_0
+
+------------------------------
+Required number of new RSA keys: 1
+RSA key bit size:         15000
+RSA key number of primes: 15
+Number of threads:        30
+------------------------------
+iteration: 1
+RSA (N primes) GMP Encrypt/Decrypt OK- bits size: 15000 - Elapsed Time: 10.056 sec
+key saved as: MY_RSA15KEY_15000_2023-04-12_19:20:49_0
+
+KEYGEN SUCCESS
+Elapsed time in seconds: 13 sec
+</pre>
+
 A tool (qa) for various tasks
 <pre>
 ====================================

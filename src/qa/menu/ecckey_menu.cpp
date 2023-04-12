@@ -133,7 +133,7 @@ namespace ns_menu
                                 outfile << bits(map_ecckey_private);
                                 outfile.close();
                             }
-                            std::cout << "key saved as: "  << keyname << " in " << fileECCKEYDB << std:: endl;
+                            std::cout << "key saved as: "  << keyname << std:: endl;
                         }
                     }
                     else

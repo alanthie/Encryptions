@@ -479,7 +479,7 @@ namespace ns_menu
 						outfile << bits(map_RSA_private);
 						outfile.close();
          			}
-                  	std::cout << "key saved as: "  << keyname << " in " << fileRSADB << std:: endl;
+                  	std::cout << "key saved as: "  << keyname << std:: endl;
 				}
 			}
           	else
@@ -605,7 +605,7 @@ namespace ns_menu
 						outfile << bits(map_rsa_private);
 						outfile.close();
 					}
-					std::cout << "key saved as: "  << keyname << " in " << fileRSADB << std:: endl;
+					std::cout << "key saved as: "  << keyname << std:: endl;
 				}
 			}
         }
@@ -703,7 +703,7 @@ namespace ns_menu
 						outfile << bits(map_rsa_private);
 						outfile.close();
 					}
-					std::cout << "key saved as: "  << keyname << " in " << fileRSADB << std:: endl;
+					std::cout << "key saved as: "  << keyname << std:: endl;
 				}
 			}
 		}
@@ -809,7 +809,7 @@ namespace ns_menu
 						outfile << bits(map_rsa_private);
 						outfile.close();
 					}
-					std::cout << "key saved as: "  << keyname << " in " << fileRSADB << std:: endl;
+					std::cout << "key saved as: "  << keyname << std:: endl;
 				}
 			}
         }

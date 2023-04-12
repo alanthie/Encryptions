@@ -91,7 +91,7 @@ namespace keygenerator
 			std::string local_rsa_db = cfg.cmdparam.folder_my_private_rsa + RSA_MY_PRIVATE_DB;
 
 			bool work_todo = true;
-			while (work_todo) // ??why a while loop on single spec??
+			while (work_todo) // vary by bits and primes - no need of while
 			{
 				// scope to destroy objects
 				{
@@ -202,7 +202,7 @@ namespace keygenerator
 									map_rsa.insert(std::make_pair(keyname,  rkey));
 									dbmgr.mark_rsa_as_changed(local_rsa_db);
 
-									if (verbose) std::cout << "key saved as: "  << keyname << " in " << local_rsa_db << std:: endl;
+									if (verbose) std::cout << "key saved as: "  << keyname << std:: endl;
 								}
 							}
 							else if (primes == 2)
@@ -233,7 +233,7 @@ namespace keygenerator
 									map_rsa.insert(std::make_pair(keyname,  rkey));
 									dbmgr.mark_rsa_as_changed(local_rsa_db);
 
-									if (verbose) std::cout << "key saved as: "  << keyname << " in " << local_rsa_db << std:: endl;
+									if (verbose) std::cout << "key saved as: "  << keyname  << std:: endl;
 								}
 							}
 							else if (primes > 3)
@@ -265,7 +265,7 @@ namespace keygenerator
 									map_rsa.insert(std::make_pair(keyname,  rkey));
 									dbmgr.mark_rsa_as_changed(local_rsa_db);
 
-									if (verbose) std::cout << "key saved as: "  << keyname << " in " << local_rsa_db << std:: endl;
+									if (verbose) std::cout << "key saved as: "  << keyname << std:: endl;
 								}
 							}
 						}
@@ -276,6 +276,8 @@ namespace keygenerator
 						if (cnt_gen_required > 0) if (verbose) std::cout << std:: endl;
 					}
 				}
+				
+				work_todo = false;
 			}
 
 			return r;
@@ -311,7 +313,7 @@ namespace keygenerator
 			std::string local_ecckey_db = cfg.cmdparam.folder_my_private_ecc + ECCKEY_MY_PRIVATE_DB;
 
 			bool work_todo = true;
-			while (work_todo) // ??why a while loop on single spec??
+			while (work_todo) // no need of while
 			{
 				// scope to destroy objects
 				{
@@ -477,7 +479,7 @@ namespace keygenerator
 								map_ecckey.insert(std::make_pair(keyname, ek));
 								dbmgr.mark_ecckey_as_changed(local_ecckey_db);
 
-								if (verbose) std::cout << "ecc key saved as: "  << keyname << " in " << local_ecckey_db << std:: endl;
+								if (verbose) std::cout << "ecc key saved as: "  << keyname << std:: endl;
 							}
 						}
 
@@ -486,6 +488,8 @@ namespace keygenerator
 						if (cnt_gen_required > 0) if (verbose) std::cout << std:: endl;
 					}
 				}
+				
+				work_todo = false;
 			}
 
 			return r;
