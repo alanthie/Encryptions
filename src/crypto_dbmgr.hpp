@@ -85,20 +85,42 @@ namespace db
 			{
 				if (file_util::fileexists(pathdb))
 				{
-					// load
-					if (SHOWDEBUG) std::cout << "get_ecckey_map loading " << pathdb << std::endl;
+					bool lock_ok = false;
+					int cnt = 0;
+					while (lock_ok == false)
+					{
+						try
+						{
+							exclusive_lock_file lockdb(pathdb + ".lock");
+							lock_ok = true; // IN LOCK
 
-					// TODO LOCK
-					// ...
+							pmap = new std::map<std::string, cryptoAL::ecc_domain>;
 
-					pmap = new std::map<std::string, cryptoAL::ecc_domain>;
+							std::ifstream infile;
+							infile.open(pathdb, std::ios_base::in);
+							infile >> bits(*pmap);
+							infile.close();
 
-					std::ifstream infile;
-					infile.open(pathdb, std::ios_base::in);
-					infile >> bits(*pmap);
-					infile.close();
+							multimap_eccdom[pathdb] = pmap;
+						}
+						catch(...)
+						{
+							lock_ok = false;
+						}
 
-					multimap_eccdom[pathdb] = pmap;;
+						if (lock_ok)
+						{
+							break;
+						}
+						cnt++;
+
+						std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec... 
+						if (cnt > 10)
+						{
+							if (SHOWDEBUG) std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
+							break;
+						}
+					}
 				}
 				else
 				{
@@ -153,19 +175,42 @@ namespace db
 				if (file_util::fileexists(pathdb))
 				{
 					// load
-					if (SHOWDEBUG) std::cout << "get_ecckey_map loading " << pathdb << std::endl;
+					bool lock_ok = false;
+					int cnt = 0;
+					while (lock_ok == false)
+					{
+						try
+						{
+							exclusive_lock_file lockdb(pathdb + ".lock");
+							lock_ok = true; // IN LOCK
 
-					// TODO LOCK
-					// ...
+							pmap = new std::map<std::string, cryptoAL::ecc_key>;
 
-					pmap = new std::map<std::string, cryptoAL::ecc_key>;
+							std::ifstream infile;
+							infile.open(pathdb, std::ios_base::in);
+							infile >> bits(*pmap);
+							infile.close();
 
-					std::ifstream infile;
-					infile.open(pathdb, std::ios_base::in);
-					infile >> bits(*pmap);
-					infile.close();
+							multimap_ecc[pathdb] = pmap;
+						}
+						catch(...)
+						{
+							lock_ok = false;
+						}
 
-					multimap_ecc[pathdb] = pmap;;
+						if (lock_ok)
+						{
+							break;
+						}
+						cnt++;
+
+						std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec... 
+						if (cnt > 10)
+						{
+							if (SHOWDEBUG) std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
+							break;
+						}
+					}
 				}
 				else
 				{
@@ -220,19 +265,42 @@ namespace db
 				if (file_util::fileexists(pathdb))
 				{
 					// load
-					if (SHOWDEBUG) std::cout << "get_rsa_map loading " << pathdb << std::endl;
+					bool lock_ok = false;
+					int cnt = 0;
+					while (lock_ok == false)
+					{
+						try
+						{
+							exclusive_lock_file lockdb(pathdb + ".lock");
+							lock_ok = true; // IN LOCK
 
-					// TODO LOCK
-					// ...
+							pmap = new std::map<std::string, cryptoAL::rsa::rsa_key>;
 
-					pmap = new std::map<std::string, cryptoAL::rsa::rsa_key>;
+							std::ifstream infile;
+							infile.open(pathdb, std::ios_base::in);
+							infile >> bits(*pmap);
+							infile.close();
 
-					std::ifstream infile;
-					infile.open(pathdb, std::ios_base::in);
-					infile >> bits(*pmap);
-					infile.close();
+							multimap_rsa[pathdb] = pmap;
+						}
+						catch(...)
+						{
+							lock_ok = false;
+						}
 
-					multimap_rsa[pathdb] = pmap;;
+						if (lock_ok)
+						{
+							break;
+						}
+						cnt++;
+
+						std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec... 
+						if (cnt > 10)
+						{
+							if (SHOWDEBUG) std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
+							break;
+						}
+					}
 				}
 				else
 				{
@@ -268,7 +336,6 @@ namespace db
 			else
 			{
 				map_private_key_ecc_update[pathdb] = true;
-				if (SHOWDEBUG) std::cout << "mark_ecckey_as_changed " << pathdb  << std::endl;
 			}
 		}
 
@@ -281,7 +348,6 @@ namespace db
 			else
 			{
 				map_private_key_rsa_update[pathdb] = true;
-				if (SHOWDEBUG) std::cout << "mark_rsa_as_changed " << pathdb  << std::endl;
 			}
 		}
 
@@ -290,44 +356,88 @@ namespace db
 							std::map<std::string, std::map<std::string, cryptoAL::ecc_key>*>& 	multimap_ecckey,
 							std::map<std::string, cryptoAL::ecc_key>* ptr_in_memory_map)
 		{
-			if (SHOWDEBUG) std::cout << "merge_ecckey " << pathdb << std::endl;
-			if (SHOWDEBUG) std::cout << "already_in_lock " << already_in_lock << std::endl;
-
-			// TODO
-			// LOCK file if already_in_lock == false
-
-			// read file into a temp map
-			std::map<std::string, cryptoAL::ecc_key>* temp_map = new std::map<std::string, cryptoAL::ecc_key>;
+			if (already_in_lock == true)
 			{
-				std::ifstream infile;
-				infile.open(pathdb, std::ios_base::in);
-				infile >> bits(*temp_map);
-				infile.close();
-			}
-			if (SHOWDEBUG) std::cout << "merge_ecckey file map count before merge: " << temp_map->size() << std::endl;
-
-			if (ptr_in_memory_map != nullptr)
-			{
-				if (SHOWDEBUG) std::cout << "merge_ecckey memory_map count " << (*ptr_in_memory_map).size() << std::endl;
-
-				for(auto& [keyname, k] : (*ptr_in_memory_map))
+				// read file into a temp map
+				std::map<std::string, cryptoAL::ecc_key>* temp_map = new std::map<std::string, cryptoAL::ecc_key>;
 				{
-					if (temp_map->find(keyname) == temp_map->end())
+					std::ifstream infile;
+					infile.open(pathdb, std::ios_base::in);
+					infile >> bits(*temp_map);
+					infile.close();
+				}
+
+				if (ptr_in_memory_map != nullptr)
+				{
+					for(auto& [keyname, k] : (*ptr_in_memory_map))
 					{
-						if (SHOWDEBUG) std::cout << "NEW KEY only in memory " << keyname << std::endl;
-						temp_map->insert(std::make_pair(keyname,  k));
+						if (temp_map->find(keyname) == temp_map->end())
+						{
+							if (SHOWDEBUG) std::cout << "NEW KEY only in memory " << keyname << std::endl;
+							temp_map->insert(std::make_pair(keyname,  k));
+						}
+					}
+				}
+				
+				// swap
+				multimap_ecckey[pathdb] = temp_map;
+				if (ptr_in_memory_map != nullptr)
+					delete ptr_in_memory_map;
+			}
+			else
+			{
+				bool lock_ok = false;
+				int cnt = 0;
+				while (lock_ok == false)
+				{
+					try
+					{
+						exclusive_lock_file lockdb(pathdb + ".lock");
+						lock_ok = true; // IN LOCK
+
+						// read file into a temp map
+						std::map<std::string, cryptoAL::ecc_key>* temp_map = new std::map<std::string, cryptoAL::ecc_key>;
+						{
+							std::ifstream infile;
+							infile.open(pathdb, std::ios_base::in);
+							infile >> bits(*temp_map);
+							infile.close();
+						}
+						if (ptr_in_memory_map != nullptr)
+						{
+							for(auto& [keyname, k] : (*ptr_in_memory_map))
+							{
+								if (temp_map->find(keyname) == temp_map->end())
+								{
+									if (SHOWDEBUG) std::cout << "NEW KEY only in memory " << keyname << std::endl;
+									temp_map->insert(std::make_pair(keyname,  k));
+								}
+							}
+						}
+						// swap
+						multimap_ecckey[pathdb] = temp_map;
+						if (ptr_in_memory_map != nullptr)
+							delete ptr_in_memory_map;
+					}
+					catch(...)
+					{
+						lock_ok = false;
+					}
+
+					if (lock_ok)
+					{
+						break;
+					}
+					cnt++;
+
+					std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec... 
+					if (cnt > 10)
+					{
+						if (SHOWDEBUG) std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
+						break;
 					}
 				}
 			}
-			if (SHOWDEBUG) std::cout << "merge_ecckey file map count after merge: " << temp_map->size() << std::endl;
-
-			// swap
-			multimap_ecckey[pathdb] = temp_map;
-			if (ptr_in_memory_map != nullptr)
-				delete ptr_in_memory_map;
-
-			// TODO
-			// UNLOCK file if already_in_lock == false
 		}
 
 		void merge_eccdom(	bool already_in_lock,
@@ -343,55 +453,99 @@ namespace db
 						std::map<std::string, std::map<std::string, cryptoAL::rsa::rsa_key>*>& 	multimap_rsa,
 						std::map<std::string, cryptoAL::rsa::rsa_key>* ptr_in_memory_map)
 		{
-			if (SHOWDEBUG) std::cout << "merge_rsa " << pathdb << std::endl;
-			if (SHOWDEBUG) std::cout << "already_in_lock " << already_in_lock << std::endl;
-
 			// some changes may have been done in file by other process
 			// take status of keys from file
 			// add keys from memory
 
-			// TODO
-			// LOCK file if already_in_lock == false
-
-			// read file into a temp map
-			std::map<std::string, cryptoAL::rsa::rsa_key>* temp_map = new std::map<std::string, cryptoAL::rsa::rsa_key>;
+			if (already_in_lock == true)
 			{
-				std::ifstream infile;
-				infile.open(pathdb, std::ios_base::in);
-				infile >> bits(*temp_map);
-				infile.close();
-			}
-			if (SHOWDEBUG) std::cout << "merge_rsa file map count before merge: " << temp_map->size() << std::endl;
-
-			if (ptr_in_memory_map != nullptr)
-			{
-				if (SHOWDEBUG) std::cout << "merge_rsa memory_map count " << (*ptr_in_memory_map).size() << std::endl;
-
-				for(auto& [keyname, k] : (*ptr_in_memory_map))
+				// read file into a temp map
+				std::map<std::string, cryptoAL::rsa::rsa_key>* temp_map = new std::map<std::string, cryptoAL::rsa::rsa_key>;
 				{
-					if (temp_map->find(keyname) == temp_map->end())
+					std::ifstream infile;
+					infile.open(pathdb, std::ios_base::in);
+					infile >> bits(*temp_map);
+					infile.close();
+				}
+
+				if (ptr_in_memory_map != nullptr)
+				{
+					for(auto& [keyname, k] : (*ptr_in_memory_map))
 					{
-						if (SHOWDEBUG) std::cout << "NEW KEY only in memory " << keyname << std::endl;
-						temp_map->insert(std::make_pair(keyname,  k));
+						if (temp_map->find(keyname) == temp_map->end())
+						{
+							if (SHOWDEBUG) std::cout << "NEW KEY only in memory " << keyname << std::endl;
+							temp_map->insert(std::make_pair(keyname,  k));
+						}
+					}
+				}
+				
+				// swap
+				multimap_rsa[pathdb] = temp_map;
+				if (ptr_in_memory_map != nullptr)
+					delete ptr_in_memory_map;
+			}
+			else
+			{
+				bool lock_ok = false;
+				int cnt = 0;
+				while (lock_ok == false)
+				{
+					try
+					{
+						exclusive_lock_file lockdb(pathdb + ".lock");
+						lock_ok = true; // IN LOCK
+
+						// read file into a temp map
+						std::map<std::string, cryptoAL::rsa::rsa_key>* temp_map = new std::map<std::string, cryptoAL::rsa::rsa_key>;
+						{
+							std::ifstream infile;
+							infile.open(pathdb, std::ios_base::in);
+							infile >> bits(*temp_map);
+							infile.close();
+						}
+
+						if (ptr_in_memory_map != nullptr)
+						{
+							for(auto& [keyname, k] : (*ptr_in_memory_map))
+							{
+								if (temp_map->find(keyname) == temp_map->end())
+								{
+									temp_map->insert(std::make_pair(keyname,  k));
+								}
+							}
+						}
+
+						// swap
+						multimap_rsa[pathdb] = temp_map;
+						if (ptr_in_memory_map != nullptr)
+							delete ptr_in_memory_map;
+					}
+					catch(...)
+					{
+						lock_ok = false;
+					}
+
+					if (lock_ok)
+					{
+						break;
+					}
+					cnt++;
+
+					std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec... 
+					if (cnt > 10)
+					{
+						if (SHOWDEBUG) std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
+						break;
 					}
 				}
 			}
-			if (SHOWDEBUG) std::cout << "merge_rsa file map count after merge: " << temp_map->size() << std::endl;
-
-			// swap
-			multimap_rsa[pathdb] = temp_map;
-			if (ptr_in_memory_map != nullptr)
-				delete ptr_in_memory_map;
-
-			// TODO
-			// UNLOCK file if already_in_lock == false
 		}
 
 		void update(bool merge_with_file = false)
 		{
 			if (SHOWDEBUG) std::cout << "update " << std::endl;
 			if (SHOWDEBUG) std::cout << "update merge_with_file " << merge_with_file  << std::endl;
-			if (SHOWDEBUG) std::cout << "update rsa map count " << map_private_key_rsa_update.size() << std::endl;
 
             try
             {
@@ -413,17 +567,9 @@ namespace db
 								{
 									try
 									{
-										// IN LOCK
-										if (SHOWDEBUG) std::cout << "update IN LOCK" << std::endl;
-
 										exclusive_lock_file lockdb(pathdb + ".lock");
-										lock_ok = true;
+										lock_ok = true; // IN LOCK
 
-										// save
-										if (SHOWDEBUG) std::cout << "update saving (lock acquired) " << pathdb + ".lock" << std::endl;
-
-										// backup
-										if (SHOWDEBUG) std::cout << "update backup " << pathdb + ".bck" << std::endl;
 										{
 											std::ofstream outfile;
 											outfile.open(pathdb + ".bck", std::ios_base::out);
@@ -437,7 +583,6 @@ namespace db
 											pmap = multimap_rsa[pathdb];
 										}
 
-										if (SHOWDEBUG) std::cout << "update save " << pathdb << std::endl;
 										{
 											std::ofstream out;
 											out.open(pathdb, std::ios_base::out);
@@ -457,10 +602,7 @@ namespace db
 									}
 									cnt++;
 
-									// TODO
-									if (SHOWDEBUG) std::cout << "INFO fail to acquire lock  - retrying in 1 sec... " << pathdb + ".lock" << std::endl;
-									std::this_thread::sleep_for(std::chrono::seconds(1));
-
+									std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec... 
 									if (cnt > 10)
 									{
 										if (SHOWDEBUG) std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
@@ -502,9 +644,6 @@ namespace db
 										exclusive_lock_file lockdb(pathdb + ".lock");
 										lock_ok = true;
 
-										// save
-                                		if (SHOWDEBUG) std::cout << "db_mgr saving (lock acquired) " << pathdb << std::endl;
-
 										// backup
 										{
 											std::ofstream outfile;
@@ -514,7 +653,6 @@ namespace db
 										}
 
 										// save
-										if (SHOWDEBUG) std::cout << "db_mgr saving " << pathdb << std::endl;
 										{
 											std::ofstream out;
 											out.open(pathdb, std::ios_base::out);
@@ -535,8 +673,6 @@ namespace db
 									}
 									cnt++;
 
-									// TODO
-									if (SHOWDEBUG) std::cout << "INFO fail to acquire lock  - retrying in 1 sec... " << pathdb + ".lock" << std::endl;
 									std::this_thread::sleep_for(std::chrono::seconds(1));
 
 									if (cnt > 10)
@@ -568,9 +704,6 @@ namespace db
 										exclusive_lock_file lockdb(pathdb + ".lock");
 										lock_ok = true;
 
-										// save
-                                		if (SHOWDEBUG) std::cout << "db_mgr saving (lock acquired) " << pathdb << std::endl;
-
 										// backup
 										{
 											std::ofstream outfile;
@@ -580,7 +713,6 @@ namespace db
 										}
 
 										// save
-										if (SHOWDEBUG) std::cout << "db_mgr saving " << pathdb << std::endl;
 										{
 											std::ofstream out;
 											out.open(pathdb, std::ios_base::out);
@@ -601,8 +733,6 @@ namespace db
 									}
 									cnt++;
 
-									// TODO
-									if (SHOWDEBUG) std::cout << "INFO fail to acquire lock  - retrying in 1 sec... " << pathdb + ".lock" << std::endl;
 									std::this_thread::sleep_for(std::chrono::seconds(1));
 
 									if (cnt > 10)
@@ -634,9 +764,6 @@ namespace db
 										exclusive_lock_file lockdb(pathdb + ".lock");
 										lock_ok = true;
 
-										// save
-                                		if (SHOWDEBUG) std::cout << "db_mgr saving (lock acquired) " << pathdb << std::endl;
-
 										// backup
 										{
 											std::ofstream outfile;
@@ -645,8 +772,6 @@ namespace db
 											outfile.close();
 										}
 
-										// save
-										if (SHOWDEBUG) std::cout << "db_mgr saving " << pathdb << std::endl;
 										{
 											std::ofstream out;
 											out.open(pathdb, std::ios_base::out);
@@ -667,8 +792,6 @@ namespace db
 									}
 									cnt++;
 
-									// TODO
-									if (SHOWDEBUG) std::cout << "INFO fail to acquire lock  - retrying in 1 sec... " << pathdb + ".lock" << std::endl;
 									std::this_thread::sleep_for(std::chrono::seconds(1));
 
 									if (cnt > 10)
@@ -698,7 +821,6 @@ namespace db
                 {
                     if (m != nullptr)
                     {
-                        if (SHOWDEBUG) std::cout << "clear deleting map_rsa " << pathdb  << std::endl;
                         delete m;
                         m = nullptr;
 						multimap_rsa[pathdb] = nullptr;
@@ -710,7 +832,6 @@ namespace db
                 {
                     if (m != nullptr)
                     {
-                        if (SHOWDEBUG) std::cout << "clear deleting map_ecc " << pathdb  << std::endl;
                         delete m;
                         m = nullptr;
 						multimap_ecc[pathdb] = nullptr;
@@ -722,7 +843,6 @@ namespace db
                 {
                     if (m != nullptr)
                     {
-                        if (SHOWDEBUG) std::cout << "clear deleting map_eccdom " << pathdb  << std::endl;
                         delete m;
                         m = nullptr;
 						multimap_eccdom[pathdb] = nullptr;
@@ -734,7 +854,6 @@ namespace db
                 {
                     if (m != nullptr)
                     {
-                        if (SHOWDEBUG) std::cout << "clear deleting hh_decode " << pathdb  << std::endl;
                         delete m;
                         m = nullptr;
 						multimap_hh_decode[pathdb] = nullptr;
@@ -746,7 +865,6 @@ namespace db
                 {
                     if (m != nullptr)
                     {
-                       	if (SHOWDEBUG) std::cout << "clear deleting hh_decode " << pathdb  << std::endl;
                         delete m;
                         m = nullptr;
 						multimap_hh_encode[pathdb] = nullptr;
@@ -778,8 +896,6 @@ namespace db
 				if (file_util::fileexists(pathdb))
 				{
 					// load
-					if (SHOWDEBUG) std::cout << "db_mgr loading " << pathdb << std::endl;
-
 					pmap = new std::map<uint32_t, cryptoAL::history_key>;
 
 					std::ifstream infile;
@@ -807,8 +923,6 @@ namespace db
 						{
 							k.add_to_usage_count();
 							map_private_key_hh_encode_update[pathdb] = true;
-
-							if (SHOWDEBUG) std::cout << "db_mgr updating usage_count " << pathdb << " " << keyseq << " " << k.usage_count << std::endl;
 							break;
 						}
 					}
@@ -831,8 +945,6 @@ namespace db
 				if (file_util::fileexists(pathdb))
 				{
 					// load
-					if (SHOWDEBUG) std::cout << "db_mgr loading " << pathdb << std::endl;
-
 					pmap = new std::map<uint32_t, cryptoAL::history_key>;
 
 					std::ifstream infile;
@@ -860,8 +972,6 @@ namespace db
 						{
 							k.add_to_usage_count();
 							map_private_key_hh_decode_update[pathdb] = true;
-
-							if (SHOWDEBUG) std::cout << "db_mgr updating usage_count " << pathdb << " " << keyseq << " " << k.usage_count << std::endl;
 							break;
 						}
 					}
@@ -884,8 +994,6 @@ namespace db
 				if (file_util::fileexists(pathdb))
 				{
 					// load
-					if (SHOWDEBUG) std::cout << "db_mgr loading " << pathdb << std::endl;
-
 					pmap = new std::map<std::string, cryptoAL::rsa::rsa_key>;
 
 					std::ifstream infile;
@@ -914,8 +1022,6 @@ namespace db
 						{
 							k.add_to_usage_count();
 							map_private_key_rsa_update[pathdb] = true;
-
-							if (SHOWDEBUG) std::cout << "db_mgr updating usage_count " << pathdb << " " << key_name << " " << k.usage_count << std::endl;
 							break;
 						}
 					}
@@ -926,8 +1032,6 @@ namespace db
 
 		bool add_to_usage_count_ecc(const std::string& key_name, const std::string& pathdb)
 		{
-			//std::cout <<  "add_to_usage_count_ecc()" << key_name << " " << pathdb << std::endl;
-		
 			if (file_util::is_file_private(pathdb) == false)
 			{
 				std::cerr << "ERROR no file: " << pathdb << std::endl;
@@ -942,8 +1046,6 @@ namespace db
 				if (file_util::fileexists(pathdb))
 				{
 					// load
-					if (SHOWDEBUG) std::cout << "db_mgr loading " << pathdb << std::endl;
-
 					pmap = new std::map<std::string, cryptoAL::ecc_key>;
 
 					std::ifstream infile;
@@ -972,8 +1074,6 @@ namespace db
 						{
 							k.add_to_usage_count();
 							map_private_key_ecc_update[pathdb] = true;
-
-							if (SHOWDEBUG) std::cout << "db_mgr updating usage_count " << pathdb << " " << key_name << " " << k.usage_count << std::endl;
 							break;
 						}
 					}
@@ -1003,8 +1103,6 @@ namespace db
 						if (multimap_hh_decode.find(local_histo_db) == multimap_hh_decode.end())
 						{
 							// load
-							if (SHOWDEBUG) std::cout << "db_mgr loading " << local_histo_db << std::endl;
-
 							pmap = new std::map<uint32_t, cryptoAL::history_key>;
 
 							std::ifstream infile;
@@ -1024,8 +1122,6 @@ namespace db
 						if (multimap_hh_encode.find(local_histo_db) == multimap_hh_encode.end())
 						{
 							// load
-							if (SHOWDEBUG) std::cout << "db_mgr loading " << local_histo_db << std::endl;
-
 							pmap = new std::map<uint32_t, cryptoAL::history_key>;
 
 							std::ifstream infile;
@@ -1076,8 +1172,6 @@ namespace db
 						if (multimap_hh_decode.find(local_histo_db) == multimap_hh_decode.end())
 						{
 							// load
-							if (SHOWDEBUG) std::cout << "db_mgr loading " << local_histo_db << std::endl;
-
 							pmap = new std::map<uint32_t, cryptoAL::history_key>;
 
 							std::ifstream infile;
@@ -1097,8 +1191,6 @@ namespace db
 						if (multimap_hh_encode.find(local_histo_db) == multimap_hh_encode.end())
 						{
 							// load
-							if (SHOWDEBUG) std::cout << "db_mgr loading " << local_histo_db << std::endl;
-
 							pmap = new std::map<uint32_t, cryptoAL::history_key>;
 
 							std::ifstream infile;
@@ -1160,8 +1252,6 @@ namespace db
 						if (multimap_hh_decode.find(local_histo_db) == multimap_hh_decode.end())
 						{
 							// load
-							if (SHOWDEBUG) std::cout << "db_mgr loading " << local_histo_db << std::endl;
-
 							pmap = new std::map<uint32_t, cryptoAL::history_key>;
 
 							std::ifstream infile;
@@ -1181,8 +1271,6 @@ namespace db
 						if (multimap_hh_encode.find(local_histo_db) == multimap_hh_encode.end())
 						{
 							// load
-							if (SHOWDEBUG) std::cout << "db_mgr loading " << local_histo_db << std::endl;
-
 							pmap = new std::map<uint32_t, cryptoAL::history_key>;
 
 							std::ifstream infile;
@@ -1239,8 +1327,6 @@ namespace db
 						if (multimap_hh_decode.find(local_histo_db) == multimap_hh_decode.end())
 						{
 							// load
-							if (SHOWDEBUG) std::cout << "db_mgr loading " << local_histo_db << std::endl;
-
 							pmap = new std::map<uint32_t, cryptoAL::history_key>;
 
 							std::ifstream infile;
@@ -1260,8 +1346,6 @@ namespace db
 						if (multimap_hh_encode.find(local_histo_db) == multimap_hh_encode.end())
 						{
 							// load
-							if (SHOWDEBUG) std::cout << "db_mgr loading " << local_histo_db << std::endl;
-
 							pmap = new std::map<uint32_t, cryptoAL::history_key>;
 
 							std::ifstream infile;

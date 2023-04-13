@@ -344,7 +344,6 @@ namespace keygenerator
 
 						if (k.dom.key_size_bits == (int)kbits)
 						{
-							//if (k.primes == primes)
 							{
 								if (k.deleted == false)
 								{
@@ -402,11 +401,6 @@ namespace keygenerator
 								if (SHOWDEBUG) std::cout << "pmap_ecc_domain == nullptr " << fileECCDOMDB << std:: endl;
 								return false;
 							}
-
-							//std::ifstream infile;
-							//infile.open (fileECCDOMDB, std::ios_base::in);
-							//infile >> bits(map_ecc_domain);
-							//infile.close();
 						}
 						else
 						{
@@ -448,8 +442,6 @@ namespace keygenerator
 						if (use_ecc_domname.size() == 0)
 						{
 							work_todo = false;
-							//if (verbose) 
-							std::cout << "Skipping NO ECC domain found"<< std::endl;
 							return false;
 						}
 						
