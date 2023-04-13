@@ -113,9 +113,9 @@ namespace keygenerator
 
 					long long cnt_active = 0;
 					long long cnt_new = 0;
+					long long cnt_to_delete = 0;
 
 					std::map<std::string, cryptoAL::rsa::rsa_key>& map_rsa = *pmap_rsa;
-					if (SHOWDEBUG) std::cout << "rsa keys read "  << map_rsa.size() << " from " << local_rsa_db << std:: endl;
 					for(auto& [keyname, k] : map_rsa)
 					{
 						uint32_t kbits = keybits8x(bits);
@@ -136,7 +136,10 @@ namespace keygenerator
 									}
 									else if (k.usage_count >= maxusagecount)
 									{
-										//
+										cnt_to_delete++;
+										k.deleted = true; // mark for delete
+										dbmgr.mark_rsa_as_changed(local_rsa_db);
+										//TODO std::cout << "key mark for delete " << keyname << std::endl;
 									}
 								}
 							}
@@ -269,12 +272,11 @@ namespace keygenerator
 								}
 							}
 						}
-
-						// SAVE
-						dbmgr.flush(true);
-
 						if (cnt_gen_required > 0) if (verbose) std::cout << std:: endl;
 					}
+					
+					// SAVE
+					dbmgr.flush(true);
 				}
 				
 				work_todo = false;
@@ -335,9 +337,10 @@ namespace keygenerator
 
 					long long cnt_active = 0;
 					long long cnt_new = 0;
+					long long cnt_to_delete = 0;
 
 					std::map<std::string, cryptoAL::ecc_key>& map_ecckey = *pmap_ecckey;
-					if (SHOWDEBUG) std::cout << "ecc keys read "  << map_ecckey.size() << " from " << local_ecckey_db << std:: endl;
+
 					for(auto& [keyname, k] : map_ecckey)
 					{
 						uint32_t kbits = keybits8x(bits);
@@ -357,7 +360,11 @@ namespace keygenerator
 									}
 									else if (k.usage_count >= maxusagecount)
 									{
-										//
+										// TODO NOT SEEKING ALL KEYS
+										cnt_to_delete++;
+										k.deleted = true; // mark for delete
+										dbmgr.mark_ecckey_as_changed(local_ecckey_db);
+										//TODO std::cout << "key mark for delete " << keyname << std::endl;
 									}
 								}
 							}
@@ -474,11 +481,11 @@ namespace keygenerator
 								if (verbose) std::cout << "ecc key saved as: "  << keyname << std:: endl;
 							}
 						}
-
-						// SAVE
-						dbmgr.flush(true);
 						if (cnt_gen_required > 0) if (verbose) std::cout << std:: endl;
 					}
+					
+					// SAVE
+					dbmgr.flush(true);
 				}
 				
 				work_todo = false;

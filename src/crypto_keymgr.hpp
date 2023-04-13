@@ -85,6 +85,7 @@ namespace keymgr
 		}
     };
 
+	// OTHER_PUBLIC_DB have been marked for delete
 	bool delete_public_keys_marked_for_deleting(const std::string& path_public_db, CRYPTO_FILE_TYPE t, bool& key_deleted, bool verbose=false)
 	{
 		bool r = true;
@@ -112,19 +113,25 @@ namespace keymgr
                     infile.close();
 				}
 
+				std::vector<std::string> v;
 				for(auto& [keyname, k] : map_rsa_public)
 				{
 					if (k.deleted == true)
 					{
 						// delete
 						key_deleted = true;
-						map_rsa_public.erase(keyname);
-
+						v.push_back(keyname);
 					}
+				}
+				for (size_t i=0;i<v.size();i++)
+				{
+					map_rsa_public.erase(v[i]);
+					//std::cout << "other public rsa key deleted: " << v[i] << std::endl;
 				}
 
 				if (key_deleted == true)
 				{
+					// TODO not working...being resend
 					// backup
 					{
 						std::ofstream outfile;
@@ -133,7 +140,7 @@ namespace keymgr
 						outfile.close();
 					}
 
-					// save private
+					// save 
 					{
                         std::ofstream out;
                         out.open(fileDB, std::ios_base::out);
@@ -164,19 +171,25 @@ namespace keymgr
                     infile.close();
 				}
 
+				std::vector<std::string> v;
 				for(auto& [keyname, k] : map_ecc_public)
 				{
 					if (k.deleted == true)
 					{
 						// delete
 						key_deleted = true;
-						map_ecc_public.erase(keyname);
-
+						v.push_back(keyname);
 					}
+				}
+				for (size_t i=0;i<v.size();i++)
+				{
+					map_ecc_public.erase(v[i]);
+					//std::cout << "other public ecc key deleted: " << v[i] << std::endl;
 				}
 
 				if (key_deleted == true)
 				{
+					// TODO not working...being resend
 					// backup
 					{
 						std::ofstream outfile;
@@ -185,7 +198,7 @@ namespace keymgr
 						outfile.close();
 					}
 
-					// save private
+					// save 
 					{
                         std::ofstream out;
                         out.open(fileDB, std::ios_base::out);
@@ -212,6 +225,7 @@ namespace keymgr
 
 			if (ok)
 			{
+				// TODO not working...being resend
                 {
                     std::ifstream infile;
                     infile.open(fileDB, std::ios_base::in);
@@ -219,19 +233,27 @@ namespace keymgr
                     infile.close();
 				}
 
+				std::vector<std::string> v;
 				for(auto& [keyname, k] : map_hh_public)
 				{
 					if (k.deleted == true)
 					{
 						// delete
 						key_deleted = true;
-						map_hh_public.erase(keyname);
+						v.push_back(keyname);
 
 					}
 				}
 
+				for (size_t i=0;i<v.size();i++)
+				{
+					map_hh_public.erase(v[i]);
+					//std::cout << "other public hh key deleted: " << v[i] << std::endl;
+				}
+
 				if (key_deleted == true)
 				{
+					// TODO not working...
 					// backup
 					{
 						std::ofstream outfile;
@@ -240,7 +262,7 @@ namespace keymgr
 						outfile.close();
 					}
 
-					// save private
+					// save 
 					{
                         std::ofstream out;
                         out.open(fileDB, std::ios_base::out);

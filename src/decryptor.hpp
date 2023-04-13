@@ -2626,13 +2626,14 @@ public:
         {
 			// WHEN to do it: was already marked as deleted and did not receive another deleted record this decode (encode sent a confimation before)
 			// cleanup public other [k.deleted == true]
-			/*
+
 			bool ok[3] = {true};
             bool key_deleted[3] = {false};
-			ok[0] = keymgr::delete_public_keys_marked_for_deleting(folder_other_publice_rsa, CRYPTO_FILE_TYPE::RSA_MY_PUBLIC , key_deleted[0]);
-			ok[1] = keymgr::delete_public_keys_marked_for_deleting(folder_other_publice_ecc, CRYPTO_FILE_TYPE::ECC_MY_PUBLIC , key_deleted[1]);
-			ok[2] = keymgr::delete_public_keys_marked_for_deleting(folder_other_publice_hh,  CRYPTO_FILE_TYPE::HH_MY_PUBLIC , key_deleted[2]);
-			*/
+			ok[0] = keymgr::delete_public_keys_marked_for_deleting(folder_other_public_rsa, CRYPTO_FILE_TYPE::RSA_PUBLIC , key_deleted[0]);
+			ok[1] = keymgr::delete_public_keys_marked_for_deleting(folder_other_public_ecc, CRYPTO_FILE_TYPE::ECC_PUBLIC , key_deleted[1]);
+			ok[2] = keymgr::delete_public_keys_marked_for_deleting(folder_other_public_hh,  CRYPTO_FILE_TYPE::HH_PUBLIC , key_deleted[2]);
+			//...
+
 		}
 
         return r;

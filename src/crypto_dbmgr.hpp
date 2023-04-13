@@ -46,14 +46,11 @@ namespace db
 
 		~db_mgr()
 		{
-			if (SHOWDEBUG) std::cout << "~db_mgr()" << std::endl;
 			flush(true);
 		}
 
 		void flush(bool merge_with_file = false)
 		{
-			if (SHOWDEBUG) std::cout << "flush merge_with_file " << merge_with_file  << std::endl;
-
 			update(merge_with_file);
 			clear();
 		}
@@ -62,9 +59,6 @@ namespace db
                           		std::map<std::string, cryptoAL::ecc_domain>** map_ecc_domain,
                             	bool merge_with_file = false)
 		{
-			if (SHOWDEBUG) std::cout << "get_eccdomain_map " << pathdb << std::endl;
-			if (SHOWDEBUG) std::cout << "merge_with_file " << merge_with_file << std::endl;
-
 			(*map_ecc_domain) = nullptr;
 			if (file_util::fileexists(pathdb) == false)
 			{
@@ -114,7 +108,7 @@ namespace db
 						}
 						cnt++;
 
-						std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec... 
+						std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec...
 						if (cnt > 10)
 						{
 							if (SHOWDEBUG) std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
@@ -151,9 +145,6 @@ namespace db
                           	std::map<std::string, cryptoAL::ecc_key>** map_ecc,
                             bool merge_with_file = false)
 		{
-			if (SHOWDEBUG) std::cout << "get_ecckey_map " << pathdb << std::endl;
-			if (SHOWDEBUG) std::cout << "merge_with_file " << merge_with_file << std::endl;
-
 			(*map_ecc) = nullptr;
 			if (file_util::fileexists(pathdb) == false)
 			{
@@ -204,7 +195,7 @@ namespace db
 						}
 						cnt++;
 
-						std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec... 
+						std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec...
 						if (cnt > 10)
 						{
 							if (SHOWDEBUG) std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
@@ -241,9 +232,6 @@ namespace db
                             std::map<std::string, cryptoAL::rsa::rsa_key>** map_rsa,
                             bool merge_with_file = false)
 		{
-			if (SHOWDEBUG) std::cout << "get_rsa_map " << pathdb << std::endl;
-			if (SHOWDEBUG) std::cout << "merge_with_file " << merge_with_file << std::endl;
-
 			(*map_rsa) = nullptr;
 			if (file_util::fileexists(pathdb) == false)
 			{
@@ -294,7 +282,7 @@ namespace db
 						}
 						cnt++;
 
-						std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec... 
+						std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec...
 						if (cnt > 10)
 						{
 							if (SHOWDEBUG) std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
@@ -367,18 +355,26 @@ namespace db
 					infile.close();
 				}
 
+				std::vector<std::string> v;
 				if (ptr_in_memory_map != nullptr)
 				{
 					for(auto& [keyname, k] : (*ptr_in_memory_map))
 					{
 						if (temp_map->find(keyname) == temp_map->end())
 						{
-							if (SHOWDEBUG) std::cout << "NEW KEY only in memory " << keyname << std::endl;
-							temp_map->insert(std::make_pair(keyname,  k));
+						 	// mark for delete
+							if (k.deleted == false)
+								temp_map->insert(std::make_pair(keyname,  k));
+						}
+						else
+						{
+							if (k.deleted == true)
+								(*temp_map)[keyname].deleted = true;
 						}
 					}
+
 				}
-				
+
 				// swap
 				multimap_ecckey[pathdb] = temp_map;
 				if (ptr_in_memory_map != nullptr)
@@ -409,8 +405,14 @@ namespace db
 							{
 								if (temp_map->find(keyname) == temp_map->end())
 								{
-									if (SHOWDEBUG) std::cout << "NEW KEY only in memory " << keyname << std::endl;
-									temp_map->insert(std::make_pair(keyname,  k));
+						 			// mark for delete
+									if (k.deleted == false)
+										temp_map->insert(std::make_pair(keyname,  k));
+								}
+								else
+								{
+									if (k.deleted == true)
+										(*temp_map)[keyname].deleted = true;
 								}
 							}
 						}
@@ -430,7 +432,7 @@ namespace db
 					}
 					cnt++;
 
-					std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec... 
+					std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec...
 					if (cnt > 10)
 					{
 						if (SHOWDEBUG) std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
@@ -474,12 +476,18 @@ namespace db
 					{
 						if (temp_map->find(keyname) == temp_map->end())
 						{
-							if (SHOWDEBUG) std::cout << "NEW KEY only in memory " << keyname << std::endl;
-							temp_map->insert(std::make_pair(keyname,  k));
+							// mark for delete
+							if (k.deleted == false)
+								temp_map->insert(std::make_pair(keyname,  k));
+						}
+						else
+						{
+							if (k.deleted == true)
+								(*temp_map)[keyname].deleted = true;
 						}
 					}
 				}
-				
+
 				// swap
 				multimap_rsa[pathdb] = temp_map;
 				if (ptr_in_memory_map != nullptr)
@@ -511,7 +519,14 @@ namespace db
 							{
 								if (temp_map->find(keyname) == temp_map->end())
 								{
-									temp_map->insert(std::make_pair(keyname,  k));
+									// mark for delete
+									if (k.deleted == false)
+										temp_map->insert(std::make_pair(keyname,  k));
+								}
+								else
+								{
+									if (k.deleted == true)
+										(*temp_map)[keyname].deleted = true;
 								}
 							}
 						}
@@ -532,7 +547,7 @@ namespace db
 					}
 					cnt++;
 
-					std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec... 
+					std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec...
 					if (cnt > 10)
 					{
 						if (SHOWDEBUG) std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
@@ -544,9 +559,6 @@ namespace db
 
 		void update(bool merge_with_file = false)
 		{
-			if (SHOWDEBUG) std::cout << "update " << std::endl;
-			if (SHOWDEBUG) std::cout << "update merge_with_file " << merge_with_file  << std::endl;
-
             try
             {
 				//multimap_eccdom read only ?
@@ -602,7 +614,7 @@ namespace db
 									}
 									cnt++;
 
-									std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec... 
+									std::this_thread::sleep_for(std::chrono::seconds(1)); //retrying in 1 sec...
 									if (cnt > 10)
 									{
 										if (SHOWDEBUG) std::cout << "ERROR fail to acquire lock " << pathdb + ".lock" << std::endl;
@@ -872,6 +884,7 @@ namespace db
                 }
 				multimap_hh_encode.clear();
 
+				map_private_key_eccdom_update.clear();
 				map_private_key_rsa_update.clear();
 				map_private_key_ecc_update.clear();
 				map_private_key_hh_encode_update.clear();
