@@ -2395,9 +2395,20 @@ public:
 			if (hkey_ok)
 			{
 				std::string local_histo_db = folder_my_private_hh + HHKEY_MY_PRIVATE_DECODE_DB;
+				if (file_util::fileexists(local_histo_db) == false)
+				{
+					std::map<uint32_t, history_key> map_histo;
+					std::ofstream outstream;
+					outstream.open(local_histo_db, std::ios_base::out);
+					outstream << bits(map_histo);
+					outstream.close();
+				}
+		
                 cryptoAL::hhkey_util::save_histo_key(hkey, local_histo_db, dbmgr, true);
-                if (VERBOSE_DEBUG)
+                if (verbose)
                     std::cout << "history sequence saved: "  << hist_out_seq << std::endl;
+					
+				dbmgr.flush();
 			}
 		}
 		return r;
@@ -2549,6 +2560,15 @@ public:
 			std::string fileHistoPrivateEncodeDB = folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
 			std::string importfile = folder_other_public_hh + HHKEY_OTHER_PUBLIC_DECODE_DB;
 
+			if (file_util::fileexists(fileHistoPrivateEncodeDB) == false)
+			{
+				std::map<uint32_t, history_key> map_histo;
+				std::ofstream outstream;
+				outstream.open(fileHistoPrivateEncodeDB, std::ios_base::out);
+				outstream << bits(map_histo);
+				outstream.close();
+			}
+			
 			if (file_util::fileexists(fileHistoPrivateEncodeDB) == true)
 			{
 				if (file_util::fileexists(importfile) == true)
@@ -2563,7 +2583,7 @@ public:
 					}
 					else
 					{
-						if (VERBOSE_DEBUG)
+						if (verbose)
 							std::cout << "Number of new confirm: " << cnt << ", number of hashes: " << n << std:: endl;
 					}
 				}
@@ -2577,7 +2597,7 @@ public:
 				if (file_util::fileexists(importfile) == true)
 				{
 					// TODO
-					//std::cerr << "WARNING no file to update HH keys confirmation: " << fileHistoPrivateEncodeDB << std:: endl;
+					if (verbose) std::cerr << "WARNING no file to update HH keys confirmation: " << fileHistoPrivateEncodeDB << std:: endl;
 				}
 			}
         }

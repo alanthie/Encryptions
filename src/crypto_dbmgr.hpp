@@ -1490,6 +1490,7 @@ namespace db
 					{
 						std::map<uint32_t, history_key>& map_histo = *pmap;
 
+						//std::cout << "histo count " << map_histo.size() << std::endl;
 						for(auto& [seqkey, k] : map_histo)
 						{
 							if (seqkey > maxseq)
@@ -1503,13 +1504,14 @@ namespace db
 				}
 				else
 				{
+					std::cout << "ERROR  no private histo " << local_histo_db << std::endl;
 					out_seq = 1;
 				}
 			}
 			else
 			{
 				out_seq = 1;
-				//std::cout << "WARNING no histo file (creating historical sequence 1) in : " << local_histo_db << std::endl;
+				std::cout << "WARNING no histo file (creating historical sequence 1) in : " << local_histo_db << std::endl;
 			}
 
 			return ok;

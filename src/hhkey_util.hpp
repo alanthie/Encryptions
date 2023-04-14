@@ -155,7 +155,16 @@ namespace hhkey_util
 		bool ok = true;
 		uint32_t maxseq=0;
 		out_seq = 0;
-
+		
+		if (file_util::fileexists(local_histo_db) == false)
+		{
+			std::map<uint32_t, history_key> map_histo;
+			std::ofstream outstream;
+            outstream.open(local_histo_db, std::ios_base::out);
+			outstream << bits(map_histo);
+			outstream.close();
+		}
+			
 		if (file_util::fileexists(local_histo_db) == true)
 		{
 			if (file_util::is_file_private(local_histo_db) == true)
