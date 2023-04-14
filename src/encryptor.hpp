@@ -2417,6 +2417,7 @@ public:
             }
 		}
 
+		dbmgr.flush();
 		return true;
     }
 
@@ -2478,7 +2479,7 @@ public:
 
 	bool post_encode(cryptodata& indata, const std::string& filename, cryptodata& out_encrypted_data, std::string& new_output_filename)
 	{
-		//dbmgr.update()
+		//dbmgr.flush();
 
 		bool r = true;
 		new_output_filename = filename;

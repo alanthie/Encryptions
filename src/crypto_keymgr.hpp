@@ -10,6 +10,7 @@
 #include "random_engine.hpp"
 #include "crc32a.hpp"
 #include "c_plus_plus_serializer.h"
+#include "crypto_dbmgr.hpp"
 
 namespace cryptoAL
 {
@@ -100,7 +101,7 @@ namespace keymgr
 			bool ok = true;
 			if (file_util::fileexists(fileDB) == false)
 			{
-				std::cerr << "WARNING no file: " << fileDB << std:: endl;
+				if (verbose) std::cerr << "WARNING no file: " << fileDB << std:: endl;
 				ok = false;
 			}
 
@@ -131,7 +132,6 @@ namespace keymgr
 
 				if (key_deleted == true)
 				{
-					// TODO not working...being resend
 					// backup
 					{
 						std::ofstream outfile;
@@ -140,7 +140,7 @@ namespace keymgr
 						outfile.close();
 					}
 
-					// save 
+					// save
 					{
                         std::ofstream out;
                         out.open(fileDB, std::ios_base::out);
@@ -158,7 +158,7 @@ namespace keymgr
 			bool ok = true;
 			if (file_util::fileexists(fileDB) == false)
 			{
-				std::cerr << "WARNING no file: " << fileDB << std:: endl;
+				if (verbose)std::cerr << "WARNING no file: " << fileDB << std:: endl;
 				ok = false;
 			}
 
@@ -189,7 +189,6 @@ namespace keymgr
 
 				if (key_deleted == true)
 				{
-					// TODO not working...being resend
 					// backup
 					{
 						std::ofstream outfile;
@@ -198,7 +197,7 @@ namespace keymgr
 						outfile.close();
 					}
 
-					// save 
+					// save
 					{
                         std::ofstream out;
                         out.open(fileDB, std::ios_base::out);
@@ -219,13 +218,12 @@ namespace keymgr
 			bool ok = true;
 			if (file_util::fileexists(fileDB) == false)
 			{
-				std::cerr << "WARNING no file: " << fileDB << std:: endl;
+				if (verbose) std::cerr << "WARNING no file: " << fileDB << std:: endl;
 				ok = false;
 			}
 
 			if (ok)
 			{
-				// TODO not working...being resend
                 {
                     std::ifstream infile;
                     infile.open(fileDB, std::ios_base::in);
@@ -253,7 +251,6 @@ namespace keymgr
 
 				if (key_deleted == true)
 				{
-					// TODO not working...
 					// backup
 					{
 						std::ofstream outfile;
@@ -262,7 +259,7 @@ namespace keymgr
 						outfile.close();
 					}
 
-					// save 
+					// save
 					{
                         std::ofstream out;
                         out.open(fileDB, std::ios_base::out);
@@ -278,7 +275,6 @@ namespace keymgr
 	bool merge_other_ecc_domain(const std::string& path_ecc_private_db, const std::string& path_ecc_other_db, bool& key_merged, [[maybe_unused]] bool verbose=false)
 	{
 		bool r = true;
-		//verbose=verbose;
 
 		std::string filePrivateECCDB = path_ecc_private_db  + ECC_DOMAIN_DB;
   		std::string fileStatusECCDB  = path_ecc_other_db    + ECC_DOMAIN_OTHER_DB;
@@ -336,7 +332,7 @@ namespace keymgr
 							key_merged = true;
 							map_eccdom_private.insert(std::make_pair(keyname, key_public));
 
-							if (VERBOSE_DEBUG)
+							if (verbose)
 							{
 								std::cout << "New ECC DOMAIN key has been ADDED: " << keyname << std::endl;
 							}
@@ -372,10 +368,9 @@ namespace keymgr
 		return r;
 	}
 
-	bool status_confirm_or_delete(const std::string& path_private_db, CRYPTO_FILE_TYPE t, bool& key_updated, [[maybe_unused]] bool verbose=false)
+	bool status_confirm_or_delete(cryptoAL::db::db_mgr& dbmgr, const std::string& path_private_db, CRYPTO_FILE_TYPE t, bool& key_updated, [[maybe_unused]] bool verbose=false)
 	{
 		bool r = true;
-		//verbose=verbose;
 		key_updated = false;
 		uint32_t cnt_deleted 	= 0;
 		uint32_t cnt_confirmed 	= 0;
@@ -385,7 +380,6 @@ namespace keymgr
 		    std::string filePrivateRSADB = path_private_db + RSA_MY_PRIVATE_DB;
             std::string fileStatusRSADB  = path_private_db + RSA_MY_STATUS_DB;
 
-			std::map< std::string, cryptoAL::rsa::rsa_key > map_rsa_private;
 			std::map< std::string, cryptoAL::rsa::rsa_key > map_rsa_status;
 
 			bool ok = true;
@@ -395,19 +389,27 @@ namespace keymgr
 			}
 			else if (file_util::fileexists(filePrivateRSADB) == false)
 			{
-				std::cerr << "WARNING no file: " << filePrivateRSADB << std:: endl;
+				if (verbose) std::cerr << "WARNING no file: " << filePrivateRSADB << std:: endl;
 				ok = false;
 			}
 
+
+			std::map<std::string, cryptoAL::rsa::rsa_key>* pmap_rsa = nullptr;
+			r = dbmgr.get_rsa_map(filePrivateRSADB, &pmap_rsa, false);
+			if (r == false)
+			{
+				std::cout << "dbmgr.get_rsa_map() == false" << std:: endl;
+				return false;
+			}
+			if (pmap_rsa == nullptr)
+			{
+				std::cout << "pmap_rsa == nullptr" << std:: endl;
+				return false;
+			}
+
+			std::map<std::string, cryptoAL::rsa::rsa_key>& map_rsa_private = *pmap_rsa;
 			if (ok)
 			{
-                {
-                    std::ifstream infile;
-                    infile.open(filePrivateRSADB, std::ios_base::in);
-                    infile >> bits(map_rsa_private);
-                    infile.close();
-				}
-
 				{
                     std::ifstream infile;
                     infile.open(fileStatusRSADB, std::ios_base::in);
@@ -433,9 +435,9 @@ namespace keymgr
 								mykey.dt_confirmed = cryptoAL::parsing::get_current_time_and_date();
 								cnt_confirmed++;
 
-								if (VERBOSE_DEBUG)
+								if (verbose)
                                 {
-                                    std::cout << "My RSA public key has been CONFIRMED: " << keyname << std::endl;
+                                    std::cout << "My RSA key has been CONFIRMED: " << keyname << std::endl;
                                 }
 							}
 						}
@@ -450,9 +452,18 @@ namespace keymgr
 								map_rsa_private.erase(keyname);
 								cnt_deleted++;
 
-								if (VERBOSE_DEBUG)
+								cryptoAL::db::transaction t;
+								{
+									t.key_type = "rsa";
+									t.key_name = keyname;
+									t.decoder_erase_key = true;
+									t.decoder_add_usage_count = false;
+								}
+								dbmgr.add_trans(t);
+
+								if (verbose)
                                 {
-                                    std::cout << "My RSA public key has been DELETED: " << keyname << std::endl;
+                                    std::cout << "My RSA key has been DELETED: " << keyname << std::endl;
                                 }
 							}
 						}
@@ -465,21 +476,7 @@ namespace keymgr
 
 				if (key_updated == true)
 				{
-					// backup
-					{
-						std::ofstream outfile;
-						outfile.open(filePrivateRSADB + ".bck", std::ios_base::out);
-						outfile << bits(map_rsa_private);
-						outfile.close();
-					}
-
-					// save private
-					{
-                        std::ofstream out;
-                        out.open(filePrivateRSADB, std::ios_base::out);
-                        out << bits(map_rsa_private);
-                        out.close();
-					}
+					dbmgr.mark_rsa_as_changed(filePrivateRSADB);
 				}
 			}
 		}
@@ -488,7 +485,6 @@ namespace keymgr
 			std::string filePrivateECCDB = path_private_db + ECCKEY_MY_PRIVATE_DB;
             std::string fileStatusECCDB  = path_private_db + ECC_MY_STATUS_DB;
 
-			std::map< std::string, ecc_key > map_ecc_private;
 			std::map< std::string, ecc_key > map_ecc_status;
 
 			bool ok = true;
@@ -498,19 +494,26 @@ namespace keymgr
 			}
 			else if (file_util::fileexists(filePrivateECCDB) == false)
 			{
-				std::cerr << "WARNING no file: " << filePrivateECCDB << std:: endl;
+				if (verbose) std::cerr << "WARNING no file: " << filePrivateECCDB << std:: endl;
 				ok = false;
 			}
 
+			std::map<std::string, cryptoAL::ecc_key>* pmap_ecc = nullptr;
+			r = dbmgr.get_ecckey_map(filePrivateECCDB, &pmap_ecc, false);
+			if (r == false)
+			{
+				std::cout << "dbmgr.get_ecckey_map() == false" << std:: endl;
+				return false;
+			}
+			if (pmap_ecc == nullptr)
+			{
+				std::cout << "pmap_ecc == nullptr" << std:: endl;
+				return false;
+			}
+			std::map<std::string, ecc_key>& map_ecc_private = *pmap_ecc;
+
 			if (ok)
 			{
-                {
-                    std::ifstream infile;
-                    infile.open(filePrivateECCDB, std::ios_base::in);
-                    infile >> bits(map_ecc_private);
-                    infile.close();
-                }
-
 				{
                     std::ifstream infile;
                     infile.open(fileStatusECCDB, std::ios_base::in);
@@ -535,7 +538,7 @@ namespace keymgr
 								mykey.dt_confirmed = cryptoAL::parsing::get_current_time_and_date();
 								cnt_confirmed++;
 
-								if (VERBOSE_DEBUG)
+								if (verbose)
                                 {
                                     std::cout << "My ECC public key has been CONFIRMED: " << keyname << std::endl;
                                 }
@@ -552,7 +555,16 @@ namespace keymgr
 								map_ecc_private.erase(keyname);
 								cnt_deleted++;
 
-								if (VERBOSE_DEBUG)
+								cryptoAL::db::transaction t;
+								{
+									t.key_type = "ecc";
+									t.key_name = keyname;
+									t.decoder_erase_key = true;
+									t.decoder_add_usage_count = false;
+								}
+								dbmgr.add_trans(t);
+
+								if (verbose)
                                 {
                                     std::cout << "My ECC public key has been DELETED: " << keyname << std::endl;
                                 }
@@ -563,21 +575,7 @@ namespace keymgr
 
 				if (key_updated == true)
 				{
-					// backup
-					{
-						std::ofstream outfile;
-						outfile.open(filePrivateECCDB + ".bck", std::ios_base::out);
-						outfile << bits(map_ecc_private);
-						outfile.close();
-					}
-
-					// save private
-					{
-						std::ofstream out;
-						out.open(filePrivateECCDB, std::ios_base::out);
-						out << bits(map_ecc_private);
-						out.close();
-					}
+					dbmgr.mark_ecckey_as_changed(filePrivateECCDB);
 				}
 			}
 		}
@@ -586,8 +584,7 @@ namespace keymgr
 			std::string filePrivateECCDB = path_private_db + ECC_DOMAIN_DB;
             std::string fileStatusECCDB  = path_private_db + ECCDOM_MY_STATUS_DB;
 
-			std::map< std::string, ecc_domain > map_ecc_private;
-			std::map< std::string, ecc_domain > map_ecc_status;
+			std::map<std::string, ecc_domain> map_ecc_status;
 
 			bool ok = true;
 			if (file_util::fileexists(fileStatusECCDB) == false)
@@ -596,19 +593,26 @@ namespace keymgr
 			}
 			else if (file_util::fileexists(filePrivateECCDB) == false)
 			{
-				std::cerr << "WARNING no file: " << filePrivateECCDB << std:: endl;
+				if (verbose) std::cerr << "WARNING no file: " << filePrivateECCDB << std:: endl;
 				ok = false;
 			}
 
+			std::map<std::string, cryptoAL::ecc_domain>* pmap_eccdom = nullptr;
+			r = dbmgr.get_eccdomain_map(filePrivateECCDB, &pmap_eccdom, false);
+			if (r == false)
+			{
+				std::cout << "dbmgr.get_eccdomain_map() == false" << std:: endl;
+				return false;
+			}
+			if (pmap_eccdom == nullptr)
+			{
+				std::cout << "pmap_eccdom == nullptr" << std:: endl;
+				return false;
+			}
+			std::map<std::string, ecc_domain>&  map_ecc_private = *pmap_eccdom;
+
 			if (ok)
 			{
-                {
-                    std::ifstream infile;
-                    infile.open(filePrivateECCDB, std::ios_base::in);
-                    infile >> bits(map_ecc_private);
-                    infile.close();
-                }
-
 				{
                     std::ifstream infile;
                     infile.open(fileStatusECCDB, std::ios_base::in);
@@ -633,7 +637,7 @@ namespace keymgr
 								mykey.dt_confirmed = cryptoAL::parsing::get_current_time_and_date();
 								cnt_confirmed++;
 
-								if (VERBOSE_DEBUG)
+								if (verbose)
                                 {
                                     std::cout << "My ECC DOMAIN key has been CONFIRMED: " << keyname << std::endl;
                                 }
@@ -650,6 +654,15 @@ namespace keymgr
 								map_ecc_private.erase(keyname);
 								cnt_deleted++;
 
+								cryptoAL::db::transaction t;
+								{
+									t.key_type = "eccdom";
+									t.key_name = keyname;
+									t.decoder_erase_key = true;
+									t.decoder_add_usage_count = false;
+								}
+								dbmgr.add_trans(t);
+
 								if (VERBOSE_DEBUG)
                                 {
                                     std::cout << "My ECC DOMAIN key has been DELETED: " << keyname << std::endl;
@@ -661,21 +674,7 @@ namespace keymgr
 
 				if (key_updated == true)
 				{
-					// backup
-					{
-						std::ofstream outfile;
-						outfile.open(filePrivateECCDB + ".bck", std::ios_base::out);
-						outfile << bits(map_ecc_private);
-						outfile.close();
-					}
-
-					// save private
-					{
-						std::ofstream out;
-						out.open(filePrivateECCDB, std::ios_base::out);
-						out << bits(map_ecc_private);
-						out.close();
-					}
+					dbmgr.mark_eccdom_as_changed(filePrivateECCDB);
 				}
 			}
 		}
@@ -699,7 +698,6 @@ namespace keymgr
         bool r 		= true;
 		key_exist 	= false;
 		uint32_t cnt = 0;
-		//verbose=verbose;
 
 		if (t == CRYPTO_FILE_TYPE::RSA_KEY_STATUS)
         {
@@ -712,7 +710,7 @@ namespace keymgr
 			bool ok = true;
 			if (file_util::fileexists(filePublicDB) == false)
 			{
-				//std::cerr << "WARNING no file: " << filePublicDB << std:: endl;
+				if (verbose) std::cerr << "WARNING no file: " << filePublicDB << std:: endl;
 				ok = false;
 			}
 
@@ -746,10 +744,8 @@ namespace keymgr
 
 						if (VERBOSE_DEBUG)
 						{
-							if (k.confirmed == false)
-								std::cout << "My RSA public key with status [confirmed == false] will be EXPORTED: " << keyname << std::endl;
-							else if (k.deleted == true)
-								std::cout << "My RSA public key with status [deleted == true] will be EXPORTED: " << keyname << std::endl;
+							if (k.confirmed == false) 	std::cout << "My RSA public key with status [confirmed == false] will be EXPORTED: " << keyname << std::endl;
+							else if (k.deleted == true) std::cout << "My RSA public key with status [deleted == true] will be EXPORTED: " << keyname << std::endl;
 						}
 					}
 				}
@@ -891,7 +887,6 @@ namespace keymgr
         bool r = true;
 		key_exist = false;
 		uint32_t cnt = 0;
-		//verbose=verbose;
 
         if (t == CRYPTO_FILE_TYPE::RSA_PUBLIC)
         {
@@ -938,7 +933,7 @@ namespace keymgr
 					out.close();
 				}
 
-				if (VERBOSE_DEBUG)
+				if (verbose)
 				{
 					std::cout << "Number of RSA public keys to export: " << cnt << std::endl;
 				}
@@ -988,7 +983,7 @@ namespace keymgr
 					out.close();
 				}
 
-				if (VERBOSE_DEBUG)
+				if (verbose)
 				{
 					std::cout << "Number of ECC public keys to export: " << cnt << std::endl;
 				}
@@ -1039,7 +1034,7 @@ namespace keymgr
 					out.close();
 				}
 
-				if (VERBOSE_DEBUG)
+				if (verbose)
 				{
 					std::cout << "Number of ECC DOMAIN keys to export: " << cnt << std::endl;
 				}
@@ -1086,7 +1081,7 @@ namespace keymgr
 					outstream.close();
 				}
 
-				if (VERBOSE_DEBUG)
+				if (verbose)
 				{
 					std::cout << "Number of HH public keys to export: " << cnt << std::endl;
 				}
@@ -1108,9 +1103,9 @@ namespace keymgr
 		bool key_exist[4] = {false};
         bool r = true;
 
-		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- "<< std::endl;
-		if (VERBOSE_DEBUG) std::cout << "Exporting public keys: "<< std::endl;
-		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- "<< std::endl;
+		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
+		if (verbose) std::cout << "Exporting public keys: "<< std::endl;
+		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
 
         if (r) r = export_public_key(folder_my_private_rsa  , CRYPTO_FILE_TYPE::RSA_PUBLIC, key_exist[0], verbose);
         if (r) r = export_public_key(folder_my_private_ecc  , CRYPTO_FILE_TYPE::ECC_PUBLIC, key_exist[1], verbose);
@@ -1124,7 +1119,7 @@ namespace keymgr
 			if (key_exist[2]) vout.emplace_back(folder_my_private_ecc  , CRYPTO_FILE_TYPE::ECC_DOMAIN);
             if (key_exist[3]) vout.emplace_back(folder_my_private_hh   , CRYPTO_FILE_TYPE::HH_PUBLIC);
         }
-		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- " << std::endl << std::endl;
+		if (verbose) std::cout << "-------------------------------------- " << std::endl << std::endl;
         return r;
 	}
 
@@ -1136,9 +1131,9 @@ namespace keymgr
 	{
 		bool key_exist[4] = {false};
         bool r = true;
-		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- "<< std::endl;
-		if (VERBOSE_DEBUG) std::cout << "Exporting other status keys: "<< std::endl;
-		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- "<< std::endl;
+		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
+		if (verbose) std::cout << "Exporting other status keys: "<< std::endl;
+		if (verbose) std::cout << "-------------------------------------- "<< std::endl;
 
         if (r) r = export_public_status_key(folder_other_public_rsa  , CRYPTO_FILE_TYPE::RSA_KEY_STATUS, key_exist[0], verbose);
         if (r) r = export_public_status_key(folder_other_public_ecc  , CRYPTO_FILE_TYPE::ECC_KEY_STATUS, key_exist[1], verbose);
@@ -1152,7 +1147,7 @@ namespace keymgr
 			if (key_exist[2]) vout.emplace_back(folder_other_public_ecc  , CRYPTO_FILE_TYPE::ECC_DOM_STATUS);
             if (key_exist[3]) vout.emplace_back(folder_other_public_hh   , CRYPTO_FILE_TYPE::HH_KEY_STATUS);
         }
-		if (VERBOSE_DEBUG) std::cout << "-------------------------------------- "<< std::endl<< std::endl;
+		if (verbose) std::cout << "-------------------------------------- "<< std::endl<< std::endl;
         return r;
 	}
 
@@ -1295,19 +1290,6 @@ namespace keymgr
 			/*
 			else if (newkeys)
 			{
-				// count key usage
-				uint32_t cnt_usage_zero = 0;
-				for(auto& [kname, key] : map_ecc_public)
-				{
-                    if (key,usage_count == 0)
-                        cnt_usage_zero++;
-				}
-				if (cnt_usage_zero < n)
-				{
-					// generate new ECC keys;
-					// compute vmapkeyname with cnt_usage == 0
-					// .....
-				}
 			}
 			*/
 		}

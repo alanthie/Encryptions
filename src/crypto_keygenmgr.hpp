@@ -139,7 +139,14 @@ namespace keygenerator
 										cnt_to_delete++;
 										k.deleted = true; // mark for delete
 										dbmgr.mark_rsa_as_changed(local_rsa_db);
-										//TODO std::cout << "key mark for delete " << keyname << std::endl;
+										cryptoAL::db::transaction t;
+										{
+											t.key_type = "rsa";
+											t.key_name = keyname;
+											t.key_gen_add = false;
+											t.key_gen_mark_del = true;
+										}
+										dbmgr.add_trans(t);
 									}
 								}
 							}
@@ -204,6 +211,14 @@ namespace keygenerator
 									// Insert
 									map_rsa.insert(std::make_pair(keyname,  rkey));
 									dbmgr.mark_rsa_as_changed(local_rsa_db);
+									cryptoAL::db::transaction t;
+									{
+										t.key_type = "rsa";
+										t.key_name = keyname;
+										t.key_gen_add = true;
+										t.key_gen_mark_del = false;
+									}
+									dbmgr.add_trans(t);
 
 									if (verbose) std::cout << "key saved as: "  << keyname << std:: endl;
 								}
@@ -235,7 +250,14 @@ namespace keygenerator
 									// Insert
 									map_rsa.insert(std::make_pair(keyname,  rkey));
 									dbmgr.mark_rsa_as_changed(local_rsa_db);
-
+									cryptoAL::db::transaction t;
+									{
+										t.key_type = "rsa";
+										t.key_name = keyname;
+										t.key_gen_add = true;
+										t.key_gen_mark_del = false;
+									}
+									dbmgr.add_trans(t);
 									if (verbose) std::cout << "key saved as: "  << keyname  << std:: endl;
 								}
 							}
@@ -267,18 +289,25 @@ namespace keygenerator
 									// Insert
 									map_rsa.insert(std::make_pair(keyname,  rkey));
 									dbmgr.mark_rsa_as_changed(local_rsa_db);
-
+									cryptoAL::db::transaction t;
+									{
+										t.key_type = "rsa";
+										t.key_name = keyname;
+										t.key_gen_add = true;
+										t.key_gen_mark_del = false;
+									}
+									dbmgr.add_trans(t);
 									if (verbose) std::cout << "key saved as: "  << keyname << std:: endl;
 								}
 							}
 						}
 						if (cnt_gen_required > 0) if (verbose) std::cout << std:: endl;
 					}
-					
+
 					// SAVE
 					dbmgr.flush(true);
 				}
-				
+
 				work_todo = false;
 			}
 
@@ -364,7 +393,14 @@ namespace keygenerator
 										cnt_to_delete++;
 										k.deleted = true; // mark for delete
 										dbmgr.mark_ecckey_as_changed(local_ecckey_db);
-										//TODO std::cout << "key mark for delete " << keyname << std::endl;
+										cryptoAL::db::transaction t;
+										{
+											t.key_type = "ecckey";
+											t.key_name = keyname;
+											t.key_gen_add = false;
+											t.key_gen_mark_del = true;
+										}
+										dbmgr.add_trans(t);
 									}
 								}
 							}
@@ -451,7 +487,7 @@ namespace keygenerator
 							work_todo = false;
 							return false;
 						}
-						
+
 						if (verbose) std::cout << "---------------------------------" << std::endl;
 						if (verbose) std::cout << "Required number of new ECC keys: "  << cnt_gen_required << std::endl;
 						if (verbose) std::cout << "ECC key bit size:                " << bits << std::endl;
@@ -478,16 +514,25 @@ namespace keygenerator
 								map_ecckey.insert(std::make_pair(keyname, ek));
 								dbmgr.mark_ecckey_as_changed(local_ecckey_db);
 
+								cryptoAL::db::transaction t;
+								{
+									t.key_type = "ecckey";
+									t.key_name = keyname;
+									t.key_gen_add = true;
+									t.key_gen_mark_del = false;
+								}
+								dbmgr.add_trans(t);
+
 								if (verbose) std::cout << "ecc key saved as: "  << keyname << std:: endl;
 							}
 						}
 						if (cnt_gen_required > 0) if (verbose) std::cout << std:: endl;
 					}
-					
+
 					// SAVE
 					dbmgr.flush(true);
 				}
-				
+
 				work_todo = false;
 			}
 

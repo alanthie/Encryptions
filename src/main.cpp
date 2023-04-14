@@ -25,6 +25,7 @@
 #include "vigenere.hpp"
 #include "data.hpp"
 #include "crypto_keygenmgr.hpp"
+#include "crypto_showkeys.hpp"
 
 // ../../../bin/Release/crypto encode -i msg.zip -u urls.txt  -l ./sam/local/ -v 1 -g 1 -rpv ./me/ -rpu ./sam/ -epv ./me/ -epu ./sam/ -hpv ./me/ -hpu ./sam/ -a 1
 //
@@ -267,6 +268,16 @@ int main_crypto(int argc, char **argv)
                 .help("set verbose level (-v 1, for debug: -v debug");
         }
 
+		// showkeys subcommand
+        argparse::ArgumentParser showkeys_command("showkeys");
+        {
+            showkeys_command.add_description("show keys rsa and ecc");
+
+          	showkeys_command.add_argument("-cfg", "--cfg")
+                .default_value(std::string(""))
+                .help("specify a config file.");
+		}
+
         // Encode subcommand
         argparse::ArgumentParser encode_command("encode");
         {
@@ -496,6 +507,7 @@ int main_crypto(int argc, char **argv)
         program.add_subparser(hex_command);
         program.add_subparser(dump_command);
         program.add_subparser(keygen_command);
+		program.add_subparser(showkeys_command);
 
         // Parse the arguments
         try {
@@ -816,6 +828,16 @@ int main_crypto(int argc, char **argv)
             }
         }
 
+       // showkeys command
+        if (program.is_subcommand_used("showkeys"))
+        {
+            auto& cmd = showkeys_command;
+			auto cfg = cmd.get<std::string>("--cfg");
+
+			cryptoAL::report r(cfg);
+			r.show_keys();
+			return 0;
+		}
 
         // Encode command
         if (program.is_subcommand_used("encode"))

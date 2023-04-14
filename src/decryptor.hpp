@@ -594,7 +594,7 @@ public:
 						if (r)
 						{
 							dbmgr.add_to_usage_count_rsa(rsa_key_at_iter, local_rsa_db);
-
+							
 							if (riter != 0)
 							{
 								uint32_t msg_size_produced;
@@ -2529,7 +2529,7 @@ public:
 		//	confirm_history_key() will re-read histo file
 		//	kpriv.update_confirmed(true);
 		//	map_histo[seq] = kpriv;
-		dbmgr.update();
+		dbmgr.flush();
 
         r = datalist.read_write_from(   decrypted_data, filename_decrypted_data,
                                         folder_other_public_rsa,
@@ -2587,25 +2587,25 @@ public:
             bool ok[4] = {true};
             bool key_updated[4] = {false};
 
-            ok[0] = keymgr::status_confirm_or_delete(folder_my_private_rsa, CRYPTO_FILE_TYPE::RSA_KEY_STATUS , key_updated[0], verbose);
+            ok[0] = keymgr::status_confirm_or_delete(dbmgr, folder_my_private_rsa, CRYPTO_FILE_TYPE::RSA_KEY_STATUS , key_updated[0], verbose);
             if (ok[0]==false)
             {
                 std::cerr << "WARNING failed to update rsa keys status " << std:: endl;
             }
 
-            ok[1] = keymgr::status_confirm_or_delete(folder_my_private_ecc, CRYPTO_FILE_TYPE::ECC_KEY_STATUS , key_updated[1], verbose);
+            ok[1] = keymgr::status_confirm_or_delete(dbmgr, folder_my_private_ecc, CRYPTO_FILE_TYPE::ECC_KEY_STATUS , key_updated[1], verbose);
             if (ok[1]==false)
             {
                 std::cerr << "WARNING failed to update ecc keys status " << std:: endl;
             }
 
-            ok[2] = keymgr::status_confirm_or_delete(folder_my_private_hh,  CRYPTO_FILE_TYPE::HH_KEY_STATUS ,  key_updated[2], verbose);
+            ok[2] = keymgr::status_confirm_or_delete(dbmgr, folder_my_private_hh,  CRYPTO_FILE_TYPE::HH_KEY_STATUS ,  key_updated[2], verbose);
             if (ok[2]==false)
             {
                 std::cerr << "WARNING failed to update hh keys status " << std:: endl;
             }
 
-			ok[3] = keymgr::status_confirm_or_delete(folder_my_private_ecc,  CRYPTO_FILE_TYPE::ECC_DOM_STATUS ,  key_updated[3], verbose);
+			ok[3] = keymgr::status_confirm_or_delete(dbmgr, folder_my_private_ecc,  CRYPTO_FILE_TYPE::ECC_DOM_STATUS ,  key_updated[3], verbose);
             if (ok[3]==false)
             {
                 std::cerr << "WARNING failed to update ecc domain keys status " << std:: endl;
@@ -2618,24 +2618,26 @@ public:
 			bool ok = keymgr::merge_other_ecc_domain(folder_my_private_ecc, folder_other_public_ecc, key_merged, verbose);
 			if (ok == false)
 			{
-                std::cerr << "WARNING failed to maerge ecc domain keys status " << std:: endl;
+                std::cerr << "WARNING failed to merge ecc domain keys status " << std:: endl;
 			}
 		}
 
 		if (r)
         {
+			// Nothing todo! - The next export will override other public keys anyway after being deleted at the source from delete confirmation status
 			// WHEN to do it: was already marked as deleted and did not receive another deleted record this decode (encode sent a confimation before)
 			// cleanup public other [k.deleted == true]
-
+/*
 			bool ok[3] = {true};
             bool key_deleted[3] = {false};
 			ok[0] = keymgr::delete_public_keys_marked_for_deleting(folder_other_public_rsa, CRYPTO_FILE_TYPE::RSA_PUBLIC , key_deleted[0]);
 			ok[1] = keymgr::delete_public_keys_marked_for_deleting(folder_other_public_ecc, CRYPTO_FILE_TYPE::ECC_PUBLIC , key_deleted[1]);
 			ok[2] = keymgr::delete_public_keys_marked_for_deleting(folder_other_public_hh,  CRYPTO_FILE_TYPE::HH_PUBLIC , key_deleted[2]);
 			//...
-
+*/
 		}
 
+		dbmgr.flush();
         return r;
     }
 

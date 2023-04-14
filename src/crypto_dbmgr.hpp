@@ -3,6 +3,7 @@
 
 #include "crypto_const.hpp"
 #include "crypto_ecckey.hpp"
+#include "crypto_cfg.hpp"
 #include "qa/rsa_gen.hpp"
 #include "crypto_history.hpp"
 #include "crypto_key_parser.hpp"
@@ -25,6 +26,17 @@ namespace db
 {
 	const bool SHOWDEBUG = false;
 
+	struct transaction
+	{
+		std::string key_type; // "rsa"
+		std::string key_name;
+		uint32_t keyseq;
+		bool key_gen_add = false;
+		bool key_gen_mark_del = false;
+		bool decoder_erase_key = false;
+		bool decoder_add_usage_count = false;
+	};
+
     class db_mgr
     {
     public:
@@ -40,17 +52,40 @@ namespace db
 		std::map<std::string, std::map<uint32_t, cryptoAL::history_key>*>  	    multimap_hh_encode;
 		std::map<std::string, std::map<uint32_t, cryptoAL::history_key>*>  	    multimap_hh_decode;
 
+		std::vector<transaction> vtrans;
+
 		crypto_cfg& cfg;
 
         db_mgr(crypto_cfg& c) : cfg(c) {}
 
 		~db_mgr()
 		{
-			flush(true);
+			//flush(true); // better to control it, not always with merge
+			clear();
+		}
+
+		void add_trans(transaction& t)
+		{
+			vtrans.push_back(t);
+		}
+
+		transaction* get_trans(const std::string& keyname)
+		{
+			transaction* r = nullptr;
+			for(size_t i=0;i<vtrans.size();i++)
+			{
+				if (vtrans[i].key_name == keyname)
+				{
+					r = &vtrans[i];
+					break;
+				}
+			}
+			return r;
 		}
 
 		void flush(bool merge_with_file = false)
 		{
+			//std::cout << "db_mgr FLUSH merge = " << merge_with_file << std::endl;
 			update(merge_with_file);
 			clear();
 		}
@@ -338,6 +373,17 @@ namespace db
 				map_private_key_rsa_update[pathdb] = true;
 			}
 		}
+		void mark_eccdom_as_changed(const std::string& pathdb)
+		{
+			if (file_util::is_file_private(pathdb) == false)
+			{
+				if (SHOWDEBUG) std::cerr << "mark_reccdom_as_changed FAILED " << pathdb  << std::endl;
+			}
+			else
+			{
+				map_private_key_eccdom_update[pathdb] = true;
+			}
+		}
 
 		void merge_ecckey(	bool already_in_lock,
                         	const std::string& pathdb,
@@ -362,14 +408,22 @@ namespace db
 					{
 						if (temp_map->find(keyname) == temp_map->end())
 						{
-						 	// mark for delete
+							// mark for delete
 							if (k.deleted == false)
-								temp_map->insert(std::make_pair(keyname,  k));
+							{
+								transaction* r = get_trans(keyname);
+								if ((r != nullptr) && (r->key_gen_add == true))
+									temp_map->insert(std::make_pair(keyname,  k));
+							}
 						}
 						else
 						{
 							if (k.deleted == true)
-								(*temp_map)[keyname].deleted = true;
+							{
+								transaction* r = get_trans(keyname);
+								if ((r != nullptr) && (r->key_gen_mark_del == true))
+									(*temp_map)[keyname].deleted = true;
+							}
 						}
 					}
 
@@ -405,14 +459,22 @@ namespace db
 							{
 								if (temp_map->find(keyname) == temp_map->end())
 								{
-						 			// mark for delete
+									// mark for delete
 									if (k.deleted == false)
-										temp_map->insert(std::make_pair(keyname,  k));
+									{
+										transaction* r = get_trans(keyname);
+										if ((r != nullptr) && (r->key_gen_add == true))
+											temp_map->insert(std::make_pair(keyname,  k));
+									}
 								}
 								else
 								{
 									if (k.deleted == true)
-										(*temp_map)[keyname].deleted = true;
+									{
+										transaction* r = get_trans(keyname);
+										if ((r != nullptr) && (r->key_gen_mark_del == true))
+											(*temp_map)[keyname].deleted = true;
+									}
 								}
 							}
 						}
@@ -478,12 +540,20 @@ namespace db
 						{
 							// mark for delete
 							if (k.deleted == false)
-								temp_map->insert(std::make_pair(keyname,  k));
+							{
+								transaction* r = get_trans(keyname);
+								if ((r != nullptr) && (r->key_gen_add == true))
+									temp_map->insert(std::make_pair(keyname,  k));
+							}
 						}
 						else
 						{
 							if (k.deleted == true)
-								(*temp_map)[keyname].deleted = true;
+							{
+								transaction* r = get_trans(keyname);
+								if ((r != nullptr) && (r->key_gen_mark_del == true))
+									(*temp_map)[keyname].deleted = true;
+							}
 						}
 					}
 				}
@@ -521,12 +591,20 @@ namespace db
 								{
 									// mark for delete
 									if (k.deleted == false)
-										temp_map->insert(std::make_pair(keyname,  k));
+									{
+										transaction* r = get_trans(keyname);
+										if ((r != nullptr) && (r->key_gen_add == true))
+											temp_map->insert(std::make_pair(keyname,  k));
+									}
 								}
 								else
 								{
 									if (k.deleted == true)
-										(*temp_map)[keyname].deleted = true;
+									{
+										transaction* r = get_trans(keyname);
+										if ((r != nullptr) && (r->key_gen_mark_del == true))
+											(*temp_map)[keyname].deleted = true;
+									}
 								}
 							}
 						}
@@ -561,7 +639,7 @@ namespace db
 		{
             try
             {
-				//multimap_eccdom read only ?
+				//multimap_eccdom........
 
                 // save
                 for(auto& [pathdb, b] : map_private_key_rsa_update)
@@ -664,7 +742,6 @@ namespace db
 											outfile.close();
 										}
 
-										// save
 										{
 											std::ofstream out;
 											out.open(pathdb, std::ios_base::out);
@@ -724,7 +801,6 @@ namespace db
 											outfile.close();
 										}
 
-										// save
 										{
 											std::ofstream out;
 											out.open(pathdb, std::ios_base::out);
@@ -819,13 +895,13 @@ namespace db
 			}
 			catch(...)
 			{
-                if (SHOWDEBUG) std::cerr << "db_mgr update EXCEPTION " << std::endl;
+                std::cerr << "db_mgr update EXCEPTION " << std::endl;
 			}
 		}
 
 		void clear()
 		{
-			if (SHOWDEBUG) std::cout << "clear " << std::endl;
+			//std::cout << "clear " << std::endl;
             try
             {
                 // delete memory
@@ -901,6 +977,15 @@ namespace db
 			if (file_util::is_file_private(pathdb) == false)
 				return false;
 
+			cryptoAL::db::transaction t;
+			{
+				t.key_type = "hh";
+				t.keyseq = keyseq;
+				t.decoder_erase_key = false;
+				t.decoder_add_usage_count = true;
+			}
+			add_trans(t);
+
             bool r = true;
 			std::map<uint32_t, cryptoAL::history_key>* pmap  = nullptr;
 
@@ -950,6 +1035,15 @@ namespace db
 			if (file_util::is_file_private(pathdb) == false)
 				return false;
 
+			cryptoAL::db::transaction t;
+			{
+				t.key_type = "hh";
+				t.keyseq = keyseq;
+				t.decoder_erase_key = false;
+				t.decoder_add_usage_count = true;
+			}
+			add_trans(t);
+
 			bool r = true;
 			std::map<uint32_t, cryptoAL::history_key>* pmap  = nullptr;
 
@@ -998,6 +1092,15 @@ namespace db
 		{
 			if (file_util::is_file_private(pathdb) == false)
 				return false;
+
+			cryptoAL::db::transaction t;
+			{
+				t.key_type = "rsa";
+				t.key_name = key_name;
+				t.decoder_erase_key = false;
+				t.decoder_add_usage_count = true;
+			}
+			add_trans(t);
 
 			bool r = true;
 			std::map<std::string, cryptoAL::rsa::rsa_key>* pmap  = nullptr;
@@ -1050,6 +1153,15 @@ namespace db
 				std::cerr << "ERROR no file: " << pathdb << std::endl;
 				return false;
 			}
+
+			cryptoAL::db::transaction t;
+			{
+				t.key_type = "ecc";
+				t.key_name = key_name;
+				t.decoder_erase_key = false;
+				t.decoder_add_usage_count = true;
+			}
+			add_trans(t);
 
             bool r = true;
 			std::map<std::string, cryptoAL::ecc_key>* pmap  = nullptr;
