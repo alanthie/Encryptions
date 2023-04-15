@@ -31,13 +31,13 @@ enum keyspec_composition_mode
 {
 	None		= 0,
 	Recursive	= 1,
-	BlockSplit	= 2
+	Linear		= 2
 };
 
 struct keyspec
 {
 	// [e]MY_RSAKEY_8100_2023-03-08_11:35:16
-	// [mode]block;[e]MY_RSAKEY_8100_2023-03-08_11:35:16;[r]MY_RSAKEY_8100_2023-03-08_11:35:16;
+	// [mode]linear;[e]MY_RSAKEY_8100_2023-03-08_11:35:16;[r]MY_RSAKEY_8100_2023-03-08_11:35:16;
 	// [mode]recur;[r:]last=10,first=4,rnd=2;[e:]last=10,first=4,rnd=2,new=4;
 	keyspec_type ktype 		= keyspec_type::Unknown;
 
@@ -68,15 +68,10 @@ struct keyspec
 struct keyspec_composite
 {
 	std::vector<keyspec> vkeyspec;
-	keyspec_composition_mode mode = keyspec_composition_mode::Recursive;
+	keyspec_composition_mode mode = keyspec_composition_mode::Linear;
 
     void show()
     {
-		if (vkeyspec.size() > 1)
-		{
-			if 		(mode == keyspec_composition_mode::BlockSplit) std::cout << "   mode = block" << std::endl;
-			else if (mode == keyspec_composition_mode::Recursive)  std::cout << "   mode = recursive" << std::endl;
-		}
         for(size_t i=0;i<vkeyspec.size();i++)
         {
 			if (vkeyspec[i].is_spec)
@@ -87,17 +82,22 @@ struct keyspec_composite
         }
     }
 
-	std::string format_key_line(int fmt, bool verbose = false)
+	std::vector<std::string> format_key_line(int fmt, bool verbose = false)
 	{
         verbose=verbose;
+
+		std::vector<std::string> rr;
 		std::string r;
-		if (fmt!=1) return r;
+		if (fmt!=1) return rr;
 
 		// TODO...
 		// old format, no mixing of recursive keys
 		bool 		start_token_done = false;
 		std::string start_token;
 		keyspec_type start_type;
+
+		bool linear = false;
+		if (mode == keyspec_composition_mode::Linear) linear = true;
 
 		for(size_t i=0;i<vkeyspec.size();i++)
         {
@@ -133,11 +133,29 @@ struct keyspec_composite
 							start_token_done = true;
 							r += start_token;
 							r += vkeyspec[i].vmaterialized_keyname[j];
+
+							if (linear)
+							{
+								r = start_token;
+								r += vkeyspec[i].vmaterialized_keyname[j];
+								rr.push_back(r);
+								r = "";
+							}
 						}
 						else if (vkeyspec[i].ktype == start_type)
 						{
-							r += ";";
-							r += vkeyspec[i].vmaterialized_keyname[j];
+							if (linear)
+							{
+								r = start_token;
+								r += vkeyspec[i].vmaterialized_keyname[j];
+								rr.push_back(r);
+								r = "";
+							}
+							else
+							{
+								r += ";";
+								r += vkeyspec[i].vmaterialized_keyname[j];
+							}
 						}
 						else
 						{
@@ -173,11 +191,29 @@ struct keyspec_composite
 					start_token_done = true;
 					r += start_token;
 					r += vkeyspec[i].keyname;
+
+					if (linear)
+					{
+						r = start_token;
+						r += vkeyspec[i].keyname;
+						rr.push_back(r);
+						r = "";
+					}
 				}
 				else if (vkeyspec[i].ktype == start_type)
 				{
-					r += ";";
-					r += vkeyspec[i].keyname;
+					if (linear)
+					{
+						r = start_token;
+						r += vkeyspec[i].keyname;
+						rr.push_back(r);
+						r = "";
+					}
+					else
+					{
+						r += ";";
+						r += vkeyspec[i].keyname;
+					}
 				}
 				else
 				{
@@ -185,8 +221,10 @@ struct keyspec_composite
 				}
 			}
         }
+		if (linear == false)
+			rr.push_back(r);
 
-		return r;
+		return rr;
 	}
 };
 
@@ -209,7 +247,10 @@ public:
 		std::cout << "--------------------------------------" << std::endl;
         for(size_t i=0;i<vkeyspec_composite.size();i++)
 		{
-            std::cout << "key line [" << i << "]:" << std::endl;
+            std::cout << "key line [" << i << "]";
+			if 		(vkeyspec_composite[i].mode == keyspec_composition_mode::Linear) 		std::cout << "[mode=linear]";
+			else if (vkeyspec_composite[i].mode == keyspec_composition_mode::Recursive)  	std::cout << "[mode=recursive]";
+			std::cout << " : "<< std::endl;
             vkeyspec_composite[i].show();
 		}
 		std::cout << "--------------------------------------" << std::endl;
@@ -251,8 +292,8 @@ public:
 			}
 			else
 			{
-				if (cryptoAL::VERBOSE_DEBUG)
-					std::cout << "parsing line :" << vlines[i] << std::endl;
+				if (cryptoAL::VERBOSE_DEBUG) std::cout << "parsing line :" << vlines[i] << std::endl;
+
 				keyspec_composite c = parse_keyspec_composite(vlines[i]);
 				if (c.vkeyspec.size() > 0)
 					vkeyspec_composite.push_back( c);
@@ -274,11 +315,11 @@ public:
 
 		keyspec_composition_mode m;
 		std::vector<std::string> v = parsing::split(line, ";");
+		
+		is_mode = false;
 		for(size_t i=0;i<v.size();i++)
 		{
 			k.ktype = keyspec_type::Unknown;
-			is_mode = false;
-			
 			if (strutil::has_token("[mode]",v[i], 0))
 			{
 				m = parse_mode(v[i]);
@@ -307,16 +348,61 @@ public:
 			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384), v[i], 0)) 	k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384),0, keyspec_type::wbaes_16384, false,  v[i]);
 			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768), v[i], 0)) 	k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768),0, keyspec_type::wbaes_32768, false,  v[i]);
 
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes512,true),  v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes512,true)  ,0, keyspec_type::wbaes_512,  true,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes1024,true), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes1024,true) ,0, keyspec_type::wbaes_1024,  true,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes2048,true), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes2048,true) ,0, keyspec_type::wbaes_2048,  true,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes4096,true), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes4096,true) ,0, keyspec_type::wbaes_4096,  true,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes8192,true), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes8192,true) ,0, keyspec_type::wbaes_8192,  true,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384,true), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384,true) ,0, keyspec_type::wbaes_16384,  true,  v[i]);
+			else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768,true), v[i], 0)) k = parse_key(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768,true) ,0, keyspec_type::wbaes_32768,  true,  v[i]);
+
 			if (k.ktype != keyspec_type::Unknown)
 			{
 				r.vkeyspec.push_back(k);
 			}
-			else if (is_mode == false)
+		}
+		
+		if (is_mode == false)
+		{
+			for(size_t i=0;i<v.size();i++)
 			{
-				if (cryptoAL::VERBOSE_DEBUG)
-					std::cout << "WARNING unrecognized or missing [token] in line :" << line << std::endl;
+				if      (strutil::has_token("[r:]", v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Recursive; break;}
+				else if (strutil::has_token("[e:]", v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Recursive; break;}
+				else if (strutil::has_token("[h:]", v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token("[l:]", v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token("[w:]", v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token("[v:]", v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token("[f:]", v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Linear; break;}
+				
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes512,true),  v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes1024,true), v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes2048,true), v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes4096,true), v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes8192,true), v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384,true), v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768,true), v[i], 0)) {is_mode = true;r.mode =keyspec_composition_mode::Linear; break;}
 			}
 		}
+		else
+		{
+			for(size_t i=0;i<v.size();i++)
+			{
+				if      (strutil::has_token("[h:]", v[i], 0)) {if (r.mode==keyspec_composition_mode::Recursive) r.mode = keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token("[l:]", v[i], 0)) {if (r.mode==keyspec_composition_mode::Recursive) r.mode = keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token("[w:]", v[i], 0)) {if (r.mode==keyspec_composition_mode::Recursive) r.mode = keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token("[v:]", v[i], 0)) {if (r.mode==keyspec_composition_mode::Recursive) r.mode = keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token("[f:]", v[i], 0)) {if (r.mode==keyspec_composition_mode::Recursive) r.mode = keyspec_composition_mode::Linear; break;}
+				
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes512,true), v[i], 0))  {if (r.mode==keyspec_composition_mode::Recursive) r.mode = keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes1024,true), v[i], 0)) {if (r.mode==keyspec_composition_mode::Recursive) r.mode = keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes2048,true), v[i], 0)) {if (r.mode==keyspec_composition_mode::Recursive) r.mode = keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes4096,true), v[i], 0)) {if (r.mode==keyspec_composition_mode::Recursive) r.mode = keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes8192,true), v[i], 0)) {if (r.mode==keyspec_composition_mode::Recursive) r.mode = keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes16384,true), v[i], 0)) {if (r.mode==keyspec_composition_mode::Recursive) r.mode = keyspec_composition_mode::Linear; break;}
+				else if (strutil::has_token(token_wbaes_algo(CRYPTO_ALGO::ALGO_wbaes32768,true), v[i], 0)) {if (r.mode==keyspec_composition_mode::Recursive) r.mode = keyspec_composition_mode::Linear; break;}
+			}
+		}
+		
 		return r;
 	}
 
@@ -324,8 +410,8 @@ public:
 	keyspec_composition_mode parse_mode(const std::string& keydesc)
 	{
 		std::string s = keydesc.substr(std::string("[mode]").size());
-		if 		(s==std::string("block")) return keyspec_composition_mode::BlockSplit;
-		else if (s==std::string("recur")) return keyspec_composition_mode::Recursive;
+		if 		(s==std::string("linear")) return keyspec_composition_mode::Linear;
+		else if (s==std::string("recur" )) return keyspec_composition_mode::Recursive;
 		else return keyspec_composition_mode::None;
 	}
 

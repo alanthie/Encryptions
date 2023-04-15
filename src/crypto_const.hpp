@@ -89,11 +89,12 @@ inline CRYPTO_ALGO wbaes_algo_from_uint16(uint16_t t)
     else if (t==(uint16_t)CRYPTO_ALGO::ALGO_wbaes32768) return CRYPTO_ALGO::ALGO_wbaes32768;
     return CRYPTO_ALGO::ALGO_NONE;
 }
-inline std::string token_wbaes_algo(CRYPTO_ALGO t)
+inline std::string token_wbaes_algo(CRYPTO_ALGO t, bool with_dots=false)
 {
     std::string s = algo_wbaes_name(t);
     if (s.size() > 0)
     {
+		if (with_dots) return "[" + s + ":]";
         return "[" + s + "]";
     }
     return "";

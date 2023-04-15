@@ -196,7 +196,7 @@ Example of urls.txt:
 ;RSA public keys given by recipient (sam) in ./sam/
 [r]MY_RSAKEY_2048_2023-03-25_14:29:11
 [r]MY_RSAKEY_2048_2023-03-25_14:29:11;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;
-[mode]block;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;
+[mode]linear;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;[r]MY_RSAKEY_2048_2023-03-25_14:29:11;
 [r:]last=10,first=6,random=7;[r:]last=1,first=2,random=25;
 
 ;ECC public keys given by recipient (sam) in ./sam/
@@ -207,6 +207,12 @@ Example of urls.txt:
 
 ;Whitebox AES 512 bits to AES 32k bits
 [aes16384]z_20230329163702
+
+;Misc
+[mode]linear;[r:]last=1,first=1,random=2;
+[mode]linear;[h:]last=1,first=1,random=2;
+[mode]linear;[l:]last=1,first=1,random=2;
+[mode]linear;[aes512:]last=1,first=1,random=2;
 </pre>
  
 Example of config file:

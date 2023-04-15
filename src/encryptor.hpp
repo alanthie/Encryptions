@@ -254,6 +254,8 @@ public:
 																folder_other_public_ecc,
 																folder_my_private_hh,
 																folder_my_private_ecc,
+																folder_local,
+																wbaes_other_public_path,
 																verbose);
 							if (t==false)
 							{
@@ -262,7 +264,7 @@ public:
 						}
 					}
 				}
-				if (VERBOSE_DEBUG)
+				if (verbose)
 					kp.show();
 
 				// REPEAT n times if have [repeat]n
@@ -270,7 +272,7 @@ public:
 				if (repeat<=1) repeat=1;
 				if (repeat > 1)
 				{
-					if (VERBOSE_DEBUG) std::cout << "REPEAT: " << repeat << std::endl;
+					if (verbose) std::cout << "REPEAT: " << repeat << std::endl;
 				}
 
 				for (long r = 0; r < repeat; r++)
@@ -278,31 +280,45 @@ public:
 					for(size_t i=0;i<kp.vkeyspec_composite.size();i++)
 					{
 						// LINEAR FORMAT (old way)
-						std::string s = kp.vkeyspec_composite[i].format_key_line(1, verbose);
-						if ((s.size() >= URL_MIN_SIZE ) && (s.size() < URL_MAX_SIZE ))
+						std::vector<std::string> vs = kp.vkeyspec_composite[i].format_key_line(1, verbose);
+/*
+						if (verbose)
 						{
-							if (VERBOSE_DEBUG) std::cout << "url[]: " << s << std::endl;
-
-							urlkey uk;
-							for(uint32_t ii=0;ii<URL_MAX_SIZE;ii++) uk.url[ii] = 0;
-							uint32_t idx2 = 0;
-							for (uint32_t ii = 0; ii < s.size(); ii++)
+							std::cout << "vs: " << vs.size() << std::endl;
+							for(size_t j=0;j<vs.size();j++)
 							{
-								if ((s[ii] != '\n') && (s[ii] != '\r'))
-									uk.url[idx2] = s[ii];
-								idx2++;
+								std::cout << "vs[j]: " << vs[j] << std::endl;
 							}
-							uk.url_size = idx2;
-							vurlkey.push_back(uk);
 						}
-						else
+*/
+						for(size_t j=0;j<vs.size();j++)
 						{
-							if (s.size() >= URL_MAX_SIZE)
+							std::string s = vs[j];
+							if ((s.size() >= URL_MIN_SIZE ) && (s.size() < URL_MAX_SIZE ))
 							{
-								std::cerr 	<< "WARNING input url key line too long (reduce number of recursion) - line skipped " << s
-											<< ", max size of all keys : " << URL_MAX_SIZE
-											<< ", current size of all keys : " << s.size()
-											<< std::endl;
+								if (VERBOSE_DEBUG) std::cout << "url[]: " << s << std::endl;
+
+								urlkey uk;
+								for(uint32_t ii=0;ii<URL_MAX_SIZE;ii++) uk.url[ii] = 0;
+								uint32_t idx2 = 0;
+								for (uint32_t ii = 0; ii < s.size(); ii++)
+								{
+									if ((s[ii] != '\n') && (s[ii] != '\r'))
+										uk.url[idx2] = s[ii];
+									idx2++;
+								}
+								uk.url_size = idx2;
+								vurlkey.push_back(uk);
+							}
+							else
+							{
+								if (s.size() >= URL_MAX_SIZE)
+								{
+									std::cerr 	<< "WARNING input url key line too long (reduce number of recursion) - line skipped " << s
+												<< ", max size of all keys : " << URL_MAX_SIZE
+												<< ", current size of all keys : " << s.size()
+												<< std::endl;
+								}
 							}
 						}
 					}

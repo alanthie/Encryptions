@@ -1153,10 +1153,44 @@ namespace keymgr
 
 	bool sortkey(const std::string& a, const std::string& b)
 	{
-		int na = (int)a.size() - 19; if (na < 1) na = 0;
-		int nb = (int)b.size() - 19; if (nb < 1) nb = 0;
+		// variable now MY_RSA15KEY_15000_2023-04-13_19:20:37_0
+
+		int na=0;
+		if (a.size() > 19)
+		{
+			size_t delta = 19;
+			while (a[a.size() - delta] != '_')
+			{
+				delta++;
+				if (a.size() < delta)
+					break;	
+			}
+			na = (int)a.size() - delta; 
+			na++;
+			if (na < 1) na = 0;
+			if (na > a.size() - 1) na = a.size() - 1;
+		}
+		
+		int nb=0;
+		if (b.size() > 19)
+		{
+			size_t delta = 19;
+			while (b[b.size() - delta] != '_')
+			{
+				delta++;
+				if (b.size() < delta)
+					break;	
+			}
+			nb = (int)b.size() - delta; 
+			nb++;
+			if (nb < 1) nb = 0;
+			if (nb > b.size() - 1) nb = b.size() - 1;
+		}
+		
 		std::string ta = a.substr(na);
 		std::string tb = b.substr(nb);
+		
+		//std::cout << ta  <<  " " << tb << std::endl; 
 		return (ta<tb);
 	}
 
@@ -1167,6 +1201,8 @@ namespace keymgr
                        	const std::string& folder_other_public_ecc,
                        	const std::string& folder_my_private_hh,
 						const std::string& folder_my_private_ecc,
+						const std::string& folder_local,
+						const std::string& wbaes_other_public_path,
 						[[maybe_unused]] bool verbose = false)
 	{
         verbose=verbose;
@@ -1174,11 +1210,10 @@ namespace keymgr
 
 		std::map<std::string, cryptoAL::rsa::rsa_key> map_rsa_public;
 		std::map<std::string, ecc_key> map_ecc_public;
-		std::map<std::string, history_key_public> map_hh_public;
+		std::map<uint32_t, history_key> map_histo;
 
 		if (t == keyspec_type::RSA)
 		{
-			//std::cout << "get_n_keys RSA in " << folder_other_public_rsa + RSA_OTHER_PUBLIC_DB << std::endl;
 			std::string filePublicOtherDB = folder_other_public_rsa + RSA_OTHER_PUBLIC_DB;
 			if (file_util::fileexists(filePublicOtherDB) == true)
 			{
@@ -1195,7 +1230,6 @@ namespace keymgr
 		}
 		else if (t == keyspec_type::ECC)
 		{
-			//std::cout << "get_n_keys ECC in " << folder_other_public_ecc + ECCKEY_OTHER_PUBLIC_DB << std::endl;
 			std::string filePublicOtherDB = folder_other_public_ecc + ECCKEY_OTHER_PUBLIC_DB;
 			if (file_util::fileexists(filePublicOtherDB) == true)
 			{
@@ -1212,26 +1246,66 @@ namespace keymgr
 		}
 		else if (t == keyspec_type::HH)
 		{
-			//std::cout << "get_n_keys HH in " << folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB << std::endl;
 			std::string fileMyPrivaterDB = folder_my_private_hh + HHKEY_MY_PRIVATE_ENCODE_DB;
 			if (file_util::fileexists(fileMyPrivaterDB) == true)
 			{
 				std::ifstream infile;
 				infile.open (fileMyPrivaterDB, std::ios_base::in);
-				infile >> bits(map_hh_public);
+				infile >> bits(map_histo); 
 				infile.close();
 
-				for(auto& [keyname, k] : map_hh_public)
+				for(auto& [seq, k] : map_histo)
 				{
-					vmapkeyname.push_back(keyname);
+					if (k.confirmed == true)
+						vmapkeyname.push_back(std::to_string(seq));
+				}
+			}
+		}
+		else if (t == keyspec_type::LocalFile)
+		{
+			std::vector<std::string> vbin = file_util::get_directory_files(folder_local, "binary.dat.", true);
+			std::sort(vbin.begin(),vbin.end());
+			for(size_t i = 0; i < vbin.size(); i++)
+			{
+				vmapkeyname.push_back(vbin[i]);
+			}
+		}
+
+		else if ((t >= keyspec_type::wbaes_512) && (t <= keyspec_type::wbaes_32768))
+		{
+			std::string a;
+			if      (t==keyspec_type::wbaes_512)   	a = "aes512";
+			else if (t==keyspec_type::wbaes_1024)   a = "aes1024";
+			else if (t==keyspec_type::wbaes_2048)   a = "aes2048";
+			else if (t==keyspec_type::wbaes_4096)   a = "aes4096";
+			else if (t==keyspec_type::wbaes_8192)   a = "aes8192";
+			else if (t==keyspec_type::wbaes_16384)  a = "aes16384";
+			else if (t==keyspec_type::wbaes_32768)  a = "aes32768";
+
+			//aes16384_z_1_20230408112137_tyboxes.tbl
+			std::vector<std::string> vbin = file_util::get_directory_files(wbaes_other_public_path, "_tyboxes.tbl", false);
+			for(size_t i = 0; i < vbin.size(); i++)
+			{
+				if (vbin[i].substr(0, a.size()) == a)
+				{
+					std::size_t first = vbin[i].find_first_of("_");
+					if (first!=std::string::npos)
+					{
+						std::size_t last = vbin[i].find_last_of("_");
+						if (last!=std::string::npos)
+						{
+							std::string s = vbin[i].substr(first+1, last-first-1);
+							vmapkeyname.push_back(s);
+						}
+					}
 				}
 			}
 		}
 
-		// sort with date in key name MY_RSAKEY_512_2023-03-18_23:32:34
 		if (vmapkeyname.size() > 0)
 		{
-			std::sort(vmapkeyname.begin(), vmapkeyname.end(), sortkey);
+			if ((t == keyspec_type::RSA) || (t == keyspec_type::ECC)) std::sort(vmapkeyname.begin(), vmapkeyname.end(), sortkey);
+			else std::sort(vmapkeyname.begin(), vmapkeyname.end());
 
 			if (first)
 			{
@@ -1301,6 +1375,8 @@ namespace keymgr
                             const std::string& folder_other_public_ecc,
                             const std::string& folder_my_private_hh,
 							const std::string& folder_my_private_ecc,
+							const std::string& folder_local,
+							const std::string& wbaes_other_public_path,
 							bool verbose = false)
 	{
 		bool r = true;
@@ -1309,23 +1385,23 @@ namespace keymgr
 		{
 			if (key_in.first_n > 0)
 			{
-				r = get_n_keys(key_in.ktype, key_in.first_n, true, false, false, false, key_in.vmaterialized_keyname,
-				folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc,verbose);
+				r = get_n_keys(	key_in.ktype, key_in.first_n, true, false, false, false, key_in.vmaterialized_keyname,
+								folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc,folder_local,wbaes_other_public_path,verbose);
 			}
 			if (key_in.last_n > 0)
 			{
-				r = get_n_keys(key_in.ktype, key_in.last_n, false, true, false, false, key_in.vmaterialized_keyname,
-				folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc,verbose);
+				r = get_n_keys(	key_in.ktype, key_in.last_n, false, true, false, false, key_in.vmaterialized_keyname,
+								folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc,folder_local,wbaes_other_public_path,verbose);
 			}
 			if (key_in.random_n > 0)
 			{
-				r = get_n_keys(key_in.ktype, key_in.random_n, false, false, true, false, key_in.vmaterialized_keyname,
-				folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc,verbose);
+				r = get_n_keys(	key_in.ktype, key_in.random_n, false, false, true, false, key_in.vmaterialized_keyname,
+								folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc,folder_local,wbaes_other_public_path,verbose);
 			}
 			if (key_in.new_n > 0)
 			{
-				r = get_n_keys(key_in.ktype, key_in.random_n, false, false, false, true, key_in.vmaterialized_keyname,
-				folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc,verbose);
+				r = get_n_keys(	key_in.ktype, key_in.random_n, false, false, false, true, key_in.vmaterialized_keyname,
+								folder_other_public_rsa, folder_other_public_ecc, folder_my_private_hh, folder_my_private_ecc,folder_local,wbaes_other_public_path,verbose);
 			}
 		}
 		return r;
