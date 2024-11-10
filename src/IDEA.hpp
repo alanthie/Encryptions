@@ -185,6 +185,12 @@ public:
             data[i] = 256*DATA[2*i] + DATA[2*i+1];
         }
         IDEA(data, key, is_encrypt);
+
+        for(int i=0;i<4;i++)
+        {
+            DATA[2*i] = data[i] / 256;
+            DATA[2*i+1] = data[i] % 256;
+        }
     }
 
 };

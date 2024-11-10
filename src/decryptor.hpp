@@ -594,7 +594,7 @@ public:
 						if (r)
 						{
 							dbmgr.add_to_usage_count_rsa(rsa_key_at_iter, local_rsa_db);
-							
+
 							if (riter != 0)
 							{
 								uint32_t msg_size_produced;
@@ -1115,7 +1115,7 @@ public:
                 if (key_idx >= nkeys) key_idx=0;
 
                 idea algo;
-                algo.IDEA(DATA, KEY, true);
+                algo.IDEA(DATA, KEY, false);
 
                 data_decrypted.buffer.write((char*)&DATA[0], 8, -1);
             }
@@ -2403,11 +2403,11 @@ public:
 					outstream << bits(map_histo);
 					outstream.close();
 				}
-		
+
                 cryptoAL::hhkey_util::save_histo_key(hkey, local_histo_db, dbmgr, true);
                 if (verbose)
                     std::cout << "history sequence saved: "  << hist_out_seq << std::endl;
-					
+
 				dbmgr.flush();
 			}
 		}
@@ -2568,7 +2568,7 @@ public:
 				outstream << bits(map_histo);
 				outstream.close();
 			}
-			
+
 			if (file_util::fileexists(fileHistoPrivateEncodeDB) == true)
 			{
 				if (file_util::fileexists(importfile) == true)
