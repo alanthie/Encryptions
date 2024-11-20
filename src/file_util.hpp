@@ -1,6 +1,7 @@
 #ifndef FILE_UTIL_H_INCLUDED
 #define FILE_UTIL_H_INCLUDED
 
+#include <vector>
 #include "crypto_const.hpp"
 #include "data.hpp"
 #include "SHA256.h"

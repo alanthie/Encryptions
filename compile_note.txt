@@ -1,5 +1,9 @@
 curl package: https://curl.se/windows/
 win build from Src: https://github.com/curl/curl/tree/master/winbuild
+linux : sudo apt-get install libcurl4-gnutls-dev
+-lcurl
+-lgmp
+-lgmpxx
 
 #ifdef _WIN32
 //https://github.com/ckormanyos/wide-integer
@@ -22,6 +26,7 @@ using dec101_t = math::wide_decimal::decwide_t<INT32_C(100), std::uint32_t, void
 https://gmplib.org/
 gmp-6.3.0.tar.xz
 win=>libgmp_6.2.1-4_msvc17 in src
+linux: sudo apt-get install libgmp-dev
 
 https://pari.math.u-bordeaux.fr/download.html
 (not used) pari-2.17.0.tar.gz

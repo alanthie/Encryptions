@@ -1,3 +1,4 @@
+#include <array>
 #include "SystemProperties.hpp"
 #include <filesystem>
 
@@ -47,7 +48,7 @@ std::string System::notation(const System::Unit unit) noexcept {
 
 System::Properties::Properties() {
 	HRESULT res;
-	
+
 	// step 1: initialise COM
 	res = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	if (FAILED(res)) {
@@ -61,10 +62,10 @@ System::Properties::Properties() {
 		-1,                          // COM authentication
 		NULL,                        // Authentication services
 		NULL,                        // Reserved
-		RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication 
-		RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation  
+		RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication
+		RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation
 		NULL,                        // Authentication info
-		EOAC_NONE,                   // Additional capabilities 
+		EOAC_NONE,                   // Additional capabilities
 		NULL                         // Reserved
 	);
 	if (FAILED(res)) {
@@ -105,11 +106,11 @@ System::Properties::Properties() {
 		_pSvc,                       // Indicates the proxy to set
 		RPC_C_AUTHN_WINNT,           // RPC_C_AUTHN_xxx
 		RPC_C_AUTHZ_NONE,            // RPC_C_AUTHZ_xxx
-		NULL,                        // Server principal name 
-		RPC_C_AUTHN_LEVEL_CALL,      // RPC_C_AUTHN_LEVEL_xxx 
+		NULL,                        // Server principal name
+		RPC_C_AUTHN_LEVEL_CALL,      // RPC_C_AUTHN_LEVEL_xxx
 		RPC_C_IMP_LEVEL_IMPERSONATE, // RPC_C_IMP_LEVEL_xxx
 		NULL,                        // client identity
-		EOAC_NONE                    // proxy capabilities 
+		EOAC_NONE                    // proxy capabilities
 	);
 	if (FAILED(res)) {
 		_pSvc->Release();
@@ -120,7 +121,7 @@ System::Properties::Properties() {
 	}
 }
 
-System::Properties::~Properties() //noexcept 
+System::Properties::~Properties() //noexcept
 {
 	if (_pSvc) _pSvc->Release();
 	if (_pLoc) _pLoc->Release();
@@ -412,7 +413,7 @@ std::string System::Properties::GPUDriver() {
 			throw std::system_error(std::error_code(4, std::system_category()),
 				"Could not retrieve driver version from modinfo");
 		}
-		
+
 		modinfoOut = modinfoOut.substr(modinfoOut.find_first_not_of(" \t", 9));
 		driver = modinfoOut.substr(0, modinfoOut.find_last_not_of("\n\r") + 1);
 	}

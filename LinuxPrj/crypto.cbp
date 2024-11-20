@@ -13,6 +13,13 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-lcurl" />
+					<Add option="-lgmp" />
+					<Add option="-lcurlpp" />
+					<Add option="-lgmpxx" />
+					<Add option="-lpthread" />
+					<Add directory="/home/allaptop/dev/wide-decimal" />
+					<Add directory="/home/allaptop/dev/wide-integer" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -22,19 +29,25 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-lcurl" />
+					<Add option="-lgmp" />
+					<Add option="-lgmpxx" />
+					<Add directory="/home/allaptop/dev/wide-decimal" />
+					<Add directory="/home/allaptop/dev/wide-integer" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-lcurl" />
+					<Add option="-lgmp" />
+					<Add option="-lgmpxx" />
 				</Linker>
-				<ExtraCommands>
-					<Add after="cp ../bin/Release/crypto ../Exec_Linux/crypto" />
-					<Mode after="always" />
-				</ExtraCommands>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
+			<Add option="-lcurl" />
+			<Add option="-lgmp" />
 		</Compiler>
 		<ExtraCommands>
 			<Add after="cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto" />
@@ -79,6 +92,7 @@
 		<Unit filename="../src/decryptor.hpp" />
 		<Unit filename="../src/encrypt.h" />
 		<Unit filename="../src/encryptor.hpp" />
+		<Unit filename="../src/exclusive-lock-file.cpp" />
 		<Unit filename="../src/ini_parser.hpp" />
 		<Unit filename="../src/main.cpp" />
 		<Unit filename="../src/puzzle.hpp" />
@@ -105,6 +119,7 @@
 		<Unit filename="../src/qa/RSA_generate/bigint/BigUnsignedInABase.cc" />
 		<Unit filename="../src/qa/RSA_generate/bigint/BigUnsignedInABase.hh" />
 		<Unit filename="../src/qa/RSA_generate/bigint/NumberlikeArray.hh" />
+		<Unit filename="../src/qa/SystemProperties.cpp" />
 		<Unit filename="../src/qa/aes-whitebox/aes_whitebox_compiler.hpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_curve.cpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_curve.hpp" />
@@ -121,9 +136,6 @@
 		</Unit>
 		<Unit filename="../src/vigenere.cpp" />
 		<Unit filename="../src/vigenere.h" />
-		<Extensions>
-			<code_completion />
-			<debugger />
-		</Extensions>
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
