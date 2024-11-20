@@ -24,6 +24,7 @@
     <ClCompile Include="..\..\src\common\includes.cpp" />
     <ClCompile Include="..\..\src\crc32a.cpp" />
     <ClCompile Include="..\..\src\DES.cpp" />
+    <ClCompile Include="..\..\src\exclusive-lock-file.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\qa\Bin2PNG\lodepng.cpp" />
     <ClCompile Include="..\..\src\qa\ecc_point\ecc_curve.cpp" />
@@ -37,7 +38,6 @@
     <ClCompile Include="..\..\src\qa\menu\puzzle_menu.cpp" />
     <ClCompile Include="..\..\src\qa\menu\rsa_menu.cpp" />
     <ClCompile Include="..\..\src\qa\menu\tools_menu.cpp" />
-    <ClCompile Include="..\..\src\qa\menu\wbaes_menu.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMP.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPmainTest.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPPrime.cpp" />
@@ -157,6 +157,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\Lib\curl-8.11.0_2-win64-mingw\include;C:\cpp\wide-integer;C:\cpp\wide-decimal;C:\cpp\ntl\include;C:\Lib\gmp-6.3.0;C:\Lib\libgmp_6.2.1-4_msvc17\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\cpp\curl\builds\libcurl-vc-x64-release-static-ipv6-sspi-schannel\lib;C:\Lib\libgmp_6.2.1-4_msvc17\lib\x64;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\Lib\curl-8.11.0_2-win64-mingw\include;C:\cpp\wide-integer;C:\cpp\wide-decimal;C:\cpp\ntl\include;C:\Lib\gmp-6.3.0;C:\Lib\libgmp_6.2.1-4_msvc17\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\cpp\curl\builds\libcurl-vc-x64-release-static-ipv6-sspi-schannel\lib;C:\Lib\libgmp_6.2.1-4_msvc17\lib\x64;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -197,7 +205,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;gmp.lib;libgmp.lib;winNTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;gmp.lib;libgmp.lib;libcurl_a.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;D:\000Lib\libgmp_6.2.1-4_msvc17\lib\x64;D:\000DEV\Encryptions\WinPrj\winNTL\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -220,7 +228,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libcurl_a.lib;advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;gmp.lib;libgmp.lib;winNTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>advapi32.lib;crypt32.lib;normaliz.lib;ws2_32.lib;wldap32.lib;gmp.lib;libgmp.lib;libcurl_a.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\000Lib\curl-7.88.0\builds\libcurl-vc10-x64-release-static-ipv6-sspi-schannel\lib;D:\000Lib\libgmp_6.2.1-4_msvc17\lib\x64;D:\000DEV\Encryptions\WinPrj\winNTL\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>

@@ -114,10 +114,10 @@
     <ClCompile Include="..\..\src\qa\menu\tools_menu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\qa\menu\wbaes_menu.cpp">
+    <ClCompile Include="..\..\src\qa\SystemProperties.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\qa\SystemProperties.cpp">
+    <ClCompile Include="..\..\src\exclusive-lock-file.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

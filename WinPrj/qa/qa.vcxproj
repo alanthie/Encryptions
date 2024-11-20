@@ -71,10 +71,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\000DEV\Encryptions\src\qa\WinNTL-11_5_1\include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\000DEV\Encryptions\src\qa\WinNTL-11_5_1\include;C:\Lib\curl-8.11.0_2-win64-mingw\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Lib\curl-8.11.0_2-win64-mingw\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>D:\000DEV\Encryptions\src\qa\WinNTL-11_5_1\include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\000DEV\Encryptions\src\qa\WinNTL-11_5_1\include;C:\Lib\curl-8.11.0_2-win64-mingw\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Lib\curl-8.11.0_2-win64-mingw\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

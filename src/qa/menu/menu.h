@@ -74,7 +74,7 @@ namespace ns_menu
         int fECCDomain(size_t choice);
         int fECCKey(size_t choice);
         int fHH(size_t choice);
-        int fWBAES(size_t choice);
+        //int fWBAES(size_t choice);
         int fTOOLS(size_t choice);
     };
 
