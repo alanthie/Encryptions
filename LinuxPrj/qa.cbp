@@ -23,14 +23,16 @@
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-std=c++20" />
+					<Add directory="../../wide-decimal" />
+					<Add directory="../../wide-integer" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-lcurl" />
+					<Add option="-lgmp" />
+					<Add option="-lgmpxx" />
+					<Add library="/usr/local/lib/libntl.a" />
 				</Linker>
-				<ExtraCommands>
-					<Add after="cp /home/server/dev/Encryptions/bin/Release/qa /home/server/dev/Encryptions/Exec_Linux/qa" />
-					<Mode after="always" />
-				</ExtraCommands>
 			</Target>
 		</Build>
 		<Compiler>
@@ -97,15 +99,13 @@
 		<Unit filename="../src/qa/menu/puzzle_menu.cpp" />
 		<Unit filename="../src/qa/menu/rsa_menu.cpp" />
 		<Unit filename="../src/qa/menu/tools_menu.cpp" />
+		<Unit filename="../src/qa/menu/wbaes_menu.cpp" />
 		<Unit filename="../src/qa/prime.h" />
 		<Unit filename="../src/qa/qa.cpp" />
 		<Unit filename="../src/qa/qa_internal.hpp" />
 		<Unit filename="../src/qa/qa_internal_empty.hpp" />
 		<Unit filename="../src/qa/uinteger_t.hh" />
 		<Unit filename="../src/vigenere.cpp" />
-		<Extensions>
-			<code_completion />
-			<debugger />
-		</Extensions>
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

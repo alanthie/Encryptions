@@ -22,6 +22,8 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add directory="../../wide-decimal" />
+					<Add directory="../../wide-integer" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -36,10 +38,6 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<ExtraCommands>
-			<Add after="cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto" />
-			<Mode after="always" />
-		</ExtraCommands>
 		<Unit filename="../src/AESa.cpp" />
 		<Unit filename="../src/AESa.h" />
 		<Unit filename="../src/Base64.cpp" />
@@ -123,9 +121,6 @@
 		</Unit>
 		<Unit filename="../src/vigenere.cpp" />
 		<Unit filename="../src/vigenere.h" />
-		<Extensions>
-			<code_completion />
-			<debugger />
-		</Extensions>
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
