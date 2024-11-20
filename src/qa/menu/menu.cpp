@@ -208,7 +208,7 @@ namespace ns_menu
         }
 		else if (m.id == MENU_ID::WBAES)
         {
-            //fWBAES(option+1);
+            fWBAES(option+1);
         }
 		else if (m.id == MENU_ID::TOOLS)
         {

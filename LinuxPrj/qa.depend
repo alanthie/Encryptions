@@ -1593,7 +1593,7 @@
 	<iomanip>
 	<string>
 
-1732091283 /home/allaptop/dev/Encryptions/src/qa/menu/menu.h
+1732104143 /home/allaptop/dev/Encryptions/src/qa/menu/menu.h
 	"../../crypto_cfg.hpp"
 	"../../crypto_parsing.hpp"
 	"menu_io.h"
@@ -1698,7 +1698,7 @@
 	<map>
 	<string>
 
-1732091283 source:/home/allaptop/dev/Encryptions/src/qa/menu/menu.cpp
+1732104041 source:/home/allaptop/dev/Encryptions/src/qa/menu/menu.cpp
 	"menu.h"
 
 1731732827 source:/home/allaptop/dev/Encryptions/src/qa/menu/menu_io.cpp
@@ -1914,4 +1914,178 @@
 	<filesystem>
 	<fstream>
 	<sys/sysinfo.h>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/menu/wbaes_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"../../../src/crypto_strutil.hpp"
+	"../aes-whitebox/aes_whitebox.hpp"
+	"../aes-whitebox/aes_whitebox_compiler.hpp"
+	"../../../src/c_plus_plus_serializer.h"
+	"menu.h"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox.hpp
+	"../../crypto_const.hpp"
+	"../../random_engine.hpp"
+	"aes_whitebox_base.hpp"
+	"../../c_plus_plus_serializer.h"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox_base.hpp
+	"../../crypto_const.hpp"
+	"../../c_plus_plus_serializer.h"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/aes-whitebox/aes_whitebox_compiler.hpp
+	"../../crypto_const.hpp"
+	"../../random_engine.hpp"
+	"../../data.hpp"
+	"../../c_plus_plus_serializer.h"
+	<NTL/mat_GF2.h>
+	"aes_private.h"
+	"aes_whitebox.hpp"
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+	<string.h>
+	<stdarg.h>
+	<array>
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/mat_GF2.h
+	<NTL/matrix.h>
+	<NTL/vec_vec_GF2.h>
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/matrix.h
+	<NTL/tools.h>
+	<NTL/vector.h>
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/tools.h
+	<NTL/ctools.h>
+	<NTL/new.h>
+	<utility>
+	<iostream>
+	<new>
+	<stdexcept>
+	<streambuf>
+	<cstdlib>
+	<cmath>
+	<cstring>
+	<type_traits>
+	<pthread.h>
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/ctools.h
+	<NTL/config.h>
+	<NTL/mach_desc.h>
+	<NTL/ALL_FEATURES.h>
+	<NTL/PackageInfo.h>
+
+1732102738 /home/allaptop/dev/ntl/include/NTL/config.h
+
+1732103038 /home/allaptop/dev/ntl/include/NTL/mach_desc.h
+
+1732103037 /home/allaptop/dev/ntl/include/NTL/ALL_FEATURES.h
+	<NTL/HAVE_ALIGNED_ARRAY.h>
+	<NTL/HAVE_BUILTIN_CLZL.h>
+	<NTL/HAVE_LL_TYPE.h>
+	<NTL/HAVE_SSSE3.h>
+	<NTL/HAVE_AVX.h>
+	<NTL/HAVE_PCLMUL.h>
+	<NTL/HAVE_AVX2.h>
+	<NTL/HAVE_FMA.h>
+	<NTL/HAVE_AVX512F.h>
+	<NTL/HAVE_COPY_TRAITS1.h>
+	<NTL/HAVE_COPY_TRAITS2.h>
+	<NTL/HAVE_CHRONO_TIME.h>
+	<NTL/HAVE_MACOS_TIME.h>
+	<NTL/HAVE_POSIX_TIME.h>
+	<NTL/HAVE_AES_NI.h>
+	<NTL/HAVE_KMA.h>
+
+1732103039 /home/allaptop/dev/ntl/include/NTL/HAVE_ALIGNED_ARRAY.h
+
+1732103039 /home/allaptop/dev/ntl/include/NTL/HAVE_BUILTIN_CLZL.h
+
+1732103039 /home/allaptop/dev/ntl/include/NTL/HAVE_LL_TYPE.h
+
+1732103040 /home/allaptop/dev/ntl/include/NTL/HAVE_SSSE3.h
+
+1732103041 /home/allaptop/dev/ntl/include/NTL/HAVE_AVX.h
+
+1732103042 /home/allaptop/dev/ntl/include/NTL/HAVE_PCLMUL.h
+
+1732103044 /home/allaptop/dev/ntl/include/NTL/HAVE_AVX2.h
+
+1732103045 /home/allaptop/dev/ntl/include/NTL/HAVE_FMA.h
+
+1732103045 /home/allaptop/dev/ntl/include/NTL/HAVE_AVX512F.h
+
+1732103047 /home/allaptop/dev/ntl/include/NTL/HAVE_COPY_TRAITS1.h
+
+1732103047 /home/allaptop/dev/ntl/include/NTL/HAVE_COPY_TRAITS2.h
+
+1732103047 /home/allaptop/dev/ntl/include/NTL/HAVE_CHRONO_TIME.h
+
+1732103047 /home/allaptop/dev/ntl/include/NTL/HAVE_MACOS_TIME.h
+
+1732103047 /home/allaptop/dev/ntl/include/NTL/HAVE_POSIX_TIME.h
+
+1732103048 /home/allaptop/dev/ntl/include/NTL/HAVE_AES_NI.h
+
+1732103048 /home/allaptop/dev/ntl/include/NTL/HAVE_KMA.h
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/PackageInfo.h
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/new.h
+	<new>
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/vector.h
+	<NTL/tools.h>
+	<new>
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/vec_vec_GF2.h
+	<NTL/vec_GF2.h>
+	<NTL/vector.h>
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/vec_GF2.h
+	<NTL/WordVector.h>
+	<NTL/GF2.h>
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/WordVector.h
+	<NTL/tools.h>
+	<NTL/ZZ.h>
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/ZZ.h
+	<NTL/lip.h>
+	<NTL/tools.h>
+	<NTL/vector.h>
+	<NTL/SmartPtr.h>
+	<NTL/sp_arith.h>
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/lip.h
+	<NTL/ctools.h>
+	<NTL/gmp_aux.h>
+
+1732103049 /home/allaptop/dev/ntl/include/NTL/gmp_aux.h
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/SmartPtr.h
+	<NTL/tools.h>
+	<NTL/thread.h>
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/thread.h
+	<NTL/tools.h>
+	<string>
+	<atomic>
+	<mutex>
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/sp_arith.h
+	<NTL/lip.h>
+	<NTL/tools.h>
+
+1732102640 /home/allaptop/dev/ntl/include/NTL/GF2.h
+	<NTL/ZZ.h>
+	<NTL/vector.h>
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/aes-whitebox/aes_private.h
+	"../../crypto_const.hpp"
 

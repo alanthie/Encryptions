@@ -24,7 +24,6 @@ using uinteger_t = uint2048_t;
 using dec101_t = math::wide_decimal::decwide_t<INT32_C(100), std::uint32_t, void>;
 
 https://gmplib.org/
-gmp-6.3.0.tar.xz
 win=>libgmp_6.2.1-4_msvc17 in src
 linux: sudo apt-get install libgmp-dev
 
@@ -32,29 +31,28 @@ https://pari.math.u-bordeaux.fr/download.html
 (not used) pari-2.17.0.tar.gz
 
 ========================
-NTL ?????????????
+NTL linux
 https://github.com/libntl/ntl
+   % gunzip ntl-xxx.tar.gz
+   % tar xf ntl-xxx.tar
+   % cd ntl-xxx/src
+   % ./configure 
+   % make
+   % make check
+   % sudo make install
+   /usr/local/lib/libntl.a 
+   //LINKER LIB: -lntl -lpthread -lgmp
+========================
+NTL window 
+https://github.com/libntl/ntl
+download zip: https://libntl.org/download.html
 
-TODO
-# This is a perl script, invoked from a shell
-perl Donfig ...=>config.h
+Also in directory "include/NTL" is a file called "config.h". 
+You can edit this file to override some of NTL's default options for basic configuration and performance. 
+Again, the defaults should be good for Windows with MSVC++. 
 
-//Original code: https://github.com/balena/aes-whitebox
-
+//use inncode: https://github.com/balena/aes-whitebox
 C:\cpp\Encryptions\src\qa\menu\wbaes_menu.cpp
-#ifdef _WIN32
-//add preprocessor directive NOMINMAX
-#pragma warning ( disable : 4146 )
-#endif
-#include <NTL/mat_GF2.h>
-#include "aes_private.h"
-#include "aes_whitebox.hpp"
-//LINKER LIB: -lntl -lpthread -lgmp
-
-src\qa\aes-whitebox
-	Line   2: #include <NTL/ctools.h>
-		#include <NTL/config.h>
-		#include <NTL/mach_desc.h>
 ========================
 
 
