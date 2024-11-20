@@ -22,6 +22,11 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-lcurl" />
+					<Add option="-lgmp" />
+					<Add option="-lgmpxx" />
+					<Add directory="/home/allaptop/dev/wide-decimal" />
+					<Add directory="/home/allaptop/dev/wide-integer" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -81,8 +86,6 @@
 		<Unit filename="../src/qa/SimpleECC/src/point.hpp" />
 		<Unit filename="../src/qa/SimpleECC/src/simple_ecc_test.cpp" />
 		<Unit filename="../src/qa/SimpleECC/src/test_simple_ecc.hpp" />
-		<Unit filename="../src/qa/aes-whitebox/aes_whitebox.hpp" />
-		<Unit filename="../src/qa/aes-whitebox/aes_whitebox_compiler.hpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_curve.cpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_curve.hpp" />
 		<Unit filename="../src/qa/ecc_point/ecc_elgamal.cpp" />
@@ -102,9 +105,6 @@
 		<Unit filename="../src/qa/qa_internal_empty.hpp" />
 		<Unit filename="../src/qa/uinteger_t.hh" />
 		<Unit filename="../src/vigenere.cpp" />
-		<Extensions>
-			<code_completion />
-			<debugger />
-		</Extensions>
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

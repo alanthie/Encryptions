@@ -49,10 +49,6 @@
 			<Add option="-lcurl" />
 			<Add option="-lgmp" />
 		</Compiler>
-		<ExtraCommands>
-			<Add after="cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto" />
-			<Mode after="always" />
-		</ExtraCommands>
 		<Unit filename="../src/AESa.cpp" />
 		<Unit filename="../src/AESa.h" />
 		<Unit filename="../src/Base64.cpp" />

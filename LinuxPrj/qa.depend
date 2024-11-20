@@ -1226,3 +1226,692 @@
 	<WbemIdl.h>
 	<sys/utsname.h>
 
+1731732827 source:/home/allaptop/dev/Encryptions/src/Base64.cpp
+	"Base64.h"
+	<fstream>
+	<iostream>
+
+1731732827 /home/allaptop/dev/Encryptions/src/Base64.h
+	<string>
+	<vector>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/crc32a.cpp
+	"crc32a.hpp"
+
+1731732827 /home/allaptop/dev/Encryptions/src/crc32a.hpp
+	<cstdint>
+	<cstddef>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/Bin2PNG/lodepng.cpp
+	"lodepng.h"
+	<stdio.h>
+	<stdlib.h>
+	<fstream>
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/Bin2PNG/lodepng.h
+	<string.h>
+	<vector>
+	<string>
+	"lodepng.h"
+	<iostream>
+	"lodepng.h"
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/ecc_point/ecc_curve.cpp
+	"../../crypto_const.hpp"
+	"ecc_curve.hpp"
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<iostream>
+
+1731732827 /home/allaptop/dev/Encryptions/src/crypto_const.hpp
+	"base_const.hpp"
+	<filesystem>
+	<curl/curl.h>
+	<chrono>
+	<ctime>
+	<sstream>
+	<iomanip>
+	<string>
+	<iostream>
+
+1731732827 /home/allaptop/dev/Encryptions/src/base_const.hpp
+	<cstddef>
+	<map>
+	<string>
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/ecc_point/ecc_curve.hpp
+	"../../crypto_const.hpp"
+	<ctype.h>
+	<string.h>
+	<stdio.h>
+	<gmpxx.h>
+	"../../Buffer.hpp"
+
+1731732827 /home/allaptop/dev/Encryptions/src/Buffer.hpp
+	"crypto_const.hpp"
+	<stdint.h>
+	<string.h>
+	<algorithm>
+	<iostream>
+	<fstream>
+	<stdio.h>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/ecc_point/ecc_elgamal.cpp
+	<stdlib.h>
+	<stdio.h>
+	<time.h>
+	"ecc_curve.hpp"
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/RSA-GMP/RSAGMP.cpp
+	"RSAGMP.h"
+	<iostream>
+	<algorithm>
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/RSA-GMP/RSAGMP.h
+	"RSAGMPPrime.h"
+	<thread>
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/RSA-GMP/RSAGMPPrime.h
+	<gmpxx.h>
+	"RSAGMPUtils.h"
+	<thread>
+	<atomic>
+	<condition_variable>
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/RSA-GMP/RSAGMPUtils.h
+	<gmpxx.h>
+	<stdlib.h>
+	<random>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/RSA-GMP/RSAGMPmainTest.cpp
+	"RSAGMPTest.h"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/RSA-GMP/RSAGMPTest.h
+	<iostream>
+	"RSAGMP.h"
+	<stdint.h>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/RSA-GMP/RSAGMPPrime.cpp
+	"RSAGMPPrime.h"
+	<iostream>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/RSA-GMP/RSAGMPTest.cpp
+	"RSAGMPTest.h"
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/RSA-GMP/RSAGMPUtils.cpp
+	"RSAGMPUtils.h"
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/RSA_generate/bigint/BigInteger.cc
+	"BigInteger.hh"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/RSA_generate/bigint/BigInteger.hh
+	"BigUnsigned.hh"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/RSA_generate/bigint/BigUnsigned.hh
+	"NumberlikeArray.hh"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/RSA_generate/bigint/NumberlikeArray.hh
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/RSA_generate/bigint/BigIntegerAlgorithms.cc
+	"BigIntegerAlgorithms.hh"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/RSA_generate/bigint/BigIntegerAlgorithms.hh
+	"BigInteger.hh"
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/RSA_generate/bigint/BigIntegerUtils.cc
+	"BigIntegerUtils.hh"
+	"BigUnsignedInABase.hh"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/RSA_generate/bigint/BigIntegerUtils.hh
+	"BigInteger.hh"
+	<string>
+	<iostream>
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/RSA_generate/bigint/BigUnsignedInABase.hh
+	"NumberlikeArray.hh"
+	"BigUnsigned.hh"
+	<string>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/RSA_generate/bigint/BigUnsigned.cc
+	"BigUnsigned.hh"
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/RSA_generate/bigint/BigUnsignedInABase.cc
+	"BigUnsignedInABase.hh"
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/SHA256.cpp
+	"SHA256.h"
+	<cstring>
+	<sstream>
+	<iomanip>
+
+1732092837 /home/allaptop/dev/Encryptions/src/SHA256.h
+	<string>
+	<array>
+	<stdint.h>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/vigenere.cpp
+	<stdio.h>
+	<string.h>
+	<string>
+	<iostream>
+	<stdio.h>
+	<ctype.h>
+	"vigenere.hpp"
+
+1731732827 /home/allaptop/dev/Encryptions/src/vigenere.hpp
+	<stdio.h>
+	<string.h>
+	<string>
+	<iostream>
+	<stdio.h>
+	<ctype.h>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/menu/cfg_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"menu.h"
+
+1731732827 /home/allaptop/dev/Encryptions/src/uint_util.hpp
+	"qa/mathcommon.h"
+	"qa/RSA_generate/bigint/BigIntegerLibrary.hh"
+	"crypto_const.hpp"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/mathcommon.h
+	<math\wide_integer\uintwide_t.h>
+	"uinteger_t.hh"
+	<bitset>
+	<bits/stdc++.h>
+	<math/wide_decimal/decwide_t.h>
+	<iostream>
+	<cmath>
+	<iomanip>
+	<atomic>
+	<vector>
+	<set>
+	<thread>
+	<mutex>
+	<algorithm>
+	<unordered_map>
+	<cstdint>
+	<stdio.h>
+	<iostream>
+	<fstream>
+	<limits>
+	<map>
+	<set>
+	<future>
+	<chrono>
+	<cstdlib>
+	<stdlib.h>
+	<cstdio>
+	<type_traits>
+	<random>
+	<list>
+	<numeric>
+	<stdexcept>
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/uinteger_t.hh
+	<cassert>
+	<vector>
+	<string>
+	<utility>
+	<cstring>
+	<cstdint>
+	<iostream>
+	<algorithm>
+	<stdexcept>
+	<functional>
+	<type_traits>
+	<intrin.h>
+
+1732092568 /home/allaptop/dev/wide-decimal/math/wide_decimal/decwide_t.h
+	<cmath>
+	<cstddef>
+	<cstdlib>
+	<cstring>
+	<functional>
+	<limits>
+	<iomanip>
+	<ios>
+	<iostream>
+	<string>
+	<math/wide_decimal/decwide_t_detail_ops.h>
+	<util/utility/util_baselexical_cast.h>
+
+1732092568 /home/allaptop/dev/wide-decimal/math/wide_decimal/decwide_t_detail_ops.h
+	<cstdint>
+	<iterator>
+	<type_traits>
+	<math/wide_decimal/decwide_t_detail.h>
+	<math/wide_decimal/decwide_t_detail_fft.h>
+
+1732092568 /home/allaptop/dev/wide-decimal/math/wide_decimal/decwide_t_detail.h
+	<algorithm>
+	<array>
+	<cstdint>
+	<initializer_list>
+	<memory>
+	<util/utility/util_dynamic_array.h>
+	<math/wide_decimal/decwide_t_detail_namespace.h>
+
+1732092568 /home/allaptop/dev/wide-decimal/util/utility/util_dynamic_array.h
+	<algorithm>
+	<cstddef>
+	<cstdint>
+	<initializer_list>
+	<iterator>
+	<memory>
+	<utility>
+
+1732092568 /home/allaptop/dev/wide-decimal/math/wide_decimal/decwide_t_detail_namespace.h
+
+1732092568 /home/allaptop/dev/wide-decimal/math/wide_decimal/decwide_t_detail_fft.h
+	<array>
+	<cstdint>
+
+1732092568 /home/allaptop/dev/wide-decimal/util/utility/util_baselexical_cast.h
+	<charconv>
+	<cstdint>
+	<algorithm>
+	<cstddef>
+	<cstdint>
+	<iterator>
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/RSA_generate/bigint/BigIntegerLibrary.hh
+	"NumberlikeArray.hh"
+	"BigUnsigned.hh"
+	"BigInteger.hh"
+	"BigIntegerAlgorithms.hh"
+	"BigUnsignedInABase.hh"
+	"BigIntegerUtils.hh"
+
+1732092862 /home/allaptop/dev/Encryptions/src/file_util.hpp
+	<vector>
+	"crypto_const.hpp"
+	"data.hpp"
+	"SHA256.h"
+	"crypto_strutil.hpp"
+	"common/includes.h"
+	<filesystem>
+
+1731732827 /home/allaptop/dev/Encryptions/src/data.hpp
+	"crypto_const.hpp"
+	"Buffer.hpp"
+	<filesystem>
+	<fstream>
+	<stdio.h>
+	<iostream>
+
+1731732827 /home/allaptop/dev/Encryptions/src/crypto_strutil.hpp
+	"crypto_const.hpp"
+	<sstream>
+	<iomanip>
+	<string>
+	<algorithm>
+
+1731732827 /home/allaptop/dev/Encryptions/src/common/includes.h
+	<cstdint>
+	<iostream>
+	<sstream>
+	<stdexcept>
+	<algorithm>
+
+1731732827 /home/allaptop/dev/Encryptions/src/crypto_cfg.hpp
+	"crypto_const.hpp"
+	"ini_parser.hpp"
+	"crypto_strutil.hpp"
+	"crypto_parsing.hpp"
+	"file_util.hpp"
+	"data.hpp"
+	<iostream>
+
+1731732827 /home/allaptop/dev/Encryptions/src/ini_parser.hpp
+	<map>
+	<string>
+	<vector>
+	<utility>
+	<sstream>
+	<fstream>
+	<stdexcept>
+	<algorithm>
+	<cctype>
+	<locale>
+
+1731732827 /home/allaptop/dev/Encryptions/src/crypto_parsing.hpp
+	"crypto_const.hpp"
+	"file_util.hpp"
+	"data.hpp"
+	"crypto_strutil.hpp"
+	<filesystem>
+	<chrono>
+	<ctime>
+	<sstream>
+	<iomanip>
+	<string>
+
+1732091283 /home/allaptop/dev/Encryptions/src/qa/menu/menu.h
+	"../../crypto_cfg.hpp"
+	"../../crypto_parsing.hpp"
+	"menu_io.h"
+	<iostream>
+	<any>
+	<string>
+	<variant>
+	<vector>
+	<type_traits>
+	<optional>
+	<sstream>
+	<limits>
+	<cctype>
+	<filesystem>
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/menu/menu_io.h
+	"../../crypto_cfg.hpp"
+	<iostream>
+	<any>
+	<string>
+	<variant>
+	<vector>
+	<type_traits>
+	<optional>
+	<sstream>
+	<limits>
+	<cctype>
+	<filesystem>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/menu/eccdomain_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"../../../src/ecc_util.hpp"
+	"../../../src/crypto_ecckey.hpp"
+	"menu.h"
+
+1731732827 /home/allaptop/dev/Encryptions/src/ecc_util.hpp
+	"uint_util.hpp"
+	"crypto_const.hpp"
+	"../src/crypto_ecckey.hpp"
+	"../src/crypto_parsing.hpp"
+	<filesystem>
+	<iostream>
+	<fstream>
+	<filesystem>
+
+1731732827 /home/allaptop/dev/Encryptions/src/crypto_ecckey.hpp
+	"crypto_const.hpp"
+	"random_engine.hpp"
+	"uint_util.hpp"
+	"crc32a.hpp"
+	"qa/ecc_point/ecc_curve.hpp"
+	"c_plus_plus_serializer.h"
+
+1731732827 /home/allaptop/dev/Encryptions/src/random_engine.hpp
+	<random>
+	"data.hpp"
+	"rng.h"
+
+1731732827 /home/allaptop/dev/Encryptions/src/rng.h
+	<cstdint>
+	<random>
+	<thread>
+	<intrin.h>
+	<x86intrin.h>
+	<arm_neon.h>
+	<mmintrin.h>
+	<altivec.h>
+	<spe.h>
+
+1731732827 /home/allaptop/dev/Encryptions/src/c_plus_plus_serializer.h
+	<fstream>
+	<iostream>
+	<sstream>
+	<vector>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/menu/ecckey_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"../../../src/crypto_ecckey.hpp"
+	"menu.h"
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/menu/hh_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"../../../src/crypto_history.hpp"
+	"menu.h"
+
+1731732827 /home/allaptop/dev/Encryptions/src/crypto_history.hpp
+	"crypto_const.hpp"
+	"c_plus_plus_serializer.h"
+	"crc32a.hpp"
+	<map>
+	<string>
+
+1732091283 source:/home/allaptop/dev/Encryptions/src/qa/menu/menu.cpp
+	"menu.h"
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/menu/menu_io.cpp
+	"menu_io.h"
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/menu/puzzle_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"../../../src/puzzle.hpp"
+	"../../../src/qa/prime.h"
+	"menu.h"
+
+1731732827 /home/allaptop/dev/Encryptions/src/puzzle.hpp
+	<iostream>
+	<fstream>
+	"Buffer.hpp"
+	"SHA256.h"
+	"random_engine.hpp"
+	"crypto_const.hpp"
+	"data.hpp"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/prime.h
+	"mathcommon.h"
+	"atomic_bitvector.hpp"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/atomic_bitvector.hpp
+	<vector>
+	<atomic>
+	<cassert>
+	<cstddef>
+	<limits>
+	"iterator_tpl.h"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/iterator_tpl.h
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/menu/rsa_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"../rsa_gen.hpp"
+	"menu.h"
+	"../RSA-GMP/RSAGMPTest.h"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/rsa_gen.hpp
+	"../uint_util.hpp"
+	"../c_plus_plus_serializer.h"
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/menu/tools_menu.cpp
+	"../../../src/uint_util.hpp"
+	"../../../src/crypto_const.hpp"
+	"../../../src/file_util.hpp"
+	"../../../src/crypto_cfg.hpp"
+	"../../../src/crypto_parsing.hpp"
+	"../../../src/c_plus_plus_serializer.h"
+	"menu.h"
+	"../SystemProperties.hpp"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/SystemProperties.hpp
+	<string>
+	<system_error>
+	<filesystem>
+	<variant>
+	<vector>
+	<comdef.h>
+	<WbemIdl.h>
+	<sys/utsname.h>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/qa.cpp
+	"../../src/crypto_const.hpp"
+	"../../src/crypto_parsing.hpp"
+	"menu/menu.h"
+
+1732091283 source:/home/allaptop/dev/Encryptions/src/qa/SimpleECC/src/ecc.cpp
+	<stdio.h>
+	<stdlib.h>
+	<assert.h>
+	<math.h>
+	<fcntl.h>
+	<time.h>
+	"boolean.hpp"
+	"point.hpp"
+	"j_point.hpp"
+	"ecc.hpp"
+	<dirent.h>
+	<ctype.h>
+	<string.h>
+	<gmpxx.h>
+
+1732091283 /home/allaptop/dev/Encryptions/src/qa/SimpleECC/src/boolean.hpp
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/SimpleECC/src/point.hpp
+	"boolean.hpp"
+	"helper.hpp"
+	<stdio.h>
+	<stdlib.h>
+	<assert.h>
+	<math.h>
+	<fcntl.h>
+	<time.h>
+	<dirent.h>
+	<ctype.h>
+	<string.h>
+	<gmpxx.h>
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/SimpleECC/src/helper.hpp
+	"boolean.hpp"
+	<stdio.h>
+	<stdlib.h>
+	<assert.h>
+	<math.h>
+	<fcntl.h>
+	<time.h>
+	<dirent.h>
+	<ctype.h>
+	<string.h>
+	<gmpxx.h>
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/SimpleECC/src/j_point.hpp
+	"boolean.hpp"
+	"helper.hpp"
+	"point.hpp"
+
+1731732827 /home/allaptop/dev/Encryptions/src/qa/SimpleECC/src/ecc.hpp
+	"boolean.hpp"
+	"point.hpp"
+	"j_point.hpp"
+	<stdio.h>
+	<stdlib.h>
+	<assert.h>
+	<math.h>
+	<fcntl.h>
+	<time.h>
+	<dirent.h>
+	<ctype.h>
+	<string.h>
+	<gmpxx.h>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/SimpleECC/src/helper.cpp
+	"boolean.hpp"
+	"helper.hpp"
+	<stdio.h>
+	<stdlib.h>
+	<assert.h>
+	<math.h>
+	<fcntl.h>
+	<time.h>
+	<dirent.h>
+	<ctype.h>
+	<string.h>
+	<gmpxx.h>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/SimpleECC/src/j_point.cpp
+	"boolean.hpp"
+	"helper.hpp"
+	"point.hpp"
+	"j_point.hpp"
+	<stdio.h>
+	<stdlib.h>
+	<assert.h>
+	<math.h>
+	<fcntl.h>
+	<time.h>
+	<dirent.h>
+	<ctype.h>
+	<string.h>
+	<gmpxx.h>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/SimpleECC/src/point.cpp
+	"boolean.hpp"
+	"helper.hpp"
+	"point.hpp"
+	<stdio.h>
+	<stdlib.h>
+	<assert.h>
+	<math.h>
+	<fcntl.h>
+	<time.h>
+	<dirent.h>
+	<ctype.h>
+	<string.h>
+	<gmpxx.h>
+
+1731732827 source:/home/allaptop/dev/Encryptions/src/qa/SimpleECC/src/simple_ecc_test.cpp
+	"boolean.hpp"
+	"helper.hpp"
+	"point.hpp"
+	"j_point.hpp"
+	"ecc.hpp"
+	<chrono>
+	<thread>
+	<dirent.h>
+	<unistd.h>
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+	<assert.h>
+	<math.h>
+	<fcntl.h>
+	<time.h>
+	<dirent.h>
+	<ctype.h>
+	<string.h>
+	<gmpxx.h>
+
+1732093632 source:/home/allaptop/dev/Encryptions/src/qa/SystemProperties.cpp
+	<array>
+	"SystemProperties.hpp"
+	<filesystem>
+	<fstream>
+	<sys/sysinfo.h>
+
