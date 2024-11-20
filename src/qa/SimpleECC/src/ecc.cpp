@@ -4,17 +4,19 @@
   *
   */
 
-#include "boolean.hpp"
-#include "point.hpp"
-#include "j_point.hpp"
-#include "ecc.hpp"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
 #include <fcntl.h>
 #include <time.h>
+
+#include "boolean.hpp"
+#include "point.hpp"
+#include "j_point.hpp"
+#include "ecc.hpp"
+
+
 #ifdef _WIN32
 #else
 #include <dirent.h>
