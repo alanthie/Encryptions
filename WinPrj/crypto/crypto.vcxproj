@@ -158,11 +158,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Lib\curl-8.11.0_2-win64-mingw\include;C:\cpp\wide-integer;C:\cpp\wide-decimal;C:\cpp\ntl\include;C:\Lib\gmp-6.3.0;C:\Lib\libgmp_6.2.1-4_msvc17\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\cpp\wide-integer;C:\cpp\wide-decimal;C:\cpp\ntl\include;C:\Lib\libgmp_6.2.1-4_msvc17\include;C:\cpp\curl\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\cpp\curl\builds\libcurl-vc-x64-release-static-ipv6-sspi-schannel\lib;C:\Lib\libgmp_6.2.1-4_msvc17\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Lib\curl-8.11.0_2-win64-mingw\include;C:\cpp\wide-integer;C:\cpp\wide-decimal;C:\cpp\ntl\include;C:\Lib\gmp-6.3.0;C:\Lib\libgmp_6.2.1-4_msvc17\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\cpp\wide-integer;C:\cpp\wide-decimal;C:\cpp\ntl\include;C:\Lib\libgmp_6.2.1-4_msvc17\include;C:\cpp\curl\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\cpp\curl\builds\libcurl-vc-x64-release-static-ipv6-sspi-schannel\lib;C:\Lib\libgmp_6.2.1-4_msvc17\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
