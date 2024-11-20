@@ -99,9 +99,6 @@
     <ClCompile Include="..\..\src\qa\menu\hh_menu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\qa\menu\menu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\qa\menu\menu_io.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

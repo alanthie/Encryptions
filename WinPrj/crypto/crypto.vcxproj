@@ -33,7 +33,6 @@
     <ClCompile Include="..\..\src\qa\menu\eccdomain_menu.cpp" />
     <ClCompile Include="..\..\src\qa\menu\ecckey_menu.cpp" />
     <ClCompile Include="..\..\src\qa\menu\hh_menu.cpp" />
-    <ClCompile Include="..\..\src\qa\menu\menu.cpp" />
     <ClCompile Include="..\..\src\qa\menu\menu_io.cpp" />
     <ClCompile Include="..\..\src\qa\menu\puzzle_menu.cpp" />
     <ClCompile Include="..\..\src\qa\menu\rsa_menu.cpp" />
@@ -158,11 +157,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\cpp\wide-integer;C:\cpp\wide-decimal;C:\cpp\ntl\include;C:\Lib\libgmp_6.2.1-4_msvc17\include;C:\cpp\curl\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\cpp\wide-integer;C:\cpp\wide-decimal;C:\Lib\libgmp_6.2.1-4_msvc17\include;C:\cpp\curl\include;C:\cpp\Encryptions\src\qa\WinNTL-11_5_1\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\cpp\curl\builds\libcurl-vc-x64-release-static-ipv6-sspi-schannel\lib;C:\Lib\libgmp_6.2.1-4_msvc17\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\cpp\wide-integer;C:\cpp\wide-decimal;C:\cpp\ntl\include;C:\Lib\libgmp_6.2.1-4_msvc17\include;C:\cpp\curl\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\cpp\wide-integer;C:\cpp\wide-decimal;C:\Lib\libgmp_6.2.1-4_msvc17\include;C:\cpp\curl\include;C:\cpp\Encryptions\src\qa\WinNTL-11_5_1\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\cpp\curl\builds\libcurl-vc-x64-release-static-ipv6-sspi-schannel\lib;C:\Lib\libgmp_6.2.1-4_msvc17\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

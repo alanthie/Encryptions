@@ -71,11 +71,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\000DEV\Encryptions\src\qa\WinNTL-11_5_1\include;C:\Lib\libgmp_6.2.1-4_msvc17\include;C:\cpp\wide-decimal;C:\cpp\wide-integer;C:\cpp\curl\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Lib\libgmp_6.2.1-4_msvc17\include;C:\cpp\wide-decimal;C:\cpp\wide-integer;C:\cpp\curl\include;C:\cpp\Encryptions\src\qa\WinNTL-11_5_1\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\cpp\curl\builds\libcurl-vc-x64-release-static-ipv6-sspi-schannel\lib;C:\Lib\libgmp_6.2.1-4_msvc17\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>D:\000DEV\Encryptions\src\qa\WinNTL-11_5_1\include;C:\Lib\libgmp_6.2.1-4_msvc17\include;C:\cpp\wide-decimal;C:\cpp\wide-integer;C:\cpp\curl\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Lib\libgmp_6.2.1-4_msvc17\include;C:\cpp\wide-decimal;C:\cpp\wide-integer;C:\cpp\curl\include;C:\cpp\Encryptions\src\qa\WinNTL-11_5_1\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\cpp\curl\builds\libcurl-vc-x64-release-static-ipv6-sspi-schannel\lib;C:\Lib\libgmp_6.2.1-4_msvc17\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -164,6 +164,7 @@
     <ClCompile Include="..\..\src\qa\menu\puzzle_menu.cpp" />
     <ClCompile Include="..\..\src\qa\menu\rsa_menu.cpp" />
     <ClCompile Include="..\..\src\qa\menu\tools_menu.cpp" />
+    <ClCompile Include="..\..\src\qa\menu\wbaes_menu.cpp" />
     <ClCompile Include="..\..\src\qa\qa.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMP.cpp" />
     <ClCompile Include="..\..\src\qa\RSA-GMP\RSAGMPmainTest.cpp" />
@@ -181,17 +182,96 @@
     <ClCompile Include="..\..\src\qa\SimpleECC\src\point.cpp" />
     <ClCompile Include="..\..\src\qa\SimpleECC\src\simple_ecc_test.cpp" />
     <ClCompile Include="..\..\src\qa\SystemProperties.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\BasicThreadPool.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ctools.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\FacVec.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\FFT.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\fileio.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\GetPID.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\GetTime.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\GF2.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\GF2E.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\GF2EX.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\GF2EXFactoring.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\GF2X.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\GF2X1.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\GF2XFactoring.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\GF2XVec.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\G_LLL_FP.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\G_LLL_QP.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\G_LLL_RR.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\G_LLL_XD.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\HNF.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\lip.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\LLL.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\LLL_FP.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\LLL_QP.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\LLL_RR.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\LLL_XD.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\lzz_p.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\lzz_pE.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\lzz_pEX.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\lzz_pEXFactoring.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\lzz_pX.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\lzz_pX1.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\lzz_pXCharPoly.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\lzz_pXFactoring.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\MatPrime.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\mat_GF2.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\mat_GF2E.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\mat_lzz_p.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\mat_lzz_pE.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\mat_poly_lzz_p.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\mat_poly_ZZ.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\mat_poly_ZZ_p.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\mat_RR.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\mat_ZZ.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\mat_ZZ_p.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\mat_ZZ_pE.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\pd_FFT.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\quad_float.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\quad_float1.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\RR.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\thread.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\tools.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\vec_GF2.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\vec_GF2E.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\vec_lzz_p.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\vec_lzz_pE.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\vec_RR.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\vec_ZZ.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\vec_ZZ_p.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\vec_ZZ_pE.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\WordVector.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\xdouble.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZ.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZVec.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZX.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZX1.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZXCharPoly.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZXFactoring.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZ_p.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZ_pE.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZ_pEX.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZ_pEXFactoring.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZ_pX.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZ_pX1.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZ_pXCharPoly.cpp" />
+    <ClCompile Include="..\..\src\qa\WinNTL-11_5_1\src\ZZ_pXFactoring.cpp" />
     <ClCompile Include="..\..\src\SHA256.cpp" />
     <ClCompile Include="..\..\src\vigenere.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Base64.h" />
     <ClInclude Include="..\..\src\base_const.hpp" />
+    <ClInclude Include="..\..\src\qa\aes-whitebox\aes_whitebox.hpp" />
+    <ClInclude Include="..\..\src\qa\aes-whitebox\aes_whitebox_compiler.hpp" />
     <ClInclude Include="..\..\src\qa\atomic_bitvector.hpp" />
     <ClInclude Include="..\..\src\qa\Bin2PNG\lodepng.h" />
     <ClInclude Include="..\..\src\qa\ecc_point\ecc_curve.hpp" />
     <ClInclude Include="..\..\src\qa\iterator_tpl.h" />
     <ClInclude Include="..\..\src\qa\mathcommon.h" />
+    <ClInclude Include="..\..\src\qa\menu\menu.h" />
     <ClInclude Include="..\..\src\qa\prime.h" />
     <ClInclude Include="..\..\src\qa\qa_internal_empty.hpp" />
     <ClInclude Include="..\..\src\qa\RSA-GMP\RSAGMP.h" />
