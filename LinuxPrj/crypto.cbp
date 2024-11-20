@@ -13,13 +13,6 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-lcurl" />
-					<Add option="-lgmp" />
-					<Add option="-lcurlpp" />
-					<Add option="-lgmpxx" />
-					<Add option="-lpthread" />
-					<Add directory="/home/allaptop/dev/wide-decimal" />
-					<Add directory="/home/allaptop/dev/wide-integer" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -29,26 +22,24 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
-					<Add option="-lcurl" />
-					<Add option="-lgmp" />
-					<Add option="-lgmpxx" />
-					<Add directory="/home/allaptop/dev/wide-decimal" />
-					<Add directory="/home/allaptop/dev/wide-integer" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-lcurl" />
-					<Add option="-lgmp" />
-					<Add option="-lgmpxx" />
 				</Linker>
+				<ExtraCommands>
+					<Add after="cp ../bin/Release/crypto ../Exec_Linux/crypto" />
+					<Mode after="always" />
+				</ExtraCommands>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
-			<Add option="-lcurl" />
-			<Add option="-lgmp" />
 		</Compiler>
+		<ExtraCommands>
+			<Add after="cp /home/server/dev/Encryptions/bin/Release/crypto /home/server/dev/Encryptions/Exec_Linux/crypto" />
+			<Mode after="always" />
+		</ExtraCommands>
 		<Unit filename="../src/AESa.cpp" />
 		<Unit filename="../src/AESa.h" />
 		<Unit filename="../src/Base64.cpp" />
@@ -132,6 +123,9 @@
 		</Unit>
 		<Unit filename="../src/vigenere.cpp" />
 		<Unit filename="../src/vigenere.h" />
-		<Extensions />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
