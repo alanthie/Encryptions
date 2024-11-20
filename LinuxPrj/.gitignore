@@ -1,1 +1,4 @@
 /crypto.depend
+*.depend
+*.db
+*.db.bck
