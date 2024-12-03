@@ -10,7 +10,7 @@
 
 enum class AESKeyLength { AES_128, AES_192, AES_256 };
 
-class binAES {
+class binAES { //
  private:
   static constexpr unsigned int Nb = 4;
   static constexpr unsigned int blockBytesLen = 4 * Nb * sizeof(unsigned char);
