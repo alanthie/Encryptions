@@ -666,7 +666,9 @@ bool RSAGMP::KeygenN(mpzBigInteger &pubkey,
 
 		for(size_t i=0;i<vPrime.size();i++)
         {
-			std::cout << vPrime[i] << std::endl;
+// TODO
+//undefined reference to `operator<<(std::ostream&, __mpz_struct const*)'
+//			std::cout << vPrime[i] << std::endl;
 		}
 	}
 
