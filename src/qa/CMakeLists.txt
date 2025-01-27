@@ -52,7 +52,7 @@ add_executable(qa
 		../vigenere.cpp
 )
 
-link_libraries(gmp lntl pthread gmpxx)
+link_libraries(gmp ntl pthread gmpxx)
 
 target_link_libraries( qa
 											 /usr/local/lib/libntl.a 
