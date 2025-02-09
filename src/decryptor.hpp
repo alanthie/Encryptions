@@ -2046,16 +2046,26 @@ public:
 		std::string remote_hwinfo(c);
 		strutil::trim(remote_hwinfo);
 
-		std::string current_hwinfo;
+		std::string current_hwinfo= "";
 		System::Properties pr;
-		current_hwinfo = pr.CPUModel() + " " + pr.GPUName();
+		try
+		{
+			current_hwinfo = pr.CPUModel() + " " + pr.GPUName();
+		}
+		catch (...)
+		{
+			// gpu permission issue
+			current_hwinfo = "";
+		}
 		strutil::trim(current_hwinfo);
 
 		encrypted_data.buffer.remove_last_n_char(256);
 		if (VERBOSE_DEBUG) std::cout << "remote hwinfo: " << remote_hwinfo << std::endl;
 
 		bool auto_save = auto_flag;
-		if (current_hwinfo == remote_hwinfo)
+		if ((current_hwinfo == remote_hwinfo) && 
+			(current_hwinfo.size() > 0) && 
+			(remote_hwinfo.size() > 0))
 		{
 			if (auto_flag)
 			{

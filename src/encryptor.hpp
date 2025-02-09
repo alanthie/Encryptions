@@ -2362,9 +2362,18 @@ public:
 
 		// TODO some simple identification of origin
 		//std::string cd = file_util::get_current_dir();
-		std::string hwinfo;
+		std::string hwinfo = "";
 		System::Properties pr;
-		hwinfo = pr.CPUModel() + " " + pr.GPUName();
+		try
+		{
+			hwinfo = pr.CPUModel() + " " + pr.GPUName();
+		}
+		catch (...)
+		{
+			// gpu permission issue
+			hwinfo = "";
+		}
+		
 		if (hwinfo.size() > 256) hwinfo = hwinfo.substr(0,256);
 		while (hwinfo.size() < 256) hwinfo += " ";
 		data_temp_next.buffer.write(hwinfo.data(), 256);
