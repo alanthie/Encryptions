@@ -13,7 +13,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 #set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBRARIES}")
 #list(APPEND LIBS "${CURL_LIBRARIES}")
 
-LINK_DIRECTORIES(/usr/lib/x86_64-linux-gnu)
+# Many distros path
+LINK_DIRECTORIES(/usr/lib64 /usr/lib/x86_64-linux-gnu)
 include_directories(../../../wide-decimal ../../../wide-integer /usr/include)
 
 add_executable(qa
@@ -56,10 +57,10 @@ add_executable(qa
 link_libraries(gmp ntl pthread gmpxx)
 
 target_link_libraries( qa
-											 /usr/local/lib/libntl.a 
-											 /usr/lib/x86_64-linux-gnu/libgmp.a
-											 ntl						 
-											 pthread
+	/usr/local/lib/libntl.a 
+	libgmp.a
+	ntl						 
+	pthread
 )
 
 

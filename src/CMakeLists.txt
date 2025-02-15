@@ -13,7 +13,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 #set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBRARIES}")
 #list(APPEND LIBS "${CURL_LIBRARIES}")
 
-LINK_DIRECTORIES(/usr/lib/x86_64-linux-gnu)
+# Many distros path
+LINK_DIRECTORIES(/usr/lib64 /usr/lib/x86_64-linux-gnu)
 include_directories(../../wide-decimal ../../wide-integer /usr/include)
 
 add_executable(crypto
@@ -49,9 +50,9 @@ add_executable(crypto
 link_libraries(gmp curl pthread gmpxx)
 
 target_link_libraries(	crypto
-											 /usr/lib/x86_64-linux-gnu/libgmp.a
-											 curl
-											 pthread
+	libgmp.a
+	curl
+	pthread
 )
 
 
