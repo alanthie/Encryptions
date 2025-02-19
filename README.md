@@ -1,5 +1,9 @@
 A C++ program (Linux and Windows) to encrypt/decrypt (without the usual limitations)
 
+<pre>
+See build_all repository for latest way to build on most distros
+</pre>
+
 Multiple encryption keys for one message to encrypt.
 <pre>
 [Keys extracted from a puzzle question-answer].
