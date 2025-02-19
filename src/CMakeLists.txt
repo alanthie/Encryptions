@@ -49,8 +49,17 @@ add_executable(crypto
 
 link_libraries(gmp curl pthread gmpxx)
 
+if(EXISTS /usr/lib/x86_64-linux-gnu/libgmp.a)
+  set(GMPLIB libgmp.a)
+else()
+  set(GMPLIB gmp)
+endif()
+if(EXISTS /usr/lib64/libgmp.a)
+  set(GMPLIB libgmp.a)
+endif()
+
 target_link_libraries(	crypto
-	libgmp.a
+	${GMPLIB}
 	curl
 	pthread
 )
